@@ -2,7 +2,7 @@
 name: Hotfix
 about: 긴급한 버그 빠르게 수정하기
 title: "[HOTFIX] hotfix 내용"
-labels: duplicate
+labels: "\U0001F691 hotfix"
 assignees: ''
 
 ---

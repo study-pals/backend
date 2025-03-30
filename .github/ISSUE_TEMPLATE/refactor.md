@@ -2,7 +2,7 @@
 name: REFACTOR
 about: 코드 리팩토링하기
 title: "[REFACTOR] refactor 내용"
-labels: help wanted
+labels: "♻️ refactor"
 assignees: ''
 
 ---
