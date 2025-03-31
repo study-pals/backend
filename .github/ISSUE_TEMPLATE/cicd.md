@@ -1,5 +1,5 @@
 ---
-name:CICD
+name: CICD
 about: CICD 파이프라인 구축 및  수정
 title: "[CICD] CICD 내용"
 labels: "🧰 cicd"
