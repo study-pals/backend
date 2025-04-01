@@ -24,14 +24,23 @@ import com.studypals.global.exceptions.errorCode.ErrorCode;
  */
 public abstract class BaseException extends RuntimeException {
     private final ErrorCode errorCode;
+    private final String logMessage;
 
     protected BaseException(ErrorCode errorCode) {
-        super(null, null, false, false);
+        super(errorCode.getMessage(), null, false, false);
         this.errorCode = errorCode;
+        this.logMessage = "[client] " + errorCode.getMessage();
     }
 
     protected BaseException(ErrorCode errorCode, String logMessage) {
-        super(logMessage, null, false, false);
+        super(errorCode.getMessage(), null, false, false);
         this.errorCode = errorCode;
+        this.logMessage = "[internal] " + logMessage;
+    }
+
+    protected BaseException(ErrorCode errorCode, String clientMessage, String logMessage) {
+        super(clientMessage, null, false, false);
+        this.errorCode = errorCode;
+        this.logMessage = "[internal] " + logMessage;
     }
 }
