@@ -1,6 +1,7 @@
-package com.studypals.global.exceptions;
+package com.studypals.global.exceptions.exception;
 
 import com.studypals.global.exceptions.errorCode.ErrorCode;
+import lombok.Getter;
 
 /**
  * 모든 커스텀 예외 클래스의 추상 부모 클래스입니다. 자체적으로는 사용되지 않습니다.
@@ -22,6 +23,7 @@ import com.studypals.global.exceptions.errorCode.ErrorCode;
  * @see ErrorCode
  * @since 2025-03-31
  */
+@Getter
 public abstract class BaseException extends RuntimeException {
     private final ErrorCode errorCode;
     private final String logMessage;

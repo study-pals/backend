@@ -1,6 +1,5 @@
 package com.studypals.global.exceptions.exception;
 
-import com.studypals.global.exceptions.BaseException;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 
 /**
