@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -35,21 +37,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RequiredArgsConstructor
 @Order(ExceptionHandlerOrder.GLOBAL_EXCEPTION_HANDLER)
 public class GlobalExceptionHandler {
+    private ResponseEntity<Object> fail(String code, String message, HttpStatus status) {
+        return ResponseEntity.status(status).body(CommonResponse.fail(code, message));
+    }
 
     @Value("${debug.message.print:false}")
     private boolean isDebug;
 
     @ExceptionHandler(BaseException.class)
-    public CommonResponse<Void> handleBaseException(BaseException ex) {
+    public ResponseEntity<Object> handleBaseException(BaseException ex) {
         if(isDebug) {
             log.warn("{}", ex.getLogMessage());
         }
-        return CommonResponse.fail(ex.getErrorCode().getCode(), ex.getMessage());
+        return fail(ex.getErrorCode().getCode(), ex.getMessage(), ex.getErrorCode().getHttpStatus());
     }
 
     @ExceptionHandler(Exception.class)
-    public CommonResponse<Void> handleUnexpectedException(Exception ex) {
+    public ResponseEntity<Object> handleUnexpectedException(Exception ex) {
         log.error("[unexpected] {}", ex.getMessage(), ex);
-        return CommonResponse.fail("INTERNAL-500", "unknown internal server error.");
+        return fail("EIS-02", "unknown internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
