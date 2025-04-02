@@ -75,10 +75,18 @@ pipeline {
     }
     post {
         success {
-            echo 'Build and archive completed successfully!'
+            discordSend description: "빌드 성공",
+            link: env.BUILD_URL, result: currentBuild.currentResult,
+            title: "📦 study-pal Jenkins Pipeline",
+            footer: "🔗 jack8226.ddns.net:3005",
+            webhookURL: "${DISCORD_WEBHOOK}"
         }
         failure {
-            echo 'Build or archive failed'
+            discordSend description: "빌드 실패",
+            link: env.BUILD_URL, result: currentBuild.currentResult,
+            title: "📦 study-pal Jenkins Pipeline",
+            footer: "🔗 jack8226.ddns.net:3005",
+            webhookURL: "${DISCORD_WEBHOOK}"
         }
     }
 }
