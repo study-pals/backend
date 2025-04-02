@@ -15,7 +15,10 @@ pipeline {
         stage('Test') {
             steps {
                 withEnv([
-
+                    "MYSQL_HOST=${MYSQL_HOST}",
+                    "MYSQL_PORT=${MYSQL_PORT}",
+                    "MYSQL_USER=${MYSQL_USER}",
+                    "MYSQL_PWD=${MYSQL_PWD}"
                 ]) {
                     sh './gradlew test'
                 }
@@ -56,6 +59,10 @@ pipeline {
 
                     sh """
                         docker run -d --name study-pal-container -p 8080:8080 \\
+                        -e MYSQL_HOST=${MYSQL_HOST} \\
+                        -e MYSQL_PORT=${MYSQL_PORT} \\
+                        -e MYSQL_USER=${MYSQL_USER} \\
+                        -e MYSQL_PWD=${MYSQL_PWD} \\
                             ${DOCKER_IMAGE}
                     """
 
