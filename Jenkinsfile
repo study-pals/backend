@@ -76,22 +76,32 @@ pipeline {
     post {
         success {
             script {
+                def branch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
                 def commitMsg = sh(script: "git log -1 --pretty=%s", returnStdout: true).trim()
                 def author = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
-                def branch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
                 def shortSha = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
+                def jenkinsUrl = env.BUILD_URL.replace("192.168.219.135:8180", "jack8226.ddns.net:3005")
+                def reportUrl = "${jenkinsUrl}ws/build/reports/tests/test/index.html"
+
                 def desc = """
-                ✅ 빌드 성공!
-                📌 브랜치: ${branch}
-                ✍️ 커밋: ${commitMsg}
-                🧑‍💻 작성자: ${author}
-                🔗 SHA: ${shortSha}
-                """.stripIndent().trim()
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    📦 study-pal Jenkins Pipeline
+
+    🔧 결과: ✅ 빌드 성공
+    🌿 브랜치: ${branch}
+    ✍️ 커밋 메시지:
+    ${commitMsg}
+    🧑‍💻 작성자: ${author}
+    🔗 SHA: ${shortSha}
+
+    📄 테스트 리포트 보기: ${reportUrl}
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    """.stripIndent().trim()
 
                 discordSend(
                     description: desc,
-                    link: env.BUILD_URL,
+                    link: jenkinsUrl,
                     result: currentBuild.currentResult,
                     title: "📦 study-pal Jenkins Pipeline",
                     footer: "jack8226.ddns.net:3005",
@@ -102,9 +112,32 @@ pipeline {
 
         failure {
             script {
+                def branch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                def commitMsg = sh(script: "git log -1 --pretty=%s", returnStdout: true).trim()
+                def author = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
+                def shortSha = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+
+                def jenkinsUrl = env.BUILD_URL.replace("192.168.219.135:8180", "jack8226.ddns.net:3005")
+                def reportUrl = "${jenkinsUrl}ws/build/reports/tests/test/index.html"
+
+                def desc = """
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    📦 study-pal Jenkins Pipeline
+
+    🔧 결과: ❌ 빌드 실패
+    🌿 브랜치: ${branch}
+    ✍️ 커밋 메시지:
+    ${commitMsg}
+    🧑‍💻 작성자: ${author}
+    🔗 SHA: ${shortSha}
+
+    📄 테스트 리포트 보기: ${reportUrl}
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    """.stripIndent().trim()
+
                 discordSend(
-                    description: "❌ 빌드 실패!",
-                    link: env.BUILD_URL,
+                    description: desc,
+                    link: jenkinsUrl,
                     result: currentBuild.currentResult,
                     title: "📦 study-pal Jenkins Pipeline",
                     footer: "jack8226.ddns.net:3005",
