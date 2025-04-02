@@ -1,3 +1,12 @@
+def sendDiscordMessage(String content) {
+    sh """
+        curl -H "Content-Type: application/json" \
+             -X POST \
+             -d '{ "content": "${content.replaceAll('"', '\\"')}" }' \
+             ${DISCORD_WEBHOOK}
+    """
+}
+
 pipeline {
     agent any
     environment {
@@ -6,6 +15,17 @@ pipeline {
     }
 
     stages {
+        stage('Notify Start') {
+            when {
+                beforeAgent true
+            }
+            steps {
+                script {
+                    sendDiscordMessage("🚀 Jenkins 파이프라인이 시작되었습니다.")
+                }
+            }
+        }
+
         stage('CheckOut') {
             steps {
                 checkout scm
@@ -74,9 +94,15 @@ pipeline {
     post {
         success {
             echo 'Build and archive completed successfully!'
+            script {
+                sendDiscordMessage("✅ 파이프라인이 성공적으로 완료되었습니다!")
+            }
         }
         failure {
             echo 'Build or archive failed'
+            script {
+                sendDiscordMessage("❌ 파이프라인이 실패했습니다. 자세한 로그를 확인해주세요.")
+            }
         }
     }
 }
