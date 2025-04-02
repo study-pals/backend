@@ -75,18 +75,42 @@ pipeline {
     }
     post {
         success {
-            discordSend description: "빌드 성공",
-            link: env.BUILD_URL, result: currentBuild.currentResult,
-            title: "📦 study-pal Jenkins Pipeline",
-            footer: "🔗 jack8226.ddns.net:3005",
-            webhookURL: "${DISCORD_WEBHOOK}"
+            script {
+                def commitMsg = sh(script: "git log -1 --pretty=%s", returnStdout: true).trim()
+                def author = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
+                def branch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                def shortSha = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+
+                def desc = """
+                ✅ 빌드 성공!
+                📌 브랜치: ${branch}
+                ✍️ 커밋: ${commitMsg}
+                🧑‍💻 작성자: ${author}
+                🔗 SHA: ${shortSha}
+                """.stripIndent().trim()
+
+                discordSend(
+                    description: desc,
+                    link: env.BUILD_URL,
+                    result: currentBuild.currentResult,
+                    title: "📦 study-pal Jenkins Pipeline",
+                    footer: "jack8226.ddns.net:3005",
+                    webhookURL: "${DISCORD_WEBHOOK}"
+                )
+            }
         }
+
         failure {
-            discordSend description: "빌드 실패",
-            link: env.BUILD_URL, result: currentBuild.currentResult,
-            title: "📦 study-pal Jenkins Pipeline",
-            footer: "🔗 jack8226.ddns.net:3005",
-            webhookURL: "${DISCORD_WEBHOOK}"
+            script {
+                discordSend(
+                    description: "❌ 빌드 실패!",
+                    link: env.BUILD_URL,
+                    result: currentBuild.currentResult,
+                    title: "📦 study-pal Jenkins Pipeline",
+                    footer: "jack8226.ddns.net:3005",
+                    webhookURL: "${DISCORD_WEBHOOK}"
+                )
+            }
         }
     }
 }
