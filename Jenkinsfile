@@ -82,16 +82,17 @@ pipeline {
                 def shortSha = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
                 def jenkinsUrl = env.BUILD_URL.replace("192.168.219.135:8180", "jack8226.ddns.net:3005")
-                def reportUrl = "${jenkinsUrl}ws/build/reports/tests/test/index.html"
+                def reportUrl = "${jenkinsUrl}execution/node/3/ws/build/reports/tests/test/index.html"
 
                 def desc = """
     ━━━━━━━━━━━━━━━━━━━━━━━━━━
     📦 study-pal Jenkins Pipeline
 
-    🔧 결과: ✅ 빌드 성공
+    ✅ 빌드 성공
+
     🌿 브랜치: ${branch}
     ✍️ 커밋 메시지:
-    ${commitMsg}
+          ${commitMsg}
     🧑‍💻 작성자: ${author}
     🔗 SHA: ${shortSha}
 
@@ -118,16 +119,17 @@ pipeline {
                 def shortSha = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
                 def jenkinsUrl = env.BUILD_URL.replace("192.168.219.135:8180", "jack8226.ddns.net:3005")
-                def reportUrl = "${jenkinsUrl}ws/build/reports/tests/test/index.html"
+                def reportUrl = "${jenkinsUrl}execution/node/3/ws/build/reports/tests/test/index.html"
 
                 def desc = """
     ━━━━━━━━━━━━━━━━━━━━━━━━━━
     📦 study-pal Jenkins Pipeline
 
-    🔧 결과: ❌ 빌드 실패
+    ❌ 빌드 실패
+
     🌿 브랜치: ${branch}
     ✍️ 커밋 메시지:
-    ${commitMsg}
+          ${commitMsg}
     🧑‍💻 작성자: ${author}
     🔗 SHA: ${shortSha}
 
