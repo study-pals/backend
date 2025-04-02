@@ -63,7 +63,7 @@ pipeline {
                         -e MYSQL_PORT=${MYSQL_PORT} \\
                         -e MYSQL_USER=${MYSQL_USER} \\
                         -e MYSQL_PWD=${MYSQL_PWD} \\
-                            ${DOCKER_IMAGE}
+                            ${DOCKER_IMAGE_NAME}
                     """
 
                     sh "docker system prune -f"
