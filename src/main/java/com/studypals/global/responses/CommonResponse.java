@@ -11,17 +11,18 @@ import lombok.Getter;
  * {@code CommonResponse<Example> response = CommonResponse.fail("ERE-00", "message");} <br>
  *
  * <p><b>상속 정보:</b><br>
- * 존재하지 않으나, 이후 다른 response 타입이 생길 경우, 이의 부모 클래스가 될 수 있습니다.
+ * {@link Response} 의 구현 클래스입니다.
  *
  * <p><b>주요 생성자:</b><br>
  * 생성자는 private으로 선언되었으며, static 메서드를 통하여 인스턴스가 생성됩니다. <br>
  *
  *
  * @author jack8
+ * @see Response
  * @since 2025-04-01
  */
 @Getter
-public class CommonResponse<T> {
+public class CommonResponse<T> implements Response<T> {
     private final String code;
     private final String status;
     private final T data;
