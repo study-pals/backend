@@ -6,9 +6,9 @@ import lombok.Getter;
  * 응답 형식에 대한 템플릿입니다. 도메인 및 기능 코드/상태/데이터/메시지가 포함되어 있습니다.
  * <p>
  * factory method 패턴을 사용하여 다음과 같이 작성할 수 있습니다. <br>
- * {@code CommonResponse<Example> response = CommonResponse.success("U10-300", example, "message);} <br>
+ * {@code CommonResponse<Example> response = CommonResponse.success(ResponseCode.SEARCH_USER, example, "message);} <br>
  * 혹은 <br>
- * {@code CommonResponse<Example> response = CommonResponse.fail("U10-300", example, "message");} <br>
+ * {@code CommonResponse<Example> response = CommonResponse.fail("ERE-00", "message");} <br>
  *
  * <p><b>상속 정보:</b><br>
  * 존재하지 않으나, 이후 다른 response 타입이 생길 경우, 이의 부모 클래스가 될 수 있습니다.
@@ -27,6 +27,13 @@ public class CommonResponse<T> {
     private final T data;
     private final String message;
 
+    private CommonResponse(ResponseCode code, String status, T data, String message) {
+        this.code = code.getCode();
+        this.status = status;
+        this.data = data;
+        this.message = message;
+    }
+
     private CommonResponse(String code, String status, T data, String message) {
         this.code = code;
         this.status = status;
@@ -34,16 +41,20 @@ public class CommonResponse<T> {
         this.message = message;
     }
 
-    public static <T> CommonResponse<T> success(String code, T data, String message) {
+    public static <T> CommonResponse<T> success(ResponseCode code, T data, String message) {
         return new CommonResponse<>(code, "success", data, message);
     }
 
-    public static <T> CommonResponse<T> success(String code, T data) {
+    public static <T> CommonResponse<T> success(ResponseCode code, T data) {
         return new CommonResponse<>(code, "success", data, "success to response");
     }
 
-    public static <T> CommonResponse<T> success(String code) {
+    public static <T> CommonResponse<T> success(ResponseCode code) {
         return new CommonResponse<>(code, "success", null, "success to response");
+    }
+
+    public static <T> CommonResponse<T> fail(ResponseCode code, String message) {
+        return new CommonResponse<>(code, "fail", null, message);
     }
 
     public static <T> CommonResponse<T> fail(String code, String message) {

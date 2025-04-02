@@ -1,5 +1,6 @@
 package com.studypals.global.exceptions.exceptionHandler;
 
+import com.studypals.global.exceptions.errorCode.ErrorCode;
 import com.studypals.global.exceptions.exception.BaseException;
 import com.studypals.global.responses.CommonResponse;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(CommonResponse.fail(code, message));
     }
 
+    private ResponseEntity<Object> fail(ErrorCode code, String message, HttpStatus status) {
+        return fail(code.getCode(), message, status);
+    }
+
     @Value("${debug.message.print:false}")
     private boolean isDebug;
 
@@ -49,7 +54,7 @@ public class GlobalExceptionHandler {
         if(isDebug) {
             log.warn("{}", ex.getLogMessage());
         }
-        return fail(ex.getErrorCode().getCode(), ex.getMessage(), ex.getErrorCode().getHttpStatus());
+        return fail(ex.getErrorCode(), ex.getMessage(), ex.getErrorCode().getHttpStatus());
     }
 
     @ExceptionHandler(Exception.class)
