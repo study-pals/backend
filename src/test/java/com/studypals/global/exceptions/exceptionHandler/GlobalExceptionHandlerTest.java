@@ -43,8 +43,9 @@ class GlobalExceptionHandlerTest {
     void handleUnexpectedException() throws Exception {
         mockMvc.perform(get("/test/unexpected"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code").value("EIS-02"))
-                .andExpect(jsonPath("$.message").value("unknown internal server error"));
+                .andExpect(hasKey("code", "EIS-02"))
+                .andExpect(hasKey("message", "unknown internal server error"));
+
     }
 
 
