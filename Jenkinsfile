@@ -1,11 +1,3 @@
-def sendDiscordMessage(String content) {
-    sh """
-        curl -H "Content-Type: application/json" \
-             -X POST \
-             -d '{ "content": "${content.replaceAll('"', '\\"')}" }' \
-             ${DISCORD_WEBHOOK}
-    """
-}
 
 pipeline {
     agent any
@@ -21,6 +13,14 @@ pipeline {
             }
             steps {
                 script {
+                    def sendDiscordMessage = { content ->
+                        sh """
+                            curl -H "Content-Type: application/json" \
+                                 -X POST \
+                                 -d '{ "content": "${content.replaceAll('"', '\\"')}" }' \
+                                 ${DISCORD_WEBHOOK}
+                        """
+                    }
                     sendDiscordMessage("🚀 Jenkins 파이프라인이 시작되었습니다.")
                 }
             }
@@ -95,12 +95,28 @@ pipeline {
         success {
             echo 'Build and archive completed successfully!'
             script {
+                def sendDiscordMessage = { content ->
+                    sh """
+                        curl -H "Content-Type: application/json" \
+                             -X POST \
+                             -d '{ "content": "${content.replaceAll('"', '\\"')}" }' \
+                             ${DISCORD_WEBHOOK}
+                    """
+                }
                 sendDiscordMessage("✅ 파이프라인이 성공적으로 완료되었습니다!")
             }
         }
         failure {
             echo 'Build or archive failed'
             script {
+                def sendDiscordMessage = { content ->
+                    sh """
+                        curl -H "Content-Type: application/json" \
+                             -X POST \
+                             -d '{ "content": "${content.replaceAll('"', '\\"')}" }' \
+                             ${DISCORD_WEBHOOK}
+                    """
+                }
                 sendDiscordMessage("❌ 파이프라인이 실패했습니다. 자세한 로그를 확인해주세요.")
             }
         }
