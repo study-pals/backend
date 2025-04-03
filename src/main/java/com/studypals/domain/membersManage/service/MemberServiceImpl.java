@@ -3,9 +3,13 @@ package com.studypals.domain.membersManage.service;
 import com.studypals.domain.membersManage.dao.MemberRepository;
 import com.studypals.domain.membersManage.dto.CreateMemberReq;
 import com.studypals.domain.membersManage.entity.Member;
+import com.studypals.global.exceptions.errorCode.AuthErrorCode;
+import com.studypals.global.exceptions.exception.AuthException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * member service 의 구현 클래스입니다.
@@ -28,6 +32,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     @Override
+    @Transactional
     public Long createMember(CreateMemberReq dto) {
         Member member = Member.builder()
                 .username(dto.username())
@@ -37,7 +42,10 @@ public class MemberServiceImpl implements MemberService {
                 .position(dto.position())
                 .imageUrl(dto.imageUrl())
                 .build();
-        memberRepository.save(member);
-        return member.getId();
+        try {
+            return memberRepository.save(member).getId();
+        } catch (DataIntegrityViolationException e) {
+            throw new AuthException(AuthErrorCode.SIGNUP_FAIL, "maybe duplicate username or nickname");
+        }
     }
 }

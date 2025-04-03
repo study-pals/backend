@@ -1,6 +1,8 @@
 package com.studypals.domain.membersManage.service;
 
 import com.studypals.domain.membersManage.entity.MemberDetails;
+import com.studypals.global.exceptions.errorCode.AuthErrorCode;
+import com.studypals.global.exceptions.exception.AuthException;
 import com.studypals.global.security.jwt.JwtToken;
 import com.studypals.global.security.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +10,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,8 +40,7 @@ public class SignInServiceImpl implements SignInService {
             MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
             return jwtUtils.createJwt(memberDetails.getId());
         } catch (Exception e) {
-            throw new UsernameNotFoundException("unknown user maybe?");
-            //todo : must change this to custom exception!!
+            throw new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't find user while signIn");
         }
     }
 }

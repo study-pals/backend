@@ -4,6 +4,9 @@ import com.studypals.domain.membersManage.dto.CreateMemberReq;
 import com.studypals.domain.membersManage.dto.SignInReq;
 import com.studypals.domain.membersManage.service.MemberService;
 import com.studypals.domain.membersManage.service.SignInService;
+import com.studypals.global.responses.CommonResponse;
+import com.studypals.global.responses.Response;
+import com.studypals.global.responses.ResponseCode;
 import com.studypals.global.security.jwt.JwtToken;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,19 +33,20 @@ public class AuthController {
     private final SignInService signInService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody CreateMemberReq dto) {
+    public ResponseEntity<Response<Long>> register(@Valid @RequestBody CreateMemberReq dto) {
         Long id = memberService.createMember(dto);
+        Response<Long> response = CommonResponse.success(ResponseCode.USER_CREATE, id, "success create user");
 
-        return ResponseEntity.ok(id);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<JwtToken> signIn(@Valid @RequestBody SignInReq dto) {
+    public ResponseEntity<Response<JwtToken>> signIn(@Valid @RequestBody SignInReq dto) {
         String username = dto.username();
         String password = dto.password();
 
         JwtToken jwtToken = signInService.signInByUsernameAndPassword(username, password);
 
-        return ResponseEntity.ok(jwtToken);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.USER_LOGIN, jwtToken, "success login"));
     }
 }
