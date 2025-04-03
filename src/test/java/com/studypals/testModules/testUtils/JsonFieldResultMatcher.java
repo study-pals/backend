@@ -78,22 +78,19 @@ public class JsonFieldResultMatcher implements ResultMatcher {
             String key = entry.getKey();
             Object value = entry.getValue();
 
-            if (value != null) {
-                if (value instanceof String) {
-                    matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(value));
-                } else if (value instanceof Integer || value instanceof Long || value instanceof Boolean) {
-                    matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(value));
-                } else if (value instanceof LocalDate) {
-                    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-                    String formattedDate = ((LocalDate) value).format(formatter);
-                    matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(formattedDate));
-                } else if (value instanceof LocalDateTime) {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-                    String formattedDateTime = ((LocalDateTime) value).truncatedTo(ChronoUnit.SECONDS).format(formatter);
-                    matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(formattedDateTime));
-                } else {
-                    matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(value));
-                }
+            if(value == null) continue;
+            if (value instanceof String || value instanceof Integer || value instanceof Long || value instanceof Boolean) {
+                matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(value));
+            }  else if (value instanceof LocalDate) {
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+                String formattedDate = ((LocalDate) value).format(formatter);
+                matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(formattedDate));
+            } else if (value instanceof LocalDateTime) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+                String formattedDateTime = ((LocalDateTime) value).truncatedTo(ChronoUnit.SECONDS).format(formatter);
+                matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(formattedDateTime));
+            } else {
+                matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(value));
             }
         }
 

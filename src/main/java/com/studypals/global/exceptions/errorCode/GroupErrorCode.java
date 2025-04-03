@@ -1,7 +1,6 @@
 package com.studypals.global.exceptions.errorCode;
 
 import com.studypals.global.responses.ResponseCode;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
@@ -21,7 +20,6 @@ import org.springframework.http.HttpStatus;
  * @see com.studypals.global.exceptions.exception.GroupException GroupException
  * @since 2025-04-02
  */
-@Getter
 @RequiredArgsConstructor
 public enum GroupErrorCode implements ErrorCode {
     // U02: User <-> Group 관련

@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<Object> handleBaseException(BaseException ex) {
-        if(isDebug) {
+        if (isDebug) {
             log.warn("{}", ex.getLogMessage());
         }
         return fail(ex.getErrorCode(), ex.getMessage(), ex.getErrorCode().getHttpStatus());

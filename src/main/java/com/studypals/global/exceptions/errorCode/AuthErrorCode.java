@@ -1,7 +1,6 @@
 package com.studypals.global.exceptions.errorCode;
 
 import com.studypals.global.responses.ResponseCode;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
@@ -21,7 +20,6 @@ import org.springframework.http.HttpStatus;
  * @see ResponseCode
  * @since 2025-03-31
  */
-@Getter
 @RequiredArgsConstructor
 public enum AuthErrorCode implements ErrorCode {
 
