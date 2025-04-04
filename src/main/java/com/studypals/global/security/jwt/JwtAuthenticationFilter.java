@@ -1,6 +1,7 @@
 package com.studypals.global.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.security.config.AccessURL;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -49,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = resolveToken(request);
 
         if (token == null) {
-            makeFailedResponse(response);
+            makeFailedResponse(response, JwtUtils.JwtStatus.INVALID);
             return;
         }
 
@@ -60,11 +61,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     id, null, List.of()
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        } else if (jwtData.getJwtStatus() == JwtUtils.JwtStatus.EXPIRED) {
-            makeFailedResponse(response);
-            return;
-        } else {
-            makeFailedResponse(response);
+        }  else {
+            makeFailedResponse(response, jwtData.getJwtStatus());
             return;
         }
 
@@ -74,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     /**
      * {@code List<String> urls}와 {@code String url}을 받아, 해당 url 이 urls에 포함되어 있는지 확인합니다.
      * 혹은, 만약 urls 중 "/"로 끝나는게 있다면, 해당 urls로 시작하는지 검사합니다.
-     * @param urls url이 존재하는지 확인할 릿트
+     * @param urls url이 존재하는지 확인할 링크
      * @param url 검사 대상
      * @return url이 urls에 포함되거나, prefix가 존재하면 true, 아니면 false
      */
@@ -100,16 +98,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 실패 시 응답을 생성합니다. `CommonResponse` 에 감싸서 건내주어야하나, 아직 해당 브랜치가 PR되지 않은 상태라 임시로 구현되어
-     * 있습니다.
+     * 실패 시 응답을 생성합니다. {@code CommonResponse} 로 감싸서 처리합니다.
      * @param response 응답
      * @throws IOException getWriter() 메서드가 던지는 예외가 해당 메서드 외부로 던지게 설정
      */
-    private void makeFailedResponse(HttpServletResponse response) throws IOException{
-        //todo : not exist response template object.
-        response.getWriter().write("INVALID TOKEN");
-        System.out.println("INVALID TOKEN");
+    private void makeFailedResponse(HttpServletResponse response, JwtUtils.JwtStatus status) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        CommonResponse<?> errorResponse;
+
+        if (status.equals(JwtUtils.JwtStatus.INVALID)) {
+            errorResponse = CommonResponse.fail("U01-08", "Invalid JWT token");
+        } else if (status.equals(JwtUtils.JwtStatus.EXPIRED)) {
+            errorResponse = CommonResponse.fail("U01-08", "Expired JWT token");
+        } else {
+            errorResponse = CommonResponse.fail("U01-08", "Unauthorized access");
+        }
+
+        String json = objectMapper.writeValueAsString(errorResponse);
+        response.getWriter().write(json);
     }
 }
 
