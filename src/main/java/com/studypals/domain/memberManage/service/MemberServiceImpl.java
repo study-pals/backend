@@ -1,8 +1,8 @@
-package com.studypals.domain.membersManage.service;
+package com.studypals.domain.memberManage.service;
 
-import com.studypals.domain.membersManage.dao.MemberRepository;
-import com.studypals.domain.membersManage.dto.CreateMemberReq;
-import com.studypals.domain.membersManage.entity.Member;
+import com.studypals.domain.memberManage.dao.MemberRepository;
+import com.studypals.domain.memberManage.dto.CreateMemberReq;
+import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.exception.AuthException;
 import lombok.RequiredArgsConstructor;
@@ -47,5 +47,12 @@ public class MemberServiceImpl implements MemberService {
         } catch (DataIntegrityViolationException e) {
             throw new AuthException(AuthErrorCode.SIGNUP_FAIL, "maybe duplicate username or nickname");
         }
+    }
+
+    @Override
+    public Long getMemberIdByUsername(String username) {
+        return memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't find user"))
+                .getId();
     }
 }

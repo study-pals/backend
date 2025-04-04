@@ -1,4 +1,4 @@
-package com.studypals.domain.membersManage.dto;
+package com.studypals.domain.memberManage.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;

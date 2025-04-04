@@ -1,4 +1,4 @@
-package com.studypals.domain.membersManage.entity;
+package com.studypals.domain.memberManage.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

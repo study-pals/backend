@@ -1,4 +1,4 @@
-package com.studypals.domain.membersManage.entity;
+package com.studypals.domain.memberManage.entity;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +19,7 @@ import java.util.List;
  * Member를 넣어 생성합니다. <br>
 
  * @author jack8
- * @see com.studypals.domain.membersManage.service.MemberDetailsService MemberDetailsService
+ * @see com.studypals.domain.memberManage.service.MemberDetailsService MemberDetailsService
  * @since 2025-04-02
  */
 public class MemberDetails implements UserDetails {

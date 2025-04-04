@@ -1,8 +1,8 @@
-package com.studypals.domain.membersManage.service;
+package com.studypals.domain.memberManage.service;
 
-import com.studypals.domain.membersManage.dao.MemberRepository;
-import com.studypals.domain.membersManage.entity.Member;
-import com.studypals.domain.membersManage.entity.MemberDetails;
+import com.studypals.domain.memberManage.dao.MemberRepository;
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.entity.MemberDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

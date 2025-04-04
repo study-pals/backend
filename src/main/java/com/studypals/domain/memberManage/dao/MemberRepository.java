@@ -1,6 +1,6 @@
-package com.studypals.domain.membersManage.dao;
+package com.studypals.domain.memberManage.dao;
 
-import com.studypals.domain.membersManage.entity.Member;
+import com.studypals.domain.memberManage.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

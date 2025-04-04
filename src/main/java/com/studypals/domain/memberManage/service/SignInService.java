@@ -1,4 +1,4 @@
-package com.studypals.domain.membersManage.service;
+package com.studypals.domain.memberManage.service;
 
 import com.studypals.global.security.jwt.JwtToken;
 import org.springframework.security.core.AuthenticationException;

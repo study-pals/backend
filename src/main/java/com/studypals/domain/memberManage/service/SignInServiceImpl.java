@@ -1,6 +1,6 @@
-package com.studypals.domain.membersManage.service;
+package com.studypals.domain.memberManage.service;
 
-import com.studypals.domain.membersManage.entity.MemberDetails;
+import com.studypals.domain.memberManage.entity.MemberDetails;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.exception.AuthException;
 import com.studypals.global.security.jwt.JwtToken;

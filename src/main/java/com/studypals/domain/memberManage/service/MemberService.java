@@ -1,6 +1,6 @@
-package com.studypals.domain.membersManage.service;
+package com.studypals.domain.memberManage.service;
 
-import com.studypals.domain.membersManage.dto.CreateMemberReq;
+import com.studypals.domain.memberManage.dto.CreateMemberReq;
 
 /**
  * MemberService 의 인터페이스입니다. 메서드를 정의합니다.
@@ -15,4 +15,5 @@ import com.studypals.domain.membersManage.dto.CreateMemberReq;
  */
 public interface MemberService {
     Long createMember(CreateMemberReq dto);
+    Long getMemberIdByUsername(String username);
 }
