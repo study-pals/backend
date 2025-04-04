@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <pre>
  *     - POST /register : 회원가입({@link CreateMemberReq})
  *     - POST /sign-in : 로그인({@link SignInReq})
+ *     - POST /refresh : 토큰 재발급({@link TokenReissueReq}
  * </pre>
  * @author jack8
  * @since 2025-04-02

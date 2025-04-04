@@ -6,23 +6,11 @@ import lombok.Builder;
 /**
  * 토큰 재발급 시 반환됩니다.(response)
  * <p>
-
- *
- * <p><b>상속 정보:</b><br>
- * 상속 정보를 적습니다.
- *
- * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br>
- * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
- *
- * <p><b>빈 관리:</b><br>
- * 필요 시 빈 관리에 대한 내용을 적습니다.
- *
- * <p><b>외부 모듈:</b><br>
- * 필요 시 외부 모듈에 대한 내용을 적습니다.
+ * userId, accessToken, refreshToken이 들어갑니다. userId는 사실
+ * service -> controller로 데이터를 넘길 때 필요해서 넣었는데, 클라이언트까지 보낼 필요가 없어서
+ * userId에 @JsonIgnore 을 통하여 직렬화를 방지하였습니다.
  *
  * @author jack8
- * @see
  * @since 2025-04-04
  */
 @Builder

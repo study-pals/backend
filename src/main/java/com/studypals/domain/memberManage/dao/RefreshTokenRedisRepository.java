@@ -5,25 +5,15 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * 코드에 대한 전체적인 역할을 적습니다.
+ * 토큰을 저장하는 redis repository
  * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
+ * redis 기반의 CRUDRepository 입니다. {@link RefreshToken} 을 관리합니다.
  *
  * <p><b>상속 정보:</b><br>
- * 상속 정보를 적습니다.
- *
- * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br>
- * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
- *
- * <p><b>빈 관리:</b><br>
- * 필요 시 빈 관리에 대한 내용을 적습니다.
- *
- * <p><b>외부 모듈:</b><br>
- * 필요 시 외부 모듈에 대한 내용을 적습니다.
+ * CRUDRepository의 확장 인터페이스입니다.
  *
  * @author jack8
- * @see
+ * @see RefreshToken
  * @since 2025-04-04
  */
 @Repository
