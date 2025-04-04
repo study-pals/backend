@@ -1,11 +1,12 @@
 package com.studypals.domain.memberManage.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 
 /**
- * 코드에 대한 전체적인 역할을 적습니다.
+ * 토큰 재발급 시 반환됩니다.(response)
  * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
+
  *
  * <p><b>상속 정보:</b><br>
  * 상속 정보를 적습니다.
@@ -26,6 +27,7 @@ import lombok.Builder;
  */
 @Builder
 public record ReissueTokenRes (
+        @JsonIgnore
         Long userId,
         String accessToken,
         String refreshToken
