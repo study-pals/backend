@@ -52,16 +52,18 @@ public class JwtUtils {
 
             String issue = claims.getIssuer();
             if(!Objects.equals(issue, "study-pals")) {
-                return new JwtData(JwtStatus.INVALID);
+                return new JwtData(JwtStatus.INVALID, null);
             }
 
             Long userId = claims.get("id", Long.class);
 
             return new JwtData(userId);
         } catch (ExpiredJwtException e) {
-            return new JwtData(JwtStatus.EXPIRED);
+            Claims claims = e.getClaims();
+            Long userId = claims.get("id", Long.class);
+            return new JwtData(JwtStatus.EXPIRED, userId);
         } catch (Exception e) {
-            return new JwtData(JwtStatus.INVALID);
+            return new JwtData(JwtStatus.INVALID, null);
         }
     }
 
@@ -102,8 +104,7 @@ public class JwtUtils {
             this.jwtStatus = JwtStatus.VALID;
             this.id = id;
         }
-
-        public JwtData(JwtStatus jwtStatus) {
+        public JwtData(JwtStatus jwtStatus, Long id) {
             this.jwtStatus = jwtStatus;
             this.id = null;
         }

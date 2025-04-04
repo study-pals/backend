@@ -49,7 +49,8 @@ public class TokenServiceImpl implements TokenService {
     public ReissueTokenRes reissueJwtToken(JwtToken jwtToken) {
 
         //실패 1 : access token이 invalid할 때
-        JwtUtils.JwtData jwtData = jwtUtils.tokenInfo(jwtToken.getAccessToken());
+        String accessToken = jwtToken.getAccessToken().substring(7);
+        JwtUtils.JwtData jwtData = jwtUtils.tokenInfo(accessToken);
         if(jwtData.getJwtStatus().equals(JwtUtils.JwtStatus.INVALID)) {
             throw new AuthException(AuthErrorCode.USER_AUTH_FAIL, "token status invalid");
         }
