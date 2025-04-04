@@ -18,7 +18,8 @@ public enum AccessURL {
     PUBLIC(List.of(
             "/sign-in",
             "/register",
-            "/first-page"
+            "/first-page",
+            "/refresh"
     ));
 
     private final List<String> urls;
