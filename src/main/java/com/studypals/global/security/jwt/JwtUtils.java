@@ -106,7 +106,7 @@ public class JwtUtils {
         }
         public JwtData(JwtStatus jwtStatus, Long id) {
             this.jwtStatus = jwtStatus;
-            this.id = null;
+            this.id = id;
         }
     }
 
