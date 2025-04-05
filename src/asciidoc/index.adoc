@@ -8,9 +8,10 @@
 
 == 🔗 API 문서 링크
 
-* link:api/member.html[👤 Member API]
-* link:api/study.html[📘 Study API]
-* link:api/group.html[👥 Group API]
+* link:api/member.html[👤 Member API (U01)]
+* link:api/group.html[👥 Group API (U02)]
+* link:api/study.html[📘 Study API (U03)]
+
 
 [[overview]]
 == 🔰 개요
@@ -20,9 +21,7 @@
 
 - 📌 <<http-verbs, HTTP 메서드 및 상태 코드>>
 - 🧾 <<response-format, 응답 형식>>
-- 🧩 <<response-type, 응답 코드 정의>>
 - ❗ <<exception-code, 예외 코드 정의>>
-- 👤 <<member-api, 사용자 API>>
 
 '''
 
@@ -87,14 +86,6 @@
   "message": "에러 메시지"
 }
 ----
-
-'''
-
-[[response-type]]
-== 🧩 응답 코드 정의
-
-include::data/user.adoc[]
-
 '''
 
 [[exception-code]]
@@ -103,8 +94,3 @@ include::data/user.adoc[]
 include::data/error.adoc[]
 
 '''
-
-[[member-api]]
-== 👤 Member API
-
-include::api/member.adoc[]

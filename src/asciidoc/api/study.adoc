@@ -1,1 +1,27 @@
-this is study api document
+= 📚 study API
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+
+== 📚 공부 관련 응답 코드 (U03)
+
+> User의 공부 및 시간에 대한 도메인입니다.
+
+|===
+| 기능 코드 | 설명
+
+| 00 | 유저 공부 시간 검색 (전체)
+| 01 | 유저 공부 시간 검색 (일부)
+| 02 | 유저 공부 시간 초기화
+| 03 | 유저 공부 시간 추가
+| 04 | 유저 공부 시간 삭제
+| 05 | 유저 공부 카테고리 검색
+| 06 | 유저 공부 카테고리 추가
+| 07 | 유저 공부 카테고리 삭제
+| 08 | 유저 공부 카테고리 정보 확인
+|===
+
+== ✨ API 문서
