@@ -20,7 +20,12 @@ pipeline {
                     "MYSQL_HOST=${MYSQL_HOST}",
                     "MYSQL_PORT=${MYSQL_PORT}",
                     "MYSQL_USER=${MYSQL_USER}",
-                    "MYSQL_PWD=${MYSQL_PWD}"
+                    "MYSQL_PWD=${MYSQL_PWD}",
+                    "JWT_SECRET=${JWT_SECRET}",
+
+                    "REDIS_HOST=${REDIS_HOST}",
+                    "REDIS_PORT=${REDIS_PORT}"
+
                 ]) {
                     sh './gradlew test'
                 }
@@ -65,6 +70,9 @@ pipeline {
                         -e MYSQL_PORT=${MYSQL_PORT} \\
                         -e MYSQL_USER=${MYSQL_USER} \\
                         -e MYSQL_PWD=${MYSQL_PWD} \\
+                        -e JWT_SECRET=${JWT_SECRET} \\
+                        -e REDIS_HOST=${REDIS_HOST} \\
+                        -e REDIS_PORT=${REDIS_PORT} \\
                             ${DOCKER_IMAGE_NAME}
                     """
 
