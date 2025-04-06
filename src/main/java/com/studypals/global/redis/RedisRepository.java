@@ -76,7 +76,7 @@ public class RedisRepository {
      */
     public <T> T get(String key, Class<T> clazz) {
         String value = stringRedisTemplate.opsForValue().get(key);
-        if(value == null) return null;
+        if (value == null) return null;
         try {
             return objectMapper.readValue(value, clazz);
         } catch (JacksonException e) {

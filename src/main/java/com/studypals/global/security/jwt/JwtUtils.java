@@ -52,7 +52,7 @@ public class JwtUtils {
 
             String issue = claims.getIssuer();
 
-            if(!Objects.equals(issue, "study-pals")) {
+            if (!Objects.equals(issue, "study-pals")) {
                 return new JwtData(JwtStatus.INVALID, null);
             }
 

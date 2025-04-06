@@ -11,7 +11,6 @@ import com.studypals.global.security.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -52,7 +51,7 @@ public class TokenServiceImpl implements TokenService {
         String accessToken = jwtToken.getAccessToken().substring(7);
         JwtUtils.JwtData jwtData = jwtUtils.tokenInfo(accessToken);
 
-        if(jwtData.isInvalid()) {
+        if (jwtData.isInvalid()) {
             throw new AuthException(AuthErrorCode.USER_AUTH_FAIL, "token status invalid");
         }
 
@@ -63,7 +62,7 @@ public class TokenServiceImpl implements TokenService {
                 new AuthException(AuthErrorCode.USER_AUTH_FAIL, "refresh token not exist"));
 
         //실패 3 : refresh token 이 일치하지 않을 때
-        if(jwtToken.isSameRefreshToken(refreshToken)) {
+        if (jwtToken.isSameRefreshToken(refreshToken)) {
             throw new AuthException(AuthErrorCode.USER_AUTH_FAIL, "refresh token unmatch");
         }
 

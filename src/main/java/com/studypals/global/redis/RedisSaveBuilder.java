@@ -70,7 +70,7 @@ public class RedisSaveBuilder {
 
     public void save() {
 
-        if(isObject) {
+        if (isObject) {
             saveObject();
         } else {
             saveKeyValue();
@@ -82,7 +82,7 @@ public class RedisSaveBuilder {
         try {
             String json = objectMapper.writeValueAsString(object);
 
-            if(timeout == -1) {
+            if (timeout == -1) {
                 stringRedisTemplate.opsForValue().set(key, json);
             } else {
                 stringRedisTemplate.opsForValue().set(key, json, timeout, timeUnit);
@@ -94,7 +94,7 @@ public class RedisSaveBuilder {
 
     private void saveKeyValue() {
 
-        if(timeout == -1) {
+        if (timeout == -1) {
             stringRedisTemplate.opsForValue().set(key, value);
         } else {
             stringRedisTemplate.opsForValue().set(key, value, timeout, timeUnit);
