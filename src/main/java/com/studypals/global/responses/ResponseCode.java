@@ -21,6 +21,7 @@ public enum ResponseCode {
     USER_SIGNUP("U01-04"),
     USER_LOGIN("U01-05"),
     USER_AUTH_CHECK("U01-06"),
+    USER_REISSUE_TOKEN("U01-07"),
 
     // U02 - User & Group
     GROUP_SEARCH("U02-00"),

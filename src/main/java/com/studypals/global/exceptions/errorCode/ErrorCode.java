@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
  * @since 2025-03-31
  */
 public interface ErrorCode {
+
     String getCode();
 
     HttpStatus getHttpStatus();

@@ -78,7 +78,7 @@ public class JsonFieldResultMatcher implements ResultMatcher {
             String key = entry.getKey();
             Object value = entry.getValue();
 
-            if(value == null) continue;
+            if (value == null) continue;
             if (value instanceof String || value instanceof Integer || value instanceof Long || value instanceof Boolean) {
                 matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(value));
             }  else if (value instanceof LocalDate) {
