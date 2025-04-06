@@ -1,27 +1,29 @@
 package com.studypals.global.security.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Objects;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import lombok.Getter;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+
 /**
  * Jwt 를 생성,검증하는 책임을 가지는 객체입니다.
- * <p>
- * 토큰으로부터 값을 추출하거나, 생성합니다. 검증 시 토큰의 유효성 및 만료 여부를 체크하고 적절한 상태를 반환합니다.
- * 상태는 JwtData 라는 nested class를 통해 이루어집니다. 이는 tokenInfo 메서드의 반환 타입이며 다음과 같은 상태를 가집니다.
- * jwtData.getJwtStatus는 JwtStatus 라는 enum 객체를 반환합니다. 이는 JwtStatus.VALID, INVALID, EXPIRE로 정의됩니다.
- * 만약 토큰이 옳바르면 id 필드에 값이 담겨 VALID와 함께 반환됩니다.
-
+ *
+ * <p>토큰으로부터 값을 추출하거나, 생성합니다. 검증 시 토큰의 유효성 및 만료 여부를 체크하고 적절한 상태를 반환합니다. 상태는 JwtData 라는 nested class를
+ * 통해 이루어집니다. 이는 tokenInfo 메서드의 반환 타입이며 다음과 같은 상태를 가집니다. jwtData.getJwtStatus는 JwtStatus 라는 enum 객체를
+ * 반환합니다. 이는 JwtStatus.VALID, INVALID, EXPIRE로 정의됩니다. 만약 토큰이 옳바르면 id 필드에 값이 담겨 VALID와 함께 반환됩니다.
+ *
  * @author jack8
  * @since 2025-04-02
  */
@@ -32,23 +34,26 @@ public class JwtUtils {
     private final Long expiredDateRefreshToken;
 
     @Autowired
-    public JwtUtils(@Value("${jwt.secret}")String secretKey,
-                    @Value("${jwt.expireDate.accessToken}") Long expireDateAccessToken,
-                    @Value("${jwt.expireDate.refreshToken}") long expireDateRefreshToken) {
-        this.secretKey = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8),
-                Jwts.SIG.HS256.key().build().getAlgorithm());
+    public JwtUtils(
+            @Value("${jwt.secret}") String secretKey,
+            @Value("${jwt.expireDate.accessToken}") Long expireDateAccessToken,
+            @Value("${jwt.expireDate.refreshToken}") long expireDateRefreshToken) {
+        this.secretKey =
+                new SecretKeySpec(
+                        secretKey.getBytes(StandardCharsets.UTF_8),
+                        Jwts.SIG.HS256.key().build().getAlgorithm());
         this.expiredDateAccessToken = expireDateAccessToken;
         this.expiredDateRefreshToken = expireDateRefreshToken;
     }
 
     public JwtData tokenInfo(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-
+            Claims claims =
+                    Jwts.parser()
+                            .verifyWith(secretKey)
+                            .build()
+                            .parseSignedClaims(token)
+                            .getPayload();
 
             String issue = claims.getIssuer();
 
@@ -105,6 +110,7 @@ public class JwtUtils {
             this.jwtStatus = JwtStatus.VALID;
             this.id = id;
         }
+
         public JwtData(JwtStatus jwtStatus, Long id) {
             this.jwtStatus = jwtStatus;
             this.id = id;
@@ -128,5 +134,4 @@ public class JwtUtils {
         INVALID,
         EXPIRED
     }
-
 }

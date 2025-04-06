@@ -1,7 +1,10 @@
 package com.studypals.global.exceptions.exceptionHandler;
 
-import com.studypals.testModules.testComponent.TestController;
-import com.studypals.testModules.testComponent.TestErrorCode;
+import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
+import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasStatus;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +13,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
-import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasStatus;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.studypals.testModules.testComponent.TestController;
+import com.studypals.testModules.testComponent.TestErrorCode;
 
 /**
  * {@link GlobalExceptionHandler} 에 대한 테스트. 일부 테스트 유틸리티를 사용하여진행하였다.
@@ -22,14 +24,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @see GlobalExceptionHandler
  * @since 2025-04-01
  */
-
 @WebMvcTest(TestController.class)
 @Import(GlobalExceptionHandler.class)
 @TestPropertySource(properties = "debug.message.print=false")
 @AutoConfigureMockMvc(addFilters = false)
 class GlobalExceptionHandlerTest {
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
     @Test
     @DisplayName("custom exception이 발생하여 CommonResponse로 매핑되어 응답")
@@ -46,7 +46,5 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(hasKey("code", "EIS-02"))
                 .andExpect(hasKey("message", "unknown internal server error"));
-
     }
-
 }

@@ -4,7 +4,6 @@ import com.studypals.domain.memberManage.dto.CreateRefreshTokenDto;
 import com.studypals.domain.memberManage.dto.ReissueTokenRes;
 import com.studypals.global.security.jwt.JwtToken;
 
-
 /**
  * 토큰 재발급, 저장에 필요한 메서드를 정의합니다.
  *
@@ -20,6 +19,4 @@ public interface TokenService {
     ReissueTokenRes reissueJwtToken(JwtToken jwtToken);
 
     void saveRefreshToken(CreateRefreshTokenDto dto);
-
-
 }

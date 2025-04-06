@@ -1,6 +1,5 @@
 package com.studypals.global.redis;
 
-import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,10 +10,12 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
+
 /**
  * redis에 대한 config 입니다.
- * <p>
- * connection factory를 등록하고, 직렬화 방법을 정의합니다.
+ *
+ * <p>connection factory를 등록하고, 직렬화 방법을 정의합니다.
  *
  * <p><b>빈 관리:</b><br>
  * redisConnectionFactory 및 redisTemplate 을 등록합니다.
@@ -23,9 +24,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * @since 2025-04-04
  */
 @Configuration
-@EnableRedisRepositories(basePackageClasses = {
-        RefreshTokenRedisRepository.class
-})
+@EnableRedisRepositories(basePackageClasses = {RefreshTokenRedisRepository.class})
 public class RedisConfig {
 
     @Value("${spring.data.redis.host}")

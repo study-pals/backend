@@ -4,6 +4,7 @@ import com.studypals.domain.memberManage.dto.CreateMemberReq;
 
 /**
  * MemberService 의 인터페이스입니다. 메서드를 정의합니다.
+ *
  * <p>
  *
  * <p><b>상속 정보:</b><br>
@@ -18,5 +19,4 @@ public interface MemberService {
     Long createMember(CreateMemberReq dto);
 
     Long getMemberIdByUsername(String username);
-
 }
