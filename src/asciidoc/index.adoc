@@ -1,0 +1,96 @@
+= 📚 API 문서
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+
+== 🔗 API 문서 링크
+
+* link:api/member.html[👤 Member API (U01)]
+* link:api/group.html[👥 Group API (U02)]
+* link:api/study.html[📘 Study API (U03)]
+
+
+[[overview]]
+== 🔰 개요
+
+이 문서는 REST API에 대한 사용법, 응답 형식, 상태 코드, 예외 코드 등을 다룹니다.
+문서는 다음과 같은 항목으로 구성되어 있습니다:
+
+- 📌 <<http-verbs, HTTP 메서드 및 상태 코드>>
+- 🧾 <<response-format, 응답 형식>>
+- ❗ <<exception-code, 예외 코드 정의>>
+
+'''
+
+[[http-verbs]]
+== 📌 HTTP 메서드 및 상태 코드
+
+=== 📬 HTTP 메서드
+
+|===
+| 메서드 | 설명
+
+| `GET` | 리소스 조회
+| `POST` | 리소스 생성
+| `PATCH` | 리소스 일부 수정
+| `DELETE` | 리소스 삭제
+|===
+
+=== 📡 상태 코드
+
+|===
+| 코드 | 의미 | 설명
+
+| 200 OK | 성공 | 요청이 성공적으로 수행됨
+| 201 Created | 생성됨 | 새로운 리소스가 생성됨. Location 헤더에 URI 포함
+| 204 No Content | 성공(내용 없음) | 수정 또는 삭제 성공 후 응답 본문 없음
+| 400 Bad Request | 잘못된 요청 | 유효성 검증 실패 또는 잘못된 파라미터
+| 401 Unauthorized | 인증 실패 | 로그인 필요
+| 403 Forbidden | 권한 없음 | 요청 자격 없음
+| 404 Not Found | 찾을 수 없음 | 요청한 리소스가 없음
+| 405 Method Not Allowed | 허용되지 않음 | 잘못된 HTTP 메서드
+| 500 Internal Server Error | 서버 오류 | 서버에서 예기치 못한 오류 발생
+|===
+
+'''
+
+[[response-format]]
+== 🧾 공통 응답 형식
+
+=== ✅ 성공 시
+
+[source,json]
+----
+{
+  "code": "도메인-코드",
+  "status": "success",
+  "data": {
+    "id": 1,
+    "username": "username",
+    "password": "12345"
+  },
+  "message": "요청이 성공적으로 처리되었습니다."
+}
+----
+
+=== ❌ 실패 시
+
+[source,json]
+----
+{
+  "code": "도메인-코드",
+  "status": "fail",
+  "message": "에러 메시지"
+}
+----
+'''
+
+[[exception-code]]
+== ❗ 전역 예외 코드
+
+include::data/error.adoc[]
+
+'''

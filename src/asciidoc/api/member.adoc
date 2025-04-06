@@ -1,0 +1,26 @@
+= 👤 member API
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+
+
+== 👤 사용자 관련 응답 코드 (U01)
+
+|===
+| 기능 코드 | 설명
+
+| 00 | 유저 검색 및 정보 반환
+| 01 | 유저 생성
+| 02 | 유저 정보 갱신
+| 03 | 유저 삭제
+| 04 | 회원가입
+| 05 | 로그인
+| 06 | 유저 권한 검색/검증
+| 07 | token 재발급
+| 08 | 토큰 인증
+|===
+
+== ✨ API 문서
