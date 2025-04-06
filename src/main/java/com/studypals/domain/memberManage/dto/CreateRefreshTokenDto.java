@@ -1,5 +1,6 @@
 package com.studypals.domain.memberManage.dto;
 
+import com.studypals.domain.memberManage.entity.RefreshToken;
 import lombok.Builder;
 
 /**
@@ -14,4 +15,12 @@ import lombok.Builder;
 public record CreateRefreshTokenDto(
         Long userId,
         String token
-) { }
+) {
+    public RefreshToken toRefreshToken(Long expiration) {
+        return RefreshToken.builder()
+                .id(this.userId)
+                .token(this.token)
+                .expiration(expiration)
+                .build();
+    }
+}

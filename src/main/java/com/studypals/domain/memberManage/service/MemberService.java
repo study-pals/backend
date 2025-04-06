@@ -14,6 +14,9 @@ import com.studypals.domain.memberManage.dto.CreateMemberReq;
  * @since 2025-04-02
  */
 public interface MemberService {
+
     Long createMember(CreateMemberReq dto);
+
     Long getMemberIdByUsername(String username);
+
 }

@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2025-04-03
  */
 public class RedisSaveBuilder {
+
     private final StringRedisTemplate stringRedisTemplate;
     private String key;
     private String value;
@@ -68,6 +69,7 @@ public class RedisSaveBuilder {
     }
 
     public void save() {
+
         if(isObject) {
             saveObject();
         } else {
@@ -79,6 +81,7 @@ public class RedisSaveBuilder {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             String json = objectMapper.writeValueAsString(object);
+
             if(timeout == -1) {
                 stringRedisTemplate.opsForValue().set(key, json);
             } else {
@@ -90,6 +93,7 @@ public class RedisSaveBuilder {
     }
 
     private void saveKeyValue() {
+
         if(timeout == -1) {
             stringRedisTemplate.opsForValue().set(key, value);
         } else {

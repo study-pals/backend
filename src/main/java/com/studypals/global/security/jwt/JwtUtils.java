@@ -51,6 +51,7 @@ public class JwtUtils {
 
 
             String issue = claims.getIssuer();
+
             if(!Objects.equals(issue, "study-pals")) {
                 return new JwtData(JwtStatus.INVALID, null);
             }
@@ -107,6 +108,18 @@ public class JwtUtils {
         public JwtData(JwtStatus jwtStatus, Long id) {
             this.jwtStatus = jwtStatus;
             this.id = id;
+        }
+
+        public boolean isInvalid() {
+            return jwtStatus == JwtStatus.INVALID;
+        }
+
+        public boolean isValid() {
+            return jwtStatus == JwtStatus.VALID;
+        }
+
+        public boolean isExpired() {
+            return jwtStatus == JwtStatus.EXPIRED;
         }
     }
 

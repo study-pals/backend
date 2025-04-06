@@ -27,8 +27,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SignInServiceImpl implements SignInService {
+
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
+
     @Override
     public JwtToken signInByUsernameAndPassword(String username, String password) throws AuthenticationException {
 

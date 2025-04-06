@@ -14,6 +14,8 @@ import org.springframework.security.core.AuthenticationException;
  * @since 2025-04-02
  */
 public interface SignInService {
+
     JwtToken signInByUsernameAndPassword(String username, String password)
             throws AuthenticationException;
+
 }

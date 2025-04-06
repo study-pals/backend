@@ -23,6 +23,7 @@ import java.util.List;
  * @since 2025-04-02
  */
 public class MemberDetails implements UserDetails {
+
     private final Member member;
 
     public MemberDetails(Member member) {

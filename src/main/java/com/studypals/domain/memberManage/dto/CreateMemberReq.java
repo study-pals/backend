@@ -1,7 +1,9 @@
 package com.studypals.domain.memberManage.dto;
 
+import com.studypals.domain.memberManage.entity.Member;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
+import org.springframework.jdbc.support.CustomSQLErrorCodesTranslation;
 
 import java.time.LocalDate;
 
@@ -21,4 +23,15 @@ public record CreateMemberReq(
         String position,
         String imageUrl
         ) {
+
+        public Member toEntity(String password) {
+                return Member.builder()
+                        .username(this.username)
+                        .password(password)
+                        .nickname(this.nickname)
+                        .birthday(this.birthday)
+                        .position(this.position)
+                        .imageUrl(this.imageUrl)
+                        .build();
+        }
 }

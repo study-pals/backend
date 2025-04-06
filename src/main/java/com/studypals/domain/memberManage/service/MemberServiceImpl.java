@@ -29,19 +29,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
+
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+
     @Override
     @Transactional
     public Long createMember(CreateMemberReq dto) {
-        Member member = Member.builder()
-                .username(dto.username())
-                .password(passwordEncoder.encode(dto.password()))
-                .nickname(dto.nickname())
-                .birthday(dto.birthday())
-                .position(dto.position())
-                .imageUrl(dto.imageUrl())
-                .build();
+        String password = passwordEncoder.encode(dto.password());
+        Member member = dto.toEntity(password);
         try {
             return memberRepository.save(member).getId();
         } catch (DataIntegrityViolationException e) {

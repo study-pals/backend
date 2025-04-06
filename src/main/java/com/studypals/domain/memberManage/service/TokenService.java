@@ -16,7 +16,10 @@ import com.studypals.global.security.jwt.JwtToken;
  * @since 2025-04-04
  */
 public interface TokenService {
+
     ReissueTokenRes reissueJwtToken(JwtToken jwtToken);
+
     void saveRefreshToken(CreateRefreshTokenDto dto);
+
 
 }

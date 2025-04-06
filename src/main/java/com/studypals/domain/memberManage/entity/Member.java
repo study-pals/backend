@@ -26,7 +26,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "MEMBER")
+@Table(name = "member")
 public class Member {
 
     @Id
@@ -54,5 +54,5 @@ public class Member {
 
     @Column(name = "created_at")
     @CreatedDate
-    private String createdAt;
+    private LocalDate createdAt;
 }

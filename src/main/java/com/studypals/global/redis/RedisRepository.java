@@ -25,6 +25,7 @@ import java.util.Set;
 @Repository
 @RequiredArgsConstructor
 public class RedisRepository {
+
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;
 

@@ -48,20 +48,22 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public ReissueTokenRes reissueJwtToken(JwtToken jwtToken) {
 
-        //실패 1 : access token이 invalid할 때
+        //실패 1 : access token 이 invalid 할 때
         String accessToken = jwtToken.getAccessToken().substring(7);
         JwtUtils.JwtData jwtData = jwtUtils.tokenInfo(accessToken);
-        if(jwtData.getJwtStatus().equals(JwtUtils.JwtStatus.INVALID)) {
+
+        if(jwtData.isInvalid()) {
             throw new AuthException(AuthErrorCode.USER_AUTH_FAIL, "token status invalid");
         }
 
-        //실패 2 : refreshToken이 존재하지 않을 때
+        //실패 2 : refresh token 이 존재하지 않을 때
         Long userId = jwtData.getId();
+
         String refreshToken = getRefreshToken(userId).orElseThrow(() ->
                 new AuthException(AuthErrorCode.USER_AUTH_FAIL, "refresh token not exist"));
 
-        //실패 3 : refreshToken이 일치하지 않을 때
-        if(!Objects.equals(jwtToken.getRefreshToken(), refreshToken)) {
+        //실패 3 : refresh token 이 일치하지 않을 때
+        if(jwtToken.isSameRefreshToken(refreshToken)) {
             throw new AuthException(AuthErrorCode.USER_AUTH_FAIL, "refresh token unmatch");
         }
 
@@ -80,11 +82,7 @@ public class TokenServiceImpl implements TokenService {
      */
     @Override
     public void saveRefreshToken(CreateRefreshTokenDto dto) {
-        RefreshToken refreshToken = RefreshToken.builder()
-                .id(dto.userId())
-                .token(dto.token())
-                .expiration(30L)
-                .build();
+        RefreshToken refreshToken = dto.toRefreshToken(30L);
 
         refreshTokenRedisRepository.save(refreshToken);
     }
