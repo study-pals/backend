@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.4.4'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    id 'com.diffplug.spotless' version '7.0.2'
 }
 
 group = 'com'
@@ -58,6 +59,28 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+spotless {
+    java {
+        googleJavaFormat().aosp()
+        importOrder('java', 'javax', 'jakarta', 'org', 'lombok', 'com')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+tasks.register("addGitPreCommitHook", Copy) {
+    from './script/pre-commit'
+    into './.git/hooks'
+}
+
+tasks.register("makeGitHookExecutable", Exec) {
+    commandLine 'chmod', '+x', './.git/hooks/pre-commit'
+    dependsOn addGitPreCommitHook
+}
+
+compileJava.dependsOn makeGitHookExecutable
+
 ext {
     snippetsDir = file('build/generated-snippets')
 }
@@ -82,6 +105,7 @@ asciidoctor {
     inputs.dir snippetsDir
     dependsOn test
 }
+
 asciidoctor.doFirst {
     delete file('src/main/resources/static/docs')
 }

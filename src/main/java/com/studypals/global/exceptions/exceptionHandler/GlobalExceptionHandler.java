@@ -1,10 +1,5 @@
 package com.studypals.global.exceptions.exceptionHandler;
 
-import com.studypals.global.exceptions.errorCode.ErrorCode;
-import com.studypals.global.exceptions.exception.BaseException;
-import com.studypals.global.responses.CommonResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -12,12 +7,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import com.studypals.global.exceptions.errorCode.ErrorCode;
+import com.studypals.global.exceptions.exception.BaseException;
+import com.studypals.global.responses.CommonResponse;
+
 /**
  * custom exception에 대한 exception handler 입니다.
- * <p>
- * {@link ExceptionHandlerOrder}에 정의된 바에 따라 비교적 후순위로 처리됩니다. 내부 필드 isDebug를 통해
- * 내부 메시지의 표시 여부를 결정합니다.
- * 모든 응답은 {@link CommonResponse} 를 통해 이루어집니다.
+ *
+ * <p>{@link ExceptionHandlerOrder}에 정의된 바에 따라 비교적 후순위로 처리됩니다. 내부 필드 isDebug를 통해 내부 메시지의 표시 여부를
+ * 결정합니다. 모든 응답은 {@link CommonResponse} 를 통해 이루어집니다.
  *
  * <p><b>상속 정보:</b><br>
  * 상속 정보를 적습니다.

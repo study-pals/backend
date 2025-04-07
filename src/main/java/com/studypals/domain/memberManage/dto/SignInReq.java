@@ -8,8 +8,4 @@ import jakarta.validation.constraints.NotBlank;
  * @author jack8
  * @since 2025-04-02
  */
-public record SignInReq(
-        @NotBlank String username,
-        @NotBlank String password
-) {
-}
+public record SignInReq(@NotBlank String username, @NotBlank String password) {}

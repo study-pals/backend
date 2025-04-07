@@ -1,20 +1,22 @@
 package com.studypals.domain.memberManage.entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.*;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDate;
 
 /**
  * Member 에 대한 엔티티입니다.
  *
  * <p><b>주요 생성자:</b><br>
- * {@code builder}  <br>
+ * {@code builder} <br>
  * 빌더 패턴을 사용하여 생성합니다. <br>
  *
  * @author jack8

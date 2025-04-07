@@ -1,10 +1,12 @@
 package com.studypals.testModules.testComponent;
 
-import com.studypals.global.exceptions.errorCode.ErrorCode;
 import org.springframework.http.HttpStatus;
+
+import com.studypals.global.exceptions.errorCode.ErrorCode;
 
 /**
  * 테스트 시 사용할 ErrorCode. 다음과 같은 값을 가지고 있다.
+ *
  * <pre>
  *     code : "TEST-400"
  *     httpStatus : 400(BAD REQUEST)
@@ -15,8 +17,7 @@ import org.springframework.http.HttpStatus;
  * @since 2025-04-01
  */
 public enum TestErrorCode implements ErrorCode {
-    TEST_ERROR_CODE
-    ;
+    TEST_ERROR_CODE;
 
     @Override
     public String getCode() {

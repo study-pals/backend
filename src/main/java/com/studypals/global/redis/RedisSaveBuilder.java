@@ -1,21 +1,22 @@
 package com.studypals.global.redis;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.util.concurrent.TimeUnit;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
- * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
+ *
+ * <p>코드에 대한 작동 원리 등을 적습니다.
  *
  * <p><b>상속 정보:</b><br>
  * 상속 정보를 적습니다.
  *
  * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br>
+ * {@code ExampleClass(String example)} <br>
  * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
  *
  * <p><b>빈 관리:</b><br>
@@ -100,5 +101,4 @@ public class RedisSaveBuilder {
             stringRedisTemplate.opsForValue().set(key, value, timeout, timeUnit);
         }
     }
-
 }

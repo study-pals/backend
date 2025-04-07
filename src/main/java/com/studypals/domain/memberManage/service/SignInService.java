@@ -1,7 +1,8 @@
 package com.studypals.domain.memberManage.service;
 
-import com.studypals.global.security.jwt.JwtToken;
 import org.springframework.security.core.AuthenticationException;
+
+import com.studypals.global.security.jwt.JwtToken;
 
 /**
  * 로그인 시 필요한 메서드를 정의합니다.
@@ -17,5 +18,4 @@ public interface SignInService {
 
     JwtToken signInByUsernameAndPassword(String username, String password)
             throws AuthenticationException;
-
 }

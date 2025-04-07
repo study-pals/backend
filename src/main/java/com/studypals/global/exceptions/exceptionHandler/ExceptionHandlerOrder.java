@@ -2,8 +2,8 @@ package com.studypals.global.exceptions.exceptionHandler;
 
 /**
  * exception handler 의 처리 순서에 대한 상수 값을 정의하고 관리하는 객체입니다.
- * <p>
- * public 한 static final 내부 필드를 통해 값을 관리합니다.
+ *
+ * <p>public 한 static final 내부 필드를 통해 값을 관리합니다.
  *
  * @author jack8
  * @since 2025-04-01
