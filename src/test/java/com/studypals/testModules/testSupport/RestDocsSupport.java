@@ -1,4 +1,4 @@
-package com.studypals.testModules.testUtils;
+package com.studypals.testModules.testSupport;
 
 import static org.springframework.restdocs.snippet.Attributes.key;
 

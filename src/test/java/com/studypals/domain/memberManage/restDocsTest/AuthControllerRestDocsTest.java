@@ -35,7 +35,7 @@ import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 import com.studypals.global.security.jwt.JwtToken;
-import com.studypals.testModules.testUtils.RestDocsSupport;
+import com.studypals.testModules.testSupport.RestDocsSupport;
 
 /**
  * {@link AuthController} 에 대한 rest docs web mvc test 입니다. 문서를 생성합니다.

@@ -100,9 +100,24 @@ ext {
     snippetsDir = file('build/generated-snippets')
 }
 
+def envProps = new Properties()
+file('.env').withInputStream { stream ->
+    stream.withReader('UTF-8') { reader ->
+        reader.eachLine { line ->
+            line = line.trim()
+            if (line && !line.startsWith('#') && line.contains('=')) {
+                def (k, v) = line.split('=', 2)
+                envProps[k] = v
+            }
+        }
+    }
+}
+
+
 tasks.named('test', Test) {
     useJUnitPlatform()
     outputs.dir snippetsDir
+    environment envProps
 }
 
 asciidoctor {

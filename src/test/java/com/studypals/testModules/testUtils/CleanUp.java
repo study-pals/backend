@@ -1,11 +1,13 @@
 package com.studypals.testModules.testUtils;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class CleanUp {
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager entityManager;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Transactional
     public void all() {
@@ -37,5 +40,10 @@ public class CleanUp {
             jdbcTemplate.execute("TRUNCATE TABLE " + table.toLowerCase());
         }
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
+
+        Objects.requireNonNull(stringRedisTemplate.getConnectionFactory())
+                .getConnection()
+                .serverCommands()
+                .flushAll();
     }
 }
