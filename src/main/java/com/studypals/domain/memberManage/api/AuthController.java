@@ -73,7 +73,7 @@ public class AuthController {
             @RequestHeader("Authorization") String accessToken) {
         JwtToken token =
                 JwtToken.builder()
-                        .accessToken(accessToken)
+                        .accessToken(accessToken.substring(7))
                         .refreshToken(req.refreshToken())
                         .build();
 
