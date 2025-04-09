@@ -24,32 +24,18 @@ import com.studypals.global.responses.ResponseCode;
  */
 @RequiredArgsConstructor
 public enum StudyErrorCode implements ErrorCode {
-    STUDY_TIME_NOT_FOUND(
-            ResponseCode.STUDY_TIME_ALL, HttpStatus.NOT_FOUND, "can't find study time"),
+    STUDY_TIME_NOT_FOUND(ResponseCode.STUDY_TIME_ALL, HttpStatus.NOT_FOUND, "can't find study time"),
     STUDY_TIME_PARTIAL_FAIL(
-            ResponseCode.STUDY_TIME_PARTIAL,
-            HttpStatus.BAD_REQUEST,
-            "failed to get partial study time"),
-    STUDY_TIME_RESET_FAIL(
-            ResponseCode.STUDY_TIME_RESET, HttpStatus.BAD_REQUEST, "failed to reset study time"),
-    STUDY_TIME_ADD_FAIL(
-            ResponseCode.STUDY_TIME_ADD, HttpStatus.BAD_REQUEST, "failed to add study time"),
-    STUDY_TIME_DELETE_FAIL(
-            ResponseCode.STUDY_TIME_DELETE, HttpStatus.BAD_REQUEST, "failed to delete study time"),
-    STUDY_CATEGORY_NOT_FOUND(
-            ResponseCode.STUDY_CATEGORY_LIST, HttpStatus.NOT_FOUND, "can't find study category"),
-    STUDY_CATEGORY_ADD_FAIL(
-            ResponseCode.STUDY_CATEGORY_ADD,
-            HttpStatus.BAD_REQUEST,
-            "failed to add study category"),
+            ResponseCode.STUDY_TIME_PARTIAL, HttpStatus.BAD_REQUEST, "failed to get partial study time"),
+    STUDY_TIME_RESET_FAIL(ResponseCode.STUDY_TIME_RESET, HttpStatus.BAD_REQUEST, "failed to reset study time"),
+    STUDY_TIME_ADD_FAIL(ResponseCode.STUDY_TIME_ADD, HttpStatus.BAD_REQUEST, "failed to add study time"),
+    STUDY_TIME_DELETE_FAIL(ResponseCode.STUDY_TIME_DELETE, HttpStatus.BAD_REQUEST, "failed to delete study time"),
+    STUDY_CATEGORY_NOT_FOUND(ResponseCode.STUDY_CATEGORY_LIST, HttpStatus.NOT_FOUND, "can't find study category"),
+    STUDY_CATEGORY_ADD_FAIL(ResponseCode.STUDY_CATEGORY_ADD, HttpStatus.BAD_REQUEST, "failed to add study category"),
     STUDY_CATEGORY_DELETE_FAIL(
-            ResponseCode.STUDY_CATEGORY_DELETE,
-            HttpStatus.BAD_REQUEST,
-            "failed to delete study category"),
+            ResponseCode.STUDY_CATEGORY_DELETE, HttpStatus.BAD_REQUEST, "failed to delete study category"),
     STUDY_CATEGORY_UPDATE_FAIL(
-            ResponseCode.STUDY_CATEGORY_UPDATE,
-            HttpStatus.BAD_REQUEST,
-            "failed to update study category");
+            ResponseCode.STUDY_CATEGORY_UPDATE, HttpStatus.BAD_REQUEST, "failed to update study category");
 
     private final ResponseCode responseCode;
     private final HttpStatus status;

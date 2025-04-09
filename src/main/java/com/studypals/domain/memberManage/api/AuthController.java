@@ -42,8 +42,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Response<Long>> register(@Valid @RequestBody CreateMemberReq req) {
         Long id = memberService.createMember(req);
-        Response<Long> response =
-                CommonResponse.success(ResponseCode.USER_CREATE, id, "success create user");
+        Response<Long> response = CommonResponse.success(ResponseCode.USER_CREATE, id, "success create user");
 
         return ResponseEntity.ok(response);
     }
@@ -56,38 +55,32 @@ public class AuthController {
         JwtToken jwtToken = signInService.signInByUsernameAndPassword(username, password);
         Long userId = memberService.getMemberIdByUsername(username);
 
-        CreateRefreshTokenDto createDto =
-                CreateRefreshTokenDto.builder()
-                        .token(jwtToken.getRefreshToken())
-                        .userId(userId)
-                        .build();
+        CreateRefreshTokenDto createDto = CreateRefreshTokenDto.builder()
+                .token(jwtToken.getRefreshToken())
+                .userId(userId)
+                .build();
         tokenService.saveRefreshToken(createDto);
 
-        return ResponseEntity.ok(
-                CommonResponse.success(ResponseCode.USER_LOGIN, jwtToken, "success login"));
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.USER_LOGIN, jwtToken, "success login"));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<Response<ReissueTokenRes>> refreshToken(
-            @Valid @RequestBody TokenReissueReq req,
-            @RequestHeader("Authorization") String accessToken) {
-        JwtToken token =
-                JwtToken.builder()
-                        .accessToken(accessToken)
-                        .refreshToken(req.refreshToken())
-                        .build();
+            @Valid @RequestBody TokenReissueReq req, @RequestHeader("Authorization") String accessToken) {
+        JwtToken token = JwtToken.builder()
+                .accessToken(accessToken)
+                .refreshToken(req.refreshToken())
+                .build();
 
         ReissueTokenRes response = tokenService.reissueJwtToken(token);
 
-        CreateRefreshTokenDto createDto =
-                CreateRefreshTokenDto.builder()
-                        .token(response.refreshToken())
-                        .userId(response.userId())
-                        .build();
+        CreateRefreshTokenDto createDto = CreateRefreshTokenDto.builder()
+                .token(response.refreshToken())
+                .userId(response.userId())
+                .build();
         tokenService.saveRefreshToken(createDto);
 
         return ResponseEntity.ok(
-                CommonResponse.success(
-                        ResponseCode.USER_REISSUE_TOKEN, response, "success reissue token"));
+                CommonResponse.success(ResponseCode.USER_REISSUE_TOKEN, response, "success reissue token"));
     }
 }

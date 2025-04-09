@@ -125,23 +125,18 @@ public class JsonFieldResultMatcher implements ResultMatcher {
                     if (value instanceof LocalDate) {
                         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
                         String formattedDate = ((LocalDate) value).format(formatter);
-                        matchers.add(
-                                MockMvcResultMatchers.jsonPath("$[" + i + "]." + entry.getKey())
-                                        .value(formattedDate));
+                        matchers.add(MockMvcResultMatchers.jsonPath("$[" + i + "]." + entry.getKey())
+                                .value(formattedDate));
                     } else if (value instanceof LocalDateTime) {
-                        DateTimeFormatter formatter =
-                                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-                        String formattedDateTime =
-                                ((LocalDateTime) value)
-                                        .truncatedTo(ChronoUnit.SECONDS)
-                                        .format(formatter);
-                        matchers.add(
-                                MockMvcResultMatchers.jsonPath("$[" + i + "]." + entry.getKey())
-                                        .value(formattedDateTime));
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+                        String formattedDateTime = ((LocalDateTime) value)
+                                .truncatedTo(ChronoUnit.SECONDS)
+                                .format(formatter);
+                        matchers.add(MockMvcResultMatchers.jsonPath("$[" + i + "]." + entry.getKey())
+                                .value(formattedDateTime));
                     } else {
-                        matchers.add(
-                                MockMvcResultMatchers.jsonPath("$[" + i + "]." + entry.getKey())
-                                        .value(value));
+                        matchers.add(MockMvcResultMatchers.jsonPath("$[" + i + "]." + entry.getKey())
+                                .value(value));
                     }
                 }
             }
@@ -155,14 +150,11 @@ public class JsonFieldResultMatcher implements ResultMatcher {
 
         List<ResultMatcher> matchers = new ArrayList<>();
 
-        matchers.add(
-                MockMvcResultMatchers.jsonPath("$.totalElements").value(page.getTotalElements()));
+        matchers.add(MockMvcResultMatchers.jsonPath("$.totalElements").value(page.getTotalElements()));
         matchers.add(MockMvcResultMatchers.jsonPath("$.totalPages").value(page.getTotalPages()));
         matchers.add(MockMvcResultMatchers.jsonPath("$.size").value(page.getSize()));
         matchers.add(MockMvcResultMatchers.jsonPath("$.number").value(page.getNumber()));
-        matchers.add(
-                MockMvcResultMatchers.jsonPath("$.numberOfElements")
-                        .value(page.getNumberOfElements()));
+        matchers.add(MockMvcResultMatchers.jsonPath("$.numberOfElements").value(page.getNumberOfElements()));
         matchers.add(MockMvcResultMatchers.jsonPath("$.first").value(page.isFirst()));
         matchers.add(MockMvcResultMatchers.jsonPath("$.last").value(page.isLast()));
         matchers.add(MockMvcResultMatchers.jsonPath("$.empty").value(page.isEmpty()));
@@ -183,26 +175,18 @@ public class JsonFieldResultMatcher implements ResultMatcher {
                     if (value instanceof LocalDate) {
                         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
                         String formattedDate = ((LocalDate) value).format(formatter);
-                        matchers.add(
-                                MockMvcResultMatchers.jsonPath(
-                                                "$.content[" + i + "]." + entry.getKey())
-                                        .value(formattedDate));
+                        matchers.add(MockMvcResultMatchers.jsonPath("$.content[" + i + "]." + entry.getKey())
+                                .value(formattedDate));
                     } else if (value instanceof LocalDateTime) {
-                        DateTimeFormatter formatter =
-                                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-                        String formattedDateTime =
-                                ((LocalDateTime) value)
-                                        .truncatedTo(ChronoUnit.SECONDS)
-                                        .format(formatter);
-                        matchers.add(
-                                MockMvcResultMatchers.jsonPath(
-                                                "$.content[" + i + "]." + entry.getKey())
-                                        .value(formattedDateTime));
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+                        String formattedDateTime = ((LocalDateTime) value)
+                                .truncatedTo(ChronoUnit.SECONDS)
+                                .format(formatter);
+                        matchers.add(MockMvcResultMatchers.jsonPath("$.content[" + i + "]." + entry.getKey())
+                                .value(formattedDateTime));
                     } else {
-                        matchers.add(
-                                MockMvcResultMatchers.jsonPath(
-                                                "$.content[" + i + "]." + entry.getKey())
-                                        .value(value));
+                        matchers.add(MockMvcResultMatchers.jsonPath("$.content[" + i + "]." + entry.getKey())
+                                .value(value));
                     }
                 }
             }

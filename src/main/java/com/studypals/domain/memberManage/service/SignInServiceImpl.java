@@ -35,8 +35,7 @@ public class SignInServiceImpl implements SignInService {
     private final JwtUtils jwtUtils;
 
     @Override
-    public JwtToken signInByUsernameAndPassword(String username, String password)
-            throws AuthenticationException {
+    public JwtToken signInByUsernameAndPassword(String username, String password) throws AuthenticationException {
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(username, password);

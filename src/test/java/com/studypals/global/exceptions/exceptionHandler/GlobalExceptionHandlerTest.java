@@ -29,7 +29,8 @@ import com.studypals.testModules.testComponent.TestErrorCode;
 @TestPropertySource(properties = "debug.message.print=false")
 @AutoConfigureMockMvc(addFilters = false)
 class GlobalExceptionHandlerTest {
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
     @Test
     @DisplayName("custom exception이 발생하여 CommonResponse로 매핑되어 응답")

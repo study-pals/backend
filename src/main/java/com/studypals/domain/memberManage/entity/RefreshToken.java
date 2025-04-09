@@ -25,7 +25,8 @@ import lombok.Getter;
 @Getter
 public class RefreshToken {
 
-    @Id private Long id;
+    @Id
+    private Long id;
 
     private String token;
 
