@@ -49,15 +49,13 @@ public class MinioRepository {
             String fileName = pathDir + "/" + file.getOriginalFilename();
 
             minioClient.putObject(
-                    PutObjectArgs.builder().bucket(bucket).object(fileName).stream(
-                                    inputStream, file.getSize(), -1)
+                    PutObjectArgs.builder().bucket(bucket).object(fileName).stream(inputStream, file.getSize(), -1)
                             .contentType(file.getContentType())
                             .build());
 
             return fileName;
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Something unexpected happened with minio. detail: " + e.getMessage());
+            throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
         }
     }
 
@@ -69,16 +67,14 @@ public class MinioRepository {
      */
     public String getPreSignedUrl(String path) {
         try {
-            return minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .method(Method.GET)
-                            .bucket(bucket)
-                            .object(path)
-                            .expiry(1, TimeUnit.MINUTES)
-                            .build());
+            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                    .method(Method.GET)
+                    .bucket(bucket)
+                    .object(path)
+                    .expiry(1, TimeUnit.MINUTES)
+                    .build());
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Something unexpected happened with minio. detail: " + e.getMessage());
+            throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
         }
     }
 
@@ -92,24 +88,24 @@ public class MinioRepository {
             minioClient.removeObject(
                     RemoveObjectArgs.builder().bucket(bucket).object(path).build());
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Something unexpected happened with minio. detail: " + e.getMessage());
+            throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
         }
     }
 
     /** MinIO 버킷이 유효한지 확인합니다. 유효하지 않다면, 해당 이름으로 버킷을 생성합니다. */
     private void validateBucket() {
         try {
-            boolean isExists =
-                    minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
+            boolean isExists = minioClient.bucketExists(
+                    BucketExistsArgs.builder().bucket(bucket).build());
             if (isExists) return;
 
             minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
-            minioClient.setBucketPolicy(
-                    SetBucketPolicyArgs.builder().bucket(bucket).config("public").build());
+            minioClient.setBucketPolicy(SetBucketPolicyArgs.builder()
+                    .bucket(bucket)
+                    .config("public")
+                    .build());
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Something unexpected happened with minio. detail: " + e.getMessage());
+            throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
         }
     }
 }
