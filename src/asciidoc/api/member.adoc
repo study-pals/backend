@@ -24,3 +24,112 @@
 |===
 
 == ✨ API 문서
+
+=== 인증 관련 API
+'''
+
+==== 1. 회원가입
+*Description* +
+
+'''
+
+회원가입을 위해 사용합니다. 권한은 존재하지 않으며 기본적인 정보를 받습니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/auth-controller-rest-docs-test/register_success/request-fields.adoc[]
+include::{snippets}/auth-controller-rest-docs-test/register_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/auth-controller-rest-docs-test/register_success/response-fields.adoc[]
+include::{snippets}/auth-controller-rest-docs-test/register_success/http-response.adoc[]
+
+==== 2. 로그인
+*Description* +
+
+'''
+
+로그인을 위해 사용합니다. 현재로선 유일한 로그인 방식입니다.
+
+[NOTE]
+추후 아이디, 닉네임 중복 확인 엔드포인트가 필요합니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/auth-controller-rest-docs-test/login_success/request-fields.adoc[]
+include::{snippets}/auth-controller-rest-docs-test/login_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/auth-controller-rest-docs-test/login_success/response-fields.adoc[]
+include::{snippets}/auth-controller-rest-docs-test/login_success/http-response.adoc[]
+
+==== 3. 토큰 재발급
+*Description* +
+
+'''
+
+access token 만료 시 token 재발급을 위한 엔드포인트입니다.
+
+[WARNING]
+refresh token 만료 시에 대한 로직 작성이 필요합니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/request-fields.adoc[]
+include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/request-headers.adoc[]
+include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/response-fields.adoc[]
+include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/http-response.adoc[]
+
+
+== ⛔ 예외 출력
+
+=== 인증 관련 예외
+'''
+
+==== 1. 회원가입 시
+
+*Description* +
+
+'''
+
+중복된 username, nickname 으로 회원가입을 시도하는 경우 다음과 같은 응답이 생성됩니다.
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/auth-controller-rest-docs-test/register_fail_duplicate_user/http-response.adoc[]
+
+==== 2. 로그인 시
+
+*Description* +
+
+'''
+
+유효하지 않은 username 혹은 password 시 다음과 같은 응답이 생성됩니다.
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/auth-controller-rest-docs-test/login_fail_invalid_value/http-response.adoc[]
+
+

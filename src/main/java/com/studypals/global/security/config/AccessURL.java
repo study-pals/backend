@@ -14,7 +14,7 @@ import lombok.Getter;
  */
 @Getter
 public enum AccessURL {
-    PUBLIC(List.of("/sign-in", "/register", "/first-page", "/refresh"));
+    PUBLIC(List.of("/sign-in", "/register", "/first-page", "/refresh", "/docs/**"));
 
     private final List<String> urls;
 

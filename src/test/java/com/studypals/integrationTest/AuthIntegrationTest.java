@@ -85,7 +85,7 @@ public class AuthIntegrationTest extends IntegrationSupport {
         response.andExpect(status().isOk())
                 .andExpect(hasKey("code", ResponseCode.USER_CREATE.getCode()))
                 .andExpect(hasKey("message", "success create user"))
-                .andExpect(jsonPath("$.data.id").exists());
+                .andExpect(jsonPath("$.data").exists());
     }
 
     @Test

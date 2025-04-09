@@ -167,8 +167,8 @@ class AuthControllerRestDocsTest extends RestDocsSupport {
                 .andExpect(hasKey(expectedResponse))
                 .andDo(
                         restDocs.document(
-                                requestBody(),
-                                responseBody(),
+                                httpRequest(),
+                                httpResponse(),
                                 requestFields(
                                         fieldWithPath("username")
                                                 .description("로그인 하고자 하는 username")
@@ -212,7 +212,7 @@ class AuthControllerRestDocsTest extends RestDocsSupport {
         // then
         result.andExpect(hasStatus(errorCode))
                 .andExpect(hasKey(errorCode))
-                .andDo(restDocs.document(responseBody()));
+                .andDo(restDocs.document(httpResponse()));
     }
 
     @Test
@@ -248,8 +248,8 @@ class AuthControllerRestDocsTest extends RestDocsSupport {
                 .andExpect(hasKey(expectedResponse))
                 .andDo(
                         restDocs.document(
-                                requestBody(),
-                                responseBody(),
+                                httpRequest(),
+                                httpResponse(),
                                 requestHeaders(
                                         headerWithName("Authorization")
                                                 .description("만료된 access token")),
