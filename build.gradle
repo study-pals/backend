@@ -61,7 +61,7 @@ dependencies {
 
 spotless {
     java {
-        googleJavaFormat().aosp()
+        palantirJavaFormat()
         importOrder('java', 'javax', 'jakarta', 'org', 'lombok', 'com')
         removeUnusedImports()
         trimTrailingWhitespace()
@@ -78,8 +78,6 @@ tasks.register("makeGitHookExecutable", Exec) {
     commandLine 'chmod', '+x', './.git/hooks/pre-commit'
     dependsOn addGitPreCommitHook
 }
-
-compileJava.dependsOn makeGitHookExecutable
 
 ext {
     snippetsDir = file('build/generated-snippets')
