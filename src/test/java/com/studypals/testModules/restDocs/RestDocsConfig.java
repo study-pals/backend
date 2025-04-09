@@ -22,8 +22,7 @@ public class RestDocsConfig {
         return MockMvcRestDocumentation.document(
                 "{class-name}/{method-name}", // 문서 이름 설정
                 preprocessRequest( // 공통 헤더 설정
-                        modifyHeaders().remove("Content-Length").remove("Host"),
-                        prettyPrint()), // pretty json 적용
+                        modifyHeaders().remove("Content-Length").remove("Host"), prettyPrint()), // pretty json 적용
                 preprocessResponse( // 공통 헤더 설정
                         modifyHeaders()
                                 .remove("Content-Length")

@@ -16,6 +16,5 @@ import com.studypals.global.security.jwt.JwtToken;
  */
 public interface SignInService {
 
-    JwtToken signInByUsernameAndPassword(String username, String password)
-            throws AuthenticationException;
+    JwtToken signInByUsernameAndPassword(String username, String password) throws AuthenticationException;
 }

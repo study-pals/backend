@@ -43,8 +43,7 @@ public class MemberServiceImpl implements MemberService {
         try {
             return memberRepository.save(member).getId();
         } catch (DataIntegrityViolationException e) {
-            throw new AuthException(
-                    AuthErrorCode.SIGNUP_FAIL, "maybe duplicate username or nickname");
+            throw new AuthException(AuthErrorCode.SIGNUP_FAIL, "maybe duplicate username or nickname");
         }
     }
 
@@ -52,8 +51,7 @@ public class MemberServiceImpl implements MemberService {
     public Long getMemberIdByUsername(String username) {
         return memberRepository
                 .findByUsername(username)
-                .orElseThrow(
-                        () -> new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't find user"))
+                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't find user"))
                 .getId();
     }
 }
