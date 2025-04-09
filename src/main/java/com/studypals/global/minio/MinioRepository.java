@@ -42,6 +42,7 @@ public class MinioRepository {
      * @return 저장된 minio path
      */
     public String uploadFile(MultipartFile file, String pathDir) {
+        ImageUtils.validateImageExtension(file);
         validateBucket();
 
         try {
