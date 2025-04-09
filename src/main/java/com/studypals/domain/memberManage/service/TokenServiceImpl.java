@@ -60,13 +60,8 @@ public class TokenServiceImpl implements TokenService {
         // 실패 2 : refresh token 이 존재하지 않을 때
         Long userId = jwtData.getId();
 
-        String refreshToken =
-                getRefreshToken(userId)
-                        .orElseThrow(
-                                () ->
-                                        new AuthException(
-                                                AuthErrorCode.USER_AUTH_FAIL,
-                                                "refresh token not exist"));
+        String refreshToken = getRefreshToken(userId)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_AUTH_FAIL, "refresh token not exist"));
 
         // 실패 3 : refresh token 이 일치 하지 않을 때
         if (!jwtToken.isSameRefreshToken(refreshToken)) {

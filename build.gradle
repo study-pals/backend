@@ -67,7 +67,7 @@ dependencies {
 
 spotless {
     java {
-        googleJavaFormat().aosp()
+        palantirJavaFormat()
         importOrder('java', 'javax', 'jakarta', 'org', 'lombok', 'com')
         removeUnusedImports()
         trimTrailingWhitespace()
@@ -80,21 +80,6 @@ tasks.register("addGitPreCommitHook", Copy) {
     into './.git/hooks'
 }
 
-tasks.register("makeGitHookExecutable") {
-    dependsOn addGitPreCommitHook
-
-    doLast {
-        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
-            exec {
-                commandLine "chmod", "+x", "./.git/hooks/pre-commit"
-            }
-        } else {
-            println "Skipping chmod because you're on Windows."
-        }
-    }
-}
-
-compileJava.dependsOn makeGitHookExecutable
 
 ext {
     snippetsDir = file('build/generated-snippets')

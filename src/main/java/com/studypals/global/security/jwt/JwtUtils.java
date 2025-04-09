@@ -38,22 +38,20 @@ public class JwtUtils {
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.expireDate.accessToken}") Long expireDateAccessToken,
             @Value("${jwt.expireDate.refreshToken}") long expireDateRefreshToken) {
-        this.secretKey =
-                new SecretKeySpec(
-                        secretKey.getBytes(StandardCharsets.UTF_8),
-                        Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.secretKey = new SecretKeySpec(
+                secretKey.getBytes(StandardCharsets.UTF_8),
+                Jwts.SIG.HS256.key().build().getAlgorithm());
         this.expiredDateAccessToken = expireDateAccessToken;
         this.expiredDateRefreshToken = expireDateRefreshToken;
     }
 
     public JwtData tokenInfo(String token) {
         try {
-            Claims claims =
-                    Jwts.parser()
-                            .verifyWith(secretKey)
-                            .build()
-                            .parseSignedClaims(token)
-                            .getPayload();
+            Claims claims = Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
 
             String issue = claims.getIssuer();
 

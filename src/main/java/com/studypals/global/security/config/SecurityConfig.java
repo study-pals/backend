@@ -43,15 +43,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, JwtUtils jwtUtils) throws Exception {
         http.httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(
-                        (session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(
-                        (auth) -> {
-                            AccessURL.PUBLIC
-                                    .getUrls()
-                                    .forEach(url -> auth.requestMatchers(url).permitAll());
-                            auth.anyRequest().authenticated();
-                        })
+                .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests((auth) -> {
+                    AccessURL.PUBLIC.getUrls().forEach(url -> auth.requestMatchers(url)
+                            .permitAll());
+                    auth.anyRequest().authenticated();
+                })
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtUtils, objectMapper),
                         UsernamePasswordAuthenticationFilter.class);
@@ -65,8 +62,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManagerBean(
-            AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManagerBean(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }

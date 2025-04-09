@@ -39,8 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper;
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         if (isExcluded(AccessURL.PUBLIC.getUrls(), request.getRequestURI())) {
@@ -107,8 +106,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @param response 응답
      * @throws IOException getWriter() 메서드가 던지는 예외가 해당 메서드 외부로 던지게 설정
      */
-    private void makeFailedResponse(HttpServletResponse response, JwtUtils.JwtStatus status)
-            throws IOException {
+    private void makeFailedResponse(HttpServletResponse response, JwtUtils.JwtStatus status) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
