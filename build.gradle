@@ -74,11 +74,6 @@ tasks.register("addGitPreCommitHook", Copy) {
     into './.git/hooks'
 }
 
-tasks.register("makeGitHookExecutable", Exec) {
-    commandLine 'chmod', '+x', './.git/hooks/pre-commit'
-    dependsOn addGitPreCommitHook
-}
-
 ext {
     snippetsDir = file('build/generated-snippets')
 }
