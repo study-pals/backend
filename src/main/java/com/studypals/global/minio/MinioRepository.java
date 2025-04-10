@@ -42,23 +42,23 @@ public class MinioRepository {
      * MultipartFile 형태의 파일을 업로드합니다.
      *
      * @param file 업로드할 파일
-     * @param pathDir 저장할 디렉토리
+     * @param path 저장할 디렉토리
      * @return 저장된 minio path
      */
-    public String uploadFile(MultipartFile file, String pathDir) {
+    public String uploadFile(MultipartFile file, ImagePath path) {
         ImageUtils.validateImageExtension(file);
         validateBucket();
 
         try {
             InputStream inputStream = file.getInputStream();
-            String fileName = pathDir + "/" + file.getOriginalFilename();
+            String destination = path.getFileDestination(file.getOriginalFilename());
 
             minioClient.putObject(
-                    PutObjectArgs.builder().bucket(bucket).object(fileName).stream(inputStream, file.getSize(), -1)
+                    PutObjectArgs.builder().bucket(bucket).object(destination).stream(inputStream, file.getSize(), -1)
                             .contentType(file.getContentType())
                             .build());
 
-            return fileName;
+            return destination;
         } catch (Exception e) {
             throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
         }
