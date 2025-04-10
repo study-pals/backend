@@ -3,8 +3,8 @@ package com.studypals.global.minio;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.studypals.global.minio.exception.ImageErrorCode;
-import com.studypals.global.minio.exception.ImageException;
+import com.studypals.global.exceptions.errorCode.ImageErrorCode;
+import com.studypals.global.exceptions.exception.ImageException;
 
 /**
  * 이미지 관련 유틸 클래스입니다.

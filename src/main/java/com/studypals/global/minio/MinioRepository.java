@@ -9,8 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.global.minio.exception.ImageErrorCode;
-import com.studypals.global.minio.exception.ImageException;
+import com.studypals.global.exceptions.errorCode.ImageErrorCode;
+import com.studypals.global.exceptions.exception.ImageException;
 
 import io.minio.*;
 import io.minio.errors.ErrorResponseException;
@@ -79,7 +79,7 @@ public class MinioRepository {
                     .method(Method.GET)
                     .bucket(bucket)
                     .object(path)
-                    .expiry(1, TimeUnit.MINUTES)
+                    .expiry(1, TimeUnit.HOURS)
                     .build());
         } catch (ErrorResponseException e) {
             if (e.errorResponse().code().equals("NoSuchKey")) {

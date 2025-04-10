@@ -1,6 +1,6 @@
-package com.studypals.global.minio.exception;
+package com.studypals.global.exceptions.exception;
 
-import com.studypals.global.exceptions.exception.BaseException;
+import com.studypals.global.exceptions.errorCode.ImageErrorCode;
 
 /**
  * 이미지 저장 및 조회에서 발생하는 예외입니다.

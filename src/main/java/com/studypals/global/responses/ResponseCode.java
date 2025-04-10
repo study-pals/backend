@@ -42,7 +42,11 @@ public enum ResponseCode {
     STUDY_CATEGORY_LIST("U03-05"),
     STUDY_CATEGORY_ADD("U03-06"),
     STUDY_CATEGORY_DELETE("U03-07"),
-    STUDY_CATEGORY_UPDATE("U03-08");
+    STUDY_CATEGORY_UPDATE("U03-08"),
+
+    // I01 - Image
+    IMAGE_UPLOAD("I01-00"),
+    IMAGE_ACCESS("I01-01");
 
     private final String code;
 
