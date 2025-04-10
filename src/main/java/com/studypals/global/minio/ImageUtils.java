@@ -6,6 +6,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.studypals.global.minio.exception.ImageErrorCode;
 import com.studypals.global.minio.exception.ImageException;
 
+/**
+ * 이미지 관련 유틸 클래스입니다.
+ *
+ * <p>이미지 업로드 시 파일명의 확장자, MimeType으로 이미지 관련 확장자를 검증합니다.
+ *
+ * @author s0o0bn
+ * @since 2025-04-10
+ */
 public class ImageUtils {
 
     public static void validateImageExtension(MultipartFile file) {
@@ -16,7 +24,12 @@ public class ImageUtils {
 
     private static boolean isImageExtension(String extension) {
         extension = extension.toLowerCase();
-        return extension.equals("jpg") || extension.equals("jpeg") || extension.equals("png");
+        return extension.equals("jpg")
+                || extension.equals("jpeg")
+                || extension.equals("png")
+                || extension.equals("git")
+                || extension.equals("bmp")
+                || extension.equals("webp");
     }
 
     private static boolean isImageMimeType(String contentType) {
