@@ -11,6 +11,7 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
+import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
 
 /**
  * redis에 대한 config 입니다.
@@ -24,7 +25,7 @@ import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
  * @since 2025-04-04
  */
 @Configuration
-@EnableRedisRepositories(basePackageClasses = {RefreshTokenRedisRepository.class})
+@EnableRedisRepositories(basePackageClasses = {RefreshTokenRedisRepository.class, StudyStatusRedisRepository.class})
 public class RedisConfig {
 
     @Value("${spring.data.redis.host}")

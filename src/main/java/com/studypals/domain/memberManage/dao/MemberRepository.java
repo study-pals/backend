@@ -13,7 +13,7 @@ import com.studypals.domain.memberManage.entity.Member;
  * <p>JPA 기반의 repository
  *
  * <p><b>상속 정보:</b><br>
- * JpaRepository<Member, Long>
+ * {@code JpaRepository<Member, Long>}
  *
  * @author jack8
  * @see Member
