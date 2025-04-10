@@ -45,10 +45,16 @@ dependencies {
     // spring security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    // spring rest docs
+    // test
     asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.mockito:mockito-core:4.6.1'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-core'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -74,13 +80,29 @@ tasks.register("addGitPreCommitHook", Copy) {
     into './.git/hooks'
 }
 
+
 ext {
     snippetsDir = file('build/generated-snippets')
 }
 
+def envProps = new Properties()
+file('.env').withInputStream { stream ->
+    stream.withReader('UTF-8') { reader ->
+        reader.eachLine { line ->
+            line = line.trim()
+            if (line && !line.startsWith('#') && line.contains('=')) {
+                def (k, v) = line.split('=', 2)
+                envProps[k] = v
+            }
+        }
+    }
+}
+
+
 tasks.named('test', Test) {
     useJUnitPlatform()
     outputs.dir snippetsDir
+    environment envProps
 }
 
 asciidoctor {

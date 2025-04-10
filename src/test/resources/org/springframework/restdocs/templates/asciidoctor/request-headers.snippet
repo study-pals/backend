@@ -1,0 +1,9 @@
+|===
+|헤더명|설명|조건
+
+{{#headers}}
+|{{#tableCellContent}}{{name}}{{/tableCellContent}}
+|{{#tableCellContent}}{{description}}{{/tableCellContent}}
+|{{#tableCellContent}}{{#constraints}}{{constraints}}{{/constraints}}{{^constraints}}-{{/constraints}}{{/tableCellContent}}
+{{/headers}}
+|===

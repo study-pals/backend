@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -71,14 +72,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * {@code List<String> urls}와 {@code String url}을 받아, 해당 url 이 urls에 포함되어 있는지 확인합니다. 혹은, 만약 urls
      * 중 "/"로 끝나는게 있다면, 해당 urls로 시작하는지 검사합니다.
      *
-     * @param urls url이 존재하는지 확인할 링크
+     * @param patterns url이 존재하는지 확인할 패턴
      * @param url 검사 대상
      * @return url이 urls에 포함되거나, prefix가 존재하면 true, 아니면 false
      */
-    private boolean isExcluded(List<String> urls, String url) {
-        for (String prefix : urls) {
-            if (url.equals(prefix)) return true;
-            if (prefix.endsWith("/") && url.startsWith(prefix)) return true;
+    private boolean isExcluded(List<String> patterns, String url) {
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        for (String pattern : patterns) {
+            if (pathMatcher.match(pattern, url)) {
+                return true;
+            }
         }
         return false;
     }
@@ -91,8 +94,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
-            return bearerToken.substring(7);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(JwtToken.BEARER_PREFIX)) {
+            return bearerToken.substring(JwtToken.BEARER_PREFIX_LENGTH);
         }
         return null;
     }

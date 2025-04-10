@@ -68,7 +68,7 @@ public class AuthController {
     public ResponseEntity<Response<ReissueTokenRes>> refreshToken(
             @Valid @RequestBody TokenReissueReq req, @RequestHeader("Authorization") String accessToken) {
         JwtToken token = JwtToken.builder()
-                .accessToken(accessToken)
+                .accessToken(accessToken.substring(JwtToken.BEARER_PREFIX_LENGTH))
                 .refreshToken(req.refreshToken())
                 .build();
 

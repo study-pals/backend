@@ -50,7 +50,7 @@ public class TokenServiceImpl implements TokenService {
     public ReissueTokenRes reissueJwtToken(JwtToken jwtToken) {
 
         // 실패 1 : access token 이 invalid 할 때
-        String accessToken = jwtToken.getAccessToken().substring(7);
+        String accessToken = jwtToken.getAccessToken();
         JwtUtils.JwtData jwtData = jwtUtils.tokenInfo(accessToken);
 
         if (jwtData.isInvalid()) {
@@ -63,8 +63,8 @@ public class TokenServiceImpl implements TokenService {
         String refreshToken = getRefreshToken(userId)
                 .orElseThrow(() -> new AuthException(AuthErrorCode.USER_AUTH_FAIL, "refresh token not exist"));
 
-        // 실패 3 : refresh token 이 일치하지 않을 때
-        if (jwtToken.isSameRefreshToken(refreshToken)) {
+        // 실패 3 : refresh token 이 일치 하지 않을 때
+        if (!jwtToken.isSameRefreshToken(refreshToken)) {
             throw new AuthException(AuthErrorCode.USER_AUTH_FAIL, "refresh token unmatch");
         }
 
