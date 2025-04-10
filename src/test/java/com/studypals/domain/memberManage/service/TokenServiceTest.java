@@ -42,9 +42,14 @@ import com.studypals.global.security.jwt.JwtUtils;
  */
 @ExtendWith(MockitoExtension.class)
 class TokenServiceTest {
-    @Mock private RefreshTokenRedisRepository refreshTokenRedisRepository;
-    @Mock private JwtUtils jwtUtils;
-    @InjectMocks private TokenServiceImpl tokenService;
+    @Mock
+    private RefreshTokenRedisRepository refreshTokenRedisRepository;
+
+    @Mock
+    private JwtUtils jwtUtils;
+
+    @InjectMocks
+    private TokenServiceImpl tokenService;
 
     @Test
     void reissueJwtToken_success() {
@@ -52,28 +57,28 @@ class TokenServiceTest {
         String accessToken = "access_token";
         String refreshToken = "refresh_token";
         Long userId = 1L;
-        JwtToken token =
-                JwtToken.builder()
-                        .grantType("Bearer")
-                        .accessToken(accessToken)
-                        .refreshToken(refreshToken)
-                        .build();
+        JwtToken token = JwtToken.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
 
-        JwtToken newToken =
-                JwtToken.builder()
-                        .grantType("Bearer")
-                        .accessToken("new_access_token")
-                        .refreshToken("new_refresh_token")
-                        .build();
+        JwtToken newToken = JwtToken.builder()
+                .grantType("Bearer")
+                .accessToken("new_access_token")
+                .refreshToken("new_refresh_token")
+                .build();
 
-        RefreshToken savedRefreshToken =
-                RefreshToken.builder().id(userId).expiration(30L).token(refreshToken).build();
+        RefreshToken savedRefreshToken = RefreshToken.builder()
+                .id(userId)
+                .expiration(30L)
+                .token(refreshToken)
+                .build();
 
         JwtUtils.JwtData tokenData = new JwtUtils.JwtData(userId);
 
         given(jwtUtils.tokenInfo(accessToken)).willReturn(tokenData);
-        given(refreshTokenRedisRepository.findById(userId))
-                .willReturn(Optional.of(savedRefreshToken));
+        given(refreshTokenRedisRepository.findById(userId)).willReturn(Optional.of(savedRefreshToken));
         given(jwtUtils.createJwt(userId)).willReturn(newToken);
 
         // when
@@ -90,15 +95,13 @@ class TokenServiceTest {
         // given
         String accessToken = "access_token";
         String refreshToken = "refresh_token";
-        JwtToken token =
-                JwtToken.builder()
-                        .grantType("Bearer")
-                        .accessToken(accessToken)
-                        .refreshToken(refreshToken)
-                        .build();
+        JwtToken token = JwtToken.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
 
-        given(jwtUtils.tokenInfo(accessToken))
-                .willReturn(new JwtUtils.JwtData(JwtUtils.JwtStatus.INVALID, null));
+        given(jwtUtils.tokenInfo(accessToken)).willReturn(new JwtUtils.JwtData(JwtUtils.JwtStatus.INVALID, null));
 
         // when & then
         assertThatThrownBy(() -> tokenService.reissueJwtToken(token))
@@ -114,12 +117,11 @@ class TokenServiceTest {
         // given
         String accessToken = "access_token";
         String refreshToken = "refresh_token";
-        JwtToken token =
-                JwtToken.builder()
-                        .grantType("Bearer")
-                        .accessToken(accessToken)
-                        .refreshToken(refreshToken)
-                        .build();
+        JwtToken token = JwtToken.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
 
         given(jwtUtils.tokenInfo(accessToken)).willReturn(new JwtUtils.JwtData(1L));
 
@@ -137,8 +139,10 @@ class TokenServiceTest {
     void saveRefreshToken_success() {
         // given
         Long userId = 1L;
-        CreateRefreshTokenDto dto =
-                CreateRefreshTokenDto.builder().userId(userId).token("refresh_token").build();
+        CreateRefreshTokenDto dto = CreateRefreshTokenDto.builder()
+                .userId(userId)
+                .token("refresh_token")
+                .build();
 
         // when
         tokenService.saveRefreshToken(dto);

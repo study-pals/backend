@@ -29,10 +29,9 @@ public class CleanUp {
 
     @Transactional
     public void all() {
-        Set<String> tableNames =
-                entityManager.getMetamodel().getEntities().stream()
-                        .map(EntityType::getName)
-                        .collect(Collectors.toSet());
+        Set<String> tableNames = entityManager.getMetamodel().getEntities().stream()
+                .map(EntityType::getName)
+                .collect(Collectors.toSet());
 
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
 

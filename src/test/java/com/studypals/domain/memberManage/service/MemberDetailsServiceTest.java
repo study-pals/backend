@@ -29,10 +29,14 @@ import com.studypals.domain.memberManage.entity.Member;
  */
 @ExtendWith(MockitoExtension.class)
 class MemberDetailsServiceTest {
-    @Mock private MemberRepository memberRepository;
-    @Mock private Member mockMember;
+    @Mock
+    private MemberRepository memberRepository;
 
-    @InjectMocks private MemberDetailsService memberDetailsService;
+    @Mock
+    private Member mockMember;
+
+    @InjectMocks
+    private MemberDetailsService memberDetailsService;
 
     @Test
     void loadUserByUsername_success() {

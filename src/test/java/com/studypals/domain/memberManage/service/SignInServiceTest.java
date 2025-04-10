@@ -42,11 +42,20 @@ import com.studypals.global.security.jwt.JwtUtils;
 @ExtendWith(MockitoExtension.class)
 class SignInServiceTest {
 
-    @Mock private AuthenticationManager authenticationManager;
-    @Mock private JwtUtils jwtUtils;
-    @Mock Authentication mockAuthentication;
-    @Mock MemberDetails mockMemberDetails;
-    @InjectMocks private SignInServiceImpl signInService;
+    @Mock
+    private AuthenticationManager authenticationManager;
+
+    @Mock
+    private JwtUtils jwtUtils;
+
+    @Mock
+    Authentication mockAuthentication;
+
+    @Mock
+    MemberDetails mockMemberDetails;
+
+    @InjectMocks
+    private SignInServiceImpl signInService;
 
     @Test
     void signInByUsernameAndPassword_success() {

@@ -33,22 +33,23 @@ import com.studypals.global.exceptions.exception.AuthException;
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
 
-    @Mock private MemberRepository memberRepository;
-    @Mock private PasswordEncoder passwordEncoder;
-    @Mock private Member mockMember;
-    @InjectMocks private MemberServiceImpl memberService;
+    @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private Member mockMember;
+
+    @InjectMocks
+    private MemberServiceImpl memberService;
 
     @Test
     void createMember_success() {
         // given
-        CreateMemberReq dto =
-                new CreateMemberReq(
-                        "username",
-                        "password",
-                        "nickname",
-                        LocalDate.of(1999, 8, 20),
-                        "student",
-                        "example.com");
+        CreateMemberReq dto = new CreateMemberReq(
+                "username", "password", "nickname", LocalDate.of(1999, 8, 20), "student", "example.com");
 
         given(passwordEncoder.encode("password")).willReturn("encoded password");
         given(memberRepository.save(any())).willReturn(mockMember);
@@ -66,18 +67,11 @@ class MemberServiceTest {
     @Test
     void createMember_fail_dupliateUser() {
         // given
-        CreateMemberReq dto =
-                new CreateMemberReq(
-                        "username",
-                        "password",
-                        "nickname",
-                        LocalDate.of(1999, 8, 20),
-                        "student",
-                        "example.com");
+        CreateMemberReq dto = new CreateMemberReq(
+                "username", "password", "nickname", LocalDate.of(1999, 8, 20), "student", "example.com");
 
         given(passwordEncoder.encode("password")).willReturn("encoded password");
-        given(memberRepository.save(any()))
-                .willThrow(new DataIntegrityViolationException("some text"));
+        given(memberRepository.save(any())).willThrow(new DataIntegrityViolationException("some text"));
 
         // when & then
         assertThatThrownBy(() -> memberService.createMember(dto))

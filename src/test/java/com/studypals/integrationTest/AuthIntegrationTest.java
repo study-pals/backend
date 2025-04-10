@@ -34,7 +34,8 @@ import com.studypals.testModules.testSupport.IntegrationSupport;
 @ActiveProfiles("test")
 @DisplayName("API TEST / 인증 통합 테스트")
 public class AuthIntegrationTest extends IntegrationSupport {
-    @Autowired RefreshTokenRedisRepository refreshTokenRedisRepository;
+    @Autowired
+    RefreshTokenRedisRepository refreshTokenRedisRepository;
 
     @Test
     @DisplayName("POST /sign-in")
@@ -46,11 +47,8 @@ public class AuthIntegrationTest extends IntegrationSupport {
         SignInReq req = new SignInReq(username, password);
 
         // when
-        ResultActions response =
-                mockMvc.perform(
-                        post("/sign-in")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(req)));
+        ResultActions response = mockMvc.perform(
+                post("/sign-in").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(req)));
 
         // then
         response.andExpect(status().isOk())
@@ -65,21 +63,13 @@ public class AuthIntegrationTest extends IntegrationSupport {
     @DisplayName("POST /register")
     void register_success() throws Exception {
         // given
-        CreateMemberReq req =
-                new CreateMemberReq(
-                        "username",
-                        "password",
-                        "nickname",
-                        LocalDate.of(2000, 1, 1),
-                        "student",
-                        "example.com");
+        CreateMemberReq req = new CreateMemberReq(
+                "username", "password", "nickname", LocalDate.of(2000, 1, 1), "student", "example.com");
 
         // when
-        ResultActions response =
-                mockMvc.perform(
-                        post("/register")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(req)));
+        ResultActions response = mockMvc.perform(post("/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)));
 
         // then
         response.andExpect(status().isOk())
@@ -95,18 +85,18 @@ public class AuthIntegrationTest extends IntegrationSupport {
         CreateUserVar var = createUser();
         TokenReissueReq req = new TokenReissueReq(var.getRefreshToken());
         String accessToken = "Bearer " + var.getAccessToken();
-        RefreshToken refreshToken =
-                RefreshToken.builder().id(var.getUserId()).token(var.getRefreshToken()).build();
+        RefreshToken refreshToken = RefreshToken.builder()
+                .id(var.getUserId())
+                .token(var.getRefreshToken())
+                .build();
 
         refreshTokenRedisRepository.save(refreshToken);
 
         // when
-        ResultActions response =
-                mockMvc.perform(
-                        post("/refresh")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .header("Authorization", accessToken)
-                                .content(objectMapper.writeValueAsString(req)));
+        ResultActions response = mockMvc.perform(post("/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", accessToken)
+                .content(objectMapper.writeValueAsString(req)));
 
         // then
         response.andExpect(status().isOk())

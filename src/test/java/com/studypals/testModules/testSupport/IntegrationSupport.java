@@ -51,21 +51,31 @@ import com.studypals.testModules.testUtils.CleanUp;
 @ActiveProfiles("test")
 public class IntegrationSupport {
 
-    @Autowired protected MockMvc mockMvc;
-    @Autowired protected ObjectMapper objectMapper;
-    @Autowired protected JdbcTemplate jdbcTemplate;
-    @Autowired protected JwtUtils jwtUtils;
-    @Autowired protected PasswordEncoder passwordEncoder;
-    @Autowired protected CleanUp cleanUp;
+    @Autowired
+    protected MockMvc mockMvc;
+
+    @Autowired
+    protected ObjectMapper objectMapper;
+
+    @Autowired
+    protected JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    protected JwtUtils jwtUtils;
+
+    @Autowired
+    protected PasswordEncoder passwordEncoder;
+
+    @Autowired
+    protected CleanUp cleanUp;
 
     @BeforeEach
     void setUp(final WebApplicationContext context) {
-        this.mockMvc =
-                MockMvcBuilders.webAppContextSetup(context)
-                        .apply(SecurityMockMvcConfigurers.springSecurity())
-                        .alwaysDo(MockMvcResultHandlers.print())
-                        .addFilter(new CharacterEncodingFilter("UTF-8", true))
-                        .build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .alwaysDo(MockMvcResultHandlers.print())
+                .addFilter(new CharacterEncodingFilter("UTF-8", true))
+                .build();
     }
 
     @AfterEach
@@ -88,8 +98,7 @@ public class IntegrationSupport {
 
         jdbcTemplate.update(
                 con -> {
-                    PreparedStatement ps =
-                            con.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
+                    PreparedStatement ps = con.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
                     ps.setString(1, username);
                     ps.setString(2, password);
                     ps.setString(3, nickname);

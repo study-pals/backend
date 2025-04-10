@@ -44,19 +44,22 @@ import com.studypals.testModules.restDocs.RestDocsConfig;
 @ExtendWith(RestDocumentationExtension.class)
 public abstract class RestDocsSupport {
 
-    @Autowired protected RestDocumentationResultHandler restDocs;
-    @Autowired protected MockMvc mockMvc;
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired
+    protected RestDocumentationResultHandler restDocs;
+
+    @Autowired
+    protected MockMvc mockMvc;
+
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp(
-            final WebApplicationContext context, final RestDocumentationContextProvider provider) {
-        this.mockMvc =
-                MockMvcBuilders.webAppContextSetup(context)
-                        .apply(MockMvcRestDocumentation.documentationConfiguration(provider))
-                        .alwaysDo(MockMvcResultHandlers.print())
-                        .addFilters(new CharacterEncodingFilter("UTF-8", true))
-                        .build();
+    void setUp(final WebApplicationContext context, final RestDocumentationContextProvider provider) {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(MockMvcRestDocumentation.documentationConfiguration(provider))
+                .alwaysDo(MockMvcResultHandlers.print())
+                .addFilters(new CharacterEncodingFilter("UTF-8", true))
+                .build();
     }
 
     protected Attributes.Attribute constraints(String value) {
