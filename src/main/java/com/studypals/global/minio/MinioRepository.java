@@ -9,7 +9,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.global.minio.exception.ImageErrorCode;
+import com.studypals.global.minio.exception.ImageException;
+
 import io.minio.*;
+import io.minio.errors.ErrorResponseException;
 import io.minio.http.Method;
 
 /**
@@ -68,12 +72,21 @@ public class MinioRepository {
      */
     public String getPreSignedUrl(String path) {
         try {
+            minioClient.statObject(
+                    StatObjectArgs.builder().bucket(bucket).object(path).build());
+
             return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
                     .method(Method.GET)
                     .bucket(bucket)
                     .object(path)
                     .expiry(1, TimeUnit.MINUTES)
                     .build());
+        } catch (ErrorResponseException e) {
+            if (e.errorResponse().code().equals("NoSuchKey")) {
+                throw new ImageException(ImageErrorCode.IMAGE_NOT_FOUND, "can't find image.");
+            }
+
+            throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
         }
