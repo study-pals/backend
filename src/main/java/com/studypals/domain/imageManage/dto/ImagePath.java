@@ -1,4 +1,4 @@
-package com.studypals.global.minio;
+package com.studypals.domain.imageManage.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ImagePath {
-    USER("/user");
+    USER("user");
 
     private final String path;
 

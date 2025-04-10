@@ -1,7 +1,8 @@
 package com.studypals.global.minio;
 
 import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
+
+import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -9,12 +10,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.global.exceptions.errorCode.ImageErrorCode;
-import com.studypals.global.exceptions.exception.ImageException;
+import com.studypals.domain.imageManage.dto.ImagePath;
 
 import io.minio.*;
-import io.minio.errors.ErrorResponseException;
-import io.minio.http.Method;
 
 /**
  * MinIO의 파일 입출력 관련 메서드를 정의했습니다.
@@ -38,6 +36,11 @@ public class MinioRepository {
     @Value("${minio.bucket}")
     private String bucket;
 
+    @PostConstruct
+    public void init() {
+        validateBucket();
+    }
+
     /**
      * MultipartFile 형태의 파일을 업로드합니다.
      *
@@ -45,9 +48,8 @@ public class MinioRepository {
      * @param path 저장할 디렉토리
      * @return 저장된 minio path
      */
-    public String uploadFile(MultipartFile file, ImagePath path) {
+    public String uploadImage(MultipartFile file, ImagePath path) {
         ImageUtils.validateImageExtension(file);
-        validateBucket();
 
         try {
             InputStream inputStream = file.getInputStream();
@@ -60,53 +62,29 @@ public class MinioRepository {
 
             return destination;
         } catch (Exception e) {
-            throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 
     /**
-     * 파일 접근을 위한 pre-signed url을 전달합니다.
+     * path 경로에 저장된 이미지를 삭제합니다.
      *
-     * @param path 파일의 저장 경로
-     * @return pre-signed url
+     * @param destination 삭제할 이미지의 경로
      */
-    public String getPreSignedUrl(String path) {
+    public void removeImage(String destination) {
         try {
-            minioClient.statObject(
-                    StatObjectArgs.builder().bucket(bucket).object(path).build());
-
-            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
-                    .method(Method.GET)
+            minioClient.removeObject(RemoveObjectArgs.builder()
                     .bucket(bucket)
-                    .object(path)
-                    .expiry(1, TimeUnit.HOURS)
+                    .object(destination)
                     .build());
-        } catch (ErrorResponseException e) {
-            if (e.errorResponse().code().equals("NoSuchKey")) {
-                throw new ImageException(ImageErrorCode.IMAGE_NOT_FOUND, "can't find image.");
-            }
-
-            throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
         } catch (Exception e) {
-            throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 
     /**
-     * path 경로에 저장된 파일을 삭제합니다.
-     *
-     * @param path 삭제할 파일의 경로
+     * MinIO 버킷이 유효한지 확인합니다. 유효하지 않다면, 해당 이름으로 버킷을 생성합니다.
      */
-    public void removeFile(String path) {
-        try {
-            minioClient.removeObject(
-                    RemoveObjectArgs.builder().bucket(bucket).object(path).build());
-        } catch (Exception e) {
-            throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
-        }
-    }
-
-    /** MinIO 버킷이 유효한지 확인합니다. 유효하지 않다면, 해당 이름으로 버킷을 생성합니다. */
     private void validateBucket() {
         try {
             boolean isExists = minioClient.bucketExists(
@@ -119,7 +97,7 @@ public class MinioRepository {
                     .config("public")
                     .build());
         } catch (Exception e) {
-            throw new RuntimeException("Something unexpected happened with minio. detail: " + e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 }
