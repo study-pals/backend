@@ -26,6 +26,9 @@ public class JwtToken {
     private String accessToken;
     private String refreshToken;
 
+    public static final String BEARER_PREFIX = "Bearer ";
+    public static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
+
     public boolean isSameRefreshToken(String token) {
         return this.refreshToken != null && this.refreshToken.equals(token);
     }

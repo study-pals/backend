@@ -66,13 +66,11 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<Response<ReissueTokenRes>> refreshToken(
-            @Valid @RequestBody TokenReissueReq req,
-            @RequestHeader("Authorization") String accessToken) {
-        JwtToken token =
-                JwtToken.builder()
-                        .accessToken(accessToken.substring(7))
-                        .refreshToken(req.refreshToken())
-                        .build();
+            @Valid @RequestBody TokenReissueReq req, @RequestHeader("Authorization") String accessToken) {
+        JwtToken token = JwtToken.builder()
+                .accessToken(accessToken.substring(JwtToken.BEARER_PREFIX_LENGTH))
+                .refreshToken(req.refreshToken())
+                .build();
 
         ReissueTokenRes response = tokenService.reissueJwtToken(token);
 
