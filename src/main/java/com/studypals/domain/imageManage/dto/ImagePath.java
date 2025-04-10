@@ -1,5 +1,7 @@
 package com.studypals.domain.imageManage.dto;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -14,9 +16,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ImagePath {
-    USER("user");
+    USER("user", List.of("jpg", "jpeg", "png", "bmp", "webp"));
 
     private final String path;
+    private final List<String> acceptableExtensions;
 
     public String getFileDestination(String fileName) {
         return path + "/" + fileName;
