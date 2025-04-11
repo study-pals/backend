@@ -5,13 +5,12 @@ import java.io.InputStream;
 import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.imageManage.dao.ImageRepository;
-import com.studypals.domain.imageManage.dto.ImagePath;
+import com.studypals.domain.common.fileManage.ObjectStorage;
 
 import io.minio.*;
 
@@ -21,10 +20,10 @@ import io.minio.*;
  * <p>업로드, 삭제 메서드를 구현했습니다.
  *
  * <p><b>상속 정보:</b><br>
- * {@link ImageRepository} 의 구현 클래스입니다.
+ * {@link ObjectStorage} 의 구현 클래스입니다.
  *
  * <p><b>빈 관리:</b><br>
- * repository
+ * Component
  *
  * <p><b>외부 모듈:</b><br>
  * MinIO에 대한 레포지토리입니다.
@@ -32,9 +31,9 @@ import io.minio.*;
  * @author s0o0bn
  * @since 2025-04-08
  */
-@Repository
+@Component
 @RequiredArgsConstructor
-public class MinioRepository implements ImageRepository {
+public class MinioStorage implements ObjectStorage {
     private final MinioClient minioClient;
 
     @Value("${minio.endpoint}")
@@ -52,14 +51,13 @@ public class MinioRepository implements ImageRepository {
      * MultipartFile 형태의 파일을 업로드합니다.
      *
      * @param file 업로드할 파일
-     * @param path 저장할 디렉토리
-     * @return 저장된 minio path
+     * @param destination 저장할 파일 경로
+     * @return 저장된 minio URL
      */
     @Override
-    public String uploadImage(MultipartFile file, ImagePath path) {
+    public String upload(MultipartFile file, String destination) {
         try {
             InputStream inputStream = file.getInputStream();
-            String destination = path.getFileDestination(file.getOriginalFilename());
 
             minioClient.putObject(
                     PutObjectArgs.builder().bucket(bucket).object(destination).stream(inputStream, file.getSize(), -1)
@@ -73,12 +71,12 @@ public class MinioRepository implements ImageRepository {
     }
 
     /**
-     * path 경로에 저장된 이미지를 삭제합니다.
+     * path 경로에 저장된 파일을 삭제합니다.
      *
-     * @param destination 삭제할 이미지의 경로
+     * @param destination 삭제할 파일의 경로
      */
     @Override
-    public void removeImage(String destination) {
+    public void delete(String destination) {
         try {
             minioClient.removeObject(RemoveObjectArgs.builder()
                     .bucket(bucket)
@@ -90,9 +88,9 @@ public class MinioRepository implements ImageRepository {
     }
 
     /**
-     * 이미지 URL에서 object 경로를 추출합니다.
+     * 파일 URL에서 object 경로를 추출합니다.
      *
-     * @param url 이미지 전체 URL
+     * @param url 파일 전체 URL
      * @return 저장된 디렉토리 경로
      */
     @Override
