@@ -1,9 +1,6 @@
 package com.studypals.global.security.jwt;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * JwtToken 에 대한 데이터를 담는 객체입니다.
@@ -19,7 +16,7 @@ import lombok.NoArgsConstructor;
  */
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class JwtToken {
     private String grantType;

@@ -4,12 +4,8 @@ import java.time.LocalDate;
 
 import jakarta.persistence.*;
 
+import lombok.*;
 import org.springframework.dao.DataIntegrityViolationException;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import com.studypals.domain.memberManage.entity.Member;
 
@@ -40,7 +36,7 @@ import com.studypals.domain.memberManage.entity.Member;
 @Builder
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "study_time")
 public class StudyTime {
 

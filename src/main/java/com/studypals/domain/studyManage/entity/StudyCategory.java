@@ -2,10 +2,7 @@ package com.studypals.domain.studyManage.entity;
 
 import jakarta.persistence.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import com.studypals.domain.memberManage.entity.Member;
 
@@ -34,7 +31,7 @@ import com.studypals.domain.memberManage.entity.Member;
 @Builder
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "study_category")
 public class StudyCategory {
 
