@@ -4,8 +4,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.Table;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,7 +31,16 @@ public class CleanUp {
     @Transactional
     public void all() {
         Set<String> tableNames = entityManager.getMetamodel().getEntities().stream()
-                .map(EntityType::getName)
+                .filter(e -> e.getJavaType().isAnnotationPresent(Entity.class)) // 실제 엔티티만
+                .map(entityType -> {
+                    Table table = entityType.getJavaType().getAnnotation(Table.class);
+                    if (table != null && !table.name().isEmpty()) {
+                        return table.name();
+                    } else {
+                        // @Table 미지정 시, 기본 이름은 클래스 이름으로 추정
+                        return entityType.getName();
+                    }
+                })
                 .collect(Collectors.toSet());
 
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");

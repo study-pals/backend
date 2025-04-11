@@ -4,9 +4,10 @@ import java.time.LocalDate;
 
 import jakarta.persistence.*;
 
-import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import lombok.*;
 
 /**
  * Member 에 대한 엔티티입니다.
