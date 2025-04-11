@@ -4,8 +4,9 @@ import java.time.LocalDate;
 
 import jakarta.persistence.*;
 
-import lombok.*;
 import org.springframework.dao.DataIntegrityViolationException;
+
+import lombok.*;
 
 import com.studypals.domain.memberManage.entity.Member;
 
