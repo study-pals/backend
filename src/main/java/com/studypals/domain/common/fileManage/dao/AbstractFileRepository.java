@@ -48,7 +48,7 @@ public abstract class AbstractFileRepository {
      * @return 저장된 URL 주소
      */
     public String upload(MultipartFile file) {
-        if (isFileAcceptable(file)) {
+        if (!isFileAcceptable(file)) {
             throw new IllegalArgumentException("can't accept file.");
         }
 
