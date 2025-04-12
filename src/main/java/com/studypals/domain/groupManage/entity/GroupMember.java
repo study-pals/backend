@@ -53,4 +53,13 @@ public class GroupMember {
     @Column(name = "joined_at", nullable = false)
     @CreatedDate
     private LocalDate joinedAt;
+
+    public static GroupMember createLeader(Member member, Group group) {
+        return GroupMember.builder()
+                .member(member)
+                .group(group)
+                .isLeader(true)
+                .mainColor(GroupMainColor.YELLOW)
+                .build();
+    }
 }
