@@ -47,11 +47,12 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public Long createGroup(Long userId, CreateGroupReq dto) {
         Group group = dto.toEntity();
-        groupRepository.save(group);
+        group = groupRepository.save(group);
 
         Member creator = memberRepository.getReferenceById(userId);
         GroupMember leader = GroupMember.createLeader(creator, group);
+        groupMemberRepository.save(leader);
 
-        return groupMemberRepository.save(leader).getId();
+        return group.getId();
     }
 }
