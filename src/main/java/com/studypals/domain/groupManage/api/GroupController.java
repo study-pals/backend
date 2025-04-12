@@ -38,7 +38,7 @@ public class GroupController {
     public ResponseEntity<Response<Long>> createGroup(
             @AuthenticationPrincipal Long userId, @Valid @RequestBody CreateGroupReq request) {
         Long groupId = groupService.createGroup(userId, request);
-        Response<Long> response = CommonResponse.success(ResponseCode.GROUP_CREATE, groupId);
+        Response<Long> response = CommonResponse.success(ResponseCode.GROUP_CREATE, groupId, "success create group");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
