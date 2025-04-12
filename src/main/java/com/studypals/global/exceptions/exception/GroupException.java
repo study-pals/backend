@@ -25,15 +25,15 @@ import com.studypals.global.exceptions.errorCode.ErrorCode;
  * @since 2025-04-02
  */
 public class GroupException extends BaseException {
-    protected GroupException(ErrorCode errorCode) {
+    public GroupException(ErrorCode errorCode) {
         super(errorCode);
     }
 
-    protected GroupException(ErrorCode errorCode, String logMessage) {
+    public GroupException(ErrorCode errorCode, String logMessage) {
         super(errorCode, logMessage);
     }
 
-    protected GroupException(ErrorCode errorCode, String clientMessage, String logMessage) {
+    public GroupException(ErrorCode errorCode, String clientMessage, String logMessage) {
         super(errorCode, clientMessage, logMessage);
     }
 }
