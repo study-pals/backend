@@ -13,6 +13,8 @@ import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.global.exceptions.errorCode.GroupErrorCode;
+import com.studypals.global.exceptions.exception.GroupException;
 
 /**
  * group service 의 구현 클래스입니다.
@@ -36,22 +38,20 @@ public class GroupServiceImpl implements GroupService {
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
 
-    /**
-     * 그룹을 생성하고 생성한 사용자에 그룹장 권한을 부여합니다.
-     *
-     * @param userId 그룹을 생성할 사용자
-     * @param dto 그룹 생성 시 필요한 데이터
-     * @return 생성된 그룹 ID
-     */
     @Override
     @Transactional
     public Long createGroup(Long userId, CreateGroupReq dto) {
         Group group = dto.toEntity();
-        group = groupRepository.save(group);
 
-        Member creator = memberRepository.getReferenceById(userId);
-        GroupMember leader = GroupMember.createLeader(creator, group);
-        groupMemberRepository.save(leader);
+        try {
+            group = groupRepository.save(group);
+
+            Member creator = memberRepository.getReferenceById(userId);
+            GroupMember leader = GroupMember.createLeader(creator, group);
+            groupMemberRepository.save(leader);
+        } catch (Exception e) {
+            throw new GroupException(GroupErrorCode.GROUP_CREATE_FAIL);
+        }
 
         return group.getId();
     }
