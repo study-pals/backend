@@ -25,7 +25,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "group")
+@Table(name = "`group`")
 public class Group {
 
     @Id
