@@ -25,3 +25,114 @@
 |===
 
 == ✨ API 문서
+
+=== 인증 관련 API
+'''
+
+==== 1. 카테고리 생성
+
+*Description* +
+
+'''
+
+카테고리 생성을 위해 사용합니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/category-controller-rest-docs-test/create_success/request-fields.adoc[]
+include::{snippets}/category-controller-rest-docs-test/create_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/category-controller-rest-docs-test/create_success/response-fields.adoc[]
+include::{snippets}/category-controller-rest-docs-test/create_success/http-response.adoc[]
+
+==== 2. 카테고리 정보 수정
+
+*Description* +
+
+'''
+
+카테고리 정보 수정을 위해 사용합니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/category-controller-rest-docs-test/update_success/request-fields.adoc[]
+include::{snippets}/category-controller-rest-docs-test/update_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/category-controller-rest-docs-test/update_success/response-fields.adoc[]
+include::{snippets}/category-controller-rest-docs-test/update_success/http-response.adoc[]
+
+==== 3. 카테고리 삭제
+
+*Description* +
+
+'''
+
+특정 카테고리의 삭제를 위해 사용합니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/category-controller-rest-docs-test/delete_success/path-parameters.adoc[]
+include::{snippets}/category-controller-rest-docs-test/delete_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/category-controller-rest-docs-test/delete_success/response-fields.adoc[]
+include::{snippets}/category-controller-rest-docs-test/delete_success/http-response.adoc[]
+
+==== 4. 카테고리 전체 삭제
+
+*Description* +
+
+'''
+
+특정 카테고리의 삭제를 위해 사용합니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/category-controller-rest-docs-test/delete-all_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/category-controller-rest-docs-test/delete-all_success/response-fields.adoc[]
+include::{snippets}/category-controller-rest-docs-test/delete-all_success/http-response.adoc[]
+
+==== 5. 카테고리 정보 불러오기
+
+*Description* +
+
+'''
+
+해당 유저의 전체 카테고리 정보를 불러올 때 사용합니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/category-controller-rest-docs-test/read_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/category-controller-rest-docs-test/read_success/response-fields.adoc[]
+include::{snippets}/category-controller-rest-docs-test/read_success/http-response.adoc[]
