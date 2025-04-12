@@ -26,3 +26,28 @@
 |===
 
 == ✨ API 문서
+
+=== 그룹 관련 API
+''''
+
+==== 1. 그룹 생성
+
+*Description* +
+
+'''
+
+그룹 생성을 위해 사용합니다.
+
+*Request* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/create-group_success/request-fields.adoc[]
+include::{snippets}/group-controller-rest-docs-test/create-group_success/http-request.adoc[]
+
+*Response* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/create-group_success/response-fields.adoc[]
+include::{snippets}/group-controller-rest-docs-test/create-group_success/http-response.adoc[]
