@@ -10,7 +10,6 @@ import jakarta.validation.constraints.NotBlank;
  * @since 2025-04-12
  */
 public record UpdateCategoryReq(
-        @NotBlank Long userId,
         @NotBlank Long categoryId,
         @NotBlank String name,
         @NotBlank String color,

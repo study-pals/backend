@@ -21,4 +21,6 @@ import com.studypals.domain.studyManage.entity.StudyCategory;
 public interface StudyCategoryRepository extends JpaRepository<StudyCategory, Long> {
 
     List<StudyCategory> findByMemberId(Long memberId);
+
+    void deleteByMemberId(Long memberId);
 }

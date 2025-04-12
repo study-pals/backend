@@ -11,8 +11,9 @@ import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
-import com.studypals.domain.studyManage.dto.DeleteCategoryReq;
+import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
+import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
@@ -41,13 +42,13 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
 
     private final MemberRepository memberRepository;
     private final StudyCategoryRepository studyCategoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     @Transactional
-    public Long createCategory(CreateCategoryReq dto) {
-        Long userId = dto.userId();
+    public Long createCategory(Long userId, CreateCategoryReq dto) {
         Member member = findMember(userId);
-        StudyCategory category = dto.toEntity(member);
+        StudyCategory category = categoryMapper.toEntity(dto, member);
 
         studyCategoryRepository.save(category);
 
@@ -56,17 +57,19 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<StudyCategory> getUserCategory(Long userId) {
+    public List<GetCategoryRes> getUserCategory(Long userId) {
 
-        return studyCategoryRepository.findByMemberId(userId);
+        return studyCategoryRepository.findByMemberId(userId).stream()
+                .map(categoryMapper::toDto)
+                .toList();
     }
 
     @Override
     @Transactional
-    public void updateCategory(UpdateCategoryReq dto) {
+    public void updateCategory(Long userId, UpdateCategoryReq dto) {
 
         StudyCategory category = findCategory(dto.categoryId());
-        if (!category.getMember().getId().equals(dto.userId())) {
+        if (!category.getMember().getId().equals(userId)) {
             throw new StudyException(StudyErrorCode.STUDY_CATEGORY_UPDATE_FAIL, "owner of category deos not match");
         }
         category.updateCategory(dto);
@@ -74,18 +77,22 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
 
     @Override
     @Transactional
-    public void deleteCategories(DeleteCategoryReq dto) {
+    public void deleteCategory(Long userId, Long categoryId) {
 
-        Long userId = dto.userId();
-        for (Long categoryId : dto.categoryIds()) {
-            StudyCategory category = findCategory(categoryId);
+        StudyCategory category = findCategory(categoryId);
 
-            if (!category.getMember().getId().equals(userId)) {
-                throw new StudyException(StudyErrorCode.STUDY_CATEGORY_DELETE_FAIL, "owner of category deos not match");
-            }
-
-            studyCategoryRepository.deleteById(categoryId);
+        if (!category.getMember().getId().equals(userId)) {
+            throw new StudyException(StudyErrorCode.STUDY_CATEGORY_DELETE_FAIL, "owner of category deos not match");
         }
+
+        studyCategoryRepository.deleteById(categoryId);
+    }
+
+    @Override
+    @Transactional
+    public void initCategory(Long userId) {
+
+        studyCategoryRepository.deleteByMemberId(userId);
     }
 
     /**
@@ -113,5 +120,9 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
                 .findById(id)
                 .orElseThrow(() ->
                         new StudyException(StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, "In StudyCategoryServiceImpl"));
+    }
+
+    private boolean validateDayOfWeek(Integer DayOfWeek) {
+        return DayOfWeek <= 127;
     }
 }

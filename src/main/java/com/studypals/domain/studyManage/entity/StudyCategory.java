@@ -49,6 +49,7 @@ public class StudyCategory {
     private String name;
 
     @Column(name = "day_belong", nullable = false, columnDefinition = "INTEGER")
+    @Setter
     private Integer dayBelong;
 
     @Column(name = "color", nullable = true, length = 9)
