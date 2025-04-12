@@ -50,7 +50,11 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
         Member member = findMember(userId);
         StudyCategory category = categoryMapper.toEntity(dto, member);
 
-        studyCategoryRepository.save(category);
+        try {
+            studyCategoryRepository.save(category);
+        } catch (Exception e) {
+            throw new StudyException(StudyErrorCode.STUDY_CATEGORY_ADD_FAIL);
+        }
 
         return category.getId();
     }

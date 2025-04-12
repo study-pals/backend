@@ -29,5 +29,6 @@ public interface CategoryMapper {
     @Mapping(target = "member", source = "member")
     StudyCategory toEntity(CreateCategoryReq req, Member member);
 
+    @Mapping(source = "id", target = "categoryId")
     GetCategoryRes toDto(StudyCategory entity);
 }

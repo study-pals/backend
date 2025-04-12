@@ -1,6 +1,7 @@
 package com.studypals.domain.studyManage.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * 카테고리를 갱신 위한 요청 데이터 입니다.
@@ -10,8 +11,8 @@ import jakarta.validation.constraints.NotBlank;
  * @since 2025-04-12
  */
 public record UpdateCategoryReq(
-        @NotBlank Long categoryId,
+        @NotNull Long categoryId,
         @NotBlank String name,
         @NotBlank String color,
-        @NotBlank Integer dayBelong,
+        Integer dayBelong,
         String description) {}
