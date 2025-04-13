@@ -1,13 +1,15 @@
 package com.studypals.domain.groupManage.restDocsTest;
 
-import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
@@ -20,9 +22,6 @@ import com.studypals.domain.groupManage.api.GroupController;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.fixture.GroupFixture;
 import com.studypals.domain.groupManage.service.GroupService;
-import com.studypals.global.responses.CommonResponse;
-import com.studypals.global.responses.Response;
-import com.studypals.global.responses.ResponseCode;
 import com.studypals.testModules.testSupport.RestDocsSupport;
 
 /**
@@ -45,8 +44,6 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
         // given
         CreateGroupReq req = GroupFixture.createGroupReq();
 
-        Response<Long> expectedResponse = CommonResponse.success(ResponseCode.GROUP_CREATE, 1L, "success create group");
-
         given(groupService.createGroup(any(), any())).willReturn(1L);
 
         // when
@@ -54,8 +51,8 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                 post("/groups").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(req)));
 
         // then
-        result.andExpect(hasKey(expectedResponse))
-                .andExpect(status().isCreated())
+        result.andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/groups/1"))
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
@@ -71,10 +68,6 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("isApprovalRequired")
                                         .description("그룹 가입 시 승인 필요 여부 / Default FALSE")
                                         .attributes(constraints("not null"))),
-                        responseFields(
-                                fieldWithPath("data").description("생성된. group의 id/식별자"),
-                                fieldWithPath("code").description("U02-02 고정"),
-                                fieldWithPath("status").description("응답 상태 (예: success 또는 fail)"),
-                                fieldWithPath("message").description("응답 메시지"))));
+                        responseHeaders(headerWithName("Location").description("추가된 그룹 id"))));
     }
 }
