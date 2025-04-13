@@ -63,7 +63,7 @@ public class GroupServiceImpl implements GroupService {
         }
 
         try {
-            group = groupRepository.save(group);
+            groupRepository.save(group);
 
             Member creator = memberRepository.getReferenceById(userId);
             GroupMember leader = groupMemberMapper.toEntity(creator, group, GroupRole.LEADER);

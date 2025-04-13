@@ -7,9 +7,9 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,7 +24,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.studypals.domain.groupManage.api.GroupController;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
-import com.studypals.domain.groupManage.fixture.GroupFixture;
 import com.studypals.domain.groupManage.service.GroupService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -74,7 +73,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
     void createGroup_success() throws Exception {
 
         // given
-        CreateGroupReq req = GroupFixture.createGroupReq();
+        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
         given(groupService.createGroup(any(), any())).willReturn(1L);
 

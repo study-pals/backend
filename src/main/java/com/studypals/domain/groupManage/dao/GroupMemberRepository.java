@@ -1,6 +1,7 @@
 package com.studypals.domain.groupManage.dao;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.groupManage.entity.GroupMember;
 
@@ -16,4 +17,5 @@ import com.studypals.domain.groupManage.entity.GroupMember;
  * @see GroupMember
  * @since 2025-04-12
  */
+@Repository
 public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> {}

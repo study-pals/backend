@@ -13,6 +13,7 @@ public interface GroupMemberMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "joinedAt", ignore = true)
+    @Mapping(target = "role", constant = "MEMBER")
     GroupMember toEntity(Member member, Group group);
 
     @Mapping(target = "id", ignore = true)

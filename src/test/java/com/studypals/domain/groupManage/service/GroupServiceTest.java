@@ -2,8 +2,6 @@ package com.studypals.domain.groupManage.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 import java.util.List;
@@ -23,9 +21,8 @@ import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.dto.mappers.GroupMemberMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
+import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.entity.GroupTag;
-import com.studypals.domain.groupManage.fixture.GroupFixture;
-import com.studypals.domain.groupManage.fixture.GroupMemberFixture;
 import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
@@ -61,17 +58,28 @@ public class GroupServiceTest {
     @Mock
     private GroupMemberMapper groupMemberMapper;
 
+    @Mock
+    private Member mockMember;
+
+    @Mock
+    private Group mockGroup;
+
+    @Mock
+    private GroupMember mockGroupMember;
+
+    @Mock
+    private GroupTag mockGroupTag;
+
     @InjectMocks
     private GroupServiceImpl groupService;
 
     @Test
     void getGroupTags_success() {
         // given
-        GroupTag tags = new GroupTag("tag");
-        GetGroupTagRes res = new GetGroupTagRes(tags.getName());
+        GetGroupTagRes res = new GetGroupTagRes(mockGroupTag.getName());
 
-        given(groupTagRepository.findAll()).willReturn(List.of(tags));
-        given(groupMapper.toTagDto(any())).willReturn(res);
+        given(groupTagRepository.findAll()).willReturn(List.of(mockGroupTag));
+        given(groupMapper.toTagDto(mockGroupTag)).willReturn(res);
 
         // when
         List<GetGroupTagRes> actual = groupService.getGroupTags();
@@ -84,21 +92,20 @@ public class GroupServiceTest {
     void createGroup_success() {
         // given
         Long userId = 1L;
-        CreateGroupReq req = GroupFixture.createGroupReq();
-        Group group = GroupFixture.group(req);
-        GroupMember groupMember = GroupMemberFixture.groupMember(group);
+        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
-        given(memberRepository.getReferenceById(anyLong()))
-                .willReturn(Member.builder().id(userId).build());
-        given(groupMapper.toEntity(any())).willReturn(group);
-        given(groupRepository.save(any())).willReturn(group);
-        given(groupMemberMapper.toEntity(any(), any(), any())).willReturn(groupMember);
+        given(mockGroupTag.getName()).willReturn("group tag");
+        given(memberRepository.getReferenceById(userId)).willReturn(mockMember);
+        given(groupTagRepository.existsById(mockGroupTag.getName())).willReturn(true);
+        given(groupMapper.toEntity(req)).willReturn(mockGroup);
+        given(groupMemberMapper.toEntity(mockMember, mockGroup, GroupRole.LEADER))
+                .willReturn(mockGroupMember);
 
         // when
         Long actual = groupService.createGroup(userId, req);
 
         // then
-        assertThat(actual).isEqualTo(group.getId());
+        assertThat(actual).isEqualTo(mockGroup.getId());
     }
 
     @Test
@@ -106,9 +113,10 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = GroupFixture.createGroupReq();
+        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
-        given(groupTagRepository.existsById(any())).willReturn(false);
+        given(mockGroupTag.getName()).willReturn("group tag");
+        given(groupTagRepository.existsById(mockGroupTag.getName())).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> groupService.createGroup(userId, req))
@@ -122,11 +130,12 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = GroupFixture.createGroupReq();
-        Group group = GroupFixture.group(req);
+        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
-        given(groupMapper.toEntity(any())).willReturn(group);
-        given(groupRepository.save(any())).willThrow(new GroupException(errorCode));
+        given(mockGroupTag.getName()).willReturn("group tag");
+        given(groupMapper.toEntity(req)).willReturn(mockGroup);
+        given(groupTagRepository.existsById(mockGroupTag.getName())).willReturn(true);
+        given(groupRepository.save(mockGroup)).willThrow(new GroupException(errorCode));
 
         // when & then
         assertThatThrownBy(() -> groupService.createGroup(userId, req))
@@ -140,16 +149,15 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = GroupFixture.createGroupReq();
-        Group group = GroupFixture.group(req);
-        GroupMember groupMember = GroupMemberFixture.groupMember(group);
+        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
-        given(memberRepository.getReferenceById(anyLong()))
-                .willReturn(Member.builder().id(userId).build());
-        given(groupMapper.toEntity(any())).willReturn(group);
-        given(groupRepository.save(any())).willReturn(group);
-        given(groupMemberMapper.toEntity(any(), any(), any())).willReturn(groupMember);
-        given(groupMemberRepository.save(any())).willThrow(new GroupException(errorCode));
+        given(mockGroupTag.getName()).willReturn("group tag");
+        given(memberRepository.getReferenceById(userId)).willReturn(mockMember);
+        given(groupTagRepository.existsById(mockGroupTag.getName())).willReturn(true);
+        given(groupMapper.toEntity(req)).willReturn(mockGroup);
+        given(groupMemberMapper.toEntity(mockMember, mockGroup, GroupRole.LEADER))
+                .willReturn(mockGroupMember);
+        given(groupMemberRepository.save(mockGroupMember)).willThrow(new GroupException(errorCode));
 
         // when & then
         assertThatThrownBy(() -> groupService.createGroup(userId, req))
