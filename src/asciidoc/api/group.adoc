@@ -23,6 +23,54 @@
 | 06 | 유저 → 그룹 탈퇴
 | 07 | 그룹 → 유저 강퇴
 | 08 | 그룹 → 유저 초대
+| 09 | 그룹 태그 조회
 |===
 
 == ✨ API 문서
+
+=== 그룹 관련 API
+''''
+
+==== 1. 그룹 태그 불러오기
+
+*Description* +
+
+'''
+
+그룹 태그 전체 조회를 위해 사용합니다.
+
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/get-group-tags_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/get-group-tags_success/response-fields.adoc[]
+include::{snippets}/group-controller-rest-docs-test/get-group-tags_success/http-response.adoc[]
+
+==== 2. 그룹 생성
+
+*Description* +
+
+'''
+
+그룹 생성을 위해 사용합니다.
+
+*Request* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/create-group_success/request-fields.adoc[]
+include::{snippets}/group-controller-rest-docs-test/create-group_success/http-request.adoc[]
+
+*Response* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/create-group_success/response-headers.adoc[]
+include::{snippets}/group-controller-rest-docs-test/create-group_success/http-response.adoc[]
