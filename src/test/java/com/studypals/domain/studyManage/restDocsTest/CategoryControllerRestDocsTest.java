@@ -3,12 +3,15 @@ package com.studypals.domain.studyManage.restDocsTest;
 import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
@@ -41,18 +44,17 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
     void create_success() throws Exception {
         // given
         CreateCategoryReq req = new CreateCategoryReq("알고리즘", "#FF5733", 10, "매일 10문제");
-        Response<Long> expected = CommonResponse.success(ResponseCode.STUDY_CATEGORY_ADD, 1L);
 
         given(studyCategoryService.createCategory(any(), any())).willReturn(1L);
 
         // when
-        ResultActions result = mockMvc.perform(post("/category")
+        ResultActions result = mockMvc.perform(post("/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 
         // then
-        result.andExpect(status().isOk())
-                .andExpect(hasKey(expected))
+        result.andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/categories/1"))
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
@@ -63,11 +65,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                                         .attributes(constraints("not blank")),
                                 fieldWithPath("dayBelong").description("요일 소속값").attributes(constraints("not blank")),
                                 fieldWithPath("description").description("설명").attributes(constraints("optional"))),
-                        responseFields(
-                                fieldWithPath("data").description("생성된 카테고리 ID"),
-                                fieldWithPath("code").description("응답 코드"),
-                                fieldWithPath("status").description("응답 상태"),
-                                fieldWithPath("message").description("응답 메시지"))));
+                        responseHeaders(headerWithName("Location").description("추가된 카테고리 id"))));
     }
 
     @Test
@@ -75,17 +73,17 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
     void update_success() throws Exception {
         // given
         UpdateCategoryReq req = new UpdateCategoryReq(1L, "DB", "#000000", 20, "설명");
-        Response<Void> expected = CommonResponse.success(ResponseCode.STUDY_CATEGORY_UPDATE);
 
-        willDoNothing().given(studyCategoryService).updateCategory(any(), any());
+        given(studyCategoryService.updateCategory(any(), any())).willReturn(1L);
 
         // when
-        ResultActions result = mockMvc.perform(
-                put("/category").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(req)));
+        ResultActions result = mockMvc.perform(put("/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)));
 
         // then
-        result.andExpect(status().isOk())
-                .andExpect(hasKey(expected))
+        result.andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/categories/1"))
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
@@ -99,13 +97,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                                         .attributes(constraints("not blank")),
                                 fieldWithPath("dayBelong").description("요일 소속값").attributes(constraints("not blank")),
                                 fieldWithPath("description").description("설명").attributes(constraints("optional"))),
-                        responseFields(
-                                fieldWithPath("data")
-                                        .description("응답 데이터 (null)")
-                                        .optional(),
-                                fieldWithPath("code").description("응답 코드"),
-                                fieldWithPath("status").description("응답 상태"),
-                                fieldWithPath("message").description("응답 메시지"))));
+                        responseHeaders(headerWithName("Location").description("변경된 cateogory id"))));
     }
 
     @Test
@@ -113,51 +105,33 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
     void delete_success() throws Exception {
         // given
         Long categoryId = 1L;
-        Response<Void> expected = CommonResponse.success(ResponseCode.STUDY_CATEGORY_DELETE);
 
         willDoNothing().given(studyCategoryService).deleteCategory(any(), eq(categoryId));
 
         // when
-        ResultActions result = mockMvc.perform(delete("/category/{categoryId}", categoryId));
+        ResultActions result = mockMvc.perform(delete("/categories/{categoryId}", categoryId));
 
         // then
-        result.andExpect(status().isOk())
-                .andExpect(hasKey(expected))
+        result.andExpect(status().isNoContent())
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
                         pathParameters(parameterWithName("categoryId")
                                 .description("삭제 카테고리 id")
-                                .attributes(constraints("not null"))),
-                        responseFields(
-                                fieldWithPath("data").description("응답 데이터 (null)"),
-                                fieldWithPath("code").description("응답 코드"),
-                                fieldWithPath("status").description("응답 상태"),
-                                fieldWithPath("message").description("응답 메시지"))));
+                                .attributes(constraints("not null")))));
     }
 
     @Test
     @WithMockUser
     void deleteAll_success() throws Exception {
         // given
-        Response<Void> expected = CommonResponse.success(ResponseCode.STUDY_CATEGORY_DELETE);
-
         willDoNothing().given(studyCategoryService).initCategory(any());
 
         // when
-        ResultActions result = mockMvc.perform(delete("/category/all"));
+        ResultActions result = mockMvc.perform(delete("/categories/all"));
 
         // then
-        result.andExpect(status().isOk())
-                .andExpect(hasKey(expected))
-                .andDo(restDocs.document(
-                        httpRequest(),
-                        httpResponse(),
-                        responseFields(
-                                fieldWithPath("data").description("응답 데이터 (null)"),
-                                fieldWithPath("code").description("응답 코드"),
-                                fieldWithPath("status").description("응답 상태"),
-                                fieldWithPath("message").description("응답 메시지"))));
+        result.andExpect(status().isNoContent()).andDo(restDocs.document(httpRequest(), httpResponse()));
     }
 
     @Test
@@ -172,7 +146,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
         given(studyCategoryService.getUserCategory(any())).willReturn(list);
 
         // when
-        ResultActions result = mockMvc.perform(get("/category"));
+        ResultActions result = mockMvc.perform(get("/categories"));
 
         // then
         result.andExpect(status().isOk())
