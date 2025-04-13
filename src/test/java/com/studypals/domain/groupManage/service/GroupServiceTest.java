@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,11 +16,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dao.GroupRepository;
+import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.dto.GetGroupTagRes;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.dto.mappers.GroupMemberMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
+import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.domain.groupManage.fixture.GroupFixture;
 import com.studypals.domain.groupManage.fixture.GroupMemberFixture;
 import com.studypals.domain.memberManage.dao.MemberRepository;
@@ -48,6 +53,9 @@ public class GroupServiceTest {
     private GroupMemberRepository groupMemberRepository;
 
     @Mock
+    private GroupTagRepository groupTagRepository;
+
+    @Mock
     private GroupMapper groupMapper;
 
     @Mock
@@ -55,6 +63,22 @@ public class GroupServiceTest {
 
     @InjectMocks
     private GroupServiceImpl groupService;
+
+    @Test
+    void getGroupTags_success() {
+        // given
+        GroupTag tags = new GroupTag("tag");
+        GetGroupTagRes res = new GetGroupTagRes(tags.getName());
+
+        given(groupTagRepository.findAll()).willReturn(List.of(tags));
+        given(groupMapper.toTagDto(any())).willReturn(res);
+
+        // when
+        List<GetGroupTagRes> actual = groupService.getGroupTags();
+
+        // then
+        assertThat(actual).isEqualTo(List.of(res));
+    }
 
     @Test
     void createGroup_success() {
@@ -75,6 +99,22 @@ public class GroupServiceTest {
 
         // then
         assertThat(actual).isEqualTo(group.getId());
+    }
+
+    @Test
+    void createGroup_fail_tagNotFound() {
+        // given
+        Long userId = 1L;
+        GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
+        CreateGroupReq req = GroupFixture.createGroupReq();
+
+        given(groupTagRepository.existsById(any())).willReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> groupService.createGroup(userId, req))
+                .isInstanceOf(GroupException.class)
+                .extracting("errorCode")
+                .isEqualTo(errorCode);
     }
 
     @Test

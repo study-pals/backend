@@ -1,16 +1,19 @@
 package com.studypals.domain.groupManage.restDocsTest;
 
+import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,8 +23,12 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.groupManage.api.GroupController;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.dto.GetGroupTagRes;
 import com.studypals.domain.groupManage.fixture.GroupFixture;
 import com.studypals.domain.groupManage.service.GroupService;
+import com.studypals.global.responses.CommonResponse;
+import com.studypals.global.responses.Response;
+import com.studypals.global.responses.ResponseCode;
 import com.studypals.testModules.testSupport.RestDocsSupport;
 
 /**
@@ -37,6 +44,31 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
 
     @MockitoBean
     private GroupService groupService;
+
+    @Test
+    void getGroupTags_success() throws Exception {
+
+        // given
+        List<GetGroupTagRes> list = List.of(new GetGroupTagRes("tag"));
+        Response<List<GetGroupTagRes>> expected = CommonResponse.success(ResponseCode.GROUP_TAG_LIST, list);
+
+        given(groupService.getGroupTags()).willReturn(list);
+
+        // when
+        ResultActions result = mockMvc.perform(get("/groups/tags"));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(hasKey(expected))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        responseFields(
+                                fieldWithPath("data[].name").description("그룹 태그 이름"),
+                                fieldWithPath("code").description("응답 코드"),
+                                fieldWithPath("status").description("응답 상태"),
+                                fieldWithPath("message").description("응답 메시지"))));
+    }
 
     @Test
     void createGroup_success() throws Exception {
