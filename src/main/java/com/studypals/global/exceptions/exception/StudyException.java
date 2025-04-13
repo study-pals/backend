@@ -25,15 +25,15 @@ import com.studypals.global.exceptions.errorCode.ErrorCode;
  * @since 2025-04-02
  */
 public class StudyException extends BaseException {
-    protected StudyException(ErrorCode errorCode) {
+    public StudyException(ErrorCode errorCode) {
         super(errorCode);
     }
 
-    protected StudyException(ErrorCode errorCode, String logMessage) {
+    public StudyException(ErrorCode errorCode, String logMessage) {
         super(errorCode, logMessage);
     }
 
-    protected StudyException(ErrorCode errorCode, String clientMessage, String logMessage) {
+    public StudyException(ErrorCode errorCode, String clientMessage, String logMessage) {
         super(errorCode, clientMessage, logMessage);
     }
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
 
 /**
  * 공부 카테고리에 대한 엔티티입니다. JPA 에 의해 관리됩니다.
@@ -55,4 +56,15 @@ public class StudyCategory {
 
     @Column(name = "description", nullable = true, columnDefinition = "TEXT")
     private String description;
+
+    public void updateCategory(UpdateCategoryReq dto) {
+        this.name = dto.name();
+        this.dayBelong = dto.dayBelong();
+        this.color = dto.color();
+        this.description = dto.description();
+    }
+
+    public boolean isOwner(Long memberId) {
+        return this.member.getId().equals(memberId);
+    }
 }

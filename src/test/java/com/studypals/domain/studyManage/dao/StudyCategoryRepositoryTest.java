@@ -67,4 +67,21 @@ class StudyCategoryRepositoryTest {
         List<String> actualName = finded.stream().map(StudyCategory::getName).toList();
         assertThat(actualName).containsExactlyInAnyOrderElementsOf(expectedName);
     }
+
+    @Test
+    public void deleteByMemberId_success() {
+        // given
+        Member member = insertMember();
+        IntStream.range(1, 10).mapToObj(i -> make(member, "category " + i)).forEach(category -> em.persist(category));
+
+        // when
+        studyCategoryRepository.deleteByMemberId(member.getId());
+
+        // then
+        assertThat(em.getEntityManager()
+                        .createQuery("SELECT c FROM StudyCategory c WHERE c.member.id = :memberId", StudyCategory.class)
+                        .setParameter("memberId", member.getId())
+                        .getResultList())
+                .isEmpty();
+    }
 }
