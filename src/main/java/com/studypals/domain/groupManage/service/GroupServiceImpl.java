@@ -1,5 +1,7 @@
 package com.studypals.domain.groupManage.service;
 
+import java.util.List;
+
 import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
@@ -8,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dao.GroupRepository;
+import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.dto.GetGroupTagRes;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.dto.mappers.GroupMemberMapper;
 import com.studypals.domain.groupManage.entity.Group;
@@ -40,14 +44,23 @@ public class GroupServiceImpl implements GroupService {
     private final MemberRepository memberRepository;
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final GroupTagRepository groupTagRepository;
 
     private final GroupMapper groupMapper;
     private final GroupMemberMapper groupMemberMapper;
 
     @Override
+    public List<GetGroupTagRes> getGroupTags() {
+        return groupTagRepository.findAll().stream().map(groupMapper::toTagDto).toList();
+    }
+
+    @Override
     @Transactional
     public Long createGroup(Long userId, CreateGroupReq dto) {
         Group group = groupMapper.toEntity(dto);
+        if (!groupTagRepository.existsById(dto.tag())) {
+            throw new GroupException(GroupErrorCode.GROUP_CREATE_FAIL, "no such tag.");
+        }
 
         try {
             group = groupRepository.save(group);
