@@ -31,16 +31,27 @@ import lombok.Getter;
  */
 @RedisHash("studyStatus")
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Getter
 public class StudyStatus {
     @Id
     private Long id;
 
-    private boolean studying;
+    @Builder.Default
+    private boolean studying = true;
+
     private LocalTime startTime;
-    private Long studyTime;
+
+    @Builder.Default
+    private Long studyTime = 0L;
+
+    private Long categoryId;
 
     @TimeToLive(unit = TimeUnit.DAYS)
-    private Long expiration;
+    @Builder.Default
+    private Long expiration = 1L;
+
+    public StudyStatusBuilder update() {
+        return this.toBuilder();
+    }
 }

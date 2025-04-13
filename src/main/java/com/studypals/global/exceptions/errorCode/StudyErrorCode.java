@@ -29,6 +29,8 @@ public enum StudyErrorCode implements ErrorCode {
             ResponseCode.STUDY_TIME_PARTIAL, HttpStatus.BAD_REQUEST, "failed to get partial study time"),
     STUDY_TIME_RESET_FAIL(ResponseCode.STUDY_TIME_RESET, HttpStatus.BAD_REQUEST, "failed to reset study time"),
     STUDY_TIME_ADD_FAIL(ResponseCode.STUDY_TIME_ADD, HttpStatus.BAD_REQUEST, "failed to add study time"),
+    STUDY_TIME_START_FAIL(ResponseCode.STUDY_TIME_ADD, HttpStatus.BAD_REQUEST, "failed to start study"),
+    STUDY_TIME_END_FAIL(ResponseCode.STUDY_TIME_ADD, HttpStatus.BAD_REQUEST, "failed to end study"),
     STUDY_TIME_DELETE_FAIL(ResponseCode.STUDY_TIME_DELETE, HttpStatus.BAD_REQUEST, "failed to delete study time"),
     STUDY_CATEGORY_NOT_FOUND(ResponseCode.STUDY_CATEGORY_LIST, HttpStatus.NOT_FOUND, "can't find study category"),
     STUDY_CATEGORY_ADD_FAIL(ResponseCode.STUDY_CATEGORY_ADD, HttpStatus.BAD_REQUEST, "failed to add study category"),
