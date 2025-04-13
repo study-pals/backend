@@ -49,5 +49,5 @@ include::{snippets}/group-controller-rest-docs-test/create-group_success/http-re
 
 '''
 
-include::{snippets}/group-controller-rest-docs-test/create-group_success/response-fields.adoc[]
+include::{snippets}/group-controller-rest-docs-test/create-group_success/response-headers.adoc[]
 include::{snippets}/group-controller-rest-docs-test/create-group_success/http-response.adoc[]
