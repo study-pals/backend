@@ -45,21 +45,13 @@ public class GroupMember {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "main_color", nullable = false)
-    private GroupMainColor mainColor;
+    private GroupMainColor mainColor = GroupMainColor.YELLOW;
 
-    @Column(name = "is_leader", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean isLeader = false;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private GroupRole role = GroupRole.MEMBER;
 
     @Column(name = "joined_at", nullable = false)
     @CreatedDate
     private LocalDate joinedAt;
-
-    public static GroupMember createLeader(Member member, Group group) {
-        return GroupMember.builder()
-                .member(member)
-                .group(group)
-                .isLeader(true)
-                .mainColor(GroupMainColor.YELLOW)
-                .build();
-    }
 }

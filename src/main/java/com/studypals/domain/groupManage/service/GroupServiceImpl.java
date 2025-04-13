@@ -9,8 +9,11 @@ import lombok.RequiredArgsConstructor;
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
+import com.studypals.domain.groupManage.dto.mappers.GroupMemberMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
+import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
@@ -38,16 +41,19 @@ public class GroupServiceImpl implements GroupService {
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
 
+    private final GroupMapper groupMapper;
+    private final GroupMemberMapper groupMemberMapper;
+
     @Override
     @Transactional
     public Long createGroup(Long userId, CreateGroupReq dto) {
-        Group group = dto.toEntity();
+        Group group = groupMapper.toEntity(dto);
 
         try {
             group = groupRepository.save(group);
 
             Member creator = memberRepository.getReferenceById(userId);
-            GroupMember leader = GroupMember.createLeader(creator, group);
+            GroupMember leader = groupMemberMapper.toEntity(creator, group, GroupRole.LEADER);
             groupMemberRepository.save(leader);
         } catch (Exception e) {
             throw new GroupException(GroupErrorCode.GROUP_CREATE_FAIL);
