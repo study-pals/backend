@@ -36,6 +36,11 @@
 '''
 
 카테고리 생성을 위해 사용합니다.
+[NOTE]
+dayBelong 은 일주일에 대한 비트마스킹입니다. 가령, 해당 카테고리가 월,수,토에 포함된다 하면, dayBelong은
+'0b0100101` 로 표현됩니다.  클라이언트를 이를 인코드해서 적절한 요일로 변환해야 합니다.
+
+
 
 *REQUEST* +
 
@@ -58,6 +63,9 @@ include::{snippets}/category-controller-rest-docs-test/create_success/http-respo
 '''
 
 카테고리 정보 수정을 위해 사용합니다.
+[NOTE]
+dayBelong 은 일주일에 대한 비트마스킹입니다. 가령, 해당 카테고리가 월,수,토에 포함된다 하면, dayBelong은
+'0b0100101` 로 표현됩니다.  클라이언트를 이를 인코드해서 적절한 요일로 변환해야 합니다.
 
 *REQUEST* +
 
