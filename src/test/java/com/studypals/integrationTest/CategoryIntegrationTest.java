@@ -1,9 +1,9 @@
 package com.studypals.integrationTest;
 
 import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,27 +26,28 @@ import com.studypals.testModules.testSupport.IntegrationSupport;
 @ActiveProfiles("test")
 @DisplayName("API TEST / 카테고리 통합 테스트")
 public class CategoryIntegrationTest extends IntegrationSupport {
+
     @Test
-    @DisplayName("POST /category")
+    @DisplayName("POST /categories")
     void create_success() throws Exception {
         // given
         CreateUserVar user = createUser();
         CreateCategoryReq req = new CreateCategoryReq("알고리즘", "#112233", 7, "문제풀이");
 
         // when
-        ResultActions result = mockMvc.perform(post("/category")
+        ResultActions result = mockMvc.perform(post("/categories")
                 .header("Authorization", "Bearer " + user.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 
         // then
-        result.andExpect(status().isOk())
-                .andExpect(hasKey("code", ResponseCode.STUDY_CATEGORY_ADD.getCode()))
-                .andExpect(jsonPath("$.data").isNumber());
+        result.andExpect(status().isCreated())
+                .andExpect(header().string("Location", matchesPattern("/categories/\\d+")));
+        ;
     }
 
     @Test
-    @DisplayName("PUT /category")
+    @DisplayName("PUT /categories")
     void update_success() throws Exception {
         // given
         CreateUserVar user = createUser();
@@ -55,32 +56,32 @@ public class CategoryIntegrationTest extends IntegrationSupport {
         UpdateCategoryReq req = new UpdateCategoryReq(categoryId, "새 이름", "#000000", 3, "설명 수정");
 
         // when
-        ResultActions result = mockMvc.perform(put("/category")
+        ResultActions result = mockMvc.perform(put("/categories")
                 .header("Authorization", "Bearer " + user.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 
         // then
-        result.andExpect(status().isOk()).andExpect(hasKey("code", ResponseCode.STUDY_CATEGORY_UPDATE.getCode()));
+        result.andExpect(status().isCreated()).andExpect(header().string("Location", "/categories/" + categoryId));
     }
 
     @Test
-    @DisplayName("DELETE /category/{categoryId}")
+    @DisplayName("DELETE /categories/{categoryId}")
     void delete_success() throws Exception {
         // given
         CreateUserVar user = createUser();
         Long categoryId = createCategory(user.getUserId(), "삭제할 카테고리");
 
         // when
-        ResultActions result = mockMvc.perform(delete("/category/{categoryId}", categoryId)
+        ResultActions result = mockMvc.perform(delete("/categories/{categoryId}", categoryId)
                 .header("Authorization", "Bearer " + user.getAccessToken()));
 
         // then
-        result.andExpect(status().isOk()).andExpect(hasKey("code", ResponseCode.STUDY_CATEGORY_DELETE.getCode()));
+        result.andExpect(status().isNoContent());
     }
 
     @Test
-    @DisplayName("DELETE /category/all")
+    @DisplayName("DELETE /categories/all")
     void deleteAll_success() throws Exception {
         // given
         CreateUserVar user = createUser();
@@ -89,14 +90,14 @@ public class CategoryIntegrationTest extends IntegrationSupport {
 
         // when
         ResultActions result =
-                mockMvc.perform(delete("/category/all").header("Authorization", "Bearer " + user.getAccessToken()));
+                mockMvc.perform(delete("/categories/all").header("Authorization", "Bearer " + user.getAccessToken()));
 
         // then
-        result.andExpect(status().isOk()).andExpect(hasKey("code", ResponseCode.STUDY_CATEGORY_DELETE.getCode()));
+        result.andExpect(status().isNoContent());
     }
 
     @Test
-    @DisplayName("GET /category")
+    @DisplayName("GET /categories")
     void read_success() throws Exception {
         // given
         CreateUserVar user = createUser();
@@ -105,7 +106,7 @@ public class CategoryIntegrationTest extends IntegrationSupport {
 
         // when
         ResultActions result =
-                mockMvc.perform(get("/category").header("Authorization", "Bearer " + user.getAccessToken()));
+                mockMvc.perform(get("/categories").header("Authorization", "Bearer " + user.getAccessToken()));
 
         // then
         result.andExpect(status().isOk())

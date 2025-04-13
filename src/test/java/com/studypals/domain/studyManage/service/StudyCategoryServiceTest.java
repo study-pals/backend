@@ -44,7 +44,6 @@ import com.studypals.global.exceptions.exception.StudyException;
  * 필요 시 외부 모듈에 대한 내용을 적습니다.
  *
  * @author jack8
- * @see
  * @since 2025-04-12
  */
 @ExtendWith(MockitoExtension.class)
@@ -75,7 +74,7 @@ class StudyCategoryServiceTest {
         Long savedCategoryId = 2L;
         CreateCategoryReq req = new CreateCategoryReq("name", "#FFFFFF", 12, "description");
 
-        given(memberRepository.findById(1L)).willReturn(Optional.of(mockMember));
+        given(memberRepository.getReferenceById(userId)).willReturn(mockMember);
         given(categoryMapper.toEntity(req, mockMember)).willReturn(mockStudyCategory);
         given(mockStudyCategory.getId()).willReturn(savedCategoryId); // 실제로는 save 후 넣어지지만, mock unit test 이므로...
 
@@ -92,7 +91,7 @@ class StudyCategoryServiceTest {
         Long userId = 1L;
         StudyErrorCode errorCode = StudyErrorCode.STUDY_CATEGORY_ADD_FAIL;
         CreateCategoryReq req = new CreateCategoryReq("name", "#FFFFFF", 12, "description");
-        given(memberRepository.findById(1L)).willReturn(Optional.of(mockMember));
+        given(memberRepository.getReferenceById(userId)).willReturn(mockMember);
         given(categoryMapper.toEntity(req, mockMember)).willReturn(mockStudyCategory);
         given(mockStudyCategory.getId()).willThrow(new StudyException(errorCode));
 
@@ -141,13 +140,14 @@ class StudyCategoryServiceTest {
         UpdateCategoryReq req = new UpdateCategoryReq(categoryId, "new category", "#FFFFFF", 12, "new description");
 
         given(studyCategoryRepository.findById(categoryId)).willReturn(Optional.of(mockStudyCategory));
-        given(mockStudyCategory.getMember()).willReturn(mockMember);
-        given(mockMember.getId()).willReturn(1L);
+        given(mockStudyCategory.getId()).willReturn(categoryId);
+        given(mockStudyCategory.isOwner(userId)).willReturn(true);
 
         // when
-        studyCategoryService.updateCategory(userId, req);
+        Long updatedCategoryId = studyCategoryService.updateCategory(userId, req);
 
         // then
+        assertThat(updatedCategoryId).isEqualTo(categoryId);
         then(mockStudyCategory).should().updateCategory(req);
     }
 }
