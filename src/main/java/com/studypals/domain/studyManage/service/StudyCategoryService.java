@@ -39,9 +39,10 @@ public interface StudyCategoryService {
      * 요창자가 해당 카테고리의 소유주인지 확인하고, 갱신한다.
      * @param userId 갱신을 요청한 사용자의 id
      * @param dto categoryId 및 category 의 정보
+     * @return cateogoryId 변경된 카테고리의 id
      * @throws StudyException {@code StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, "In StudyCategoryServiceImpl} 포함
      */
-    void updateCategory(Long userId, UpdateCategoryReq dto);
+    Long updateCategory(Long userId, UpdateCategoryReq dto);
 
     /**
      * 카테고리 delete를 위한 메서드.
@@ -53,7 +54,7 @@ public interface StudyCategoryService {
     void deleteCategory(Long userId, Long categoryId);
 
     /**
-     * 특정 요일의 카테고리를 전부 삭제한다.
+     * 해당 사용자의 모든 카테고리를 초기화한다.
      * @param userId 삭제를 요청한 요청자의 id
      */
     void initCategory(Long userId);

@@ -15,9 +15,7 @@ import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
 import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
-import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
-import com.studypals.global.exceptions.exception.AuthException;
 import com.studypals.global.exceptions.exception.StudyException;
 
 /**
@@ -47,7 +45,7 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     @Override
     @Transactional
     public Long createCategory(Long userId, CreateCategoryReq dto) {
-        Member member = findMember(userId);
+        Member member = memberRepository.getReferenceById(userId);
         StudyCategory category = categoryMapper.toEntity(dto, member);
 
         try {
@@ -70,13 +68,15 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
 
     @Override
     @Transactional
-    public void updateCategory(Long userId, UpdateCategoryReq dto) {
+    public Long updateCategory(Long userId, UpdateCategoryReq dto) {
 
         StudyCategory category = findCategory(dto.categoryId());
-        if (!category.getMember().getId().equals(userId)) {
+        if (!category.isOwner(userId)) {
             throw new StudyException(StudyErrorCode.STUDY_CATEGORY_UPDATE_FAIL, "owner of category deos not match");
         }
         category.updateCategory(dto);
+
+        return category.getId();
     }
 
     @Override
@@ -85,8 +85,8 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
 
         StudyCategory category = findCategory(categoryId);
 
-        if (!category.getMember().getId().equals(userId)) {
-            throw new StudyException(StudyErrorCode.STUDY_CATEGORY_DELETE_FAIL, "owner of category deos not match");
+        if (!category.isOwner(userId)) {
+            throw new StudyException(StudyErrorCode.STUDY_CATEGORY_DELETE_FAIL, "owner of category does not match");
         }
 
         studyCategoryRepository.deleteById(categoryId);
@@ -97,19 +97,6 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     public void initCategory(Long userId) {
 
         studyCategoryRepository.deleteByMemberId(userId);
-    }
-
-    /**
-     * member 를 찾는 private method. 실패 시 예외 처리의 공통화를 위해 분리하였다.
-     *
-     * @param id 찾고자 하는 member 의 id
-     * @return Member
-     * @throws AuthException {@code AuthErrorCode.USER_NOT_FOUND, "In StudyCategoryServiceImpl} 포함
-     */
-    private Member findMember(Long id) {
-        return memberRepository
-                .findById(id)
-                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND, "In StudyCategoryServiceImpl"));
     }
 
     /**
@@ -124,9 +111,5 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
                 .findById(id)
                 .orElseThrow(() ->
                         new StudyException(StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, "In StudyCategoryServiceImpl"));
-    }
-
-    private boolean validateDayOfWeek(Integer DayOfWeek) {
-        return DayOfWeek <= 127;
     }
 }

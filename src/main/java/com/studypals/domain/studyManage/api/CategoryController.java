@@ -1,5 +1,6 @@
 package com.studypals.domain.studyManage.api;
 
+import java.net.URI;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -33,38 +34,38 @@ import com.studypals.global.responses.ResponseCode;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/category")
+@RequestMapping("/categories")
 public class CategoryController {
 
     private final StudyCategoryService studyCategoryService;
 
     @PostMapping
-    public ResponseEntity<Response<Long>> create(
+    public ResponseEntity<Void> create(
             @AuthenticationPrincipal Long userId, @Valid @RequestBody CreateCategoryReq req) {
 
         Long categoryId = studyCategoryService.createCategory(userId, req);
-        return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_CATEGORY_ADD, categoryId));
+        return ResponseEntity.created(URI.create("/categories/" + categoryId)).build();
     }
 
     @DeleteMapping("/{categoryId}")
-    public ResponseEntity<Response<Void>> delete(@AuthenticationPrincipal Long userId, @PathVariable Long categoryId) {
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal Long userId, @PathVariable Long categoryId) {
 
         studyCategoryService.deleteCategory(userId, categoryId);
-        return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_CATEGORY_DELETE));
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/all")
-    public ResponseEntity<Response<Void>> deleteAll(@AuthenticationPrincipal Long userId) {
+    public ResponseEntity<Void> deleteAll(@AuthenticationPrincipal Long userId) {
 
         studyCategoryService.initCategory(userId);
-        return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_CATEGORY_DELETE));
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping
     public ResponseEntity<Response<Void>> update(
             @AuthenticationPrincipal Long userId, @Valid @RequestBody UpdateCategoryReq req) {
-        studyCategoryService.updateCategory(userId, req);
-        return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_CATEGORY_UPDATE));
+        Long categoryId = studyCategoryService.updateCategory(userId, req);
+        return ResponseEntity.created(URI.create("/categories/" + categoryId)).build();
     }
 
     @GetMapping
