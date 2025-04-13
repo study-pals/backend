@@ -15,7 +15,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
+import com.studypals.domain.groupManage.dto.mappers.GroupMemberMapper;
 import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupMember;
+import com.studypals.domain.groupManage.fixture.GroupFixture;
+import com.studypals.domain.groupManage.fixture.GroupMemberFixture;
 import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
@@ -42,6 +47,12 @@ public class GroupServiceTest {
     @Mock
     private GroupMemberRepository groupMemberRepository;
 
+    @Mock
+    private GroupMapper groupMapper;
+
+    @Mock
+    private GroupMemberMapper groupMemberMapper;
+
     @InjectMocks
     private GroupServiceImpl groupService;
 
@@ -49,12 +60,15 @@ public class GroupServiceTest {
     void createGroup_success() {
         // given
         Long userId = 1L;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
-        Group group = createGroup(req);
+        CreateGroupReq req = GroupFixture.createGroupReq();
+        Group group = GroupFixture.group(req);
+        GroupMember groupMember = GroupMemberFixture.groupMember(group);
 
         given(memberRepository.getReferenceById(anyLong()))
                 .willReturn(Member.builder().id(userId).build());
+        given(groupMapper.toEntity(any())).willReturn(group);
         given(groupRepository.save(any())).willReturn(group);
+        given(groupMemberMapper.toEntity(any(), any(), any())).willReturn(groupMember);
 
         // when
         Long actual = groupService.createGroup(userId, req);
@@ -68,9 +82,10 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
-        Group group = createGroup(req);
+        CreateGroupReq req = GroupFixture.createGroupReq();
+        Group group = GroupFixture.group(req);
 
+        given(groupMapper.toEntity(any())).willReturn(group);
         given(groupRepository.save(any())).willThrow(new GroupException(errorCode));
 
         // when & then
@@ -85,12 +100,15 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
-        Group group = createGroup(req);
+        CreateGroupReq req = GroupFixture.createGroupReq();
+        Group group = GroupFixture.group(req);
+        GroupMember groupMember = GroupMemberFixture.groupMember(group);
 
         given(memberRepository.getReferenceById(anyLong()))
                 .willReturn(Member.builder().id(userId).build());
+        given(groupMapper.toEntity(any())).willReturn(group);
         given(groupRepository.save(any())).willReturn(group);
+        given(groupMemberMapper.toEntity(any(), any(), any())).willReturn(groupMember);
         given(groupMemberRepository.save(any())).willThrow(new GroupException(errorCode));
 
         // when & then
@@ -98,16 +116,5 @@ public class GroupServiceTest {
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
-    }
-
-    private Group createGroup(CreateGroupReq req) {
-        return Group.builder()
-                .id(1L)
-                .name(req.name())
-                .tag(req.tag())
-                .maxMember(req.maxMember())
-                .isOpen(req.isOpen())
-                .isApprovalRequired(req.isApprovalRequired())
-                .build();
     }
 }

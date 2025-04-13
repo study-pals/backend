@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.groupManage.api.GroupController;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.fixture.GroupFixture;
 import com.studypals.domain.groupManage.service.GroupService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -42,7 +43,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
     void createGroup_success() throws Exception {
 
         // given
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
+        CreateGroupReq req = GroupFixture.createGroupReq();
 
         Response<Long> expectedResponse = CommonResponse.success(ResponseCode.GROUP_CREATE, 1L, "success create group");
 

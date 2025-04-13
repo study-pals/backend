@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.fixture.GroupFixture;
 import com.studypals.global.responses.ResponseCode;
 import com.studypals.testModules.testSupport.IntegrationSupport;
 
@@ -33,7 +34,7 @@ public class GroupIntegrationTest extends IntegrationSupport {
     void createGroup_success() throws Exception {
         // given
         CreateUserVar user = createUser();
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
+        CreateGroupReq req = GroupFixture.createGroupReq();
 
         // when
         ResultActions result = mockMvc.perform(post("/groups")
