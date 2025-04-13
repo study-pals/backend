@@ -43,10 +43,12 @@ public class GroupMember {
     @JoinColumn(name = "group_id")
     private Group group;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "main_color", nullable = false)
     private GroupMainColor mainColor = GroupMainColor.YELLOW;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private GroupRole role = GroupRole.MEMBER;

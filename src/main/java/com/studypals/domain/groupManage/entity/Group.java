@@ -39,12 +39,15 @@ public class Group {
     @Column(name = "tag", nullable = false)
     private String tag;
 
+    @Builder.Default
     @Column(name = "max_member", nullable = false, columnDefinition = "INTEGER DEFAULT 100")
     private Integer maxMember = 100;
 
+    @Builder.Default
     @Column(name = "is_open", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isOpen = false;
 
+    @Builder.Default
     @Column(name = "is_approval_required", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isApprovalRequired = false;
 
