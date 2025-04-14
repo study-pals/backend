@@ -73,4 +73,13 @@ class StudyStatusRedisRepositoryTest {
         // then
         assertThat(result).isEmpty();
     }
+
+    @Test
+    void findById_fail_noExistData() {
+        // when
+        StudyStatus status = studyStatusRedisRepository.findById(0L).orElse(null);
+
+        // then
+        assertThat(status).isNull();
+    }
 }
