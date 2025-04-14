@@ -285,6 +285,7 @@ class StudyTimeServiceTest {
         assertThat(savedStatus.getTemporaryName()).isNull();
     }
 
+    // 종료 성공 - 시작과 종료가 같은 날에 존재 - studyTime이 존재하지 않을 때- 카테고리에 대한
     @Test
     void endStudy_success_inOneDay_notExistStudyTime_byCategory() {
         // given
@@ -338,6 +339,7 @@ class StudyTimeServiceTest {
         assertThat(savedTime.getTime()).isEqualTo(time);
     }
 
+    // 종료 성공 - 시작과 종료가 다른 날에 존재 - 이미 StudyTime 이 존재할 때 - 카테고리에 대한
     @Test
     void endStudy_success_acrossDays_alreadyExistStudytime_byCategory() {
         // given
@@ -373,6 +375,7 @@ class StudyTimeServiceTest {
         assertThat(result).isEqualTo(time);
     }
 
+    // 종료 성공 - 시작과 종료가 다른 날에 존재 - studyTime이 존재하지 않을 때 - 카테고리에 대한
     @Test
     void endStudy_success_acrossDays_notExistStudytime_byCategory() {
         // given

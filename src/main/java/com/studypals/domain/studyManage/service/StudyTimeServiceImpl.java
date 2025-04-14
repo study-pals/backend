@@ -27,25 +27,29 @@ import com.studypals.global.exceptions.exception.StudyException;
 import com.studypals.global.utils.TimeUtils;
 
 /**
- * 코드에 대한 전체적인 역할을 적습니다.
+ * {@link StudyTimeService} 의 구현 클래스입니다.
  * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
+ * 오버라이드된 메서드와, 해당 메서드에 사용되는 private 메서드가 선언되어 있습니다. 자세한 주석은
+ * interface 에 존재합니다.
  *
  * <p><b>상속 정보:</b><br>
- * 상속 정보를 적습니다.
+ * {@code StudyTimeService} 의 구현 클래스
  *
- * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br>
- * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
  *
  * <p><b>빈 관리:</b><br>
- * 필요 시 빈 관리에 대한 내용을 적습니다.
+ * Service 빈
+ * <pre>
+ *     private final StudyStatusRedisRepository studyStatusRepository;
+ *     private final StudyTimeRepository studyTimeRepository;
+ *     private final StudyCategoryRepository studyCategoryRepository;
+ *     private final StudyTimeMapper mapper;
+ *     private final MemberRepository memberRepository;
+ *     private final TimeUtils timeUtils;
+ * </pre>>
  *
- * <p><b>외부 모듈:</b><br>
- * 필요 시 외부 모듈에 대한 내용을 적습니다.
  *
  * @author jack8
- * @see
+ * @see StudyTimeService
  * @since 2025-04-13
  */
 @Service
@@ -62,20 +66,21 @@ public class StudyTimeServiceImpl implements StudyTimeService {
     @Override
     public StartStudyDto startStudy(Long userId, StartStudyReq dto) {
 
-        // 입력 검증
-        validStartDto(dto);
-
+        // status 받아오기
         StudyStatus status = studyStatusRepository.findById(userId).orElse(null);
 
+        // 오늘 처음 공부 시
         if (status == null) {
             status = StudyStatus.builder()
                     .id(userId)
+                    .studying(true)
                     .startTime(dto.startAt())
                     .categoryId(dto.categoryId())
                     .temporaryName(dto.temporaryName())
                     .build();
 
             saveStatus(status);
+
         } else if (!status.isStudying()) {
             status = status.update()
                     .studying(true)
@@ -109,16 +114,16 @@ public class StudyTimeServiceImpl implements StudyTimeService {
         return durationInSec;
     }
 
-    private void validStartDto(StartStudyReq dto) {
-        if (dto.categoryId() != null && dto.temporaryName() != null) {
-            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL, "both category, name exist");
-        }
-
-        if (dto.categoryId() == null && dto.temporaryName() == null) {
-            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL, "both category, name null");
-        }
-    }
-
+    /**
+     * redis 에 저장된 정보가 유효한지 검증합니다. 검증 사항은 다음과 같습니다.
+     * <pre>
+     * 1. null 여부(사용자가 시작하지 않았음)
+     * 2. studying == false 여부 (사용자가 시작하지 않았음)
+     * 3. startTime null 여부(왜인지 모르겠으나 startTime이 들어가 있지 않음)
+     * </pre>
+     * null 이 아닌 경우, 잘못된 데이터가 존재하는 것이므로 공부 시간 누적을 제외하고 초기화 한다.
+     * @param status redis에 저장된 사용자의 상태
+     */
     private void validStatus(StudyStatus status) {
 
         if (status == null) {
@@ -137,6 +142,13 @@ public class StudyTimeServiceImpl implements StudyTimeService {
         }
     }
 
+    /**
+     * 시작 시간과 종료 시간에 대해 second로 반환하는 메서드.
+     * 00:00 을 기점으로 계산 로직이 달라진다.
+     * @param start 공부 시작 시간
+     * @param end 공부 종료 시간
+     * @return 초 단위 공부 시간
+     */
     private Long getTimeDuration(LocalTime start, LocalTime end) {
 
         long time;
@@ -151,35 +163,51 @@ public class StudyTimeServiceImpl implements StudyTimeService {
         return time;
     }
 
+    /**
+     * studyTime 을 최신화하는 메서드. category에 대한 공부인지, temporaryName 에 대한 공부인지에 따라
+     * 갈린다.
+     * @param userId 사용자 id
+     * @param status redis 에 저장된 사용자 상태
+     * @param studiedAt 언제 공부했는지에 대한 날짜(today)
+     * @param time 초 단위 공부 시간
+     */
     private void upsertStudyTime(Long userId, StudyStatus status, LocalDate studiedAt, Long time) {
 
         Long categoryId = status.getCategoryId();
         String temporaryName = status.getTemporaryName();
         Member member = findMember(userId);
 
+        // member 에 토큰을 업데이트
         member.addToken(calculateToken(time));
 
-        if (categoryId != null) {
+        if (categoryId != null) { // 카테고리에 대한 공부인 경우
             Optional<StudyTime> optional =
                     studyTimeRepository.findByMemberIdAndStudiedAtAndCategoryId(userId, studiedAt, categoryId);
             if (optional.isPresent()) {
-                optional.get().addTime(time);
+                optional.get().addTime(time); // 이미 해당 레코드가 존재하면, 시간만 더해준다.
             } else {
-                createNewStudyTimeWithCategory(member, categoryId, studiedAt, time);
+                createNewStudyTimeWithCategory(member, categoryId, studiedAt, time); // 해당 레코드가 존재하지 않으면 새로 저장한다.
             }
-        } else if (temporaryName != null) {
+        } else if (temporaryName != null) { // 임시 이름에 대한 공부인 경우
             Optional<StudyTime> optional =
                     studyTimeRepository.findByMemberIdAndStudiedAtAndTemporaryName(userId, studiedAt, temporaryName);
             if (optional.isPresent()) {
-                optional.get().addTime(time);
+                optional.get().addTime(time); // 이미 존재하는 경우, 시간만 더해준다.
             } else {
-                createNewStudyTimeWithTemporaryName(member, temporaryName, studiedAt, time);
+                createNewStudyTimeWithTemporaryName(member, temporaryName, studiedAt, time); // 존재하지 않는 경우 새로 저장한다.
             }
-        } else {
+        } else { // 모두 다 null 인 경우 실패
             throw new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL, "both id, name null in redis");
         }
     }
 
+    /**
+     * 카테고리에 대한 공부 일 시, 해당 메서드를 통해 studyTime 테이블에 데이터를 저장한다.
+     * @param member 사용자
+     * @param categoryId 카테고리 아이디
+     * @param studiedAt 공부 날짜(today)
+     * @param time 초 단위 공부 시간
+     */
     private void createNewStudyTimeWithCategory(Member member, Long categoryId, LocalDate studiedAt, Long time) {
         StudyCategory studyCategory = studyCategoryRepository.getReferenceById(categoryId);
         StudyTime newStudyTime = StudyTime.builder()
@@ -192,6 +220,13 @@ public class StudyTimeServiceImpl implements StudyTimeService {
         saveTime(newStudyTime);
     }
 
+    /**
+     * 임시 이름에 대한 공부 일 시, 해당 메서드를 통해 studyTime 테이블에 데이터를 저장한다.
+     * @param member 사용자
+     * @param temporaryName 임시 이름
+     * @param studiedAt 공부 날짜(today)
+     * @param time 초 단위 공부 시간
+     */
     private void createNewStudyTimeWithTemporaryName(
             Member member, String temporaryName, LocalDate studiedAt, Long time) {
 
@@ -205,6 +240,11 @@ public class StudyTimeServiceImpl implements StudyTimeService {
         saveTime(newStudyTime);
     }
 
+    /**
+     * 공부 종료 후, 해당 메서드를 통해 사용자가 공부 중이 아님을 표시하낟.
+     * @param status 기존에 존재하던 사용자의 공부 상태
+     * @param studiedTimeToAdd 사용자가 추가로 공부한 시간
+     */
     private void resetStudyStatus(StudyStatus status, Long studiedTimeToAdd) {
         status = status.update()
                 .studyTime(status.getStudyTime() + studiedTimeToAdd)
