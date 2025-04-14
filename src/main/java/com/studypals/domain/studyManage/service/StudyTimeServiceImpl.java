@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
-import com.studypals.domain.studyManage.dto.GetStudyListDto;
+import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.global.utils.TimeUtils;
@@ -43,7 +43,7 @@ public class StudyTimeServiceImpl implements StudyTimeService {
     private final StudyTimeRepository studyTimeRepository;
 
     @Override
-    public List<GetStudyListDto> getStudyList(Long userId, LocalDate date) {
+    public List<GetStudyDto> getStudyList(Long userId, LocalDate date) {
         LocalDate today = timeUtils.getToday();
         if (date.isAfter(today)) {
             return List.of();

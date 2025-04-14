@@ -14,5 +14,5 @@ import com.studypals.domain.studyManage.entity.StudyStatus;
  * @see StudyStatus
  * @since 2025-04-13
  */
-public record StartStudyDto(
+public record StartStudyRes(
         boolean studying, LocalTime startTime, Long studyTime, Long categoryId, String temporaryName) {}

@@ -2,8 +2,8 @@ package com.studypals.domain.studyManage.service;
 
 import java.time.LocalTime;
 
-import com.studypals.domain.studyManage.dto.StartStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
+import com.studypals.domain.studyManage.dto.StartStudyRes;
 
 /**
  * 공부 시간 시작/종료 등 세션에 대한 관리를 담당합니다.
@@ -32,7 +32,7 @@ public interface StudySessionService {
      * @param dto 카테고리 혹은 이름 , 시작 시간
      * @return 카테고리, 시작 시간  등
      */
-    StartStudyDto startStudy(Long userId, StartStudyReq dto);
+    StartStudyRes startStudy(Long userId, StartStudyReq dto);
 
     /**
      * 공부 종료 시 해당 메서드를 사용합니다. 모든 공부 시간은 오전 6시에 초기화 됩니다. 배치 작업에 대하여 6시

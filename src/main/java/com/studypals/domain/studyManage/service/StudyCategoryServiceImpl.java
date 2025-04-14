@@ -1,5 +1,6 @@
 package com.studypals.domain.studyManage.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -62,6 +63,18 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     public List<GetCategoryRes> getUserCategory(Long userId) {
 
         return studyCategoryRepository.findByMemberId(userId).stream()
+                .map(categoryMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GetCategoryRes> getUserCategoryByDate(Long userId, LocalDate date) {
+
+        int dayBit = 1 << (date.getDayOfWeek().getValue() - 1);
+
+        return studyCategoryRepository.findByMemberId(userId).stream()
+                .filter(category -> (category.getDayBelong() & dayBit) != 0)
                 .map(categoryMapper::toDto)
                 .toList();
     }

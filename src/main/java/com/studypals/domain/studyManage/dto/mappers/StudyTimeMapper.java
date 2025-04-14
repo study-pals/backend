@@ -3,8 +3,8 @@ package com.studypals.domain.studyManage.dto.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.studypals.domain.studyManage.dto.GetStudyListDto;
-import com.studypals.domain.studyManage.dto.StartStudyDto;
+import com.studypals.domain.studyManage.dto.GetStudyDto;
+import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
 
@@ -18,8 +18,8 @@ import com.studypals.domain.studyManage.entity.StudyTime;
 @Mapper(componentModel = "spring")
 public interface StudyTimeMapper {
 
-    StartStudyDto toDto(StudyStatus entity);
+    StartStudyRes toDto(StudyStatus entity);
 
     @Mapping(target = "categoryId", source = "category.id")
-    GetStudyListDto toDto(StudyTime entity);
+    GetStudyDto toDto(StudyTime entity);
 }

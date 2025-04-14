@@ -14,8 +14,8 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
-import com.studypals.domain.studyManage.dto.StartStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
+import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
@@ -64,7 +64,7 @@ public class StudySessionServiceImpl implements StudySessionService {
     private final TimeUtils timeUtils;
 
     @Override
-    public StartStudyDto startStudy(Long userId, StartStudyReq dto) {
+    public StartStudyRes startStudy(Long userId, StartStudyReq dto) {
 
         // status 받아오기
         StudyStatus status = studyStatusRepository.findById(userId).orElse(null);

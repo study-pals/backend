@@ -6,4 +6,4 @@ package com.studypals.domain.studyManage.dto;
  * @author jack8
  * @since 2025-04-14
  */
-public record GetStudyListDto(Long categoryId, String temporaryName, Long time) {}
+public record GetStudyDto(Long categoryId, String temporaryName, Long time) {}

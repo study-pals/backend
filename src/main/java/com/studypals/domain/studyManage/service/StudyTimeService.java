@@ -3,7 +3,7 @@ package com.studypals.domain.studyManage.service;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.studypals.domain.studyManage.dto.GetStudyListDto;
+import com.studypals.domain.studyManage.dto.GetStudyDto;
 
 /**
  * 공부 시간을 반환하거나, 통계를 담당합니다.
@@ -25,5 +25,5 @@ public interface StudyTimeService {
      * @param date 찾고자 하는 날짜
      * @return 해당 날짜에 사용자가 공부한 카테고리id or 이름 - 시간(초 단위)
      */
-    List<GetStudyListDto> getStudyList(Long userId, LocalDate date);
+    List<GetStudyDto> getStudyList(Long userId, LocalDate date);
 }

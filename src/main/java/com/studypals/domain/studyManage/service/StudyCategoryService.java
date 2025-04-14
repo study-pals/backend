@@ -1,5 +1,6 @@
 package com.studypals.domain.studyManage.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
@@ -33,6 +34,8 @@ public interface StudyCategoryService {
      * @return 카테고리 리스트. 만약 없으면 빈 리스트가 반환된다.
      */
     List<GetCategoryRes> getUserCategory(Long userId);
+
+    List<GetCategoryRes> getUserCategoryByDate(Long userId, LocalDate date);
 
     /**
      * 카테고리 update를 위한 메서드.
