@@ -24,4 +24,5 @@ import java.time.LocalTime;
  * @see
  * @since 2025-04-13
  */
-public record StartStudyDto(String status, LocalTime startTime, Long categoryId) {}
+public record StartStudyDto(
+        boolean studying, LocalTime startTime, Long studyTime, Long categoryId, String temporaryName) {}

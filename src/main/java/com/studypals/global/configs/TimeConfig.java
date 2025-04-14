@@ -1,9 +1,9 @@
-package com.studypals.domain.studyManage.service;
+package com.studypals.global.configs;
 
-import java.time.LocalTime;
+import java.time.Clock;
 
-import com.studypals.domain.studyManage.dto.StartStudyDto;
-import com.studypals.domain.studyManage.dto.StartStudyReq;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
@@ -25,11 +25,13 @@ import com.studypals.domain.studyManage.dto.StartStudyReq;
  *
  * @author jack8
  * @see
- * @since 2025-04-13
+ * @since 2025-04-14
  */
-public interface StudyTimeService {
+@Configuration
+public class TimeConfig {
 
-    StartStudyDto startStudy(Long userId, StartStudyReq dto);
-
-    Long endStudy(Long userId, LocalTime endedAt);
+    @Bean
+    public Clock systemClock() {
+        return Clock.systemDefaultZone();
+    }
 }

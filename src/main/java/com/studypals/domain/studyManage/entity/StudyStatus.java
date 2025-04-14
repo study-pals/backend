@@ -47,6 +47,8 @@ public class StudyStatus {
 
     private Long categoryId;
 
+    private String temporaryName;
+
     @TimeToLive(unit = TimeUnit.DAYS)
     @Builder.Default
     private Long expiration = 1L;

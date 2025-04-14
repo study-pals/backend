@@ -24,4 +24,4 @@ import java.time.LocalTime;
  * @see
  * @since 2025-04-13
  */
-public record StartStudyReq(Long categoryId, LocalTime startAt) {}
+public record StartStudyReq(Long categoryId, String temporaryName, LocalTime startAt) {}
