@@ -7,6 +7,8 @@ import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
@@ -95,9 +97,11 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
+                        pathParameters(
+                                parameterWithName("date").description("조회할 날짜").attributes(constraints("YYYY-MM-DD"))),
                         responseFields(
-                                fieldWithPath("code").description("U03-04 고정"),
-                                fieldWithPath("status").description("응답 상태 (예: success 또는 fail)"),
+                                fieldWithPath("code").description("응답 코드"),
+                                fieldWithPath("status").description("응답 상태"),
                                 fieldWithPath("message").description("응답 메시지"),
                                 fieldWithPath("data[].categoryId")
                                         .description("카테고리 ID")

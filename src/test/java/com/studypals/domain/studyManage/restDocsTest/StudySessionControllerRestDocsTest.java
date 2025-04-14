@@ -63,16 +63,20 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                         httpRequest(),
                         httpResponse(),
                         requestFields(
-                                fieldWithPath("categoryId").description("카테고리 ID (nullable, temporaryName과 상호 배타적)"),
-                                fieldWithPath("temporaryName").description("임시 카테고리 이름 (nullable, categoryId와 상호 배타적)"),
+                                fieldWithPath("categoryId")
+                                        .description("카테고리 ID")
+                                        .attributes(constraints("temporaryName과 상호 베타적")),
+                                fieldWithPath("temporaryName")
+                                        .description("임시 카테고리 이름")
+                                        .attributes(constraints("categoryId 와 상호 베타적")),
                                 fieldWithPath("startAt").description("공부 시작 시간 - HH:mm 형식")),
                         responseFields(
                                 fieldWithPath("code").description("U03-03 고정"),
                                 fieldWithPath("status").description("응답 상태 (예: success 또는 fail)"),
                                 fieldWithPath("message").description("응답 메시지"),
-                                fieldWithPath("data.studying").description("공부 중 여부 (true 고정)"),
+                                fieldWithPath("data.studying").description("공부 중 여부"),
                                 fieldWithPath("data.startTime").description("공부 시작 시간"),
-                                fieldWithPath("data.studyTime").description("현재까지 누적 공부 시간 (기본값: 0)"),
+                                fieldWithPath("data.studyTime").description("현재까지 누적 공부 시간"),
                                 fieldWithPath("data.categoryId").description("카테고리 ID"),
                                 fieldWithPath("data.temporaryName").description("임시 카테고리 이름"))));
     }
