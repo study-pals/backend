@@ -22,8 +22,8 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
-import com.studypals.domain.studyManage.dto.StartStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
+import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
@@ -78,13 +78,13 @@ class StudySessionServiceTest {
         Long categoryId = 1L;
         LocalTime time = LocalTime.of(12, 30, 30);
         StartStudyReq dto = new StartStudyReq(categoryId, null, time);
-        StartStudyDto ans = new StartStudyDto(true, time, 0L, categoryId, null);
+        StartStudyRes ans = new StartStudyRes(true, time, 0L, categoryId, null);
 
         given(studyStatusRepository.findById(userId)).willReturn(Optional.empty());
         given(mapper.toDto(any(StudyStatus.class))).willReturn(ans);
 
         // when
-        StartStudyDto value = studySessionService.startStudy(userId, dto);
+        StartStudyRes value = studySessionService.startStudy(userId, dto);
 
         // then
         ArgumentCaptor<StudyStatus> captor = ArgumentCaptor.forClass(StudyStatus.class);
@@ -108,13 +108,13 @@ class StudySessionServiceTest {
         String name = "name";
         LocalTime time = LocalTime.of(12, 30, 30);
         StartStudyReq dto = new StartStudyReq(null, name, time);
-        StartStudyDto ans = new StartStudyDto(true, time, 0L, null, name);
+        StartStudyRes ans = new StartStudyRes(true, time, 0L, null, name);
 
         given(studyStatusRepository.findById(userId)).willReturn(Optional.empty());
         given(mapper.toDto(any(StudyStatus.class))).willReturn(ans);
 
         // when
-        StartStudyDto value = studySessionService.startStudy(userId, dto);
+        StartStudyRes value = studySessionService.startStudy(userId, dto);
 
         // then
         ArgumentCaptor<StudyStatus> captor = ArgumentCaptor.forClass(StudyStatus.class);
@@ -139,13 +139,13 @@ class StudySessionServiceTest {
         LocalTime time = LocalTime.of(12, 30, 30);
         StartStudyReq dto = new StartStudyReq(categoryId, null, time);
         StudyStatus existStatus = new StudyStatus(userId, false, null, 3400L, null, null, 1L);
-        StartStudyDto ans = new StartStudyDto(true, time, 3400L, categoryId, null);
+        StartStudyRes ans = new StartStudyRes(true, time, 3400L, categoryId, null);
 
         given(studyStatusRepository.findById(userId)).willReturn(Optional.of(existStatus));
         given(mapper.toDto(any(StudyStatus.class))).willReturn(ans);
 
         // when
-        StartStudyDto value = studySessionService.startStudy(userId, dto);
+        StartStudyRes value = studySessionService.startStudy(userId, dto);
 
         // then
         ArgumentCaptor<StudyStatus> captor = ArgumentCaptor.forClass(StudyStatus.class);
@@ -173,13 +173,13 @@ class StudySessionServiceTest {
 
         StartStudyReq dto = new StartStudyReq(categoryId, null, afterTime);
         StudyStatus existStatus = new StudyStatus(userId, true, time, 3400L, categoryId, null, 1L);
-        StartStudyDto ans = new StartStudyDto(true, time, 3400L, categoryId, null);
+        StartStudyRes ans = new StartStudyRes(true, time, 3400L, categoryId, null);
 
         given(studyStatusRepository.findById(userId)).willReturn(Optional.of(existStatus));
         given(mapper.toDto(any(StudyStatus.class))).willReturn(ans);
 
         // when
-        StartStudyDto value = studySessionService.startStudy(userId, dto);
+        StartStudyRes value = studySessionService.startStudy(userId, dto);
 
         // then
         ArgumentCaptor<StudyStatus> captor = ArgumentCaptor.forClass(StudyStatus.class);

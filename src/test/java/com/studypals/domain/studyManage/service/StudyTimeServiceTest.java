@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
-import com.studypals.domain.studyManage.dto.GetStudyListDto;
+import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.global.utils.TimeUtils;
@@ -53,7 +53,7 @@ class StudyTimeServiceTest {
         given(timeUtils.getToday()).willReturn(today);
 
         // when
-        List<GetStudyListDto> result = studyTimeService.getStudyList(userId, future);
+        List<GetStudyDto> result = studyTimeService.getStudyList(userId, future);
 
         // then
         assertThat(result).isEmpty();
@@ -66,14 +66,14 @@ class StudyTimeServiceTest {
         // given
         Long userId = 1L;
         LocalDate today = LocalDate.of(2025, 4, 14);
-        GetStudyListDto dto = new GetStudyListDto(1L, null, 3600L);
+        GetStudyDto dto = new GetStudyDto(1L, null, 3600L);
 
         given(timeUtils.getToday()).willReturn(today);
         given(studyTimeRepository.findByMemberIdAndStudiedAt(userId, today)).willReturn(List.of(mockStudyTime));
         given(mapper.toDto(mockStudyTime)).willReturn(dto);
 
         // when
-        List<GetStudyListDto> result = studyTimeService.getStudyList(userId, today);
+        List<GetStudyDto> result = studyTimeService.getStudyList(userId, today);
 
         // then
         assertThat(result).hasSize(1);
@@ -90,7 +90,7 @@ class StudyTimeServiceTest {
         given(studyTimeRepository.findByMemberIdAndStudiedAt(userId, today)).willReturn(List.of());
 
         // when
-        List<GetStudyListDto> result = studyTimeService.getStudyList(userId, today);
+        List<GetStudyDto> result = studyTimeService.getStudyList(userId, today);
 
         // then
         assertThat(result).isEmpty();
