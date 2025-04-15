@@ -3,6 +3,7 @@ package com.studypals.domain.groupManage.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 
 import java.util.List;
 
@@ -14,12 +15,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
+import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupTag;
-import com.studypals.domain.groupManage.worker.GroupMemberWorker;
-import com.studypals.domain.groupManage.worker.GroupReader;
-import com.studypals.domain.groupManage.worker.GroupWorker;
+import com.studypals.domain.groupManage.worker.*;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
@@ -43,6 +43,12 @@ public class GroupServiceTest {
 
     @Mock
     private GroupMemberWorker groupMemberWorker;
+
+    @Mock
+    private GroupAuthorityValidator authorityValidator;
+
+    @Mock
+    private GroupEntryCodeGenerator entryCodeGenerator;
 
     @Mock
     private GroupMapper groupMapper;
@@ -114,6 +120,57 @@ public class GroupServiceTest {
 
         // when & then
         assertThatThrownBy(() -> groupService.createGroup(userId, req))
+                .isInstanceOf(GroupException.class)
+                .extracting("errorCode")
+                .isEqualTo(errorCode);
+    }
+
+    @Test
+    void generateEntryCode_success() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        String entryCode = "A1B2C3";
+        GroupEntryCodeRes expected = new GroupEntryCodeRes(groupId, entryCode);
+
+        given(mockGroup.getId()).willReturn(groupId);
+        given(groupFinder.getById(groupId)).willReturn(mockGroup);
+        given(entryCodeGenerator.generate(groupId)).willReturn(entryCode);
+
+        // when
+        GroupEntryCodeRes actual = groupService.generateEntryCode(userId, groupId);
+
+        // then
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void generateEntryCode_fail_invalidAuthority() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        GroupErrorCode errorCode = GroupErrorCode.GROUP_FORBIDDEN;
+
+        willThrow(new GroupException(errorCode)).given(authorityValidator).validate(userId);
+
+        // when & then
+        assertThatThrownBy(() -> groupService.generateEntryCode(userId, groupId))
+                .isInstanceOf(GroupException.class)
+                .extracting("errorCode")
+                .isEqualTo(errorCode);
+    }
+
+    @Test
+    void generateEntryCode_fail_groupNotFound() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        GroupErrorCode errorCode = GroupErrorCode.GROUP_NOT_FOUND;
+
+        given(groupFinder.getById(groupId)).willThrow(new GroupException(errorCode));
+
+        // when & then
+        assertThatThrownBy(() -> groupService.generateEntryCode(userId, groupId))
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
