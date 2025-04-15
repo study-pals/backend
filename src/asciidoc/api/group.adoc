@@ -23,7 +23,8 @@
 | 06 | 유저 → 그룹 탈퇴
 | 07 | 그룹 → 유저 강퇴
 | 08 | 그룹 → 유저 초대
-| 09 | 그룹 태그 조회
+| 09 | 그룹 초대 코드 생성
+| 10 | 그룹 태그 조회
 |===
 
 == ✨ API 문서
@@ -74,3 +75,25 @@ include::{snippets}/group-controller-rest-docs-test/create-group_success/http-re
 
 include::{snippets}/group-controller-rest-docs-test/create-group_success/response-headers.adoc[]
 include::{snippets}/group-controller-rest-docs-test/create-group_success/http-response.adoc[]
+
+==== 3. 초대 코드 생성
+
+*Description* +
+
+'''
+
+그룹 초대 코드 생성을 위해 사용합니다.
+
+*Request* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/http-request.adoc[]
+
+*Response* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/response-headers.adoc[]
+include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/response-fields.adoc[]
+include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/http-response.adoc[]
