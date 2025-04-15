@@ -10,6 +10,18 @@ import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.entity.GroupTag;
 
+/**
+ * group 도메인의 기본 Worker 클래스입니다.
+ *
+ * <p>group 관련 CUD 로직을 수행합니다.
+ *
+ *
+ * <p><b>빈 관리:</b><br>
+ * Worker
+ *
+ * @author s0o0bn
+ * @since 2025-04-15
+ */
 @Component
 @RequiredArgsConstructor
 public class GroupFinder {

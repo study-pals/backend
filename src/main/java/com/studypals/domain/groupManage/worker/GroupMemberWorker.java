@@ -14,6 +14,18 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
+/**
+ * group member 도메인의 기본 Worker 클래스입니다.
+ *
+ * <p>group member 관련 CUD 로직을 수행합니다.
+ *
+ *
+ * <p><b>빈 관리:</b><br>
+ * Worker
+ *
+ * @author s0o0bn
+ * @since 2025-04-15
+ */
 @Component
 @RequiredArgsConstructor
 public class GroupMemberWorker {
