@@ -8,20 +8,13 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.dao.GroupMemberRepository;
-import com.studypals.domain.groupManage.dao.GroupRepository;
-import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
-import com.studypals.domain.groupManage.dto.mappers.GroupMemberMapper;
 import com.studypals.domain.groupManage.entity.Group;
-import com.studypals.domain.groupManage.entity.GroupMember;
-import com.studypals.domain.groupManage.entity.GroupRole;
-import com.studypals.domain.memberManage.dao.MemberRepository;
-import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.global.exceptions.errorCode.GroupErrorCode;
-import com.studypals.global.exceptions.exception.GroupException;
+import com.studypals.domain.groupManage.worker.GroupFinder;
+import com.studypals.domain.groupManage.worker.GroupMemberWorker;
+import com.studypals.domain.groupManage.worker.GroupWorker;
 
 /**
  * group service 의 구현 클래스입니다.
@@ -41,37 +34,22 @@ import com.studypals.global.exceptions.exception.GroupException;
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
-    private final MemberRepository memberRepository;
-    private final GroupRepository groupRepository;
-    private final GroupMemberRepository groupMemberRepository;
-    private final GroupTagRepository groupTagRepository;
+    private final GroupWorker groupWorker;
+    private final GroupFinder groupFinder;
+    private final GroupMemberWorker groupMemberWorker;
 
     private final GroupMapper groupMapper;
-    private final GroupMemberMapper groupMemberMapper;
 
     @Override
     public List<GetGroupTagRes> getGroupTags() {
-        return groupTagRepository.findAll().stream().map(groupMapper::toTagDto).toList();
+        return groupFinder.getGroupTags().stream().map(groupMapper::toTagDto).toList();
     }
 
     @Override
     @Transactional
     public Long createGroup(Long userId, CreateGroupReq dto) {
-        Group group = groupMapper.toEntity(dto);
-        if (!groupTagRepository.existsById(dto.tag())) {
-            throw new GroupException(GroupErrorCode.GROUP_CREATE_FAIL, "no such tag.");
-        }
-
-        try {
-            groupRepository.save(group);
-
-            Member creator = memberRepository.getReferenceById(userId);
-            GroupMember leader = groupMemberMapper.toEntity(creator, group, GroupRole.LEADER);
-            groupMemberRepository.save(leader);
-        } catch (Exception e) {
-            throw new GroupException(GroupErrorCode.GROUP_CREATE_FAIL);
-        }
-
+        Group group = groupWorker.create(dto);
+        groupMemberWorker.createLeader(userId, group);
         return group.getId();
     }
 }
