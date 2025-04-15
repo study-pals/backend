@@ -17,8 +17,8 @@ import com.studypals.domain.groupManage.dto.GetGroupTagRes;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupTag;
-import com.studypals.domain.groupManage.worker.GroupFinder;
 import com.studypals.domain.groupManage.worker.GroupMemberWorker;
+import com.studypals.domain.groupManage.worker.GroupReader;
 import com.studypals.domain.groupManage.worker.GroupWorker;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
@@ -39,7 +39,7 @@ public class GroupServiceTest {
     private GroupWorker groupWorker;
 
     @Mock
-    private GroupFinder groupFinder;
+    private GroupReader groupReader;
 
     @Mock
     private GroupMemberWorker groupMemberWorker;
@@ -61,7 +61,7 @@ public class GroupServiceTest {
         // given
         GetGroupTagRes res = new GetGroupTagRes(mockGroupTag.getName());
 
-        given(groupFinder.getGroupTags()).willReturn(List.of(mockGroupTag));
+        given(groupReader.getGroupTags()).willReturn(List.of(mockGroupTag));
         given(groupMapper.toTagDto(mockGroupTag)).willReturn(res);
 
         // when

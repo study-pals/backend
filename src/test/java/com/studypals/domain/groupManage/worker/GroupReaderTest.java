@@ -16,16 +16,16 @@ import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.entity.GroupTag;
 
 /**
- * {@link GroupFinder} 에 대한 단위 테스트입니다.
+ * {@link GroupReader} 에 대한 단위 테스트입니다.
  *
  * <p>성공 케이스와 예외 케이스에 대한 테스트입니다.
  *
  * @author s0o0bn
- * @see GroupFinder
+ * @see GroupReader
  * @since 2025-04-15
  */
 @ExtendWith(MockitoExtension.class)
-public class GroupFinderTest {
+public class GroupReaderTest {
 
     @Mock
     private GroupRepository groupRepository;
@@ -37,7 +37,7 @@ public class GroupFinderTest {
     private GroupTag mockGroupTag;
 
     @InjectMocks
-    private GroupFinder groupFinder;
+    private GroupReader groupReader;
 
     @Test
     void getGroupTags_success() {
@@ -46,7 +46,7 @@ public class GroupFinderTest {
         given(groupTagRepository.findAll()).willReturn(tags);
 
         // when
-        List<GroupTag> actual = groupFinder.getGroupTags();
+        List<GroupTag> actual = groupReader.getGroupTags();
 
         // then
         assertThat(actual).isEqualTo(tags);

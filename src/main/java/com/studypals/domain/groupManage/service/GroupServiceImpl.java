@@ -12,8 +12,8 @@ import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
-import com.studypals.domain.groupManage.worker.GroupFinder;
 import com.studypals.domain.groupManage.worker.GroupMemberWorker;
+import com.studypals.domain.groupManage.worker.GroupReader;
 import com.studypals.domain.groupManage.worker.GroupWorker;
 
 /**
@@ -35,14 +35,14 @@ import com.studypals.domain.groupManage.worker.GroupWorker;
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
     private final GroupWorker groupWorker;
-    private final GroupFinder groupFinder;
+    private final GroupReader groupReader;
     private final GroupMemberWorker groupMemberWorker;
 
     private final GroupMapper groupMapper;
 
     @Override
     public List<GetGroupTagRes> getGroupTags() {
-        return groupFinder.getGroupTags().stream().map(groupMapper::toTagDto).toList();
+        return groupReader.getGroupTags().stream().map(groupMapper::toTagDto).toList();
     }
 
     @Override

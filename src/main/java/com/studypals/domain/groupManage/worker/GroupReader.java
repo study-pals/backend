@@ -23,7 +23,7 @@ import com.studypals.global.annotations.Worker;
  */
 @Worker
 @RequiredArgsConstructor
-public class GroupFinder {
+public class GroupReader {
     private final GroupRepository groupRepository;
     private final GroupTagRepository groupTagRepository;
 
