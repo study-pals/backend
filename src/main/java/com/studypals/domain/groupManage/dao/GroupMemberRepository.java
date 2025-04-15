@@ -1,6 +1,9 @@
 package com.studypals.domain.groupManage.dao;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.groupManage.entity.GroupMember;
@@ -18,4 +21,8 @@ import com.studypals.domain.groupManage.entity.GroupMember;
  * @since 2025-04-12
  */
 @Repository
-public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> {}
+public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> {
+
+    @Query(value = "SELECT * FROM group_member WHERE member_id = :userId", nativeQuery = true)
+    Optional<GroupMember> findByMemberId(Long userId);
+}

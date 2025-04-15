@@ -51,4 +51,8 @@ public class GroupMember {
     @Column(name = "joined_at", nullable = false)
     @CreatedDate
     private LocalDate joinedAt;
+
+    public boolean isLeader() {
+        return role.equals(GroupRole.LEADER);
+    }
 }

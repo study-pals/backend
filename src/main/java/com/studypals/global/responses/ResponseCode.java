@@ -32,7 +32,9 @@ public enum ResponseCode {
     GROUP_LEAVE("U02-06"),
     GROUP_KICK("U02-07"),
     GROUP_INVITE("U02-08"),
-    GROUP_TAG_LIST("U02-09"),
+    GROUP_ENTRY_CODE("U02-09"),
+    GROUP_TAG_LIST("U02-10"),
+    GROUP_LEADER("U02-11"),
 
     // U03 - User Study & Time
     STUDY_TIME_ALL("U03-00"),
