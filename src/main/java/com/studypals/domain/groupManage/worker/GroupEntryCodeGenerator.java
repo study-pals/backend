@@ -27,7 +27,7 @@ public class GroupEntryCodeGenerator {
 
     private final GroupEntryCodeRedisRepository groupEntryCodeRepository;
 
-    public String generateEntryCode(Long groupId) {
+    public String generate(Long groupId) {
         String code = RandomUtils.generateUpperAlphaNumericCode(GROUP_ENTRY_CODE_LENGTH);
         GroupEntryCode entryCode = new GroupEntryCode(groupId, code);
         groupEntryCodeRepository.save(entryCode);
