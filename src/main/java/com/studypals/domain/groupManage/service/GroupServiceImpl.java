@@ -2,19 +2,17 @@ package com.studypals.domain.groupManage.service;
 
 import java.util.List;
 
-import jakarta.transaction.Transactional;
-
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
+import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
-import com.studypals.domain.groupManage.worker.GroupMemberWorker;
-import com.studypals.domain.groupManage.worker.GroupReader;
-import com.studypals.domain.groupManage.worker.GroupWorker;
+import com.studypals.domain.groupManage.worker.*;
 
 /**
  * group service 의 구현 클래스입니다.
@@ -37,6 +35,8 @@ public class GroupServiceImpl implements GroupService {
     private final GroupWorker groupWorker;
     private final GroupReader groupReader;
     private final GroupMemberWorker groupMemberWorker;
+    private final GroupAuthorityValidator authorityValidator;
+    private final GroupEntryCodeGenerator entryCodeGenerator;
 
     private final GroupMapper groupMapper;
 
@@ -51,5 +51,15 @@ public class GroupServiceImpl implements GroupService {
         Group group = groupWorker.create(dto);
         groupMemberWorker.createLeader(userId, group);
         return group.getId();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
+        authorityValidator.validate(userId);
+        Group group = groupFinder.getById(groupId);
+        String entryCode = entryCodeGenerator.generateEntryCode(group.getId());
+
+        return new GroupEntryCodeRes(group.getId(), entryCode);
     }
 }
