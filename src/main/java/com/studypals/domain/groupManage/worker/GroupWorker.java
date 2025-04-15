@@ -1,7 +1,5 @@
 package com.studypals.domain.groupManage.worker;
 
-import org.springframework.stereotype.Component;
-
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupRepository;
@@ -9,6 +7,7 @@ import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
@@ -24,7 +23,7 @@ import com.studypals.global.exceptions.exception.GroupException;
  * @author s0o0bn
  * @since 2025-04-15
  */
-@Component
+@Worker
 @RequiredArgsConstructor
 public class GroupWorker {
     private final GroupRepository groupRepository;
