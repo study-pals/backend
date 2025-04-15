@@ -10,6 +10,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
 import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
 
@@ -25,7 +26,12 @@ import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
  * @since 2025-04-04
  */
 @Configuration
-@EnableRedisRepositories(basePackageClasses = {RefreshTokenRedisRepository.class, StudyStatusRedisRepository.class})
+@EnableRedisRepositories(
+        basePackageClasses = {
+            RefreshTokenRedisRepository.class,
+            StudyStatusRedisRepository.class,
+            GroupEntryCodeRedisRepository.class
+        })
 public class RedisConfig {
 
     @Value("${spring.data.redis.host}")
