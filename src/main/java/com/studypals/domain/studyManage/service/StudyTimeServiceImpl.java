@@ -4,13 +4,14 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.studyManage.dao.StudyTimeRepository;
 import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyTime;
+import com.studypals.domain.studyManage.worker.StudyTimeWorker;
 import com.studypals.global.utils.TimeUtils;
 
 /**
@@ -40,16 +41,17 @@ public class StudyTimeServiceImpl implements StudyTimeService {
 
     private final TimeUtils timeUtils;
     private final StudyTimeMapper mapper;
-    private final StudyTimeRepository studyTimeRepository;
+    private final StudyTimeWorker studyTimeWorker;
 
     @Override
+    @Transactional(readOnly = true)
     public List<GetStudyDto> getStudyList(Long userId, LocalDate date) {
         LocalDate today = timeUtils.getToday();
         if (date.isAfter(today)) {
             return List.of();
         }
 
-        List<StudyTime> times = studyTimeRepository.findByMemberIdAndStudiedAt(userId, date);
+        List<StudyTime> times = studyTimeWorker.findDateStudyByMember(userId, date);
 
         return times.stream().map(mapper::toDto).toList();
     }

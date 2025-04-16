@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
 import com.studypals.domain.memberManage.dto.CreateRefreshTokenDto;
 import com.studypals.domain.memberManage.dto.ReissueTokenRes;
 import com.studypals.domain.memberManage.entity.RefreshToken;
+import com.studypals.domain.memberManage.worker.RefreshTokenWorker;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.exception.AuthException;
 import com.studypals.global.security.jwt.JwtToken;
@@ -32,7 +32,7 @@ import com.studypals.global.security.jwt.JwtUtils;
 @Service
 public class TokenServiceImpl implements TokenService {
 
-    private final RefreshTokenRedisRepository refreshTokenRedisRepository;
+    private final RefreshTokenWorker refreshTokenWorker;
     private final JwtUtils jwtUtils;
 
     /**
@@ -86,7 +86,7 @@ public class TokenServiceImpl implements TokenService {
     public void saveRefreshToken(CreateRefreshTokenDto dto) {
         RefreshToken refreshToken = dto.toRefreshToken(30L);
 
-        refreshTokenRedisRepository.save(refreshToken);
+        refreshTokenWorker.saveToken(refreshToken);
     }
 
     /**
@@ -96,7 +96,7 @@ public class TokenServiceImpl implements TokenService {
      * @return Optional 인 refresh token
      */
     private Optional<String> getRefreshToken(Long userId) {
-        Optional<RefreshToken> token = refreshTokenRedisRepository.findById(userId);
+        Optional<RefreshToken> token = refreshTokenWorker.findToken(userId);
         return token.map(RefreshToken::getToken);
     }
 }
