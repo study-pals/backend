@@ -14,36 +14,26 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
 import com.studypals.domain.memberManage.dto.CreateRefreshTokenDto;
 import com.studypals.domain.memberManage.dto.ReissueTokenRes;
 import com.studypals.domain.memberManage.entity.RefreshToken;
+import com.studypals.domain.memberManage.worker.RefreshTokenWorker;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.exception.AuthException;
 import com.studypals.global.security.jwt.JwtToken;
 import com.studypals.global.security.jwt.JwtUtils;
 
 /**
- * <br>
- * package name : com.studypals.domain.memberManage.service <br>
- * file name : TokenServiceTest <br>
- * date : 4/8/25
+ * {@link TokenService} 에 대한 단위 테스트입니다.
  *
- * <pre>
- * <span style="color: white;">[description]</span>
- *
- * </pre>
- *
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
- *
- * } </pre>
+ * @author jack8
+ * @see TokenService
+ * @since 2025-04-07
  */
 @ExtendWith(MockitoExtension.class)
 class TokenServiceTest {
     @Mock
-    private RefreshTokenRedisRepository refreshTokenRedisRepository;
+    private RefreshTokenWorker refreshTokenWorker;
 
     @Mock
     private JwtUtils jwtUtils;
@@ -78,7 +68,7 @@ class TokenServiceTest {
         JwtUtils.JwtData tokenData = new JwtUtils.JwtData(userId);
 
         given(jwtUtils.tokenInfo(accessToken)).willReturn(tokenData);
-        given(refreshTokenRedisRepository.findById(userId)).willReturn(Optional.of(savedRefreshToken));
+        given(refreshTokenWorker.findToken(userId)).willReturn(Optional.of(savedRefreshToken));
         given(jwtUtils.createJwt(userId)).willReturn(newToken);
 
         // when
@@ -109,7 +99,7 @@ class TokenServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(AuthErrorCode.USER_AUTH_FAIL);
 
-        then(refreshTokenRedisRepository).shouldHaveNoInteractions();
+        then(refreshTokenWorker).shouldHaveNoInteractions();
     }
 
     @Test
@@ -125,7 +115,7 @@ class TokenServiceTest {
 
         given(jwtUtils.tokenInfo(accessToken)).willReturn(new JwtUtils.JwtData(1L));
 
-        given(refreshTokenRedisRepository.findById(1L))
+        given(refreshTokenWorker.findToken(1L))
                 .willReturn(Optional.of(new RefreshToken(1L, "unmatched_refresh_token", 30L)));
 
         // when & then
@@ -148,6 +138,6 @@ class TokenServiceTest {
         tokenService.saveRefreshToken(dto);
 
         // then
-        then(refreshTokenRedisRepository).should().save(any());
+        then(refreshTokenWorker).should().saveToken(any());
     }
 }

@@ -13,10 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.studyManage.dao.StudyTimeRepository;
 import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyTime;
+import com.studypals.domain.studyManage.worker.StudyTimeWorker;
 import com.studypals.global.utils.TimeUtils;
 
 /**
@@ -32,7 +32,7 @@ class StudyTimeServiceTest {
     private TimeUtils timeUtils;
 
     @Mock
-    private StudyTimeRepository studyTimeRepository;
+    private StudyTimeWorker studyTimeWorker;
 
     @Mock
     private StudyTimeMapper mapper;
@@ -57,7 +57,7 @@ class StudyTimeServiceTest {
 
         // then
         assertThat(result).isEmpty();
-        then(studyTimeRepository).shouldHaveNoInteractions();
+        then(studyTimeWorker).shouldHaveNoInteractions();
         then(mapper).shouldHaveNoInteractions();
     }
 
@@ -69,7 +69,7 @@ class StudyTimeServiceTest {
         GetStudyDto dto = new GetStudyDto(1L, null, 3600L);
 
         given(timeUtils.getToday()).willReturn(today);
-        given(studyTimeRepository.findByMemberIdAndStudiedAt(userId, today)).willReturn(List.of(mockStudyTime));
+        given(studyTimeWorker.findDateStudyByMember(userId, today)).willReturn(List.of(mockStudyTime));
         given(mapper.toDto(mockStudyTime)).willReturn(dto);
 
         // when
@@ -87,7 +87,7 @@ class StudyTimeServiceTest {
         LocalDate today = LocalDate.of(2025, 4, 14);
 
         given(timeUtils.getToday()).willReturn(today);
-        given(studyTimeRepository.findByMemberIdAndStudiedAt(userId, today)).willReturn(List.of());
+        given(studyTimeWorker.findDateStudyByMember(userId, today)).willReturn(List.of());
 
         // when
         List<GetStudyDto> result = studyTimeService.getStudyList(userId, today);

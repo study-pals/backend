@@ -1,5 +1,6 @@
 package com.studypals.testModules.testUtils;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 
@@ -16,12 +17,14 @@ public class GlobalTestInitializer implements TestExecutionListener {
     @Override
     public void beforeTestClass(TestContext testContext) {
         if (!alreadyInitialized) {
-            System.out.println("clean up all Data base");
-
-            CleanUp cleanUp = testContext.getApplicationContext().getBean(CleanUp.class);
-            cleanUp.all();
-
-            alreadyInitialized = true;
+            ApplicationContext ctx = testContext.getApplicationContext();
+            if (ctx.containsBean("cleanUp")) {
+                CleanUp cleanUp = ctx.getBean(CleanUp.class);
+                cleanUp.all();
+                alreadyInitialized = true;
+            } else {
+                System.out.println("[WARN] CleanUp 빈이 없어서 초기화 스킵됨.");
+            }
         }
     }
 }

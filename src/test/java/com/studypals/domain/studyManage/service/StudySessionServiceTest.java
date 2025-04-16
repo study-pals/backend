@@ -1,35 +1,24 @@
 package com.studypals.domain.studyManage.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.memberManage.dao.MemberRepository;
-import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
-import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
-import com.studypals.domain.studyManage.dao.StudyTimeRepository;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
-import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
-import com.studypals.domain.studyManage.entity.StudyTime;
-import com.studypals.global.exceptions.errorCode.StudyErrorCode;
-import com.studypals.global.exceptions.exception.StudyException;
+import com.studypals.domain.studyManage.worker.StudySessionWorker;
+import com.studypals.domain.studyManage.worker.StudyStatusWorker;
 import com.studypals.global.utils.TimeUtils;
 
 /**
@@ -42,457 +31,144 @@ import com.studypals.global.utils.TimeUtils;
 class StudySessionServiceTest {
 
     @Mock
-    private StudyStatusRedisRepository studyStatusRepository;
+    private StudySessionWorker studySessionWorker;
 
     @Mock
-    private StudyTimeRepository studyTimeRepository;
-
-    @Mock
-    private StudyCategoryRepository studyCategoryRepository;
+    private StudyStatusWorker studyStatusWorker;
 
     @Mock
     private StudyTimeMapper mapper;
 
     @Mock
-    private MemberRepository memberRepository;
-
-    @Mock
     private TimeUtils timeUtils;
-
-    @Mock
-    private StudyTime mockStudyTime;
-
-    @Mock
-    private StudyCategory mockStudyCategory;
-
-    @Mock
-    private Member mockMember;
 
     @InjectMocks
     private StudySessionServiceImpl studySessionService;
 
     @Test
-    void startStudy_success_firstCategory() { // 해당 메서드의 테스트케이스는 mockStudyStatus 를 쓰지 않았다 / 직접적인 값 검증 필요
-        // given
-        Long userId = 0L;
-        Long categoryId = 1L;
-        LocalTime time = LocalTime.of(12, 30, 30);
-        StartStudyReq dto = new StartStudyReq(categoryId, null, time);
-        StartStudyRes ans = new StartStudyRes(true, time, 0L, categoryId, null);
-
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.empty());
-        given(mapper.toDto(any(StudyStatus.class))).willReturn(ans);
-
-        // when
-        StartStudyRes value = studySessionService.startStudy(userId, dto);
-
-        // then
-        ArgumentCaptor<StudyStatus> captor = ArgumentCaptor.forClass(StudyStatus.class);
-        then(studyStatusRepository).should().save(captor.capture());
-
-        StudyStatus savedStatus = captor.getValue();
-
-        assertThat(savedStatus.getId()).isEqualTo(userId);
-        assertThat(savedStatus.isStudying()).isTrue();
-        assertThat(savedStatus.getStartTime()).isEqualTo(time);
-        assertThat(savedStatus.getCategoryId()).isEqualTo(categoryId);
-        assertThat(savedStatus.getTemporaryName()).isNull();
-
-        assertThat(value).isNotNull();
-    }
-
-    @Test
-    void startStudy_success_firstTemporary() {
-        // given
-        Long userId = 0L;
-        String name = "name";
-        LocalTime time = LocalTime.of(12, 30, 30);
-        StartStudyReq dto = new StartStudyReq(null, name, time);
-        StartStudyRes ans = new StartStudyRes(true, time, 0L, null, name);
-
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.empty());
-        given(mapper.toDto(any(StudyStatus.class))).willReturn(ans);
-
-        // when
-        StartStudyRes value = studySessionService.startStudy(userId, dto);
-
-        // then
-        ArgumentCaptor<StudyStatus> captor = ArgumentCaptor.forClass(StudyStatus.class);
-        then(studyStatusRepository).should().save(captor.capture());
-
-        StudyStatus savedStatus = captor.getValue();
-
-        assertThat(savedStatus.getId()).isEqualTo(userId);
-        assertThat(savedStatus.isStudying()).isTrue();
-        assertThat(savedStatus.getStartTime()).isEqualTo(time);
-        assertThat(savedStatus.getCategoryId()).isNull();
-        assertThat(savedStatus.getTemporaryName()).isEqualTo(name);
-
-        assertThat(value).isNotNull();
-    }
-
-    @Test
-    void startStudy_success_exist() {
-        // given
-        Long userId = 0L;
-        Long categoryId = 1L;
-        LocalTime time = LocalTime.of(12, 30, 30);
-        StartStudyReq dto = new StartStudyReq(categoryId, null, time);
-        StudyStatus existStatus = new StudyStatus(userId, false, null, 3400L, null, null, 1L);
-        StartStudyRes ans = new StartStudyRes(true, time, 3400L, categoryId, null);
-
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.of(existStatus));
-        given(mapper.toDto(any(StudyStatus.class))).willReturn(ans);
-
-        // when
-        StartStudyRes value = studySessionService.startStudy(userId, dto);
-
-        // then
-        ArgumentCaptor<StudyStatus> captor = ArgumentCaptor.forClass(StudyStatus.class);
-        then(studyStatusRepository).should().save(captor.capture());
-
-        StudyStatus savedStatus = captor.getValue();
-
-        assertThat(savedStatus.getId()).isEqualTo(userId);
-        assertThat(savedStatus.isStudying()).isTrue();
-        assertThat(savedStatus.getStartTime()).isEqualTo(time);
-        assertThat(savedStatus.getStudyTime()).isEqualTo(3400L);
-        assertThat(savedStatus.getCategoryId()).isEqualTo(categoryId);
-        assertThat(savedStatus.getTemporaryName()).isNull();
-
-        assertThat(value).isNotNull();
-    }
-
-    @Test
-    void startStudy_success_alreadyStart() {
-        // given
-        Long userId = 0L;
-        Long categoryId = 1L;
-        LocalTime afterTime = LocalTime.of(13, 10, 10);
-        LocalTime time = LocalTime.of(12, 30, 30);
-
-        StartStudyReq dto = new StartStudyReq(categoryId, null, afterTime);
-        StudyStatus existStatus = new StudyStatus(userId, true, time, 3400L, categoryId, null, 1L);
-        StartStudyRes ans = new StartStudyRes(true, time, 3400L, categoryId, null);
-
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.of(existStatus));
-        given(mapper.toDto(any(StudyStatus.class))).willReturn(ans);
-
-        // when
-        StartStudyRes value = studySessionService.startStudy(userId, dto);
-
-        // then
-        ArgumentCaptor<StudyStatus> captor = ArgumentCaptor.forClass(StudyStatus.class);
-        then(mapper).should().toDto(captor.capture());
-
-        StudyStatus savedStatus = captor.getValue();
-
-        assertThat(savedStatus.getId()).isEqualTo(userId);
-        assertThat(savedStatus.isStudying()).isTrue();
-        assertThat(savedStatus.getStartTime()).isEqualTo(time);
-        assertThat(savedStatus.getStudyTime()).isEqualTo(3400L);
-        assertThat(savedStatus.getCategoryId()).isEqualTo(categoryId);
-        assertThat(savedStatus.getTemporaryName()).isNull();
-
-        assertThat(value).isNotNull();
-    }
-
-    // 종료 성공 - 시작과 종료가 같은 날에 존재 - 이미 studyTime 안에 해당 데이터가 존재할 때 - 카테고리에 대한 검색
-    @Test
-    void endStudy_success_inOneDay_alreadyExistStudytime_byCategory() {
+    void startStudy_success_firstCategory() {
         // given
         Long userId = 1L;
         Long categoryId = 2L;
-        LocalTime startAt = LocalTime.of(16, 5, 20);
-        LocalTime endedAt = LocalTime.of(20, 30, 0);
-        LocalDate today = LocalDate.of(2025, 4, 14);
-
-        Long time = Duration.between(startAt, endedAt).toSeconds();
+        LocalTime time = LocalTime.of(10, 0);
+        StartStudyReq req = new StartStudyReq(categoryId, null, time);
 
         StudyStatus status = StudyStatus.builder()
                 .id(userId)
-                .studying(true)
-                .studyTime(3400L)
                 .categoryId(categoryId)
-                .temporaryName(null)
-                .startTime(startAt)
+                .startTime(time)
+                .studying(true)
                 .build();
+        StartStudyRes expected = new StartStudyRes(true, time, 0L, categoryId, null);
 
-        given(timeUtils.getToday()).willReturn(today);
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.of(status));
-        given(studyTimeRepository.findByMemberIdAndStudiedAtAndCategoryId(userId, today, categoryId))
-                .willReturn(Optional.of(mockStudyTime));
-        given(memberRepository.findById(userId)).willReturn(Optional.of(mockMember));
+        given(studyStatusWorker.findStatus(userId)).willReturn(null);
+        given(studyStatusWorker.firstStudyStatus(userId, req)).willReturn(status);
+        given(mapper.toDto(status)).willReturn(expected);
 
         // when
-        Long value = studySessionService.endStudy(userId, endedAt);
+        StartStudyRes result = studySessionService.startStudy(userId, req);
 
         // then
-        ArgumentCaptor<StudyStatus> captor = ArgumentCaptor.forClass(StudyStatus.class);
-        then(mockStudyTime).should().addTime(time);
-        then(studyStatusRepository).should().save(captor.capture());
-
-        StudyStatus savedStatus = captor.getValue();
-
-        assertThat(value).isEqualTo(time);
-        assertThat(savedStatus.isStudying()).isFalse();
-        assertThat(savedStatus.getStudyTime()).isEqualTo(3400L + time);
-        assertThat(savedStatus.getCategoryId()).isNull();
-        assertThat(savedStatus.getTemporaryName()).isNull();
+        assertThat(result).isEqualTo(expected);
+        then(studyStatusWorker).should().saveStatus(status);
     }
 
-    // 종료 성공 - 시작과 종료가 같은 날에 존재 - 이미 studyTime 안에 해당 데이터가 존재할 때 - 이름에 대한
     @Test
-    void endStudy_success_inOneDay_alreadyExistStudytime_byTemporaryName() {
+    void startStudy_success_restart() {
         // given
         Long userId = 1L;
-        String name = "algorithm";
-        LocalTime startAt = LocalTime.of(16, 5, 20);
-        LocalTime endedAt = LocalTime.of(20, 30, 0);
-        LocalDate today = LocalDate.of(2025, 4, 14);
+        Long categoryId = 3L;
+        LocalTime time = LocalTime.of(9, 30);
+        StartStudyReq req = new StartStudyReq(categoryId, null, time);
 
-        Long time = Duration.between(startAt, endedAt).toSeconds();
-
-        StudyStatus status = StudyStatus.builder()
+        StudyStatus oldStatus = StudyStatus.builder().id(userId).studying(false).build();
+        StudyStatus newStatus = StudyStatus.builder()
                 .id(userId)
-                .studying(true)
-                .studyTime(3400L)
-                .categoryId(null)
-                .temporaryName(name)
-                .startTime(startAt)
-                .build();
-
-        given(timeUtils.getToday()).willReturn(today);
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.of(status));
-        given(studyTimeRepository.findByMemberIdAndStudiedAtAndTemporaryName(userId, today, name))
-                .willReturn(Optional.of(mockStudyTime));
-        given(memberRepository.findById(userId)).willReturn(Optional.of(mockMember));
-
-        // when
-        Long value = studySessionService.endStudy(userId, endedAt);
-
-        // then
-        ArgumentCaptor<StudyStatus> captor = ArgumentCaptor.forClass(StudyStatus.class);
-        then(mockStudyTime).should().addTime(time);
-        then(studyStatusRepository).should().save(captor.capture());
-
-        StudyStatus savedStatus = captor.getValue();
-
-        assertThat(value).isEqualTo(time);
-        assertThat(savedStatus.isStudying()).isFalse();
-        assertThat(savedStatus.getStudyTime()).isEqualTo(3400L + time);
-        assertThat(savedStatus.getCategoryId()).isNull();
-        assertThat(savedStatus.getTemporaryName()).isNull();
-    }
-
-    // 종료 성공 - 시작과 종료가 같은 날에 존재 - studyTime이 존재하지 않을 때- 카테고리에 대한
-    @Test
-    void endStudy_success_inOneDay_notExistStudyTime_byCategory() {
-        // given
-        Long userId = 1L;
-        Long categoryId = 2L;
-        LocalTime startAt = LocalTime.of(16, 5, 20);
-        LocalTime endedAt = LocalTime.of(20, 30, 0);
-        LocalDate today = LocalDate.of(2025, 4, 14);
-
-        Long time = Duration.between(startAt, endedAt).toSeconds();
-
-        StudyStatus status = StudyStatus.builder()
-                .id(userId)
-                .studying(true)
-                .studyTime(3400L)
                 .categoryId(categoryId)
-                .temporaryName(null)
-                .startTime(startAt)
+                .startTime(time)
+                .studying(true)
                 .build();
+        StartStudyRes expected = new StartStudyRes(true, time, 0L, categoryId, null);
 
-        given(timeUtils.getToday()).willReturn(today);
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.of(status));
-        given(studyTimeRepository.findByMemberIdAndStudiedAtAndCategoryId(userId, today, categoryId))
-                .willReturn(Optional.empty());
-        given(memberRepository.findById(userId)).willReturn(Optional.of(mockMember));
-        given(studyCategoryRepository.getReferenceById(categoryId)).willReturn(mockStudyCategory);
-
+        given(studyStatusWorker.findStatus(userId)).willReturn(oldStatus);
+        given(studyStatusWorker.restartStudyStatus(oldStatus, req)).willReturn(newStatus);
+        given(mapper.toDto(newStatus)).willReturn(expected);
         // when
-        Long value = studySessionService.endStudy(userId, endedAt);
+        StartStudyRes result = studySessionService.startStudy(userId, req);
 
         // then
-        ArgumentCaptor<StudyStatus> statusCaptor = ArgumentCaptor.forClass(StudyStatus.class);
-        ArgumentCaptor<StudyTime> timeCaptor = ArgumentCaptor.forClass(StudyTime.class);
-
-        then(studyStatusRepository).should().save(statusCaptor.capture());
-
-        then(studyTimeRepository).should().save(timeCaptor.capture());
-
-        StudyStatus savedStatus = statusCaptor.getValue();
-        StudyTime savedTime = timeCaptor.getValue();
-
-        assertThat(value).isEqualTo(time);
-        assertThat(savedStatus.isStudying()).isFalse();
-        assertThat(savedStatus.getStudyTime()).isEqualTo(3400L + time);
-        assertThat(savedStatus.getCategoryId()).isNull();
-        assertThat(savedStatus.getTemporaryName()).isNull();
-
-        assertThat(savedTime.getMember()).isEqualTo(mockMember);
-        assertThat(savedTime.getCategory()).isEqualTo(mockStudyCategory);
-        assertThat(savedTime.getStudiedAt()).isEqualTo(today);
-        assertThat(savedTime.getTime()).isEqualTo(time);
+        assertThat(result).isEqualTo(expected);
+        then(studyStatusWorker).should().saveStatus(newStatus);
     }
 
-    // 종료 성공 - 시작과 종료가 다른 날에 존재 - 이미 StudyTime 이 존재할 때 - 카테고리에 대한
     @Test
-    void endStudy_success_acrossDays_alreadyExistStudytime_byCategory() {
+    void endStudy_success_sameDay() {
         // given
         Long userId = 1L;
-        Long categoryId = 2L;
-        LocalTime startAt = LocalTime.of(20, 0); // 오후 8시
-        LocalTime endedAt = LocalTime.of(2, 0); // 다음날 새벽 2시
-        LocalDate today = LocalDate.of(2025, 4, 14);
-        Long time = Duration.between(startAt, LocalTime.MIDNIGHT).toSeconds()
-                + Duration.between(LocalTime.MIN, endedAt).toSeconds();
+        LocalDate today = LocalDate.of(2025, 4, 15);
+        LocalTime start = LocalTime.of(10, 0);
+        LocalTime end = LocalTime.of(13, 0);
+        Long duration = Duration.between(start, end).toSeconds();
 
         StudyStatus status = StudyStatus.builder()
                 .id(userId)
+                .startTime(start)
                 .studying(true)
-                .studyTime(100L)
-                .categoryId(categoryId)
-                .temporaryName(null)
-                .startTime(startAt)
+                .categoryId(1L)
+                .studyTime(300L)
                 .build();
-
-        given(timeUtils.getToday()).willReturn(today);
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.of(status));
-        given(studyTimeRepository.findByMemberIdAndStudiedAtAndCategoryId(userId, today, categoryId))
-                .willReturn(Optional.of(mockStudyTime));
-        given(memberRepository.findById(userId)).willReturn(Optional.of(mockMember));
-
-        // when
-        Long result = studySessionService.endStudy(userId, endedAt);
-
-        // then
-        then(mockStudyTime).should().addTime(time);
-        then(studyStatusRepository).should().save(any());
-        assertThat(result).isEqualTo(time);
-    }
-
-    // 종료 성공 - 시작과 종료가 다른 날에 존재 - studyTime이 존재하지 않을 때 - 카테고리에 대한
-    @Test
-    void endStudy_success_acrossDays_notExistStudytime_byCategory() {
-        // given
-        Long userId = 1L;
-        Long categoryId = 2L;
-        LocalTime startAt = LocalTime.of(21, 30); // 오후 9시 30분
-        LocalTime endedAt = LocalTime.of(3, 0); // 다음날 새벽 3시
-        LocalDate today = LocalDate.of(2025, 4, 14);
-        Long time = Duration.between(startAt, LocalTime.MIDNIGHT).toSeconds()
-                + Duration.between(LocalTime.MIN, endedAt).toSeconds();
-
-        StudyStatus status = StudyStatus.builder()
-                .id(userId)
-                .studying(true)
-                .studyTime(500L)
-                .categoryId(categoryId)
-                .temporaryName(null)
-                .startTime(startAt)
-                .build();
-
-        given(timeUtils.getToday()).willReturn(today);
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.of(status));
-        given(studyTimeRepository.findByMemberIdAndStudiedAtAndCategoryId(userId, today, categoryId))
-                .willReturn(Optional.empty());
-        given(memberRepository.findById(userId)).willReturn(Optional.of(mockMember));
-        given(studyCategoryRepository.getReferenceById(categoryId)).willReturn(mockStudyCategory);
-
-        // when
-        Long result = studySessionService.endStudy(userId, endedAt);
-
-        // then
-        then(studyTimeRepository).should().save(any());
-        then(studyStatusRepository).should().save(any());
-        assertThat(result).isEqualTo(time);
-    }
-
-    @Test
-    void endStudy_fail_statusNotExistInRedis() {
-        // given
-        Long userId = 1L;
-        LocalTime endAt = LocalTime.of(12, 0);
-
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.empty());
-
-        // when & then
-        assertThatThrownBy(() -> studySessionService.endStudy(userId, endAt))
-                .isInstanceOf(StudyException.class)
-                .extracting("errorCode")
-                .isEqualTo(StudyErrorCode.STUDY_TIME_END_FAIL);
-    }
-
-    @Test
-    void endStudy_fail_notStudying() {
-        // given
-        Long userId = 1L;
-        LocalTime endAt = LocalTime.of(12, 0);
-        StudyStatus status = StudyStatus.builder()
+        StudyStatus updated = StudyStatus.builder()
                 .id(userId)
                 .studying(false)
-                .startTime(LocalTime.of(10, 0))
-                .categoryId(1L)
-                .build();
-
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.of(status));
-
-        // when & then
-        assertThatThrownBy(() -> studySessionService.endStudy(userId, endAt))
-                .isInstanceOf(StudyException.class)
-                .extracting("errorCode")
-                .isEqualTo(StudyErrorCode.STUDY_TIME_END_FAIL);
-    }
-
-    @Test
-    void endStudy_fail_startTimeNull() {
-        // given
-        Long userId = 1L;
-        LocalTime endAt = LocalTime.of(12, 0);
-        StudyStatus status = StudyStatus.builder()
-                .id(userId)
-                .studying(true)
-                .startTime(null) // 시작 시간 없음
-                .categoryId(1L)
-                .build();
-
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.of(status));
-
-        // when & then
-        assertThatThrownBy(() -> studySessionService.endStudy(userId, endAt))
-                .isInstanceOf(StudyException.class)
-                .extracting("errorCode")
-                .isEqualTo(StudyErrorCode.STUDY_TIME_END_FAIL);
-    }
-
-    @Test
-    void endStudy_fail_bothCategoryAndNameNullInStatus() {
-        // given
-        Long userId = 1L;
-        LocalTime endAt = LocalTime.of(12, 0);
-        LocalTime startAt = LocalTime.of(10, 0);
-        LocalDate today = LocalDate.of(2025, 4, 14);
-
-        StudyStatus status = StudyStatus.builder()
-                .id(userId)
-                .studying(true)
-                .startTime(startAt)
-                .categoryId(null)
-                .temporaryName(null)
+                .studyTime(300L + duration)
                 .build();
 
         given(timeUtils.getToday()).willReturn(today);
-        given(studyStatusRepository.findById(userId)).willReturn(Optional.of(status));
-        given(memberRepository.findById(userId)).willReturn(Optional.of(mockMember));
+        given(studyStatusWorker.findStatus(userId)).willReturn(status);
+        willDoNothing().given(studyStatusWorker).validStatus(status);
+        given(studyStatusWorker.resetStudyStatus(status, duration)).willReturn(updated);
 
-        // when & then
-        assertThatThrownBy(() -> studySessionService.endStudy(userId, endAt))
-                .isInstanceOf(StudyException.class)
-                .extracting("errorCode")
-                .isEqualTo(StudyErrorCode.STUDY_TIME_END_FAIL);
+        // when
+        Long result = studySessionService.endStudy(userId, end);
+
+        // then
+        assertThat(result).isEqualTo(duration);
+        then(studySessionWorker).should().upsertStudyTime(userId, status, today, duration);
+        then(studyStatusWorker).should().saveStatus(updated);
+    }
+
+    @Test
+    void endStudy_success_acrossDays() {
+        Long userId = 1L;
+        LocalDate today = LocalDate.of(2025, 4, 15);
+        LocalTime start = LocalTime.of(23, 0);
+        LocalTime end = LocalTime.of(2, 0);
+
+        long duration = Duration.between(start, LocalTime.MIDNIGHT).toSeconds()
+                + Duration.between(LocalTime.MIN, end).toSeconds();
+
+        StudyStatus status = StudyStatus.builder()
+                .id(userId)
+                .startTime(start)
+                .studying(true)
+                .categoryId(1L)
+                .studyTime(100L)
+                .build();
+        StudyStatus updated = StudyStatus.builder()
+                .id(userId)
+                .studying(false)
+                .studyTime(100L + duration)
+                .build();
+
+        given(timeUtils.getToday()).willReturn(today);
+        given(studyStatusWorker.findStatus(userId)).willReturn(status);
+        willDoNothing().given(studyStatusWorker).validStatus(status);
+        given(studyStatusWorker.resetStudyStatus(status, duration)).willReturn(updated);
+
+        Long result = studySessionService.endStudy(userId, end);
+
+        assertThat(result).isEqualTo(duration);
+        then(studySessionWorker).should().upsertStudyTime(userId, status, today, duration);
+        then(studyStatusWorker).should().saveStatus(updated);
     }
 }

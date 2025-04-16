@@ -3,9 +3,6 @@ package com.studypals.domain.memberManage.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,10 +10,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberFinder;
+import com.studypals.global.exceptions.errorCode.AuthErrorCode;
+import com.studypals.global.exceptions.exception.AuthException;
 
 /**
  * {@link MemberDetailsService} 에 대한 테스트코드입니다.
@@ -30,7 +28,7 @@ import com.studypals.domain.memberManage.entity.Member;
 @ExtendWith(MockitoExtension.class)
 class MemberDetailsServiceTest {
     @Mock
-    private MemberRepository memberRepository;
+    private MemberFinder memberFinder;
 
     @Mock
     private Member mockMember;
@@ -42,14 +40,13 @@ class MemberDetailsServiceTest {
     void loadUserByUsername_success() {
         // given
         String username = "username";
-        given(memberRepository.findByUsername(username)).willReturn(Optional.of(mockMember));
+        given(memberFinder.findMember(username)).willReturn(mockMember);
         given(mockMember.getUsername()).willReturn(username);
 
         // when
         UserDetails userDetails = memberDetailsService.loadUserByUsername(username);
 
         // then
-        then(memberRepository).should().findByUsername(username);
         assertThat(userDetails.getUsername()).isEqualTo(username);
     }
 
@@ -57,13 +54,13 @@ class MemberDetailsServiceTest {
     void loadUserByUsername_fail_unknown_user() {
         // given
         String username = "username";
-        given(memberRepository.findByUsername(username)).willReturn(Optional.empty());
+        AuthErrorCode code = AuthErrorCode.USER_NOT_FOUND;
+        given(memberFinder.findMember(username)).willThrow(new AuthException(code));
 
         // when & then
         assertThatThrownBy(() -> memberDetailsService.loadUserByUsername(username))
-                .isInstanceOf(UsernameNotFoundException.class)
-                .hasMessageContaining("invalid username");
-
-        then(memberRepository).should().findByUsername(username);
+                .isInstanceOf(AuthException.class)
+                .extracting("errorCode")
+                .isEqualTo(code);
     }
 }
