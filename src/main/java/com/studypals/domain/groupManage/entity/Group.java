@@ -44,6 +44,10 @@ public class Group {
     private Integer maxMember = 100;
 
     @Builder.Default
+    @Column(name = "total_member", nullable = false, columnDefinition = "INTEGER DEFAULT 1")
+    private Integer totalMember = 1;
+
+    @Builder.Default
     @Column(name = "is_open", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isOpen = false;
 
