@@ -26,7 +26,7 @@ public class StudyTimeReader {
 
     private final StudyTimeRepository studyTimeRepository;
 
-    public List<StudyTime> findByMemberAndDate(Long userId, LocalDate date) {
+    public List<StudyTime> getListByMemberAndDate(Long userId, LocalDate date) {
         return studyTimeRepository.findByMemberIdAndStudiedAt(userId, date);
     }
 }

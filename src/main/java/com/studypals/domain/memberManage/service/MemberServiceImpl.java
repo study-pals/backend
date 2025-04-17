@@ -51,6 +51,6 @@ public class MemberServiceImpl implements MemberService {
     @Transactional(readOnly = true)
     public Long getMemberIdByUsername(String username) {
 
-        return memberReader.find(username).getId();
+        return memberReader.get(username).getId();
     }
 }

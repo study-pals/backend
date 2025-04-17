@@ -40,7 +40,7 @@ class MemberDetailsServiceTest {
     void loadUserByUsername_success() {
         // given
         String username = "username";
-        given(memberReader.find(username)).willReturn(mockMember);
+        given(memberReader.get(username)).willReturn(mockMember);
         given(mockMember.getUsername()).willReturn(username);
 
         // when
@@ -55,7 +55,7 @@ class MemberDetailsServiceTest {
         // given
         String username = "username";
         AuthErrorCode code = AuthErrorCode.USER_NOT_FOUND;
-        given(memberReader.find(username)).willThrow(new AuthException(code));
+        given(memberReader.get(username)).willThrow(new AuthException(code));
 
         // when & then
         assertThatThrownBy(() -> memberDetailsService.loadUserByUsername(username))

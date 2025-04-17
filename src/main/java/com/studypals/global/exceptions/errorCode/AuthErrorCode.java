@@ -24,7 +24,7 @@ import com.studypals.global.responses.ResponseCode;
  */
 @RequiredArgsConstructor
 public enum AuthErrorCode implements ErrorCode {
-    USER_NOT_FOUND(ResponseCode.USER_SEARCH, HttpStatus.NOT_FOUND, "can't find user"),
+    USER_NOT_FOUND(ResponseCode.USER_SEARCH, HttpStatus.NOT_FOUND, "can't get user"),
     USER_CREATE_FAIL(ResponseCode.USER_CREATE, HttpStatus.BAD_REQUEST, "failed to createWithCategory user"),
     USER_UPDATE_FAIL(ResponseCode.USER_UPDATE, HttpStatus.BAD_REQUEST, "failed to update user"),
     USER_DELETE_FAIL(ResponseCode.USER_DELETE, HttpStatus.BAD_REQUEST, "failed to delete user"),

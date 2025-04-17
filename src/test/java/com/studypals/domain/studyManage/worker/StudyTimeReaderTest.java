@@ -32,7 +32,7 @@ class StudyTimeReaderTest {
         given(studyTimeRepository.findByMemberIdAndStudiedAt(userId, date)).willReturn(List.of(mockTime));
 
         // when
-        List<StudyTime> result = studyTimeReader.findByMemberAndDate(userId, date);
+        List<StudyTime> result = studyTimeReader.getListByMemberAndDate(userId, date);
 
         // then
         assertThat(result).hasSize(1);
@@ -47,7 +47,7 @@ class StudyTimeReaderTest {
         given(studyTimeRepository.findByMemberIdAndStudiedAt(userId, date)).willReturn(List.of());
 
         // when
-        List<StudyTime> result = studyTimeReader.findByMemberAndDate(userId, date);
+        List<StudyTime> result = studyTimeReader.getListByMemberAndDate(userId, date);
 
         // then
         assertThat(result).isEmpty();

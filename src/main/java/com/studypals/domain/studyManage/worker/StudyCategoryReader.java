@@ -40,7 +40,7 @@ public class StudyCategoryReader {
      * @param dayBit 검색할 요일 / 비트 / 가령 수요일이면 0b0000100 (4) 로 정의
      * @return 카테고리 리스트
      */
-    public List<StudyCategory> findByMemberAndDay(Long userId, int dayBit) {
+    public List<StudyCategory> getListByMemberAndDay(Long userId, int dayBit) {
 
         return studyCategoryRepository.findByMemberId(userId).stream()
                 .filter(category -> (category.getDayBelong() & dayBit) != 0)
@@ -53,7 +53,7 @@ public class StudyCategoryReader {
      * @param categoryId 검색할 유저
      * @return 만약 해당 카테고리가 해당 유저의 소유라면, 카테고리 반환
      */
-    public StudyCategory findAndValidate(Long userId, Long categoryId) {
+    public StudyCategory getAndValidate(Long userId, Long categoryId) {
         StudyCategory category = studyCategoryRepository
                 .findById(categoryId)
                 .orElseThrow(() ->

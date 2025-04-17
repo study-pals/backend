@@ -25,19 +25,19 @@ public class MemberReader {
 
     private final MemberRepository memberRepository;
 
-    public Member find(Long userId) {
+    public Member get(Long userId) {
         return memberRepository
                 .findById(userId)
-                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't find user"));
+                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't get user"));
     }
 
-    public Member find(String username) {
+    public Member get(String username) {
         return memberRepository
                 .findByUsername(username)
-                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't find user"));
+                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't get user"));
     }
 
-    public Member findRef(Long userId) {
+    public Member getRef(Long userId) {
         return memberRepository.getReferenceById(userId);
     }
 }

@@ -59,7 +59,7 @@ class StudySessionWorkerTest {
                 .startTime(LocalTime.of(10, 0))
                 .build();
 
-        given(memberReader.find(userId)).willReturn(mockMember);
+        given(memberReader.get(userId)).willReturn(mockMember);
         given(studyTimeRepository.findByMemberIdAndStudiedAtAndCategoryId(userId, today, categoryId))
                 .willReturn(Optional.of(mockStudyTime));
 
@@ -81,7 +81,7 @@ class StudySessionWorkerTest {
         StudyStatus status =
                 StudyStatus.builder().id(userId).temporaryName(tempName).build();
 
-        given(memberReader.find(userId)).willReturn(mockMember);
+        given(memberReader.get(userId)).willReturn(mockMember);
         given(studyTimeRepository.findByMemberIdAndStudiedAtAndTemporaryName(userId, today, tempName))
                 .willReturn(Optional.of(mockStudyTime));
 
@@ -101,7 +101,7 @@ class StudySessionWorkerTest {
         Long time = 180L;
         StudyStatus status = StudyStatus.builder().id(userId).build(); // both null
 
-        given(memberReader.find(userId)).willReturn(mockMember);
+        given(memberReader.get(userId)).willReturn(mockMember);
 
         // when & then
         assertThatThrownBy(() -> studySessionWorker.upsert(userId, status, today, time))

@@ -43,7 +43,7 @@ public class StudySessionWorker {
 
         Long categoryId = status.getCategoryId();
         String temporaryName = status.getTemporaryName();
-        Member member = memberReader.find(userId);
+        Member member = memberReader.get(userId);
 
         // member 에 토큰을 업데이트
         member.addToken(calculateToken(time));

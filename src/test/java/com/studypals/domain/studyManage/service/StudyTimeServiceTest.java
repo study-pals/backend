@@ -69,7 +69,7 @@ class StudyTimeServiceTest {
         GetStudyDto dto = new GetStudyDto(1L, null, 3600L);
 
         given(timeUtils.getToday()).willReturn(today);
-        given(studyTimeReader.findByMemberAndDate(userId, today)).willReturn(List.of(mockStudyTime));
+        given(studyTimeReader.getListByMemberAndDate(userId, today)).willReturn(List.of(mockStudyTime));
         given(mapper.toDto(mockStudyTime)).willReturn(dto);
 
         // when
@@ -87,7 +87,7 @@ class StudyTimeServiceTest {
         LocalDate today = LocalDate.of(2025, 4, 14);
 
         given(timeUtils.getToday()).willReturn(today);
-        given(studyTimeReader.findByMemberAndDate(userId, today)).willReturn(List.of());
+        given(studyTimeReader.getListByMemberAndDate(userId, today)).willReturn(List.of());
 
         // when
         List<GetStudyDto> result = studyTimeService.getStudyList(userId, today);

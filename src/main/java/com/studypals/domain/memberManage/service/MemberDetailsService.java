@@ -33,7 +33,7 @@ public class MemberDetailsService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member member = memberReader.find(username);
+        Member member = memberReader.get(username);
         return new MemberDetails(member);
     }
 }

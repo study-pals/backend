@@ -37,60 +37,60 @@ class MemberReaderTest {
     private MemberReader memberReader;
 
     @Test
-    void findById_success() {
+    void getById_success() {
         // given
         given(memberRepository.findById(1L)).willReturn(Optional.of(mockMember));
 
         // when
-        Member result = memberReader.find(1L);
+        Member result = memberReader.get(1L);
 
         // then
         assertThat(result).isEqualTo(mockMember);
     }
 
     @Test
-    void findById_fail_userNotFound() {
+    void getById_fail_userNotFound() {
         // given
         given(memberRepository.findById(1L)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> memberReader.find(1L))
+        assertThatThrownBy(() -> memberReader.get(1L))
                 .isInstanceOf(AuthException.class)
                 .extracting("errorCode")
                 .isEqualTo(AuthErrorCode.USER_NOT_FOUND);
     }
 
     @Test
-    void findByUsername_success() {
+    void getByUsername_success() {
         // given
         given(memberRepository.findByUsername("username")).willReturn(Optional.of(mockMember));
 
         // when
-        Member result = memberReader.find("username");
+        Member result = memberReader.get("username");
 
         // then
         assertThat(result).isEqualTo(mockMember);
     }
 
     @Test
-    void findByUsername_fail_userNotFound() {
+    void getByUsername_fail_userNotFound() {
         // given
         given(memberRepository.findByUsername("username")).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> memberReader.find("username"))
+        assertThatThrownBy(() -> memberReader.get("username"))
                 .isInstanceOf(AuthException.class)
                 .extracting("errorCode")
                 .isEqualTo(AuthErrorCode.USER_NOT_FOUND);
     }
 
     @Test
-    void findRef_success() {
+    void getRef_success() {
         // given
         given(memberRepository.getReferenceById(1L)).willReturn(mockMember);
 
         // when
-        Member result = memberReader.findRef(1L);
+        Member result = memberReader.getRef(1L);
 
         // then
         assertThat(result).isEqualTo(mockMember);

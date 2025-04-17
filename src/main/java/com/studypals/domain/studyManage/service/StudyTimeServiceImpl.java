@@ -51,7 +51,7 @@ public class StudyTimeServiceImpl implements StudyTimeService {
             return List.of();
         }
 
-        List<StudyTime> times = studyTimeReader.findByMemberAndDate(userId, date);
+        List<StudyTime> times = studyTimeReader.getListByMemberAndDate(userId, date);
 
         return times.stream().map(mapper::toDto).toList();
     }

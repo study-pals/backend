@@ -47,7 +47,7 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     @Override
     @Transactional
     public Long createCategory(Long userId, CreateCategoryReq dto) {
-        Member member = memberReader.findRef(userId);
+        Member member = memberReader.getRef(userId);
         StudyCategory category = categoryMapper.toEntity(dto, member);
 
         studyCategoryWriter.save(category);
@@ -71,7 +71,7 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
 
         int dayBit = 1 << (date.getDayOfWeek().getValue() - 1);
 
-        List<StudyCategory> categories = studyCategoryReader.findByMemberAndDay(userId, dayBit);
+        List<StudyCategory> categories = studyCategoryReader.getListByMemberAndDay(userId, dayBit);
 
         return categories.stream().map(categoryMapper::toDto).toList();
     }
@@ -80,7 +80,7 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     @Transactional
     public Long updateCategory(Long userId, UpdateCategoryReq dto) {
 
-        StudyCategory category = studyCategoryReader.findAndValidate(userId, dto.categoryId());
+        StudyCategory category = studyCategoryReader.getAndValidate(userId, dto.categoryId());
         category.updateCategory(dto);
 
         return category.getId();
@@ -90,7 +90,7 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     @Transactional
     public void deleteCategory(Long userId, Long categoryId) {
 
-        StudyCategory category = studyCategoryReader.findAndValidate(userId, categoryId);
+        StudyCategory category = studyCategoryReader.getAndValidate(userId, categoryId);
 
         studyCategoryWriter.delete(category);
     }

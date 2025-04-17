@@ -93,7 +93,7 @@ class MemberServiceTest {
         // given
         String username = "usernmame";
 
-        given(memberReader.find(username)).willReturn(mockMember);
+        given(memberReader.get(username)).willReturn(mockMember);
         given(mockMember.getId()).willReturn(1L);
 
         // when
@@ -108,7 +108,7 @@ class MemberServiceTest {
         // given
         String username = "usernmame";
 
-        given(memberReader.find(username)).willThrow(new AuthException(AuthErrorCode.USER_NOT_FOUND));
+        given(memberReader.get(username)).willThrow(new AuthException(AuthErrorCode.USER_NOT_FOUND));
 
         // when & then
         assertThatThrownBy(() -> memberService.getMemberIdByUsername(username))

@@ -40,7 +40,7 @@ class StudyCategoryReaderTest {
     private StudyCategoryReader studyCategoryReader;
 
     @Test
-    void findByMemberAndDay_success() {
+    void getListByMemberAndDay_success() {
         // given
         Long userId = 1L;
         int dayBit = 0b0100; // 수요일만 선택된 비트
@@ -50,14 +50,14 @@ class StudyCategoryReaderTest {
         given(studyCategoryRepository.findByMemberId(userId)).willReturn(List.of(mockCategory1, mockCategory2));
 
         // when
-        List<StudyCategory> result = studyCategoryReader.findByMemberAndDay(userId, dayBit);
+        List<StudyCategory> result = studyCategoryReader.getListByMemberAndDay(userId, dayBit);
 
         // then
         assertThat(result).containsExactly(mockCategory1);
     }
 
     @Test
-    void findAndValidate_fail_notOwner() {
+    void getAndValidate_fail_notOwner() {
         // given
         Long userId = 1L;
         Long categoryId = 10L;
@@ -65,7 +65,7 @@ class StudyCategoryReaderTest {
         given(mockCategory1.isOwner(userId)).willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> studyCategoryReader.findAndValidate(userId, categoryId))
+        assertThatThrownBy(() -> studyCategoryReader.getAndValidate(userId, categoryId))
                 .isInstanceOf(StudyException.class)
                 .extracting("errorCode")
                 .isEqualTo(StudyErrorCode.STUDY_CATEGORY_DELETE_FAIL);
