@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.global.annotations.Worker;
+import com.studypals.global.exceptions.errorCode.StudyErrorCode;
+import com.studypals.global.exceptions.exception.StudyException;
 
 /**
  * 공부 category 의 읽기에 대한 로직을 수행합니다.
@@ -43,5 +45,24 @@ public class StudyCategoryReader {
         return studyCategoryRepository.findByMemberId(userId).stream()
                 .filter(category -> (category.getDayBelong() & dayBit) != 0)
                 .toList();
+    }
+
+    /**
+     * 특정 카테고리를 category id 를 기반으로 찾되, 해당 카테고리의 소유주를 검증하고 반환
+     * @param userId 검증할 유저
+     * @param categoryId 검색할 유저
+     * @return 만약 해당 카테고리가 해당 유저의 소유라면, 카테고리 반환
+     */
+    public StudyCategory findAndValidate(Long userId, Long categoryId) {
+        StudyCategory category = studyCategoryRepository
+                .findById(categoryId)
+                .orElseThrow(() ->
+                        new StudyException(StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, "In StudyCategoryServiceImpl"));
+
+        if (!category.isOwner(userId)) {
+            throw new StudyException(StudyErrorCode.STUDY_CATEGORY_DELETE_FAIL, "owner of category does not match");
+        }
+
+        return category;
     }
 }

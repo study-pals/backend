@@ -80,7 +80,7 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     @Transactional
     public Long updateCategory(Long userId, UpdateCategoryReq dto) {
 
-        StudyCategory category = studyCategoryWriter.findAndValidate(userId, dto.categoryId());
+        StudyCategory category = studyCategoryReader.findAndValidate(userId, dto.categoryId());
         category.updateCategory(dto);
 
         return category.getId();
@@ -90,7 +90,7 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     @Transactional
     public void deleteCategory(Long userId, Long categoryId) {
 
-        StudyCategory category = studyCategoryWriter.findAndValidate(userId, categoryId);
+        StudyCategory category = studyCategoryReader.findAndValidate(userId, categoryId);
 
         studyCategoryWriter.delete(category);
     }

@@ -57,10 +57,9 @@ public class StudySessionServiceImpl implements StudySessionService {
     @Override
     public StartStudyRes startStudy(Long userId, StartStudyReq dto) {
 
-        // status 받아오기
+        // status 정보 가져오기 - 존재하지 않으면 최초 양식 생성
         StudyStatus status = studyStatusWorker.find(userId).orElse(studyStatusWorker.firstStatus(userId, dto));
 
-        // 오늘 처음 공부 시
         if (!status.isStudying()) {
             status = studyStatusWorker.restartStatus(status, dto);
         }
@@ -101,7 +100,7 @@ public class StudySessionServiceImpl implements StudySessionService {
      * @return 초 단위 공부 시간
      */
     private Long getTimeDuration(LocalTime start, LocalTime end) {
-        if (!end.isBefore(start)) { // `isAfter`?
+        if (start.isAfter(end)) {
             return Duration.between(start, end).toSeconds();
         }
 

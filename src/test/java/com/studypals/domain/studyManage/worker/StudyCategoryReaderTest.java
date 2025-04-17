@@ -1,9 +1,11 @@
 package com.studypals.domain.studyManage.worker;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.global.exceptions.errorCode.StudyErrorCode;
+import com.studypals.global.exceptions.exception.StudyException;
 
 /**
  * {@link StudyCategoryReader} 에 대한 테스트
@@ -50,5 +54,20 @@ class StudyCategoryReaderTest {
 
         // then
         assertThat(result).containsExactly(mockCategory1);
+    }
+
+    @Test
+    void findAndValidate_fail_notOwner() {
+        // given
+        Long userId = 1L;
+        Long categoryId = 10L;
+        given(studyCategoryRepository.findById(categoryId)).willReturn(Optional.of(mockCategory1));
+        given(mockCategory1.isOwner(userId)).willReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> studyCategoryReader.findAndValidate(userId, categoryId))
+                .isInstanceOf(StudyException.class)
+                .extracting("errorCode")
+                .isEqualTo(StudyErrorCode.STUDY_CATEGORY_DELETE_FAIL);
     }
 }

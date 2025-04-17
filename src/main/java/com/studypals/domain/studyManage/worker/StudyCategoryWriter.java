@@ -52,23 +52,4 @@ public class StudyCategoryWriter {
 
         studyCategoryRepository.deleteByMemberId(userId);
     }
-
-    /**
-     * 특정 카테고리를 category id 를 기반으로 찾되, 해당 카테고리의 소유주를 검증하고 반환
-     * @param userId 검증할 유저
-     * @param categoryId 검색할 유저
-     * @return 만약 해당 카테고리가 해당 유저의 소유라면, 카테고리 반환
-     */
-    public StudyCategory findAndValidate(Long userId, Long categoryId) {
-        StudyCategory category = studyCategoryRepository
-                .findById(categoryId)
-                .orElseThrow(() ->
-                        new StudyException(StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, "In StudyCategoryServiceImpl"));
-
-        if (!category.isOwner(userId)) {
-            throw new StudyException(StudyErrorCode.STUDY_CATEGORY_DELETE_FAIL, "owner of category does not match");
-        }
-
-        return category;
-    }
 }
