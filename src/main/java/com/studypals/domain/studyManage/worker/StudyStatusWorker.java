@@ -1,5 +1,7 @@
 package com.studypals.domain.studyManage.worker;
 
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
@@ -27,8 +29,8 @@ public class StudyStatusWorker {
 
     private final StudyStatusRedisRepository studyStatusRedisRepository;
 
-    public StudyStatus findStatus(Long id) {
-        return studyStatusRedisRepository.findById(id).orElse(null);
+    public Optional<StudyStatus> find(Long id) {
+        return studyStatusRedisRepository.findById(id);
     }
 
     /**
@@ -37,7 +39,7 @@ public class StudyStatusWorker {
      * @param dto 공부 데이터
      * @return 만들어진 객체
      */
-    public StudyStatus firstStudyStatus(Long userId, StartStudyReq dto) {
+    public StudyStatus firstStatus(Long userId, StartStudyReq dto) {
         return StudyStatus.builder()
                 .id(userId)
                 .studying(true)
@@ -52,7 +54,7 @@ public class StudyStatusWorker {
      * @param status 기존에 존재하던 사용자의 공부 상태
      * @param studiedTimeToAdd 사용자가 추가로 공부한 시간
      */
-    public StudyStatus resetStudyStatus(StudyStatus status, Long studiedTimeToAdd) {
+    public StudyStatus resetStatus(StudyStatus status, Long studiedTimeToAdd) {
         return status.update()
                 .studyTime(status.getStudyTime() + studiedTimeToAdd)
                 .studying(false)
@@ -67,7 +69,7 @@ public class StudyStatusWorker {
      * @param status 기존에 존재하던 사용자의 공부 상태
      * @param dto 재시작하는 공부 정보
      */
-    public StudyStatus restartStudyStatus(StudyStatus status, StartStudyReq dto) {
+    public StudyStatus restartStatus(StudyStatus status, StartStudyReq dto) {
         return status.update()
                 .studying(true)
                 .startTime(dto.startAt())
@@ -91,17 +93,22 @@ public class StudyStatusWorker {
         if (status == null) {
             throw new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL);
         } else if (status.getStartTime() == null || !status.isStudying()) {
-            status = status.update()
-                    .studying(false)
-                    .startTime(null)
-                    .categoryId(null)
-                    .temporaryName(null)
-                    .build();
 
-            saveStatus(status);
+            resetAndSaveStatus(status);
 
             throw new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL);
         }
+    }
+
+    private void resetAndSaveStatus(StudyStatus status) {
+        StudyStatus updated = status.update()
+                .studying(false)
+                .startTime(null)
+                .categoryId(null)
+                .temporaryName(null)
+                .build();
+
+        saveStatus(updated);
     }
 
     public void saveStatus(StudyStatus status) {

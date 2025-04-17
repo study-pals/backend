@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyTime;
-import com.studypals.domain.studyManage.worker.StudyTimeWorker;
+import com.studypals.domain.studyManage.worker.StudyTimeReader;
 import com.studypals.global.utils.TimeUtils;
 
 /**
@@ -41,7 +41,7 @@ public class StudyTimeServiceImpl implements StudyTimeService {
 
     private final TimeUtils timeUtils;
     private final StudyTimeMapper mapper;
-    private final StudyTimeWorker studyTimeWorker;
+    private final StudyTimeReader studyTimeReader;
 
     @Override
     @Transactional(readOnly = true)
@@ -51,7 +51,7 @@ public class StudyTimeServiceImpl implements StudyTimeService {
             return List.of();
         }
 
-        List<StudyTime> times = studyTimeWorker.findDateStudyByMember(userId, date);
+        List<StudyTime> times = studyTimeReader.findByMemberAndDate(userId, date);
 
         return times.stream().map(mapper::toDto).toList();
     }

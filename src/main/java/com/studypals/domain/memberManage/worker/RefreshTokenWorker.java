@@ -1,7 +1,5 @@
 package com.studypals.domain.memberManage.worker;
 
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
@@ -25,7 +23,7 @@ public class RefreshTokenWorker {
 
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
 
-    public void saveToken(RefreshToken refreshToken) {
+    public void save(RefreshToken refreshToken) {
         try {
             refreshTokenRedisRepository.save(refreshToken);
         } catch (Exception e) {
@@ -33,7 +31,9 @@ public class RefreshTokenWorker {
         }
     }
 
-    public Optional<RefreshToken> findToken(Long userId) {
-        return refreshTokenRedisRepository.findById(userId);
+    public RefreshToken find(Long userId) {
+        return refreshTokenRedisRepository
+                .findById(userId)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_AUTH_FAIL, "refresh token not exist"));
     }
 }

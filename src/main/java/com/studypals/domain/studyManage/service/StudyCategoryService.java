@@ -35,6 +35,13 @@ public interface StudyCategoryService {
      */
     List<GetCategoryRes> getUserCategory(Long userId);
 
+    /**
+     * 사용자의 id 와, 특정 날자를 기반으로, 해당 날짜의 요일을 계산하여
+     * 그에 따른 카테고리 리스트를 반환한다.
+     * @param userId 검색하고자 하는 유저의 id
+     * @param date 검색하고자 하는 날짜. 내부적으로 요일로 변환
+     * @return 카테고리 이름/색상/id 등
+     */
     List<GetCategoryRes> getUserCategoryByDate(Long userId, LocalDate date);
 
     /**

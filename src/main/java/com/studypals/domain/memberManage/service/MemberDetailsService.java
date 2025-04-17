@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.entity.MemberDetails;
-import com.studypals.domain.memberManage.worker.MemberFinder;
+import com.studypals.domain.memberManage.worker.MemberReader;
 
 /**
  * 스프링 시큐리티에게 유저 정보를 건내주는 역할을 위임받은 객체입니다.
@@ -28,12 +28,12 @@ import com.studypals.domain.memberManage.worker.MemberFinder;
 @RequiredArgsConstructor
 public class MemberDetailsService implements UserDetailsService {
 
-    private final MemberFinder memberFinder;
+    private final MemberReader memberReader;
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member member = memberFinder.findMember(username);
+        Member member = memberReader.find(username);
         return new MemberDetails(member);
     }
 }

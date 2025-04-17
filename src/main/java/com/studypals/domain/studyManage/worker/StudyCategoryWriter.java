@@ -1,7 +1,5 @@
 package com.studypals.domain.studyManage.worker;
 
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
@@ -11,7 +9,7 @@ import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
 
 /**
- * 공부 category 의 전반적이 crud 등에 대한 worker 클래스입니다.
+ * 공부 category 의 쓰기에 대한 로직을 수행합니다.
  *
  * <p><b>빈 관리:</b><br>
  * worker
@@ -21,7 +19,7 @@ import com.studypals.global.exceptions.exception.StudyException;
  */
 @Worker
 @RequiredArgsConstructor
-public class StudyCategoryWorker {
+public class StudyCategoryWriter {
 
     private final StudyCategoryRepository studyCategoryRepository;
 
@@ -29,7 +27,7 @@ public class StudyCategoryWorker {
      * 카테고리를 저장하고, 안되면 적절한 예외를 생성합니다.
      * @param category 저장하고자 하는 카테고리
      */
-    public void saveCategory(StudyCategory category) {
+    public void save(StudyCategory category) {
         try {
             studyCategoryRepository.save(category);
         } catch (Exception e) {
@@ -38,32 +36,10 @@ public class StudyCategoryWorker {
     }
 
     /**
-     * 특정 멤버의 모든 카테고리를 반환하는 메서드
-     * @param userId 검색할 user 의 아이디
-     * @return 카테고리 리스트
-     */
-    public List<StudyCategory> findCategoryByMember(Long userId) {
-        return studyCategoryRepository.findByMemberId(userId);
-    }
-
-    /**
-     * 특정 날짜의, 해당 유저의 카테고리를 가져오는 메서드
-     * @param userId 검색할 유저의 아이디
-     * @param dayBit 검색할 요일 / 비트 / 가령 수요일이면 0b0000100 (4) 로 정의
-     * @return 카테고리 리스트
-     */
-    public List<StudyCategory> findCategoryByMemberAndDay(Long userId, int dayBit) {
-
-        return studyCategoryRepository.findByMemberId(userId).stream()
-                .filter(category -> (category.getDayBelong() & dayBit) != 0)
-                .toList();
-    }
-
-    /**
      * 특정 카테고리를 삭제
      * @param category 삭제하고자 할, id 가 포함된 영속성 엔티티
      */
-    public void deleteCategory(StudyCategory category) {
+    public void delete(StudyCategory category) {
 
         studyCategoryRepository.delete(category);
     }
@@ -83,7 +59,7 @@ public class StudyCategoryWorker {
      * @param categoryId 검색할 유저
      * @return 만약 해당 카테고리가 해당 유저의 소유라면, 카테고리 반환
      */
-    public StudyCategory findCategoryAndValidate(Long userId, Long categoryId) {
+    public StudyCategory findAndValidate(Long userId, Long categoryId) {
         StudyCategory category = studyCategoryRepository
                 .findById(categoryId)
                 .orElseThrow(() ->

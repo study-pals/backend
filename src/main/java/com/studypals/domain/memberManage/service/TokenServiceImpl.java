@@ -1,7 +1,5 @@
 package com.studypals.domain.memberManage.service;
 
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -60,8 +58,7 @@ public class TokenServiceImpl implements TokenService {
         // 실패 2 : refresh token 이 존재하지 않을 때
         Long userId = jwtData.getId();
 
-        String refreshToken = getRefreshToken(userId)
-                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_AUTH_FAIL, "refresh token not exist"));
+        String refreshToken = refreshTokenWorker.find(userId).getToken();
 
         // 실패 3 : refresh token 이 일치 하지 않을 때
         if (!jwtToken.isSameRefreshToken(refreshToken)) {
@@ -86,17 +83,6 @@ public class TokenServiceImpl implements TokenService {
     public void saveRefreshToken(CreateRefreshTokenDto dto) {
         RefreshToken refreshToken = dto.toRefreshToken(30L);
 
-        refreshTokenWorker.saveToken(refreshToken);
-    }
-
-    /**
-     * refresh token을 조회합니다. Optional로 반환하여 null-safe 합니다.
-     *
-     * @param userId 조회하고자 하는 user id
-     * @return Optional 인 refresh token
-     */
-    private Optional<String> getRefreshToken(Long userId) {
-        Optional<RefreshToken> token = refreshTokenWorker.findToken(userId);
-        return token.map(RefreshToken::getToken);
+        refreshTokenWorker.save(refreshToken);
     }
 }

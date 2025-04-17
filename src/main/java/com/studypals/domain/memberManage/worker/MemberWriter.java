@@ -27,7 +27,7 @@ public class MemberWriter {
 
     private final MemberRepository memberRepository;
 
-    public void saveMember(Member member) {
+    public void save(Member member) {
 
         try {
             memberRepository.save(member);

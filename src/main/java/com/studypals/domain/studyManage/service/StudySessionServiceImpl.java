@@ -15,6 +15,8 @@ import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
+import com.studypals.global.exceptions.errorCode.StudyErrorCode;
+import com.studypals.global.exceptions.exception.StudyException;
 import com.studypals.global.utils.TimeUtils;
 
 /**
@@ -56,19 +58,14 @@ public class StudySessionServiceImpl implements StudySessionService {
     public StartStudyRes startStudy(Long userId, StartStudyReq dto) {
 
         // status 받아오기
-        StudyStatus status = studyStatusWorker.findStatus(userId);
+        StudyStatus status = studyStatusWorker.find(userId).orElse(studyStatusWorker.firstStatus(userId, dto));
 
         // 오늘 처음 공부 시
-        if (status == null) {
-            status = studyStatusWorker.firstStudyStatus(userId, dto);
-
-            studyStatusWorker.saveStatus(status);
-
-        } else if (!status.isStudying()) {
-            status = studyStatusWorker.restartStudyStatus(status, dto);
-
-            studyStatusWorker.saveStatus(status);
+        if (!status.isStudying()) {
+            status = studyStatusWorker.restartStatus(status, dto);
         }
+
+        studyStatusWorker.saveStatus(status);
 
         return mapper.toDto(status);
     }
@@ -77,7 +74,9 @@ public class StudySessionServiceImpl implements StudySessionService {
     @Transactional
     public Long endStudy(Long userId, LocalTime endedAt) {
         LocalDate today = timeUtils.getToday();
-        StudyStatus status = studyStatusWorker.findStatus(userId);
+        StudyStatus status = studyStatusWorker
+                .find(userId)
+                .orElseThrow(() -> new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL));
 
         studyStatusWorker.validStatus(status); // 받아온 status 가 정상인지 확인
 
@@ -85,10 +84,10 @@ public class StudySessionServiceImpl implements StudySessionService {
         Long durationInSec = getTimeDuration(status.getStartTime(), endedAt);
 
         // 2) DB에 공부시간 upsert
-        studySessionWorker.upsertStudyTime(userId, status, today, durationInSec);
+        studySessionWorker.upsert(userId, status, today, durationInSec);
 
         // 3) 레디스 상태 값 리셋
-        status = studyStatusWorker.resetStudyStatus(status, durationInSec);
+        status = studyStatusWorker.resetStatus(status, durationInSec);
         studyStatusWorker.saveStatus(status);
 
         return durationInSec;
@@ -102,16 +101,13 @@ public class StudySessionServiceImpl implements StudySessionService {
      * @return 초 단위 공부 시간
      */
     private Long getTimeDuration(LocalTime start, LocalTime end) {
-
-        long time;
-
-        if (end.isBefore(start)) { // startAt 이 00:00 전이고, endedAt 이 이후인 경우
-            long startToMidnight = Duration.between(start, LocalTime.MIDNIGHT).toSeconds();
-            long midnightToEnd = Duration.between(LocalTime.MIN, end).toSeconds();
-            time = startToMidnight + midnightToEnd;
-        } else { // 정상적인 경우
-            time = Duration.between(start, end).toSeconds();
+        if (!end.isBefore(start)) { // `isAfter`?
+            return Duration.between(start, end).toSeconds();
         }
-        return time;
+
+        // startAt 이 00:00 전이고, endedAt 이 이후인 경우
+        long startToMidnight = Duration.between(start, LocalTime.MIDNIGHT).toSeconds();
+        long midnightToEnd = Duration.between(LocalTime.MIN, end).toSeconds();
+        return startToMidnight + midnightToEnd;
     }
 }

@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import com.studypals.domain.memberManage.dto.CreateMemberReq;
 import com.studypals.domain.memberManage.dto.mappers.MemberMapper;
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.memberManage.worker.MemberFinder;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.memberManage.worker.MemberWriter;
 
 /**
@@ -31,7 +31,7 @@ import com.studypals.domain.memberManage.worker.MemberWriter;
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
 
-    private final MemberFinder memberFinder;
+    private final MemberReader memberReader;
     private final MemberWriter memberWriter;
     private final PasswordEncoder passwordEncoder;
     private final MemberMapper mapper;
@@ -42,7 +42,7 @@ public class MemberServiceImpl implements MemberService {
         String password = passwordEncoder.encode(dto.password());
         Member member = mapper.toEntity(dto, password);
 
-        memberWriter.saveMember(member);
+        memberWriter.save(member);
 
         return member.getId();
     }
@@ -51,6 +51,6 @@ public class MemberServiceImpl implements MemberService {
     @Transactional(readOnly = true)
     public Long getMemberIdByUsername(String username) {
 
-        return memberFinder.findMember(username).getId();
+        return memberReader.find(username).getId();
     }
 }

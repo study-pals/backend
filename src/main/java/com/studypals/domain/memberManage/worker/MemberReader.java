@@ -21,23 +21,23 @@ import com.studypals.global.exceptions.exception.AuthException;
  */
 @Worker
 @RequiredArgsConstructor
-public class MemberFinder {
+public class MemberReader {
 
     private final MemberRepository memberRepository;
 
-    public Member findMember(Long userId) {
+    public Member find(Long userId) {
         return memberRepository
                 .findById(userId)
                 .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't find user"));
     }
 
-    public Member findMember(String username) {
+    public Member find(String username) {
         return memberRepository
                 .findByUsername(username)
                 .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't find user"));
     }
 
-    public Member findMemberRef(Long userId) {
+    public Member findRef(Long userId) {
         return memberRepository.getReferenceById(userId);
     }
 }

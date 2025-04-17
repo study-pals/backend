@@ -5,17 +5,15 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.global.annotations.Worker;
-import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
-import com.studypals.global.exceptions.exception.AuthException;
 import com.studypals.global.exceptions.exception.StudyException;
 
 /**
@@ -31,7 +29,7 @@ public class StudySessionWorker {
 
     private final StudyTimeRepository studyTimeRepository;
     private final StudyCategoryRepository studyCategoryRepository;
-    private final MemberRepository memberRepository;
+    private final MemberReader memberReader;
 
     /**
      * studyTime 을 최신화하는 메서드. category에 대한 공부인지, temporaryName 에 대한 공부인지에 따라
@@ -41,11 +39,11 @@ public class StudySessionWorker {
      * @param studiedAt 언제 공부했는지에 대한 날짜(today)
      * @param time 초 단위 공부 시간
      */
-    public void upsertStudyTime(Long userId, StudyStatus status, LocalDate studiedAt, Long time) {
+    public void upsert(Long userId, StudyStatus status, LocalDate studiedAt, Long time) {
 
         Long categoryId = status.getCategoryId();
         String temporaryName = status.getTemporaryName();
-        Member member = findMember(userId);
+        Member member = memberReader.find(userId);
 
         // member 에 토큰을 업데이트
         member.addToken(calculateToken(time));
@@ -56,7 +54,7 @@ public class StudySessionWorker {
             if (optional.isPresent()) {
                 optional.get().addTime(time); // 이미 해당 레코드가 존재하면, 시간만 더해준다.
             } else {
-                createNewStudyTimeWithCategory(member, categoryId, studiedAt, time); // 해당 레코드가 존재하지 않으면 새로 저장한다.
+                createWithCategory(member, categoryId, studiedAt, time); // 해당 레코드가 존재하지 않으면 새로 저장한다.
             }
         } else if (temporaryName != null) { // 임시 이름에 대한 공부인 경우
             Optional<StudyTime> optional =
@@ -64,7 +62,7 @@ public class StudySessionWorker {
             if (optional.isPresent()) {
                 optional.get().addTime(time); // 이미 존재하는 경우, 시간만 더해준다.
             } else {
-                createNewStudyTimeWithTemporaryName(member, temporaryName, studiedAt, time); // 존재하지 않는 경우 새로 저장한다.
+                createWithTemporaryName(member, temporaryName, studiedAt, time); // 존재하지 않는 경우 새로 저장한다.
             }
         } else { // 모두 다 null 인 경우 실패
             throw new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL, "both id, name null in redis");
@@ -78,7 +76,7 @@ public class StudySessionWorker {
      * @param studiedAt 공부 날짜(today)
      * @param time 초 단위 공부 시간
      */
-    public void createNewStudyTimeWithCategory(Member member, Long categoryId, LocalDate studiedAt, Long time) {
+    public void createWithCategory(Member member, Long categoryId, LocalDate studiedAt, Long time) {
         StudyCategory studyCategory = studyCategoryRepository.getReferenceById(categoryId);
         StudyTime newStudyTime = StudyTime.builder()
                 .member(member)
@@ -97,8 +95,7 @@ public class StudySessionWorker {
      * @param studiedAt 공부 날짜(today)
      * @param time 초 단위 공부 시간
      */
-    public void createNewStudyTimeWithTemporaryName(
-            Member member, String temporaryName, LocalDate studiedAt, Long time) {
+    public void createWithTemporaryName(Member member, String temporaryName, LocalDate studiedAt, Long time) {
 
         StudyTime newStudyTime = StudyTime.builder()
                 .member(member)
@@ -108,10 +105,6 @@ public class StudySessionWorker {
                 .build();
 
         saveTime(newStudyTime);
-    }
-
-    private Member findMember(Long userId) {
-        return memberRepository.findById(userId).orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND));
     }
 
     private void saveTime(StudyTime time) {

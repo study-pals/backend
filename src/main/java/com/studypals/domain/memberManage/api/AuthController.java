@@ -42,7 +42,8 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Response<Long>> register(@Valid @RequestBody CreateMemberReq req) {
         Long id = memberService.createMember(req);
-        Response<Long> response = CommonResponse.success(ResponseCode.USER_CREATE, id, "success create user");
+        Response<Long> response =
+                CommonResponse.success(ResponseCode.USER_CREATE, id, "success createWithCategory user");
 
         return ResponseEntity.ok(response);
     }
