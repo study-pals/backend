@@ -37,47 +37,47 @@ class RefreshTokenWorkerTest {
     private RefreshTokenWorker refreshTokenWorker;
 
     @Test
-    void saveToken_success() {
+    void save_success() {
 
         // given & when & then
-        assertThatCode(() -> refreshTokenWorker.saveToken(mockRefreshToken)).doesNotThrowAnyException();
+        assertThatCode(() -> refreshTokenWorker.save(mockRefreshToken)).doesNotThrowAnyException();
     }
 
     @Test
-    void saveToken_fail_exceptionOccurs() {
+    void save_fail_exceptionOccurs() {
         // given
         willThrow(new RuntimeException("redis down"))
                 .given(refreshTokenRedisRepository)
                 .save(mockRefreshToken);
 
         // when & then
-        assertThatThrownBy(() -> refreshTokenWorker.saveToken(mockRefreshToken))
+        assertThatThrownBy(() -> refreshTokenWorker.save(mockRefreshToken))
                 .isInstanceOf(AuthException.class)
                 .extracting("errorCode")
                 .isEqualTo(AuthErrorCode.USER_AUTH_FAIL);
     }
 
     @Test
-    void findToken_success_present() {
+    void find_success_present() {
         // given
         given(refreshTokenRedisRepository.findById(1L)).willReturn(Optional.of(mockRefreshToken));
 
         // when
-        Optional<RefreshToken> result = refreshTokenWorker.findToken(1L);
+        RefreshToken result = refreshTokenWorker.find(1L);
 
         // then
-        assertThat(result).isPresent().contains(mockRefreshToken);
+        assertThat(result).isEqualTo(mockRefreshToken);
     }
 
     @Test
-    void findToken_success_empty() {
+    void find_success_empty() {
         // given
         given(refreshTokenRedisRepository.findById(1L)).willReturn(Optional.empty());
 
-        // when
-        Optional<RefreshToken> result = refreshTokenWorker.findToken(1L);
-
-        // then
-        assertThat(result).isEmpty();
+        // when & then
+        assertThatThrownBy(() -> refreshTokenWorker.find(1L))
+                .isInstanceOf(AuthException.class)
+                .extracting("errorCode")
+                .isEqualTo(AuthErrorCode.USER_AUTH_FAIL);
     }
 }

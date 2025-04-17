@@ -12,8 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
 import com.studypals.domain.studyManage.entity.StudyCategory;
@@ -32,7 +32,7 @@ class StudySessionWorkerTest {
     private StudyCategoryRepository studyCategoryRepository;
 
     @Mock
-    private MemberRepository memberRepository;
+    private MemberReader memberReader;
 
     @Mock
     private Member mockMember;
@@ -47,7 +47,7 @@ class StudySessionWorkerTest {
     private StudySessionWorker studySessionWorker;
 
     @Test
-    void upsertStudyTime_success_withCategory() {
+    void upsert_success_withCategory() {
         // given
         Long userId = 1L;
         Long categoryId = 100L;
@@ -59,12 +59,12 @@ class StudySessionWorkerTest {
                 .startTime(LocalTime.of(10, 0))
                 .build();
 
-        given(memberRepository.findById(userId)).willReturn(Optional.of(mockMember));
+        given(memberReader.find(userId)).willReturn(mockMember);
         given(studyTimeRepository.findByMemberIdAndStudiedAtAndCategoryId(userId, today, categoryId))
                 .willReturn(Optional.of(mockStudyTime));
 
         // when
-        studySessionWorker.upsertStudyTime(userId, status, today, time);
+        studySessionWorker.upsert(userId, status, today, time);
 
         // then
         then(mockStudyTime).should().addTime(time);
@@ -72,7 +72,7 @@ class StudySessionWorkerTest {
     }
 
     @Test
-    void upsertStudyTime_success_withTemporaryName() {
+    void upsert_success_withTemporaryName() {
         // given
         Long userId = 1L;
         String tempName = "temp-study";
@@ -81,12 +81,12 @@ class StudySessionWorkerTest {
         StudyStatus status =
                 StudyStatus.builder().id(userId).temporaryName(tempName).build();
 
-        given(memberRepository.findById(userId)).willReturn(Optional.of(mockMember));
+        given(memberReader.find(userId)).willReturn(mockMember);
         given(studyTimeRepository.findByMemberIdAndStudiedAtAndTemporaryName(userId, today, tempName))
                 .willReturn(Optional.of(mockStudyTime));
 
         // when
-        studySessionWorker.upsertStudyTime(userId, status, today, time);
+        studySessionWorker.upsert(userId, status, today, time);
 
         // then
         then(mockStudyTime).should().addTime(time);
@@ -94,24 +94,24 @@ class StudySessionWorkerTest {
     }
 
     @Test
-    void upsertStudyTime_fail_bothCategoryAndTempNameNull() {
+    void upsert_fail_bothCategoryAndTempNameNull() {
         // given
         Long userId = 1L;
         LocalDate today = LocalDate.now();
         Long time = 180L;
         StudyStatus status = StudyStatus.builder().id(userId).build(); // both null
 
-        given(memberRepository.findById(userId)).willReturn(Optional.of(mockMember));
+        given(memberReader.find(userId)).willReturn(mockMember);
 
         // when & then
-        assertThatThrownBy(() -> studySessionWorker.upsertStudyTime(userId, status, today, time))
+        assertThatThrownBy(() -> studySessionWorker.upsert(userId, status, today, time))
                 .isInstanceOf(StudyException.class)
                 .extracting("errorCode")
                 .isEqualTo(StudyErrorCode.STUDY_TIME_END_FAIL);
     }
 
     @Test
-    void createNewStudyTimeWithCategory_success() {
+    void create_WithCategory_success() {
         // given
         Long categoryId = 10L;
         LocalDate today = LocalDate.now();
@@ -120,7 +120,7 @@ class StudySessionWorkerTest {
         given(studyCategoryRepository.getReferenceById(categoryId)).willReturn(mockCategory);
 
         // when
-        studySessionWorker.createNewStudyTimeWithCategory(mockMember, categoryId, today, time);
+        studySessionWorker.createWithCategory(mockMember, categoryId, today, time);
 
         // then
         then(studyTimeRepository)
@@ -132,14 +132,14 @@ class StudySessionWorkerTest {
     }
 
     @Test
-    void createNewStudyTimeWithTemporaryName_success() {
+    void createWithCategoryWithTemporaryName_success() {
         // given
         String tempName = "free study";
         LocalDate today = LocalDate.now();
         Long time = 600L;
 
         // when
-        studySessionWorker.createNewStudyTimeWithTemporaryName(mockMember, tempName, today, time);
+        studySessionWorker.createWithTemporaryName(mockMember, tempName, today, time);
 
         // then
         then(studyTimeRepository)

@@ -17,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.studypals.domain.memberManage.dto.CreateMemberReq;
 import com.studypals.domain.memberManage.dto.mappers.MemberMapper;
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.memberManage.worker.MemberFinder;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.memberManage.worker.MemberWriter;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.exception.AuthException;
@@ -33,7 +33,7 @@ import com.studypals.global.exceptions.exception.AuthException;
 class MemberServiceTest {
 
     @Mock
-    private MemberFinder memberFinder;
+    private MemberReader memberReader;
 
     @Mock
     private MemberWriter memberWriter;
@@ -78,7 +78,7 @@ class MemberServiceTest {
         given(passwordEncoder.encode("password")).willReturn("encoded password");
         willThrow(new AuthException(AuthErrorCode.SIGNUP_FAIL))
                 .given(memberWriter)
-                .saveMember(any());
+                .save(any());
         given(mapper.toEntity(dto, "encoded password")).willReturn(mockMember);
 
         // when & then
@@ -93,7 +93,7 @@ class MemberServiceTest {
         // given
         String username = "usernmame";
 
-        given(memberFinder.findMember(username)).willReturn(mockMember);
+        given(memberReader.find(username)).willReturn(mockMember);
         given(mockMember.getId()).willReturn(1L);
 
         // when
@@ -108,7 +108,7 @@ class MemberServiceTest {
         // given
         String username = "usernmame";
 
-        given(memberFinder.findMember(username)).willThrow(new AuthException(AuthErrorCode.USER_NOT_FOUND));
+        given(memberReader.find(username)).willThrow(new AuthException(AuthErrorCode.USER_NOT_FOUND));
 
         // when & then
         assertThatThrownBy(() -> memberService.getMemberIdByUsername(username))

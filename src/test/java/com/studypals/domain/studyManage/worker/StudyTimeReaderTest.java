@@ -15,16 +15,16 @@ import com.studypals.domain.studyManage.dao.StudyTimeRepository;
 import com.studypals.domain.studyManage.entity.StudyTime;
 
 @ExtendWith(MockitoExtension.class)
-class StudyTimeWorkerTest {
+class StudyTimeReaderTest {
 
     @Mock
     private StudyTimeRepository studyTimeRepository;
 
     @InjectMocks
-    private StudyTimeWorker studyTimeWorker;
+    private StudyTimeReader studyTimeReader;
 
     @Test
-    void findDateStudyByMember_success() {
+    void findByMember_AndDate_success() {
         // given
         Long userId = 1L;
         LocalDate date = LocalDate.now();
@@ -32,7 +32,7 @@ class StudyTimeWorkerTest {
         given(studyTimeRepository.findByMemberIdAndStudiedAt(userId, date)).willReturn(List.of(mockTime));
 
         // when
-        List<StudyTime> result = studyTimeWorker.findDateStudyByMember(userId, date);
+        List<StudyTime> result = studyTimeReader.findByMemberAndDate(userId, date);
 
         // then
         assertThat(result).hasSize(1);
@@ -40,14 +40,14 @@ class StudyTimeWorkerTest {
     }
 
     @Test
-    void findDateStudyByMember_success_nothingToReturn() {
+    void findByMember_AndDate_success_nothingToReturn() {
         // given
         Long userId = 1L;
         LocalDate date = LocalDate.of(2025, 1, 1);
         given(studyTimeRepository.findByMemberIdAndStudiedAt(userId, date)).willReturn(List.of());
 
         // when
-        List<StudyTime> result = studyTimeWorker.findDateStudyByMember(userId, date);
+        List<StudyTime> result = studyTimeReader.findByMemberAndDate(userId, date);
 
         // then
         assertThat(result).isEmpty();

@@ -27,40 +27,40 @@ class StudyStatusWorkerTest {
     private StudyStatusWorker studyStatusWorker;
 
     @Test
-    void findStatus_success() {
+    void find_success() {
         // given
         Long userId = 1L;
         StudyStatus status = StudyStatus.builder().id(userId).studyTime(120L).build();
         given(studyStatusRedisRepository.findById(userId)).willReturn(Optional.of(status));
 
         // when
-        StudyStatus result = studyStatusWorker.findStatus(userId);
+        Optional<StudyStatus> result = studyStatusWorker.find(userId);
 
         // then
-        assertThat(result).isEqualTo(status);
+        assertThat(result).isPresent().contains(status);
     }
 
     @Test
-    void findStatus_success_notExist() {
+    void find_success_notExist() {
         // given
         Long userId = 1L;
         given(studyStatusRedisRepository.findById(userId)).willReturn(Optional.empty());
 
         // when
-        StudyStatus result = studyStatusWorker.findStatus(userId);
+        Optional<StudyStatus> result = studyStatusWorker.find(userId);
 
         // then
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void firstStudyStatus_success() {
+    void firstStatus_success() {
         // given
         Long userId = 1L;
         StartStudyReq req = new StartStudyReq(100L, null, LocalTime.of(9, 30));
 
         // when
-        StudyStatus result = studyStatusWorker.firstStudyStatus(userId, req);
+        StudyStatus result = studyStatusWorker.firstStatus(userId, req);
 
         // then
         assertThat(result.getId()).isEqualTo(userId);
@@ -71,7 +71,7 @@ class StudyStatusWorkerTest {
     }
 
     @Test
-    void resetStudyStatus_success() {
+    void resetStatus_success() {
         // given
         StudyStatus original = StudyStatus.builder()
                 .id(1L)
@@ -83,7 +83,7 @@ class StudyStatusWorkerTest {
                 .build();
 
         // when
-        StudyStatus updated = studyStatusWorker.resetStudyStatus(original, 200L);
+        StudyStatus updated = studyStatusWorker.resetStatus(original, 200L);
 
         // then
         assertThat(updated.isStudying()).isFalse();
@@ -94,14 +94,14 @@ class StudyStatusWorkerTest {
     }
 
     @Test
-    void restartStudyStatus_success() {
+    void restartStatus_success() {
         // given
         StartStudyReq req = new StartStudyReq(null, "focus", LocalTime.of(9, 30));
         StudyStatus current =
                 StudyStatus.builder().id(1L).studyTime(120L).studying(false).build();
 
         // when
-        StudyStatus restarted = studyStatusWorker.restartStudyStatus(current, req);
+        StudyStatus restarted = studyStatusWorker.restartStatus(current, req);
 
         // then
         assertThat(restarted.isStudying()).isTrue();

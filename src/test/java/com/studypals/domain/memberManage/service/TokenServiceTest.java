@@ -6,8 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -68,7 +66,7 @@ class TokenServiceTest {
         JwtUtils.JwtData tokenData = new JwtUtils.JwtData(userId);
 
         given(jwtUtils.tokenInfo(accessToken)).willReturn(tokenData);
-        given(refreshTokenWorker.findToken(userId)).willReturn(Optional.of(savedRefreshToken));
+        given(refreshTokenWorker.find(userId)).willReturn(savedRefreshToken);
         given(jwtUtils.createJwt(userId)).willReturn(newToken);
 
         // when
@@ -115,8 +113,7 @@ class TokenServiceTest {
 
         given(jwtUtils.tokenInfo(accessToken)).willReturn(new JwtUtils.JwtData(1L));
 
-        given(refreshTokenWorker.findToken(1L))
-                .willReturn(Optional.of(new RefreshToken(1L, "unmatched_refresh_token", 30L)));
+        given(refreshTokenWorker.find(1L)).willReturn(new RefreshToken(1L, "unmatched_refresh_token", 30L));
 
         // when & then
         assertThatThrownBy(() -> tokenService.reissueJwtToken(token))
@@ -138,6 +135,6 @@ class TokenServiceTest {
         tokenService.saveRefreshToken(dto);
 
         // then
-        then(refreshTokenWorker).should().saveToken(any());
+        then(refreshTokenWorker).should().save(any());
     }
 }

@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.memberManage.worker.MemberFinder;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.exception.AuthException;
 
@@ -28,7 +28,7 @@ import com.studypals.global.exceptions.exception.AuthException;
 @ExtendWith(MockitoExtension.class)
 class MemberDetailsServiceTest {
     @Mock
-    private MemberFinder memberFinder;
+    private MemberReader memberReader;
 
     @Mock
     private Member mockMember;
@@ -40,7 +40,7 @@ class MemberDetailsServiceTest {
     void loadUserByUsername_success() {
         // given
         String username = "username";
-        given(memberFinder.findMember(username)).willReturn(mockMember);
+        given(memberReader.find(username)).willReturn(mockMember);
         given(mockMember.getUsername()).willReturn(username);
 
         // when
@@ -55,7 +55,7 @@ class MemberDetailsServiceTest {
         // given
         String username = "username";
         AuthErrorCode code = AuthErrorCode.USER_NOT_FOUND;
-        given(memberFinder.findMember(username)).willThrow(new AuthException(code));
+        given(memberReader.find(username)).willThrow(new AuthException(code));
 
         // when & then
         assertThatThrownBy(() -> memberDetailsService.loadUserByUsername(username))

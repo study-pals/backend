@@ -18,14 +18,14 @@ import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.exception.AuthException;
 
 /**
- * {@link MemberFinder} 에 대한 단위 테스트 코드
+ * {@link MemberReader} 에 대한 단위 테스트 코드
  *
  * @author jack8
  * @since 2025-04-16
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("MemberFinder 유닛 테스트")
-class MemberFinderTest {
+@DisplayName("MemberReader 유닛 테스트")
+class MemberReaderTest {
 
     @Mock
     private MemberRepository memberRepository;
@@ -34,63 +34,63 @@ class MemberFinderTest {
     private Member mockMember;
 
     @InjectMocks
-    private MemberFinder memberFinder;
+    private MemberReader memberReader;
 
     @Test
-    void findMemberById_success() {
+    void findById_success() {
         // given
         given(memberRepository.findById(1L)).willReturn(Optional.of(mockMember));
 
         // when
-        Member result = memberFinder.findMember(1L);
+        Member result = memberReader.find(1L);
 
         // then
         assertThat(result).isEqualTo(mockMember);
     }
 
     @Test
-    void findMemberById_fail_userNotFound() {
+    void findById_fail_userNotFound() {
         // given
         given(memberRepository.findById(1L)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> memberFinder.findMember(1L))
+        assertThatThrownBy(() -> memberReader.find(1L))
                 .isInstanceOf(AuthException.class)
                 .extracting("errorCode")
                 .isEqualTo(AuthErrorCode.USER_NOT_FOUND);
     }
 
     @Test
-    void findMemberByUsername_success() {
+    void findByUsername_success() {
         // given
         given(memberRepository.findByUsername("username")).willReturn(Optional.of(mockMember));
 
         // when
-        Member result = memberFinder.findMember("username");
+        Member result = memberReader.find("username");
 
         // then
         assertThat(result).isEqualTo(mockMember);
     }
 
     @Test
-    void findMemberByUsername_fail_userNotFound() {
+    void findByUsername_fail_userNotFound() {
         // given
         given(memberRepository.findByUsername("username")).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> memberFinder.findMember("username"))
+        assertThatThrownBy(() -> memberReader.find("username"))
                 .isInstanceOf(AuthException.class)
                 .extracting("errorCode")
                 .isEqualTo(AuthErrorCode.USER_NOT_FOUND);
     }
 
     @Test
-    void findMemberRef_success() {
+    void findRef_success() {
         // given
         given(memberRepository.getReferenceById(1L)).willReturn(mockMember);
 
         // when
-        Member result = memberFinder.findMemberRef(1L);
+        Member result = memberReader.findRef(1L);
 
         // then
         assertThat(result).isEqualTo(mockMember);

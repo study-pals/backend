@@ -36,21 +36,21 @@ class MemberWriterTest {
     private MemberWriter memberWriter;
 
     @Test
-    void saveMember_success() {
+    void save_success() {
 
         // when & then
-        assertThatCode(() -> memberWriter.saveMember(mockMember)).doesNotThrowAnyException();
+        assertThatCode(() -> memberWriter.save(mockMember)).doesNotThrowAnyException();
     }
 
     @Test
-    void saveMember_fail_duplicate() {
+    void save_fail_duplicate() {
         // given
         willThrow(new DataIntegrityViolationException("duplicate"))
                 .given(memberRepository)
                 .save(mockMember);
 
         // when & then
-        assertThatThrownBy(() -> memberWriter.saveMember(mockMember))
+        assertThatThrownBy(() -> memberWriter.save(mockMember))
                 .isInstanceOf(AuthException.class)
                 .extracting("errorCode")
                 .isEqualTo(AuthErrorCode.SIGNUP_FAIL);

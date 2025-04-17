@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.*;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,8 +62,8 @@ class StudySessionServiceTest {
                 .build();
         StartStudyRes expected = new StartStudyRes(true, time, 0L, categoryId, null);
 
-        given(studyStatusWorker.findStatus(userId)).willReturn(null);
-        given(studyStatusWorker.firstStudyStatus(userId, req)).willReturn(status);
+        given(studyStatusWorker.find(userId)).willReturn(Optional.empty());
+        given(studyStatusWorker.firstStatus(userId, req)).willReturn(status);
         given(mapper.toDto(status)).willReturn(expected);
 
         // when
@@ -90,8 +91,8 @@ class StudySessionServiceTest {
                 .build();
         StartStudyRes expected = new StartStudyRes(true, time, 0L, categoryId, null);
 
-        given(studyStatusWorker.findStatus(userId)).willReturn(oldStatus);
-        given(studyStatusWorker.restartStudyStatus(oldStatus, req)).willReturn(newStatus);
+        given(studyStatusWorker.find(userId)).willReturn(Optional.of(oldStatus));
+        given(studyStatusWorker.restartStatus(oldStatus, req)).willReturn(newStatus);
         given(mapper.toDto(newStatus)).willReturn(expected);
         // when
         StartStudyRes result = studySessionService.startStudy(userId, req);
@@ -124,16 +125,16 @@ class StudySessionServiceTest {
                 .build();
 
         given(timeUtils.getToday()).willReturn(today);
-        given(studyStatusWorker.findStatus(userId)).willReturn(status);
+        given(studyStatusWorker.find(userId)).willReturn(Optional.of(status));
         willDoNothing().given(studyStatusWorker).validStatus(status);
-        given(studyStatusWorker.resetStudyStatus(status, duration)).willReturn(updated);
+        given(studyStatusWorker.resetStatus(status, duration)).willReturn(updated);
 
         // when
         Long result = studySessionService.endStudy(userId, end);
 
         // then
         assertThat(result).isEqualTo(duration);
-        then(studySessionWorker).should().upsertStudyTime(userId, status, today, duration);
+        then(studySessionWorker).should().upsert(userId, status, today, duration);
         then(studyStatusWorker).should().saveStatus(updated);
     }
 
@@ -161,14 +162,14 @@ class StudySessionServiceTest {
                 .build();
 
         given(timeUtils.getToday()).willReturn(today);
-        given(studyStatusWorker.findStatus(userId)).willReturn(status);
+        given(studyStatusWorker.find(userId)).willReturn(Optional.of(status));
         willDoNothing().given(studyStatusWorker).validStatus(status);
-        given(studyStatusWorker.resetStudyStatus(status, duration)).willReturn(updated);
+        given(studyStatusWorker.resetStatus(status, duration)).willReturn(updated);
 
         Long result = studySessionService.endStudy(userId, end);
 
         assertThat(result).isEqualTo(duration);
-        then(studySessionWorker).should().upsertStudyTime(userId, status, today, duration);
+        then(studySessionWorker).should().upsert(userId, status, today, duration);
         then(studyStatusWorker).should().saveStatus(updated);
     }
 }
