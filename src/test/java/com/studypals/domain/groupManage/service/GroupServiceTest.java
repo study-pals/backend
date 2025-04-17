@@ -12,19 +12,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.groupManage.dao.GroupMemberRepository;
-import com.studypals.domain.groupManage.dao.GroupRepository;
-import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
-import com.studypals.domain.groupManage.dto.mappers.GroupMemberMapper;
 import com.studypals.domain.groupManage.entity.Group;
-import com.studypals.domain.groupManage.entity.GroupMember;
-import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.entity.GroupTag;
-import com.studypals.domain.memberManage.dao.MemberRepository;
-import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.groupManage.worker.GroupMemberWorker;
+import com.studypals.domain.groupManage.worker.GroupReader;
+import com.studypals.domain.groupManage.worker.GroupWorker;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
@@ -41,31 +36,19 @@ import com.studypals.global.exceptions.exception.GroupException;
 public class GroupServiceTest {
 
     @Mock
-    private MemberRepository memberRepository;
+    private GroupWorker groupWorker;
 
     @Mock
-    private GroupRepository groupRepository;
+    private GroupReader groupReader;
 
     @Mock
-    private GroupMemberRepository groupMemberRepository;
-
-    @Mock
-    private GroupTagRepository groupTagRepository;
+    private GroupMemberWorker groupMemberWorker;
 
     @Mock
     private GroupMapper groupMapper;
 
     @Mock
-    private GroupMemberMapper groupMemberMapper;
-
-    @Mock
-    private Member mockMember;
-
-    @Mock
     private Group mockGroup;
-
-    @Mock
-    private GroupMember mockGroupMember;
 
     @Mock
     private GroupTag mockGroupTag;
@@ -78,7 +61,7 @@ public class GroupServiceTest {
         // given
         GetGroupTagRes res = new GetGroupTagRes(mockGroupTag.getName());
 
-        given(groupTagRepository.findAll()).willReturn(List.of(mockGroupTag));
+        given(groupReader.getGroupTags()).willReturn(List.of(mockGroupTag));
         given(groupMapper.toTagDto(mockGroupTag)).willReturn(res);
 
         // when
@@ -94,12 +77,7 @@ public class GroupServiceTest {
         Long userId = 1L;
         CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
-        given(mockGroupTag.getName()).willReturn("group tag");
-        given(memberRepository.getReferenceById(userId)).willReturn(mockMember);
-        given(groupTagRepository.existsById(mockGroupTag.getName())).willReturn(true);
-        given(groupMapper.toEntity(req)).willReturn(mockGroup);
-        given(groupMemberMapper.toEntity(mockMember, mockGroup, GroupRole.LEADER))
-                .willReturn(mockGroupMember);
+        given(groupWorker.create(req)).willReturn(mockGroup);
 
         // when
         Long actual = groupService.createGroup(userId, req);
@@ -109,14 +87,13 @@ public class GroupServiceTest {
     }
 
     @Test
-    void createGroup_fail_tagNotFound() {
+    void createGroup_fail_whileGroupCreating() {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
         CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
-        given(mockGroupTag.getName()).willReturn("group tag");
-        given(groupTagRepository.existsById(mockGroupTag.getName())).willReturn(false);
+        given(groupWorker.create(req)).willThrow(new GroupException(errorCode));
 
         // when & then
         assertThatThrownBy(() -> groupService.createGroup(userId, req))
@@ -126,38 +103,14 @@ public class GroupServiceTest {
     }
 
     @Test
-    void createGroup_fail_whileGroupSave() {
+    void createGroup_fail_whileGroupMemberCreating() {
         // given
         Long userId = 1L;
-        GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
+        GroupErrorCode errorCode = GroupErrorCode.GROUP_MEMBER_CREATE_FAIL;
         CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
-        given(mockGroupTag.getName()).willReturn("group tag");
-        given(groupMapper.toEntity(req)).willReturn(mockGroup);
-        given(groupTagRepository.existsById(mockGroupTag.getName())).willReturn(true);
-        given(groupRepository.save(mockGroup)).willThrow(new GroupException(errorCode));
-
-        // when & then
-        assertThatThrownBy(() -> groupService.createGroup(userId, req))
-                .isInstanceOf(GroupException.class)
-                .extracting("errorCode")
-                .isEqualTo(errorCode);
-    }
-
-    @Test
-    void createGroup_fail_whileGroupMemberSave() {
-        // given
-        Long userId = 1L;
-        GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
-
-        given(mockGroupTag.getName()).willReturn("group tag");
-        given(memberRepository.getReferenceById(userId)).willReturn(mockMember);
-        given(groupTagRepository.existsById(mockGroupTag.getName())).willReturn(true);
-        given(groupMapper.toEntity(req)).willReturn(mockGroup);
-        given(groupMemberMapper.toEntity(mockMember, mockGroup, GroupRole.LEADER))
-                .willReturn(mockGroupMember);
-        given(groupMemberRepository.save(mockGroupMember)).willThrow(new GroupException(errorCode));
+        given(groupWorker.create(req)).willReturn(mockGroup);
+        given(groupMemberWorker.createLeader(userId, mockGroup)).willThrow(new GroupException(errorCode));
 
         // when & then
         assertThatThrownBy(() -> groupService.createGroup(userId, req))

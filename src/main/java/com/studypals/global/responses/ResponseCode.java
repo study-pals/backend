@@ -24,7 +24,7 @@ public enum ResponseCode {
 
     // U02 - User & Group
     GROUP_SEARCH("U02-00"),
-    GROUP_USER_LIST("U02-01"),
+    GROUP_MEMBER_LIST("U02-01"),
     GROUP_CREATE("U02-02"),
     GROUP_DELETE("U02-03"),
     GROUP_UPDATE("U02-04"),
