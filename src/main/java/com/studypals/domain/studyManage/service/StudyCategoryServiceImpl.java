@@ -1,5 +1,6 @@
 package com.studypals.domain.studyManage.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -7,16 +8,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
 import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
 import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
-import com.studypals.global.exceptions.errorCode.StudyErrorCode;
-import com.studypals.global.exceptions.exception.StudyException;
+import com.studypals.domain.studyManage.worker.StudyCategoryReader;
+import com.studypals.domain.studyManage.worker.StudyCategoryWriter;
 
 /**
  * StudyCategory 에 대한 service implement class 입니다.
@@ -38,42 +38,49 @@ import com.studypals.global.exceptions.exception.StudyException;
 @RequiredArgsConstructor
 public class StudyCategoryServiceImpl implements StudyCategoryService {
 
-    private final MemberRepository memberRepository;
-    private final StudyCategoryRepository studyCategoryRepository;
+    private final MemberReader memberReader;
+    private final StudyCategoryWriter studyCategoryWriter;
+    private final StudyCategoryReader studyCategoryReader;
     private final CategoryMapper categoryMapper;
 
+    /*tested*/
     @Override
     @Transactional
     public Long createCategory(Long userId, CreateCategoryReq dto) {
-        Member member = memberRepository.getReferenceById(userId);
+        Member member = memberReader.getRef(userId);
         StudyCategory category = categoryMapper.toEntity(dto, member);
 
-        try {
-            studyCategoryRepository.save(category);
-        } catch (Exception e) {
-            throw new StudyException(StudyErrorCode.STUDY_CATEGORY_ADD_FAIL);
-        }
+        studyCategoryWriter.save(category);
 
         return category.getId();
     }
-
+    /*tested*/
     @Override
     @Transactional(readOnly = true)
     public List<GetCategoryRes> getUserCategory(Long userId) {
 
-        return studyCategoryRepository.findByMemberId(userId).stream()
+        return studyCategoryReader.findByMember(userId).stream()
                 .map(categoryMapper::toDto)
                 .toList();
+    }
+
+    /*tested*/
+    @Override
+    @Transactional(readOnly = true)
+    public List<GetCategoryRes> getUserCategoryByDate(Long userId, LocalDate date) {
+
+        int dayBit = 1 << (date.getDayOfWeek().getValue() - 1);
+
+        List<StudyCategory> categories = studyCategoryReader.getListByMemberAndDay(userId, dayBit);
+
+        return categories.stream().map(categoryMapper::toDto).toList();
     }
 
     @Override
     @Transactional
     public Long updateCategory(Long userId, UpdateCategoryReq dto) {
 
-        StudyCategory category = findCategory(dto.categoryId());
-        if (!category.isOwner(userId)) {
-            throw new StudyException(StudyErrorCode.STUDY_CATEGORY_UPDATE_FAIL, "owner of category deos not match");
-        }
+        StudyCategory category = studyCategoryReader.getAndValidate(userId, dto.categoryId());
         category.updateCategory(dto);
 
         return category.getId();
@@ -83,33 +90,15 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     @Transactional
     public void deleteCategory(Long userId, Long categoryId) {
 
-        StudyCategory category = findCategory(categoryId);
+        StudyCategory category = studyCategoryReader.getAndValidate(userId, categoryId);
 
-        if (!category.isOwner(userId)) {
-            throw new StudyException(StudyErrorCode.STUDY_CATEGORY_DELETE_FAIL, "owner of category does not match");
-        }
-
-        studyCategoryRepository.deleteById(categoryId);
+        studyCategoryWriter.delete(category);
     }
 
     @Override
     @Transactional
     public void initCategory(Long userId) {
 
-        studyCategoryRepository.deleteByMemberId(userId);
-    }
-
-    /**
-     * study category 를 찾는 private method. 실패 시 예외 처리의 공통화를 위해 분리하였다.
-     *
-     * @param id 찾고자 하는 category 의 id
-     * @return Category
-     * @throws StudyException {@code StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, "In StudyCategoryServiceImpl} 포함
-     */
-    private StudyCategory findCategory(Long id) {
-        return studyCategoryRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new StudyException(StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, "In StudyCategoryServiceImpl"));
+        studyCategoryWriter.deleteAll(userId);
     }
 }

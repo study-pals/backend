@@ -91,8 +91,8 @@ public class IntegrationSupport {
         String password = passwordEncoder.encode("password");
         String insertQuery =
                 """
-                INSERT INTO member (username, password, nickname)
-                VALUE(?, ?, ?)
+                INSERT INTO member (username, password, nickname, token)
+                VALUE(?, ?, ?, 0)
                 """;
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
