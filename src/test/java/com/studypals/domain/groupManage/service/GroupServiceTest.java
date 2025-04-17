@@ -134,7 +134,7 @@ public class GroupServiceTest {
         GroupEntryCodeRes expected = new GroupEntryCodeRes(groupId, entryCode);
 
         given(mockGroup.getId()).willReturn(groupId);
-        given(groupFinder.getById(groupId)).willReturn(mockGroup);
+        given(groupReader.getById(groupId)).willReturn(mockGroup);
         given(entryCodeGenerator.generate(groupId)).willReturn(entryCode);
 
         // when
@@ -167,7 +167,7 @@ public class GroupServiceTest {
         Long groupId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_NOT_FOUND;
 
-        given(groupFinder.getById(groupId)).willThrow(new GroupException(errorCode));
+        given(groupReader.getById(groupId)).willThrow(new GroupException(errorCode));
 
         // when & then
         assertThatThrownBy(() -> groupService.generateEntryCode(userId, groupId))
