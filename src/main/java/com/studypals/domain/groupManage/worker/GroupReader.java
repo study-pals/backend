@@ -6,8 +6,11 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
+import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.global.annotations.Worker;
+import com.studypals.global.exceptions.errorCode.GroupErrorCode;
+import com.studypals.global.exceptions.exception.GroupException;
 
 /**
  * group 도메인의 기본 Worker 클래스입니다.
@@ -29,5 +32,9 @@ public class GroupReader {
 
     public List<GroupTag> getGroupTags() {
         return groupTagRepository.findAll();
+    }
+
+    public Group getById(Long groupId) {
+        return groupRepository.findById(groupId).orElseThrow(() -> new GroupException(GroupErrorCode.GROUP_NOT_FOUND));
     }
 }

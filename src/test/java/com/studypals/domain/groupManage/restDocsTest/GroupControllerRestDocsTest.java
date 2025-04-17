@@ -18,12 +18,14 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.groupManage.api.GroupController;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
+import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
 import com.studypals.domain.groupManage.service.GroupService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -70,6 +72,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
     }
 
     @Test
+    @WithMockUser
     void createGroup_success() throws Exception {
 
         // given
@@ -100,5 +103,34 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                                         .description("그룹 가입 시 승인 필요 여부 / Default FALSE")
                                         .attributes(constraints("not null"))),
                         responseHeaders(headerWithName("Location").description("추가된 그룹 id"))));
+    }
+
+    @Test
+    @WithMockUser
+    void generateEntryCode_success() throws Exception {
+        // given
+        Long groupId = 1L;
+        GroupEntryCodeRes entryCodeRes = new GroupEntryCodeRes(groupId, "A1B2C3");
+        Response<GroupEntryCodeRes> expected = CommonResponse.success(ResponseCode.GROUP_ENTRY_CODE, entryCodeRes);
+
+        given(groupService.generateEntryCode(any(), any())).willReturn(entryCodeRes);
+
+        // when
+        ResultActions result = mockMvc.perform(post("/groups/" + groupId + "/entry-code"));
+
+        // then
+        result.andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/groups/1/entry-code/" + entryCodeRes.code()))
+                .andExpect(hasKey(expected))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        responseFields(
+                                fieldWithPath("data.groupId").description("그룹 ID"),
+                                fieldWithPath("data.code").description("그룹 초대 코드 | 6자리의 대문자 알파벳, 숫자 조합"),
+                                fieldWithPath("code").description("응답 코드"),
+                                fieldWithPath("status").description("응답 상태"),
+                                fieldWithPath("message").description("응답 메시지")),
+                        responseHeaders(headerWithName("Location").description("생성된 그룹 초대 코드"))));
     }
 }

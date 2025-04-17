@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
+import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
 import com.studypals.domain.groupManage.service.GroupService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -47,5 +48,15 @@ public class GroupController {
         Long groupId = groupService.createGroup(userId, request);
 
         return ResponseEntity.created(URI.create("/groups/" + groupId)).build();
+    }
+
+    @PostMapping("/{groupId}/entry-code")
+    public ResponseEntity<Response<GroupEntryCodeRes>> generateEntryCode(
+            @AuthenticationPrincipal Long userId, @PathVariable Long groupId) {
+        GroupEntryCodeRes codeResponse = groupService.generateEntryCode(userId, groupId);
+        Response<GroupEntryCodeRes> response = CommonResponse.success(ResponseCode.GROUP_ENTRY_CODE, codeResponse);
+
+        return ResponseEntity.created(URI.create("/groups/" + groupId + "/entry-code/" + codeResponse.code()))
+                .body(response);
     }
 }
