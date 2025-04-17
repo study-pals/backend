@@ -56,8 +56,8 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional(readOnly = true)
     public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
-        authorityValidator.validate(userId);
         Group group = groupReader.getById(groupId);
+        authorityValidator.validate(userId);
         String entryCode = entryCodeGenerator.generate(group.getId());
 
         return new GroupEntryCodeRes(group.getId(), entryCode);
