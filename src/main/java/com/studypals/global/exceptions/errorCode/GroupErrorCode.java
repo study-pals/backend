@@ -26,7 +26,7 @@ import com.studypals.global.responses.ResponseCode;
 public enum GroupErrorCode implements ErrorCode {
     // U02: User <-> Group 관련
     GROUP_NOT_FOUND(ResponseCode.GROUP_SEARCH, HttpStatus.NOT_FOUND, "can't find group"),
-    GROUP_CREATE_FAIL(ResponseCode.GROUP_CREATE, HttpStatus.BAD_REQUEST, "failed to create group"),
+    GROUP_CREATE_FAIL(ResponseCode.GROUP_CREATE, HttpStatus.BAD_REQUEST, "failed to createWithCategory group"),
     GROUP_DELETE_FAIL(ResponseCode.GROUP_DELETE, HttpStatus.BAD_REQUEST, "failed to delete group"),
     GROUP_UPDATE_FAIL(ResponseCode.GROUP_UPDATE, HttpStatus.BAD_REQUEST, "failed to update group"),
     GROUP_JOIN_FAIL(ResponseCode.GROUP_JOIN, HttpStatus.BAD_REQUEST, "failed to join group"),
@@ -35,7 +35,8 @@ public enum GroupErrorCode implements ErrorCode {
     GROUP_INVITE_FAIL(ResponseCode.GROUP_INVITE, HttpStatus.BAD_REQUEST, "failed to invite user to group"),
 
     GROUP_MEMBER_NOT_FOUND(ResponseCode.GROUP_MEMBER_LIST, HttpStatus.NOT_FOUND, "can't find member in group"),
-    GROUP_MEMBER_CREATE_FAIL(ResponseCode.GROUP_CREATE, HttpStatus.BAD_REQUEST, "failed to create group member");
+    GROUP_MEMBER_CREATE_FAIL(
+            ResponseCode.GROUP_CREATE, HttpStatus.BAD_REQUEST, "failed to createWithCategory group member");
 
     private final ResponseCode responseCode;
     private final HttpStatus status;

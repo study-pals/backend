@@ -64,7 +64,8 @@ class AuthControllerRestDocsTest extends RestDocsSupport {
         CreateMemberReq req = new CreateMemberReq(
                 "username", "password", "nickname", LocalDate.of(2000, 1, 1), "student", "example.com");
 
-        Response<Long> expectedResponse = CommonResponse.success(ResponseCode.USER_CREATE, 1L, "success create user");
+        Response<Long> expectedResponse =
+                CommonResponse.success(ResponseCode.USER_CREATE, 1L, "success createWithCategory user");
 
         given(memberService.createMember(req)).willReturn(1L);
 

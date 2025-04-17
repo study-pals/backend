@@ -5,8 +5,6 @@ import java.time.LocalDate;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
 
-import com.studypals.domain.memberManage.entity.Member;
-
 /**
  * 회원가입 시 사용되는 DTO 입니다.
  *
@@ -21,16 +19,4 @@ public record CreateMemberReq(
         @NotBlank String nickname,
         @PastOrPresent LocalDate birthday,
         String position,
-        String imageUrl) {
-
-    public Member toEntity(String password) {
-        return Member.builder()
-                .username(this.username)
-                .password(password)
-                .nickname(this.nickname)
-                .birthday(this.birthday)
-                .position(this.position)
-                .imageUrl(this.imageUrl)
-                .build();
-    }
-}
+        String imageUrl) {}

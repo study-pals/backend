@@ -2,6 +2,7 @@ package com.studypals.domain.studyManage.dao;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,4 +32,9 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
     Long sumTimeByMemberAndDate(@Param("memberId") Long memberId, @Param("studiedAt") LocalDate studiedAt);
 
     List<StudyTime> findByMemberIdAndStudiedAtBetween(Long memberId, LocalDate start, LocalDate end);
+
+    Optional<StudyTime> findByMemberIdAndStudiedAtAndCategoryId(Long memberId, LocalDate studiedAt, Long categoryId);
+
+    Optional<StudyTime> findByMemberIdAndStudiedAtAndTemporaryName(
+            Long memberId, LocalDate studiedAt, String temporaryName);
 }

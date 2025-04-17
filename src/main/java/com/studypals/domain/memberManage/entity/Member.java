@@ -54,4 +54,12 @@ public class Member {
     @Column(name = "created_at")
     @CreatedDate
     private LocalDate createdAt;
+
+    @Column(name = "token")
+    @Builder.Default
+    private Long token = 0L;
+
+    public void addToken(Long token) {
+        this.token += token;
+    }
 }

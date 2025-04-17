@@ -4,12 +4,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.entity.MemberDetails;
+import com.studypals.domain.memberManage.worker.MemberReader;
 
 /**
  * 스프링 시큐리티에게 유저 정보를 건내주는 역할을 위임받은 객체입니다.
@@ -27,13 +28,12 @@ import com.studypals.domain.memberManage.entity.MemberDetails;
 @RequiredArgsConstructor
 public class MemberDetailsService implements UserDetailsService {
 
-    private final MemberRepository memberRepository;
+    private final MemberReader memberReader;
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member member = memberRepository
-                .findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("invalid username"));
+        Member member = memberReader.get(username);
         return new MemberDetails(member);
     }
 }

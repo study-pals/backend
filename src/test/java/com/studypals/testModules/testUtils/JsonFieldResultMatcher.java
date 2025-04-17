@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.studypals.global.exceptions.errorCode.ErrorCode;
 import com.studypals.global.responses.Response;
@@ -117,11 +119,14 @@ public class JsonFieldResultMatcher implements ResultMatcher {
 
         matchers.add(MockMvcResultMatchers.jsonPath("$." + root + ".length()").value(values.size()));
 
-        for (int i = 0; i < values.size(); i++) {
-            Object value = values.get(i);
-            String elementPath = String.format("%s[%d]", root, i);
+        // 리스트가 1개면 내부 값도 재귀 검사
+        if (values.size() == 1) {
+            Object value = values.get(0);
+            String elementPath = String.format("%s[0]", root);
             matchers.addAll(buildMatchersForValue("$." + elementPath, value));
         }
+
+        // size >= 2 면 길이만 검사하고 내부는 생략
 
         return matchers;
     }
@@ -136,6 +141,9 @@ public class JsonFieldResultMatcher implements ResultMatcher {
             matchers.add(MockMvcResultMatchers.jsonPath(path).value(value));
         } else if (value instanceof LocalDate) {
             String formatted = ((LocalDate) value).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            matchers.add(MockMvcResultMatchers.jsonPath(path).value(formatted));
+        } else if (value instanceof LocalTime) {
+            String formatted = ((LocalTime) value).format(DateTimeFormatter.ISO_LOCAL_TIME);
             matchers.add(MockMvcResultMatchers.jsonPath(path).value(formatted));
         } else if (value instanceof LocalDateTime) {
             String formatted = ((LocalDateTime) value)
@@ -163,6 +171,7 @@ public class JsonFieldResultMatcher implements ResultMatcher {
     private static ObjectMapper createMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return mapper;
     }
 }

@@ -38,7 +38,9 @@ import com.studypals.domain.memberManage.entity.Member;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "study_time")
+@Table(
+        name = "study_time",
+        indexes = {@Index(name = "idx_member_studied_category", columnList = "member_id, studied_at, category_id")})
 public class StudyTime {
 
     @Id
@@ -61,7 +63,8 @@ public class StudyTime {
     private LocalDate studiedAt;
 
     @Column(name = "time", nullable = false)
-    private Long time;
+    @Builder.Default
+    private Long time = 0L;
 
     @PrePersist
     @PreUpdate
@@ -69,5 +72,9 @@ public class StudyTime {
         if (this.temporaryName == null && this.category == null) {
             throw new DataIntegrityViolationException("must have value temporary name or category");
         }
+    }
+
+    public void addTime(Long time) {
+        this.time += time;
     }
 }

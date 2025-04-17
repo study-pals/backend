@@ -1,17 +1,16 @@
 package com.studypals.domain.memberManage.service;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.dto.CreateMemberReq;
+import com.studypals.domain.memberManage.dto.mappers.MemberMapper;
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.global.exceptions.errorCode.AuthErrorCode;
-import com.studypals.global.exceptions.exception.AuthException;
+import com.studypals.domain.memberManage.worker.MemberReader;
+import com.studypals.domain.memberManage.worker.MemberWriter;
 
 /**
  * member service 의 구현 클래스입니다.
@@ -32,26 +31,26 @@ import com.studypals.global.exceptions.exception.AuthException;
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
 
-    private final MemberRepository memberRepository;
+    private final MemberReader memberReader;
+    private final MemberWriter memberWriter;
     private final PasswordEncoder passwordEncoder;
+    private final MemberMapper mapper;
 
     @Override
     @Transactional
     public Long createMember(CreateMemberReq dto) {
         String password = passwordEncoder.encode(dto.password());
-        Member member = dto.toEntity(password);
-        try {
-            return memberRepository.save(member).getId();
-        } catch (DataIntegrityViolationException e) {
-            throw new AuthException(AuthErrorCode.SIGNUP_FAIL, "maybe duplicate username or nickname");
-        }
+        Member member = mapper.toEntity(dto, password);
+
+        memberWriter.save(member);
+
+        return member.getId();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Long getMemberIdByUsername(String username) {
-        return memberRepository
-                .findByUsername(username)
-                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't find user"))
-                .getId();
+
+        return memberReader.get(username).getId();
     }
 }
