@@ -6,4 +6,4 @@ import lombok.Builder;
 
 @Builder
 public record GroupSummaryRes(
-        Long id, String name, boolean isOpen, int totalMember, List<GroupMemberProfileDto> members) {}
+        Long id, String name, String tag, boolean isOpen, int totalMember, List<GroupMemberProfileDto> members) {}

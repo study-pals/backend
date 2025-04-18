@@ -76,6 +76,7 @@ public class GroupServiceImpl implements GroupService {
         return GroupSummaryRes.builder()
                 .id(groupId)
                 .name(group.getName())
+                .tag(group.getTag())
                 .isOpen(group.getIsOpen())
                 .totalMember(group.getTotalMember())
                 .members(members)
