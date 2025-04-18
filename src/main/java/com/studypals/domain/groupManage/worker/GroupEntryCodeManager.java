@@ -22,7 +22,7 @@ import com.studypals.global.utils.RandomUtils;
  */
 @Component
 @RequiredArgsConstructor
-public class GroupEntryCodeGenerator {
+public class GroupEntryCodeManager {
     private static final int GROUP_ENTRY_CODE_LENGTH = 6;
 
     private final GroupEntryCodeRedisRepository groupEntryCodeRepository;

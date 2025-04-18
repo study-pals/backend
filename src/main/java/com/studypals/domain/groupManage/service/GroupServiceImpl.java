@@ -36,7 +36,7 @@ public class GroupServiceImpl implements GroupService {
     private final GroupReader groupReader;
     private final GroupMemberWorker groupMemberWorker;
     private final GroupAuthorityValidator authorityValidator;
-    private final GroupEntryCodeGenerator entryCodeGenerator;
+    private final GroupEntryCodeManager entryCodeManager;
 
     private final GroupMapper groupMapper;
 
@@ -58,7 +58,7 @@ public class GroupServiceImpl implements GroupService {
     public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
         Group group = groupReader.getById(groupId);
         authorityValidator.validate(userId);
-        String entryCode = entryCodeGenerator.generate(group.getId());
+        String entryCode = entryCodeManager.generate(group.getId());
 
         return new GroupEntryCodeRes(group.getId(), entryCode);
     }

@@ -11,13 +11,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class GroupEntryCodeGeneratorTest {
+public class GroupEntryCodeManagerTest {
 
     @Mock
     private GroupEntryCodeRedisRepository entryCodeRepository;
 
     @InjectMocks
-    private GroupEntryCodeGenerator entryCodeGenerator;
+    private GroupEntryCodeManager entryCodeManager;
 
     @Test
     void generate_success() {
@@ -25,7 +25,7 @@ public class GroupEntryCodeGeneratorTest {
         Long groupId = 1L;
 
         // when
-        String code = entryCodeGenerator.generate(groupId);
+        String code = entryCodeManager.generate(groupId);
 
         // then
         assertThat(code).isNotNull();

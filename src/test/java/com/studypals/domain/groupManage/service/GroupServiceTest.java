@@ -48,7 +48,7 @@ public class GroupServiceTest {
     private GroupAuthorityValidator authorityValidator;
 
     @Mock
-    private GroupEntryCodeGenerator entryCodeGenerator;
+    private GroupEntryCodeManager entryCodeManager;
 
     @Mock
     private GroupMapper groupMapper;
@@ -135,7 +135,7 @@ public class GroupServiceTest {
 
         given(mockGroup.getId()).willReturn(groupId);
         given(groupReader.getById(groupId)).willReturn(mockGroup);
-        given(entryCodeGenerator.generate(groupId)).willReturn(entryCode);
+        given(entryCodeManager.generate(groupId)).willReturn(entryCode);
 
         // when
         GroupEntryCodeRes actual = groupService.generateEntryCode(userId, groupId);
