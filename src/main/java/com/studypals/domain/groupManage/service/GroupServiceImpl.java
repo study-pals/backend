@@ -7,9 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.dto.CreateGroupReq;
-import com.studypals.domain.groupManage.dto.GetGroupTagRes;
-import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
+import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.worker.*;
@@ -32,9 +30,13 @@ import com.studypals.domain.groupManage.worker.*;
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
+    private static final int GROUP_SUMMARY_MEMBER_COUNT = 5;
+
     private final GroupWorker groupWorker;
     private final GroupReader groupReader;
     private final GroupMemberWorker groupMemberWorker;
+    private final GroupMemberReader groupMemberReader;
+
     private final GroupAuthorityValidator authorityValidator;
     private final GroupEntryCodeManager entryCodeManager;
 
@@ -61,5 +63,22 @@ public class GroupServiceImpl implements GroupService {
         String entryCode = entryCodeManager.generate(group.getId());
 
         return new GroupEntryCodeRes(group.getId(), entryCode);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GroupSummaryRes getGroupSummary(String entryCode) {
+        Long groupId = entryCodeManager.getGroupId(entryCode);
+        Group group = groupReader.getById(groupId);
+        List<GroupMemberProfileDto> members =
+                groupMemberReader.getTopNMemberProfiles(groupId, GROUP_SUMMARY_MEMBER_COUNT);
+
+        return GroupSummaryRes.builder()
+                .id(groupId)
+                .name(group.getName())
+                .isOpen(group.getIsOpen())
+                .totalMember(group.getTotalMember())
+                .members(members)
+                .build();
     }
 }

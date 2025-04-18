@@ -26,6 +26,7 @@ import com.studypals.global.responses.ResponseCode;
 public enum GroupErrorCode implements ErrorCode {
     // U02: User <-> Group 관련
     GROUP_NOT_FOUND(ResponseCode.GROUP_SEARCH, HttpStatus.NOT_FOUND, "can't find group"),
+    GROUP_CODE_NOT_FOUND(ResponseCode.GROUP_ENTRY_CODE, HttpStatus.NOT_FOUND, "can't find group entry code"),
     GROUP_FORBIDDEN(ResponseCode.GROUP_LEADER, HttpStatus.FORBIDDEN, "no authorization for managing group"),
     GROUP_CREATE_FAIL(ResponseCode.GROUP_CREATE, HttpStatus.BAD_REQUEST, "failed to createWithCategory group"),
     GROUP_DELETE_FAIL(ResponseCode.GROUP_DELETE, HttpStatus.BAD_REQUEST, "failed to delete group"),

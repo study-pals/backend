@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
 import com.studypals.domain.groupManage.entity.GroupEntryCode;
+import com.studypals.global.exceptions.errorCode.GroupErrorCode;
+import com.studypals.global.exceptions.exception.GroupException;
 import com.studypals.global.utils.RandomUtils;
 
 /**
@@ -33,5 +35,12 @@ public class GroupEntryCodeManager {
         groupEntryCodeRepository.save(entryCode);
 
         return code;
+    }
+
+    public Long getGroupId(String entryCode) {
+        return groupEntryCodeRepository
+                .findById(entryCode)
+                .orElseThrow(() -> new GroupException(GroupErrorCode.GROUP_CODE_NOT_FOUND))
+                .getId();
     }
 }

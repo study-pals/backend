@@ -5,6 +5,7 @@ import java.util.List;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
 import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
+import com.studypals.domain.groupManage.dto.GroupSummaryRes;
 
 /**
  * GroupService 의 인터페이스입니다. 메서드를 정의합니다.
@@ -46,4 +47,13 @@ public interface GroupService {
      * @return 그룹 ID와 해당 그룹의 초대 코드
      */
     GroupEntryCodeRes generateEntryCode(Long userId, Long groupId);
+
+    /**
+     * 초대 코드로 그룹 대표 정보를 조회합니다.
+     * 그룹장 포함 일부 멤버들의 프로필 이미지와 함께 조회합니다.
+     *
+     * @param entryCode 그룹 초대 코드
+     * @return 그룹 대표 정보
+     */
+    GroupSummaryRes getGroupSummary(String entryCode);
 }
