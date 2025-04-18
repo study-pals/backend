@@ -18,4 +18,4 @@ import com.studypals.domain.groupManage.entity.GroupEntryCode;
  * @since 2025-04-15
  */
 @Repository
-public interface GroupEntryCodeRedisRepository extends CrudRepository<GroupEntryCode, Long> {}
+public interface GroupEntryCodeRedisRepository extends CrudRepository<GroupEntryCode, String> {}

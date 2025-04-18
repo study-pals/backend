@@ -29,7 +29,7 @@ public class GroupEntryCodeGenerator {
 
     public String generate(Long groupId) {
         String code = RandomUtils.generateUpperAlphaNumericCode(GROUP_ENTRY_CODE_LENGTH);
-        GroupEntryCode entryCode = new GroupEntryCode(groupId, code);
+        GroupEntryCode entryCode = new GroupEntryCode(code, groupId);
         groupEntryCodeRepository.save(entryCode);
 
         return code;
