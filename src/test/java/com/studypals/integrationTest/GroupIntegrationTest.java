@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -21,7 +22,9 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import lombok.Builder;
 
+import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.entity.GroupEntryCode;
 import com.studypals.global.responses.ResponseCode;
 import com.studypals.testModules.testSupport.IntegrationSupport;
 
@@ -37,6 +40,8 @@ import com.studypals.testModules.testSupport.IntegrationSupport;
 @ActiveProfiles("test")
 @DisplayName("API TEST / 그룹 관리 통합 테스트")
 public class GroupIntegrationTest extends IntegrationSupport {
+    @Autowired
+    private GroupEntryCodeRedisRepository entryCodeRedisRepository;
 
     @Test
     @DisplayName("GET /groups/tags")
@@ -91,6 +96,29 @@ public class GroupIntegrationTest extends IntegrationSupport {
                 .andExpect(header().string("Location", matchesPattern("/groups/\\d+/entry-code/[A-Z0-9]+")))
                 .andExpect(hasKey("code", ResponseCode.GROUP_ENTRY_CODE.getCode()))
                 .andExpect(jsonPath("$.data.code").isString());
+    }
+
+    @Test
+    @DisplayName("GET /groups/summary")
+    void getGroupSummary_success() throws Exception {
+        // given
+        CreateUserVar user = createUser();
+        CreateGroupVar group = createGroup(user.getUserId(), "group", "tag");
+        GroupEntryCode entryCode = new GroupEntryCode("entry-code", group.groupId());
+
+        entryCodeRedisRepository.save(entryCode);
+
+        // when
+        ResultActions result = mockMvc.perform(get("/groups/summary")
+                .param("entryCode", entryCode.getCode())
+                .header("Authorization", "Bearer " + user.getAccessToken()));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(hasKey("code", ResponseCode.GROUP_SUMMARY.getCode()))
+                .andExpect(jsonPath("$.data.id").value(group.groupId()))
+                .andExpect(jsonPath("$.data.name").value(group.name()))
+                .andExpect(jsonPath("$.data.members.length()").value(1));
     }
 
     private void createGroupTag(String name) {
