@@ -9,13 +9,12 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.entity.StudyTime;
+import com.studypals.testModules.testSupport.DataJpaSupport;
 
 /**
  * {@link StudyTimeRepository} 에 대한 테스트 클래스
@@ -23,10 +22,8 @@ import com.studypals.domain.studyManage.entity.StudyTime;
  * @author jack8
  * @since 2025-04-10
  */
-@DataJpaTest
 @DisplayName("StudyTime_JPA_test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class StudyTimeRepositoryTest {
+class StudyTimeRepositoryTest extends DataJpaSupport {
 
     @Autowired
     private TestEntityManager em;

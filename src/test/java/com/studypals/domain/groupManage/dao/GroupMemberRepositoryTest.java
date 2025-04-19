@@ -8,23 +8,17 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
 
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.global.config.QueryDslTestConfig;
+import com.studypals.testModules.testSupport.DataJpaSupport;
 
-@DataJpaTest
 @DisplayName("GroupMember_QueryDsl_test")
-@Import(QueryDslTestConfig.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class GroupMemberRepositoryTest {
+public class GroupMemberRepositoryTest extends DataJpaSupport {
 
     @Autowired
     private TestEntityManager em;
