@@ -118,7 +118,7 @@ public class GroupIntegrationTest extends IntegrationSupport {
                 .andExpect(hasKey("code", ResponseCode.GROUP_SUMMARY.getCode()))
                 .andExpect(jsonPath("$.data.id").value(group.groupId()))
                 .andExpect(jsonPath("$.data.name").value(group.name()))
-                .andExpect(jsonPath("$.data.members.length()").value(1));
+                .andExpect(jsonPath("$.data.profiles.length()").value(1));
     }
 
     private void createGroupTag(String name) {

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRole;
@@ -31,7 +31,7 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
                 .username(username)
                 .password("password")
                 .nickname(nickname)
-                .imageUrl("image-url")
+                .imageUrl("imageUrl-url")
                 .build());
     }
 
@@ -58,13 +58,13 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
         GroupMember leader = insertGroupMember(group, member1, GroupRole.LEADER);
         GroupMember member = insertGroupMember(group, member2, GroupRole.MEMBER);
 
-        List<GroupMemberProfileDto> expected = List.of(
-                new GroupMemberProfileDto(member1.getImageUrl(), leader.getRole()),
-                new GroupMemberProfileDto(member2.getImageUrl(), member.getRole()));
+        List<GroupMemberProfileImageDto> expected = List.of(
+                new GroupMemberProfileImageDto(member1.getImageUrl(), leader.getRole()),
+                new GroupMemberProfileImageDto(member2.getImageUrl(), member.getRole()));
 
         // when
-        List<GroupMemberProfileDto> actual =
-                groupMemberRepository.findTopNMember(group.getId(), group.getTotalMember());
+        List<GroupMemberProfileImageDto> actual =
+                groupMemberRepository.findTopNMemberByJoinedAt(group.getId(), group.getTotalMember());
 
         // then
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);

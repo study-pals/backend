@@ -54,6 +54,7 @@ public interface GroupService {
      *
      * @param entryCode 그룹 초대 코드
      * @return 그룹 대표 정보
+     * @throws com.studypals.global.exceptions.exception.GroupException
      */
     GroupSummaryRes getGroupSummary(String entryCode);
 }

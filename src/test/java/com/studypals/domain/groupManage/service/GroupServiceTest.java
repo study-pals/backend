@@ -191,16 +191,16 @@ public class GroupServiceTest {
                 .isOpen(true)
                 .totalMember(5)
                 .build();
-        List<GroupMemberProfileDto> profiles = List.of(
-                new GroupMemberProfileDto("image url", GroupRole.LEADER),
-                new GroupMemberProfileDto("image url", GroupRole.MEMBER));
+        List<GroupMemberProfileImageDto> profiles = List.of(
+                new GroupMemberProfileImageDto("imageUrl url", GroupRole.LEADER),
+                new GroupMemberProfileImageDto("imageUrl url", GroupRole.MEMBER));
         GroupSummaryRes expected = GroupSummaryRes.builder()
                 .id(group.getId())
                 .name(group.getName())
                 .tag(group.getTag())
                 .isOpen(group.getIsOpen())
-                .totalMember(group.getTotalMember())
-                .members(profiles)
+                .memberCount(group.getTotalMember())
+                .profiles(profiles)
                 .build();
 
         given(entryCodeManager.getGroupId(entryCode)).willReturn(group.getId());

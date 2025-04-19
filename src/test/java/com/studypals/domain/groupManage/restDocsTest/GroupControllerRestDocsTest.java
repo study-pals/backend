@@ -139,16 +139,16 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
     void getGroupSummary_success() throws Exception {
         // given
         String entryCode = "A1B2C3";
-        List<GroupMemberProfileDto> profiles = List.of(
-                new GroupMemberProfileDto("image url", GroupRole.LEADER),
-                new GroupMemberProfileDto("image url", GroupRole.MEMBER));
+        List<GroupMemberProfileImageDto> profiles = List.of(
+                new GroupMemberProfileImageDto("imageUrl url", GroupRole.LEADER),
+                new GroupMemberProfileImageDto("imageUrl url", GroupRole.MEMBER));
         GroupSummaryRes groupSummaryRes = GroupSummaryRes.builder()
                 .id(1L)
                 .name("group name")
                 .tag("tag")
                 .isOpen(true)
-                .totalMember(2)
-                .members(profiles)
+                .memberCount(2)
+                .profiles(profiles)
                 .build();
         Response<GroupSummaryRes> expected = CommonResponse.success(ResponseCode.GROUP_SUMMARY, groupSummaryRes);
 
@@ -169,9 +169,9 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data.name").description("그룹명"),
                                 fieldWithPath("data.tag").description("그룹 태그"),
                                 fieldWithPath("data.isOpen").description("그룹 공개 여부"),
-                                fieldWithPath("data.totalMember").description("그룹 전체 멤버 수"),
-                                fieldWithPath("data.members[].image").description("그룹 멤버 프로필 이미지"),
-                                fieldWithPath("data.members[].role").description("그룹 멤버 권한 | LEADER, MEMBER"),
+                                fieldWithPath("data.memberCount").description("그룹 전체 멤버 수"),
+                                fieldWithPath("data.profiles[].imageUrl").description("그룹 멤버 프로필 이미지"),
+                                fieldWithPath("data.profiles[].role").description("그룹 멤버 권한 | LEADER, MEMBER"),
                                 fieldWithPath("code").description("응답 코드"),
                                 fieldWithPath("status").description("응답 상태"),
                                 fieldWithPath("message").description("응답 메시지"))));

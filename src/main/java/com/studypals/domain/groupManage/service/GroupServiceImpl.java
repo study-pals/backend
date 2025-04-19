@@ -70,7 +70,7 @@ public class GroupServiceImpl implements GroupService {
     public GroupSummaryRes getGroupSummary(String entryCode) {
         Long groupId = entryCodeManager.getGroupId(entryCode);
         Group group = groupReader.getById(groupId);
-        List<GroupMemberProfileDto> members =
+        List<GroupMemberProfileImageDto> profiles =
                 groupMemberReader.getTopNMemberProfiles(groupId, GROUP_SUMMARY_MEMBER_COUNT);
 
         return GroupSummaryRes.builder()
@@ -78,8 +78,8 @@ public class GroupServiceImpl implements GroupService {
                 .name(group.getName())
                 .tag(group.getTag())
                 .isOpen(group.getIsOpen())
-                .totalMember(group.getTotalMember())
-                .members(members)
+                .memberCount(group.getTotalMember())
+                .profiles(profiles)
                 .build();
     }
 }
