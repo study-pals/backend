@@ -8,22 +8,19 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.testModules.testSupport.DataJpaSupport;
 
 /**
  *
  * @author jack8
  * @since 2025-04-10
  */
-@DataJpaTest
 @DisplayName("StudyCategory_JPA_test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class StudyCategoryRepositoryTest {
+class StudyCategoryRepositoryTest extends DataJpaSupport {
 
     @Autowired
     private TestEntityManager em;

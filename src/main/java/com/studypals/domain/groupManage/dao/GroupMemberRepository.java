@@ -21,7 +21,7 @@ import com.studypals.domain.groupManage.entity.GroupMember;
  * @since 2025-04-12
  */
 @Repository
-public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> {
+public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>, GroupMemberCustomRepository {
 
     @Query(value = "SELECT * FROM group_member WHERE member_id = :userId", nativeQuery = true)
     Optional<GroupMember> findByMemberId(Long userId);

@@ -20,9 +20,8 @@ import lombok.Getter;
 @Builder
 @Getter
 public class GroupEntryCode {
-
     @Id
-    private Long id;
-
     private String code;
+
+    private Long id;
 }

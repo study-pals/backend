@@ -25,6 +25,7 @@
 | 08 | 그룹 → 유저 초대
 | 09 | 그룹 초대 코드 생성
 | 10 | 그룹 태그 조회
+| 12 | 그룹 대표 정보 조회
 |===
 
 == ✨ API 문서
@@ -97,3 +98,28 @@ include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/
 include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/response-headers.adoc[]
 include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/response-fields.adoc[]
 include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/http-response.adoc[]
+
+==== 4. 그룹 대표 정보 조회
+
+*Description* +
+
+'''
+
+초대 코드로 그룹 대표 정보를 조회합니다.
+[NOTE]
+해당 그룹의 일부 그룹원의 프로필 이미지도 함께 응답합니다.
+그룹원의 수는 최대 5명입니다.
+
+*Request* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/get-group-summary_success/http-request.adoc[]
+include::{snippets}/group-controller-rest-docs-test/get-group-summary_success/query-parameters.adoc[]
+
+*Response* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/get-group-summary_success/http-response.adoc[]
+include::{snippets}/group-controller-rest-docs-test/get-group-summary_success/response-fields.adoc[]
