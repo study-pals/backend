@@ -1,6 +1,7 @@
 package com.studypals.domain.studyManage.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -13,7 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.studypals.domain.studyManage.dto.GetDailyStudyDto;
 import com.studypals.domain.studyManage.dto.GetStudyDto;
+import com.studypals.domain.studyManage.dto.PeriodDto;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.worker.StudyTimeReader;
@@ -35,13 +38,21 @@ class StudyTimeServiceTest {
     private StudyTimeReader studyTimeReader;
 
     @Mock
-    private StudyTimeMapper mapper;
+    private StudyTimeMapper studyTimeMapper;
 
     @InjectMocks
     private StudyTimeServiceImpl studyTimeService;
 
     @Mock
     private StudyTime mockStudyTime;
+
+    private StudyTime make(String name, LocalDate studiedAt, Long time) {
+        return StudyTime.builder()
+                .temporaryName(name)
+                .studiedAt(studiedAt)
+                .time(time)
+                .build();
+    }
 
     @Test
     void getStudyList_success_futureDate() {
@@ -58,7 +69,7 @@ class StudyTimeServiceTest {
         // then
         assertThat(result).isEmpty();
         then(studyTimeReader).shouldHaveNoInteractions();
-        then(mapper).shouldHaveNoInteractions();
+        then(studyTimeMapper).shouldHaveNoInteractions();
     }
 
     @Test
@@ -70,7 +81,7 @@ class StudyTimeServiceTest {
 
         given(timeUtils.getToday()).willReturn(today);
         given(studyTimeReader.getListByMemberAndDate(userId, today)).willReturn(List.of(mockStudyTime));
-        given(mapper.toDto(mockStudyTime)).willReturn(dto);
+        given(studyTimeMapper.toDto(mockStudyTime)).willReturn(dto);
 
         // when
         List<GetStudyDto> result = studyTimeService.getStudyList(userId, today);
@@ -94,5 +105,49 @@ class StudyTimeServiceTest {
 
         // then
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getDailyStudyList_success() {
+        // given
+        Long userId = 1L;
+        LocalDate date = LocalDate.of(2025, 4, 14);
+        PeriodDto period = new PeriodDto(date, date.plusDays(3));
+
+        List<StudyTime> timeList = List.of(
+                make("time1", date, 100L),
+                make("time2", date, 200L),
+                make("time3", date, 300L),
+                make("time4", date.plusDays(1), 100L),
+                make("time5", date.plusDays(3), 100L),
+                make("time6", date.plusDays(3), 100L));
+
+        given(studyTimeReader.getListByMemberAndDateByPeriod(userId, period)).willReturn(timeList);
+
+        // when
+        List<GetDailyStudyDto> results = studyTimeService.getDailyStudyList(userId, period);
+
+        // then
+        assertThat(results).hasSize(3);
+        assertThat(results)
+                .filteredOn(r -> r.studiedAt().equals(date))
+                .singleElement()
+                .extracting(GetDailyStudyDto::studyList)
+                .asInstanceOf(LIST)
+                .hasSize(3);
+
+        assertThat(results)
+                .filteredOn(r -> r.studiedAt().equals(date.plusDays(1)))
+                .singleElement()
+                .extracting(GetDailyStudyDto::studyList)
+                .asInstanceOf(LIST)
+                .hasSize(1);
+
+        assertThat(results)
+                .filteredOn(r -> r.studiedAt().equals(date.plusDays(3)))
+                .singleElement()
+                .extracting(GetDailyStudyDto::studyList)
+                .asInstanceOf(LIST)
+                .hasSize(2);
     }
 }

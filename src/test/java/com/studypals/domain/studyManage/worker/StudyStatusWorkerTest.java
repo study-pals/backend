@@ -3,6 +3,7 @@ package com.studypals.domain.studyManage.worker;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
 
@@ -11,17 +12,33 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
+import com.studypals.domain.studyManage.dao.DailyStudyInfoRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
+import com.studypals.global.utils.TimeUtils;
 
 @ExtendWith(MockitoExtension.class)
 class StudyStatusWorkerTest {
 
     @Mock
     private StudyStatusRedisRepository studyStatusRedisRepository;
+
+    @Mock
+    private DailyStudyInfoRepository dailyStudyInfoRepository;
+
+    @Mock
+    private MemberReader memberReader;
+
+    @Mock
+    private Member mockMember;
+
+    @Mock
+    private TimeUtils timeUtils;
 
     @InjectMocks
     private StudyStatusWorker studyStatusWorker;
@@ -57,7 +74,10 @@ class StudyStatusWorkerTest {
     void firstStatus_success() {
         // given
         Long userId = 1L;
+        LocalDate today = LocalDate.of(2025, 1, 1);
         StartStudyReq req = new StartStudyReq(100L, null, LocalTime.of(9, 30));
+        given(memberReader.get(userId)).willReturn(mockMember);
+        given(timeUtils.getToday()).willReturn(today);
 
         // when
         StudyStatus result = studyStatusWorker.firstStatus(userId, req);

@@ -22,6 +22,12 @@ import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
 
+/**
+ * {@link StudySessionWorker} 에 대한 테스트
+ *
+ * @author jack8
+ * @since 2025-04-19
+ */
 @ExtendWith(MockitoExtension.class)
 class StudySessionWorkerTest {
 
