@@ -20,14 +20,15 @@ import com.studypals.domain.studyManage.entity.StudyTime;
 public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
 
     // tested
-    List<StudyTime> findByMemberIdAndStudiedAt(Long memberId, LocalDate studiedAt);
+    List<StudyTime> findByMemberIdAndStudiedDate(Long memberId, LocalDate studiedDate);
 
     // tested
-    List<StudyTime> findAllByMemberIdAndStudiedAtBetween(Long memberId, LocalDate start, LocalDate end);
+    List<StudyTime> findAllByMemberIdAndStudiedDateBetween(Long memberId, LocalDate start, LocalDate end);
 
     // tested
-    Optional<StudyTime> findByMemberIdAndStudiedAtAndCategoryId(Long memberId, LocalDate studiedAt, Long categoryId);
+    Optional<StudyTime> findByMemberIdAndStudiedDateAndCategoryId(
+            Long memberId, LocalDate studiedDate, Long categoryId);
 
-    Optional<StudyTime> findByMemberIdAndStudiedAtAndTemporaryName(
-            Long memberId, LocalDate studiedAt, String temporaryName);
+    Optional<StudyTime> findByMemberIdAndStudiedDateAndTemporaryName(
+            Long memberId, LocalDate studiedDate, String temporaryName);
 }

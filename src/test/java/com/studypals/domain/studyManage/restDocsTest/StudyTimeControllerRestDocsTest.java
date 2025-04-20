@@ -106,16 +106,16 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
         // given
         List<GetDailyStudyRes> expectedData = List.of(
                 GetDailyStudyRes.builder()
-                        .studiedAt(LocalDate.of(2024, 4, 1))
-                        .startAt(LocalTime.of(9, 0))
-                        .endedAt(LocalTime.of(11, 0))
+                        .studiedDate(LocalDate.of(2024, 4, 1))
+                        .startTime(LocalTime.of(9, 0))
+                        .endTime(LocalTime.of(11, 0))
                         .memo("집중 잘 됨")
                         .studyList(List.of(new StudyList(null, "알고리즘", 60L), new StudyList(2L, null, 30L)))
                         .build(),
                 GetDailyStudyRes.builder()
-                        .studiedAt(LocalDate.of(2024, 4, 3))
-                        .startAt(LocalTime.of(11, 0))
-                        .endedAt(LocalTime.of(13, 0))
+                        .studiedDate(LocalDate.of(2024, 4, 3))
+                        .startTime(LocalTime.of(11, 0))
+                        .endTime(LocalTime.of(13, 0))
                         .memo("집중 잘 됨")
                         .studyList(List.of(
                                 new StudyList(1L, null, 60L),
@@ -147,9 +147,9 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("code").description("S01-01 고정"),
                                 fieldWithPath("status").description("응답 상태 (예: success 또는 fail)"),
                                 fieldWithPath("message").description("응답 메시지"),
-                                fieldWithPath("data[].studiedAt").description("공부한 날짜"),
-                                fieldWithPath("data[].startAt").description("해당 날짜 공부 시작 시간"),
-                                fieldWithPath("data[].endedAt").description("해당 날짜 공부 종료 시간"),
+                                fieldWithPath("data[].studiedDate").description("공부한 날짜"),
+                                fieldWithPath("data[].startTime").description("해당 날짜 공부 시작 시간"),
+                                fieldWithPath("data[].endTime").description("해당 날짜 공부 종료 시간"),
                                 fieldWithPath("data[].memo").description("간단한 메모"),
                                 fieldWithPath("data[].studyList[].categoryId")
                                         .description("카테고리 ID (없으면 null)")

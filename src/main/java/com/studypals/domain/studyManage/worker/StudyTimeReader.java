@@ -28,10 +28,10 @@ public class StudyTimeReader {
     private final StudyTimeRepository studyTimeRepository;
 
     public List<StudyTime> getListByMemberAndDate(Long userId, LocalDate date) {
-        return studyTimeRepository.findByMemberIdAndStudiedAt(userId, date);
+        return studyTimeRepository.findByMemberIdAndStudiedDate(userId, date);
     }
 
     public List<StudyTime> getListByMemberAndDateByPeriod(Long userId, PeriodDto periodDto) {
-        return studyTimeRepository.findAllByMemberIdAndStudiedAtBetween(userId, periodDto.start(), periodDto.end());
+        return studyTimeRepository.findAllByMemberIdAndStudiedDateBetween(userId, periodDto.start(), periodDto.end());
     }
 }

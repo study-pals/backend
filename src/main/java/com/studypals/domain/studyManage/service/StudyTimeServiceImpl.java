@@ -69,7 +69,7 @@ public class StudyTimeServiceImpl implements StudyTimeService {
         List<StudyTime> summaries = studyTimeReader.getListByMemberAndDateByPeriod(userId, period);
 
         return summaries.stream()
-                .collect(Collectors.groupingBy(StudyTime::getStudiedAt))
+                .collect(Collectors.groupingBy(StudyTime::getStudiedDate))
                 .entrySet()
                 .stream() // entry 로 변환
                 .map(entry -> new GetDailyStudyDto(
@@ -82,7 +82,7 @@ public class StudyTimeServiceImpl implements StudyTimeService {
                                         st.getTemporaryName(),
                                         st.getTime()))
                                 .toList()))
-                .sorted(Comparator.comparing(GetDailyStudyDto::studiedAt)) // 공부 날짜에 따라 정렬
+                .sorted(Comparator.comparing(GetDailyStudyDto::studiedDate)) // 공부 날짜에 따라 정렬
                 .toList();
     }
 }

@@ -30,9 +30,9 @@ class DailyStudyInfoMapperTest {
         DailyStudyInfo entity = DailyStudyInfo.builder()
                 .id(1L)
                 .member(Member.builder().id(1L).build())
-                .studiedAt(LocalDate.of(2024, 4, 20))
-                .startAt(LocalTime.of(9, 0))
-                .endAt(LocalTime.of(12, 30))
+                .studiedDate(LocalDate.of(2024, 4, 20))
+                .startTime(LocalTime.of(9, 0))
+                .endTime(LocalTime.of(12, 30))
                 .memo("집중 잘 됨")
                 .build();
 
@@ -40,9 +40,9 @@ class DailyStudyInfoMapperTest {
         GetDailyStudyInfoDto dto = mapper.toDto(entity);
 
         // then
-        assertThat(dto.studiedAt()).isEqualTo(LocalDate.of(2024, 4, 20));
-        assertThat(dto.startAt()).isEqualTo(LocalTime.of(9, 0));
-        assertThat(dto.endAt()).isEqualTo(LocalTime.of(12, 30));
+        assertThat(dto.studiedDate()).isEqualTo(LocalDate.of(2024, 4, 20));
+        assertThat(dto.startTime()).isEqualTo(LocalTime.of(9, 0));
+        assertThat(dto.endTime()).isEqualTo(LocalTime.of(12, 30));
         assertThat(dto.memo()).isEqualTo("집중 잘 됨");
     }
 }

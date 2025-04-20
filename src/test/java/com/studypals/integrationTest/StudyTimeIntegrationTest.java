@@ -155,8 +155,8 @@ public class StudyTimeIntegrationTest extends IntegrationSupport {
         result.andExpect(status().isOk())
                 .andExpect(hasKey("code", ResponseCode.STUDY_TIME_ALL.getCode()))
                 .andExpect(jsonPath("$.data.length()").value(2))
-                .andExpect(jsonPath("$.data[0].studiedAt").value("2025-04-09"))
-                .andExpect(jsonPath("$.data[1].studiedAt").value("2025-04-10"))
+                .andExpect(jsonPath("$.data[0].studiedDate").value("2025-04-09"))
+                .andExpect(jsonPath("$.data[1].studiedDate").value("2025-04-10"))
                 .andExpect(jsonPath("$.data[0].studyList.length()").value(1))
                 .andExpect(jsonPath("$.data[1].studyList.length()").value(1));
     }

@@ -46,10 +46,10 @@ class StudyTimeServiceTest {
     @Mock
     private StudyTime mockStudyTime;
 
-    private StudyTime make(String name, LocalDate studiedAt, Long time) {
+    private StudyTime make(String name, LocalDate studiedDate, Long time) {
         return StudyTime.builder()
                 .temporaryName(name)
-                .studiedAt(studiedAt)
+                .studiedDate(studiedDate)
                 .time(time)
                 .build();
     }
@@ -130,21 +130,21 @@ class StudyTimeServiceTest {
         // then
         assertThat(results).hasSize(3);
         assertThat(results)
-                .filteredOn(r -> r.studiedAt().equals(date))
+                .filteredOn(r -> r.studiedDate().equals(date))
                 .singleElement()
                 .extracting(GetDailyStudyDto::studyList)
                 .asInstanceOf(LIST)
                 .hasSize(3);
 
         assertThat(results)
-                .filteredOn(r -> r.studiedAt().equals(date.plusDays(1)))
+                .filteredOn(r -> r.studiedDate().equals(date.plusDays(1)))
                 .singleElement()
                 .extracting(GetDailyStudyDto::studyList)
                 .asInstanceOf(LIST)
                 .hasSize(1);
 
         assertThat(results)
-                .filteredOn(r -> r.studiedAt().equals(date.plusDays(3)))
+                .filteredOn(r -> r.studiedDate().equals(date.plusDays(3)))
                 .singleElement()
                 .extracting(GetDailyStudyDto::studyList)
                 .asInstanceOf(LIST)

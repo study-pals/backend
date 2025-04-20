@@ -30,6 +30,6 @@ public class DailyInfoReader {
      * @return 공부 날짜, 시작 시간, 종료 시간, 메모의 엔티티
      */
     public List<DailyStudyInfo> getDailyInfoListByPeriod(Long userId, PeriodDto period) {
-        return dailyStudyInfoRepository.findAllByMemberIdAndStudiedAtBetween(userId, period.start(), period.end());
+        return dailyStudyInfoRepository.findAllByMemberIdAndStudiedDateBetween(userId, period.start(), period.end());
     }
 }

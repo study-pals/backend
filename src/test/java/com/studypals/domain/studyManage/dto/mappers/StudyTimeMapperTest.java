@@ -59,7 +59,7 @@ class StudyTimeMapperTest {
                 .id(1L)
                 .category(category)
                 .temporaryName("temp")
-                .studiedAt(LocalDate.of(2024, 1, 1))
+                .studiedDate(LocalDate.of(2024, 1, 1))
                 .time(80L)
                 .member(Member.builder().id(1L).build())
                 .build();

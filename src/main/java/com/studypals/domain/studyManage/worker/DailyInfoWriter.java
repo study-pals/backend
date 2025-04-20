@@ -28,14 +28,14 @@ public class DailyInfoWriter {
      * 종료 시간이 들어가지 않아있는 경우, 아침 6시로 간주하여야 합니다.
      * <p> NOT TESTED / simple logic </p>
      * @param userId 갱신할 user 의 id
-     * @param studiedAt 공부 날짜(검색을 위한)
+     * @param studiedDate 공부 날짜(검색을 위한)
      * @param endedAt 종료 시간(갱신을 위한)
      */
-    public void updateEndtime(Long userId, LocalDate studiedAt, LocalTime endedAt) {
+    public void updateEndtime(Long userId, LocalDate studiedDate, LocalTime endedAt) {
         DailyStudyInfo summary = dailyStudyInfoRepository
-                .findByMemberIdAndStudiedAt(userId, studiedAt)
+                .findByMemberIdAndStudiedDate(userId, studiedDate)
                 .orElseThrow(() -> new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL));
 
-        summary.setEndAt(endedAt);
+        summary.setEndTime(endedAt);
     }
 }

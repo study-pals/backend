@@ -29,7 +29,7 @@ class StudyTimeReaderTest {
         Long userId = 1L;
         LocalDate date = LocalDate.now();
         StudyTime mockTime = mock(StudyTime.class);
-        given(studyTimeRepository.findByMemberIdAndStudiedAt(userId, date)).willReturn(List.of(mockTime));
+        given(studyTimeRepository.findByMemberIdAndStudiedDate(userId, date)).willReturn(List.of(mockTime));
 
         // when
         List<StudyTime> result = studyTimeReader.getListByMemberAndDate(userId, date);
@@ -44,7 +44,7 @@ class StudyTimeReaderTest {
         // given
         Long userId = 1L;
         LocalDate date = LocalDate.of(2025, 1, 1);
-        given(studyTimeRepository.findByMemberIdAndStudiedAt(userId, date)).willReturn(List.of());
+        given(studyTimeRepository.findByMemberIdAndStudiedDate(userId, date)).willReturn(List.of());
 
         // when
         List<StudyTime> result = studyTimeReader.getListByMemberAndDate(userId, date);

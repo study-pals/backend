@@ -66,7 +66,7 @@ class StudySessionWorkerTest {
                 .build();
 
         given(memberReader.get(userId)).willReturn(mockMember);
-        given(studyTimeRepository.findByMemberIdAndStudiedAtAndCategoryId(userId, today, categoryId))
+        given(studyTimeRepository.findByMemberIdAndStudiedDateAndCategoryId(userId, today, categoryId))
                 .willReturn(Optional.of(mockStudyTime));
 
         // when
@@ -88,7 +88,7 @@ class StudySessionWorkerTest {
                 StudyStatus.builder().id(userId).temporaryName(tempName).build();
 
         given(memberReader.get(userId)).willReturn(mockMember);
-        given(studyTimeRepository.findByMemberIdAndStudiedAtAndTemporaryName(userId, today, tempName))
+        given(studyTimeRepository.findByMemberIdAndStudiedDateAndTemporaryName(userId, today, tempName))
                 .willReturn(Optional.of(mockStudyTime));
 
         // when
@@ -133,7 +133,7 @@ class StudySessionWorkerTest {
                 .should()
                 .save(argThat(timeEntity -> timeEntity.getCategory() == mockCategory
                         && timeEntity.getMember() == mockMember
-                        && timeEntity.getStudiedAt().equals(today)
+                        && timeEntity.getStudiedDate().equals(today)
                         && timeEntity.getTime().equals(time)));
     }
 
@@ -152,7 +152,7 @@ class StudySessionWorkerTest {
                 .should()
                 .save(argThat(timeEntity -> timeEntity.getTemporaryName().equals(tempName)
                         && timeEntity.getMember() == mockMember
-                        && timeEntity.getStudiedAt().equals(today)
+                        && timeEntity.getStudiedDate().equals(today)
                         && timeEntity.getTime().equals(time)));
     }
 }

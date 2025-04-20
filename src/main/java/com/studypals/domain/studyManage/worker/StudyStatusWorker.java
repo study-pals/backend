@@ -50,8 +50,8 @@ public class StudyStatusWorker {
 
         DailyStudyInfo summary = DailyStudyInfo.builder()
                 .member(memberReader.get(userId))
-                .studiedAt(timeUtils.getToday())
-                .startAt(dto.startAt())
+                .studiedDate(timeUtils.getToday())
+                .startTime(dto.startTime())
                 .build();
 
         try {
@@ -63,7 +63,7 @@ public class StudyStatusWorker {
         return StudyStatus.builder()
                 .id(userId)
                 .studying(true)
-                .startTime(dto.startAt())
+                .startTime(dto.startTime())
                 .categoryId(dto.categoryId())
                 .temporaryName(dto.temporaryName())
                 .build();
@@ -92,7 +92,7 @@ public class StudyStatusWorker {
     public StudyStatus restartStatus(StudyStatus status, StartStudyReq dto) {
         return status.update()
                 .studying(true)
-                .startTime(dto.startAt())
+                .startTime(dto.startTime())
                 .categoryId(dto.categoryId())
                 .temporaryName(dto.temporaryName())
                 .build();

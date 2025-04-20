@@ -1,7 +1,6 @@
 package com.studypals.domain.studyManage.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -43,17 +42,17 @@ class DailyStudyInfoRepositoryTest {
                 .build());
     }
 
-    private DailyStudyInfo make(Member member, LocalDate studiedAt, LocalTime startAt, LocalTime endAt) {
+    private DailyStudyInfo make(Member member, LocalDate studiedDate, LocalTime startTime, LocalTime endTime) {
         return DailyStudyInfo.builder()
                 .member(member)
-                .studiedAt(studiedAt)
-                .startAt(startAt)
-                .endAt(endAt)
+                .studiedDate(studiedDate)
+                .startTime(startTime)
+                .endTime(endTime)
                 .build();
     }
 
     @Test
-    void findByMemberIdAndStudiedAt_success() {
+    void findByMemberIdAndStudiedDate_success() {
         // given
         Member member = insertMember();
         LocalDate date = LocalDate.of(1999, 8, 20);
@@ -65,14 +64,14 @@ class DailyStudyInfoRepositoryTest {
         em.clear();
 
         // when
-        Optional<DailyStudyInfo> result = dailyStudyInfoRepository.findByMemberIdAndStudiedAt(member.getId(), date);
+        Optional<DailyStudyInfo> result = dailyStudyInfoRepository.findByMemberIdAndStudiedDate(member.getId(), date);
 
         // then
         assertThat(result).isNotEmpty();
     }
 
     @Test
-    void findAllByMemberIdAndStudiedAtBetween_success() {
+    void findAllByMemberIdAndStudiedDateBetween_success() {
         // given
         Member member = insertMember();
         LocalDate date = LocalDate.of(1999, 8, 20);
@@ -89,7 +88,7 @@ class DailyStudyInfoRepositoryTest {
 
         // when
         List<DailyStudyInfo> results =
-                dailyStudyInfoRepository.findAllByMemberIdAndStudiedAtBetween(member.getId(), date, date.plusDays(5));
+                dailyStudyInfoRepository.findAllByMemberIdAndStudiedDateBetween(member.getId(), date, date.plusDays(5));
 
         // then
         assertThat(results).hasSize(5);

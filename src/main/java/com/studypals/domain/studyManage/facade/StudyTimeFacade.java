@@ -117,15 +117,15 @@ public class StudyTimeFacade {
     private List<GetDailyStudyRes> toDailyStudyList(List<GetDailyStudyDto> studies, List<GetDailyStudyInfoDto> infos) {
 
         Map<LocalDate, List<StudyList>> studyMap =
-                studies.stream().collect(Collectors.toMap(GetDailyStudyDto::studiedAt, GetDailyStudyDto::studyList));
+                studies.stream().collect(Collectors.toMap(GetDailyStudyDto::studiedDate, GetDailyStudyDto::studyList));
 
         return infos.stream()
                 .map(info -> GetDailyStudyRes.builder()
-                        .studiedAt(info.studiedAt())
-                        .startAt(info.startAt())
-                        .endedAt(info.endAt())
+                        .studiedDate(info.studiedDate())
+                        .startTime(info.startTime())
+                        .endTime(info.endTime())
                         .memo(info.memo())
-                        .studyList(studyMap.getOrDefault(info.studiedAt(), List.of()))
+                        .studyList(studyMap.getOrDefault(info.studiedDate(), List.of()))
                         .build())
                 .toList();
     }

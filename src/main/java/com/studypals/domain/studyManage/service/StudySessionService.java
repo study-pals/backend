@@ -46,8 +46,8 @@ public interface StudySessionService {
      * 6. redis에 사용자 정보를 갱신 혹은 저장합니다.
      * </pre>
      * @param userId 종료 요청을 보낸 사용자의 id
-     * @param endedAt 공부가 종료된 시간
+     * @param endTime 공부가 종료된 시간
      * @return 이번 시간동안 공부한 총 양
      */
-    Long endStudy(Long userId, LocalTime endedAt);
+    Long endStudy(Long userId, LocalTime endTime);
 }

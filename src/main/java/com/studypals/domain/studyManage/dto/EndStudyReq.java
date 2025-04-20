@@ -8,4 +8,4 @@ import java.time.LocalTime;
  * @author jack8
  * @since 2025-04-14
  */
-public record EndStudyReq(LocalTime endedAt) {}
+public record EndStudyReq(LocalTime endTime) {}

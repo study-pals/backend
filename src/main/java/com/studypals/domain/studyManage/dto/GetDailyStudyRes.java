@@ -16,4 +16,4 @@ import lombok.Builder;
  */
 @Builder
 public record GetDailyStudyRes(
-        LocalDate studiedAt, LocalTime startAt, LocalTime endedAt, String memo, List<StudyList> studyList) {}
+        LocalDate studiedDate, LocalTime startTime, LocalTime endTime, String memo, List<StudyList> studyList) {}

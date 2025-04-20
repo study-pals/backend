@@ -29,10 +29,10 @@ class StudyStatusWorkerTest {
     private StudyStatusRedisRepository studyStatusRedisRepository;
 
     @Mock
-    private DailyStudyInfoRepository dailyStudyInfoRepository;
+    private MemberReader memberReader;
 
     @Mock
-    private MemberReader memberReader;
+    private DailyStudyInfoRepository dailyStudyInfoRepository;
 
     @Mock
     private Member mockMember;
@@ -84,7 +84,7 @@ class StudyStatusWorkerTest {
 
         // then
         assertThat(result.getId()).isEqualTo(userId);
-        assertThat(result.getStartTime()).isEqualTo(req.startAt());
+        assertThat(result.getStartTime()).isEqualTo(req.startTime());
         assertThat(result.getCategoryId()).isEqualTo(req.categoryId());
         assertThat(result.getTemporaryName()).isEqualTo(req.temporaryName());
         assertThat(result.isStudying()).isTrue();
@@ -125,7 +125,7 @@ class StudyStatusWorkerTest {
 
         // then
         assertThat(restarted.isStudying()).isTrue();
-        assertThat(restarted.getStartTime()).isEqualTo(req.startAt());
+        assertThat(restarted.getStartTime()).isEqualTo(req.startTime());
         assertThat(restarted.getCategoryId()).isNull();
         assertThat(restarted.getTemporaryName()).isEqualTo("focus");
     }

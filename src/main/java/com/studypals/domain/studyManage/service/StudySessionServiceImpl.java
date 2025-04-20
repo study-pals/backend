@@ -74,7 +74,7 @@ public class StudySessionServiceImpl implements StudySessionService {
 
     @Override
     @Transactional
-    public Long endStudy(Long userId, LocalTime endedAt) {
+    public Long endStudy(Long userId, LocalTime endTime) {
         LocalDate today = timeUtils.getToday();
         StudyStatus status = studyStatusWorker
                 .find(userId)
@@ -83,11 +83,11 @@ public class StudySessionServiceImpl implements StudySessionService {
         studyStatusWorker.validStatus(status); // 받아온 status 가 정상인지 확인
 
         // 1) 실제 공부 시간(초)
-        Long durationInSec = getTimeDuration(status.getStartTime(), endedAt);
+        Long durationInSec = getTimeDuration(status.getStartTime(), endTime);
 
         // 2) DB에 공부시간 및 종료 시간 upsert
         studySessionWorker.upsert(userId, status, today, durationInSec);
-        dailyInfoWriter.updateEndtime(userId, today, endedAt);
+        dailyInfoWriter.updateEndtime(userId, today, endTime);
 
         // 3) 레디스 상태 값 리셋
         status = studyStatusWorker.resetStatus(status, durationInSec);
@@ -108,7 +108,7 @@ public class StudySessionServiceImpl implements StudySessionService {
             return Duration.between(start, end).toSeconds();
         }
 
-        // startAt 이 00:00 전이고, endedAt 이 이후인 경우
+        // startTime 이 00:00 전이고, endTime 이 이후인 경우
         long startToMidnight = Duration.between(start, LocalTime.MIDNIGHT).toSeconds();
         long midnightToEnd = Duration.between(LocalTime.MIN, end).toSeconds();
         return startToMidnight + midnightToEnd;

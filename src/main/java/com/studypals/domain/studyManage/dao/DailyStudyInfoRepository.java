@@ -19,7 +19,7 @@ import com.studypals.domain.studyManage.entity.DailyStudyInfo;
 @Repository
 public interface DailyStudyInfoRepository extends JpaRepository<DailyStudyInfo, Long> {
 
-    Optional<DailyStudyInfo> findByMemberIdAndStudiedAt(Long userId, LocalDate studiedAt);
+    Optional<DailyStudyInfo> findByMemberIdAndStudiedDate(Long userId, LocalDate studiedDate);
 
-    List<DailyStudyInfo> findAllByMemberIdAndStudiedAtBetween(Long userId, LocalDate start, LocalDate end);
+    List<DailyStudyInfo> findAllByMemberIdAndStudiedDateBetween(Long userId, LocalDate start, LocalDate end);
 }

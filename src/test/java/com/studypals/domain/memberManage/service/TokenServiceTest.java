@@ -63,9 +63,9 @@ class TokenServiceTest {
                 .token(refreshToken)
                 .build();
 
-        JwtUtils.JwtData tokenData = new JwtUtils.JwtData(userId);
+        JwtUtils.JwtData tokendTimea = new JwtUtils.JwtData(userId);
 
-        given(jwtUtils.tokenInfo(accessToken)).willReturn(tokenData);
+        given(jwtUtils.tokenInfo(accessToken)).willReturn(tokendTimea);
         given(refreshTokenWorker.find(userId)).willReturn(savedRefreshToken);
         given(jwtUtils.createJwt(userId)).willReturn(newToken);
 

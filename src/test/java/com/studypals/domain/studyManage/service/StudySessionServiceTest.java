@@ -39,7 +39,7 @@ class StudySessionServiceTest {
     private StudyStatusWorker studyStatusWorker;
 
     @Mock
-    DailyInfoWriter dailyInfoWriter;
+    private DailyInfoWriter dailyInfoWriter; // no delete
 
     @Mock
     private StudyTimeMapper mapper;

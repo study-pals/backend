@@ -44,7 +44,7 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
         return StudyTime.builder()
                 .temporaryName(temporaryName)
                 .member(member)
-                .studiedAt(date)
+                .studiedDate(date)
                 .time(time)
                 .build();
     }
@@ -62,7 +62,8 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
         // given
         Member member = insertMember();
         LocalDate date = LocalDate.of(1999, 8, 20);
-        StudyTime studyTime = StudyTime.builder().member(member).studiedAt(date).build();
+        StudyTime studyTime =
+                StudyTime.builder().member(member).studiedDate(date).build();
 
         // when & than
         assertThatThrownBy(() -> studyTimeRepository.save(studyTime))
@@ -71,7 +72,7 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
     }
 
     @Test
-    void findByMemberIdAndStudiedAt_success() {
+    void findByMemberIdAndStudiedDate_success() {
         // given
         Member member = insertMember();
         LocalDate date = LocalDate.of(2024, 4, 10);
@@ -85,7 +86,7 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
         em.clear();
 
         // when
-        List<StudyTime> results = studyTimeRepository.findByMemberIdAndStudiedAt(member.getId(), date);
+        List<StudyTime> results = studyTimeRepository.findByMemberIdAndStudiedDate(member.getId(), date);
 
         // then
         assertThat(results)
@@ -95,7 +96,7 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
     }
 
     @Test
-    void findAllByMemberIdAndStudiedAtBetween_returnsAllInRange() {
+    void findAllByMemberIdAndstudiedDateBetween_returnsAllInRange() {
         // given
         Member member = insertMember();
         LocalDate april = LocalDate.of(2024, 4, 1);
@@ -112,14 +113,14 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
 
         // when
         List<StudyTime> results =
-                studyTimeRepository.findAllByMemberIdAndStudiedAtBetween(member.getId(), april, april.plusDays(30));
+                studyTimeRepository.findAllByMemberIdAndStudiedDateBetween(member.getId(), april, april.plusDays(30));
 
         // then
         assertThat(results).hasSize(6);
     }
 
     @Test
-    void findAllByMemberIdAndStudiedAtBetween_success_return0() {
+    void findAllByMemberIdAndStudiedDateBetween_success_return0() {
         // given
         Member member = insertMember();
         LocalDate march = LocalDate.of(2024, 3, 1);
@@ -129,23 +130,23 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
 
         // when
         List<StudyTime> results =
-                studyTimeRepository.findAllByMemberIdAndStudiedAtBetween(member.getId(), march, march.plusDays(30));
+                studyTimeRepository.findAllByMemberIdAndStudiedDateBetween(member.getId(), march, march.plusDays(30));
 
         // then
         assertThat(results).isEmpty();
     }
 
     @Test
-    void findByMemberIdAndStudiedAtAndCategoryId_success() {
+    void findByMemberIdAndStudiedDateAndCategoryId_success() {
         // given
         Member member = insertMember();
-        LocalDate studiedAt = LocalDate.of(2024, 4, 1);
+        LocalDate studiedDate = LocalDate.of(2024, 4, 1);
 
         StudyCategory category = em.persist(make(member, "category", 127));
         em.persist(StudyTime.builder()
                 .category(category)
                 .temporaryName(null)
-                .studiedAt(studiedAt)
+                .studiedDate(studiedDate)
                 .time(100L)
                 .member(member)
                 .build());
@@ -153,8 +154,8 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
         em.clear();
 
         // when
-        Optional<StudyTime> results = studyTimeRepository.findByMemberIdAndStudiedAtAndCategoryId(
-                member.getId(), studiedAt, category.getId());
+        Optional<StudyTime> results = studyTimeRepository.findByMemberIdAndStudiedDateAndCategoryId(
+                member.getId(), studiedDate, category.getId());
 
         // then
         assertThat(results).isNotEmpty();
@@ -162,15 +163,15 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
     }
 
     @Test
-    void findByMemberIdAndStudiedAtAndTemporaryName_success() {
+    void findByMemberIdAndStudiedDateAndTemporaryName_success() {
         // given
         Member member = insertMember();
-        LocalDate studiedAt = LocalDate.of(2024, 4, 1);
+        LocalDate studiedDate = LocalDate.of(2024, 4, 1);
 
         em.persist(StudyTime.builder()
                 .category(null)
                 .temporaryName("name")
-                .studiedAt(studiedAt)
+                .studiedDate(studiedDate)
                 .time(100L)
                 .member(member)
                 .build());
@@ -179,7 +180,7 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
 
         // when
         Optional<StudyTime> results =
-                studyTimeRepository.findByMemberIdAndStudiedAtAndTemporaryName(member.getId(), studiedAt, "name");
+                studyTimeRepository.findByMemberIdAndStudiedDateAndTemporaryName(member.getId(), studiedDate, "name");
 
         // then
         assertThat(results).isNotEmpty();
