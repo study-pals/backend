@@ -13,6 +13,7 @@ import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyStatus;
+import com.studypals.domain.studyManage.worker.DailyInfoWriter;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
@@ -53,12 +54,14 @@ public class StudySessionServiceImpl implements StudySessionService {
 
     private final StudySessionWorker studySessionWorker;
     private final StudyStatusWorker studyStatusWorker;
+    private final DailyInfoWriter dailyInfoWriter;
 
     @Override
+    @Transactional
     public StartStudyRes startStudy(Long userId, StartStudyReq dto) {
 
         // status 정보 가져오기 - 존재하지 않으면 최초 양식 생성
-        StudyStatus status = studyStatusWorker.find(userId).orElse(studyStatusWorker.firstStatus(userId, dto));
+        StudyStatus status = studyStatusWorker.find(userId).orElseGet(() -> studyStatusWorker.firstStatus(userId, dto));
 
         if (!status.isStudying()) {
             status = studyStatusWorker.restartStatus(status, dto);
@@ -82,8 +85,9 @@ public class StudySessionServiceImpl implements StudySessionService {
         // 1) 실제 공부 시간(초)
         Long durationInSec = getTimeDuration(status.getStartTime(), endedAt);
 
-        // 2) DB에 공부시간 upsert
+        // 2) DB에 공부시간 및 종료 시간 upsert
         studySessionWorker.upsert(userId, status, today, durationInSec);
+        dailyInfoWriter.updateEndtime(userId, today, endedAt);
 
         // 3) 레디스 상태 값 리셋
         status = studyStatusWorker.resetStatus(status, durationInSec);

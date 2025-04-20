@@ -1,6 +1,7 @@
 package com.studypals.domain.studyManage.entity;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import jakarta.persistence.*;
 
@@ -9,23 +10,21 @@ import lombok.*;
 import com.studypals.domain.memberManage.entity.Member;
 
 /**
- * 하루 동안 공부한 총 양에 대한 읽기 전용 엔티티입니다.
- * <p>
- * 쓸 수 없습니다. 해당 엔티티의 생성은 불가능합니다.
- *
- * <p><b>주요 생성자:</b><br>
- * JPA 프록시 객체 생성을 위한 protected no arg constructor 밖에 없습니다. <br>
+ * 하루 동안의 공부 데이터에 대한 엔티티입니다.
+ * 공부를 언제 시작했는지, 언제 마쳤는지, 메모 등의 데이터가 관리됩니다. 분류는 member, studiedAt를 통해 이루어집니다.
  *
  * @author jack8
  * @since 2025-04-17
  */
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-        name = "daily_study_summary",
+        name = "daily_study_info",
         indexes = {@Index(name = "idx_member_studied", columnList = "member_id, studied_at")})
-public class DailyStudySummary {
+public class DailyStudyInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +38,13 @@ public class DailyStudySummary {
     @Column(name = "studied_at", nullable = false)
     private LocalDate studiedAt;
 
-    @Column(name = "time", nullable = false)
-    private Long time;
+    @Column(name = "start_at", nullable = false)
+    private LocalTime startAt;
+
+    @Column(name = "end_at", nullable = true)
+    @Setter
+    private LocalTime endAt;
+
+    @Column(name = "memo", columnDefinition = "TEXT")
+    private String memo;
 }

@@ -8,9 +8,8 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.studyManage.dto.GetCategoryRes;
-import com.studypals.domain.studyManage.dto.GetStudyDto;
-import com.studypals.domain.studyManage.dto.GetStudyRes;
+import com.studypals.domain.studyManage.dto.*;
+import com.studypals.domain.studyManage.service.DailyStudyInfoService;
 import com.studypals.domain.studyManage.service.StudyCategoryService;
 import com.studypals.domain.studyManage.service.StudyTimeService;
 import com.studypals.global.annotations.Facade;
@@ -32,6 +31,7 @@ public class StudyTimeFacade {
 
     private final StudyTimeService studyTimeService;
     private final StudyCategoryService studyCategoryService;
+    private final DailyStudyInfoService dailyStudyInfoService;
 
     /**
      * 특정 날짜의 공부 시간을 반환한다. studyTimeService 로부터 해당 날짜에 공부한 기록 및,
@@ -47,6 +47,21 @@ public class StudyTimeFacade {
         List<GetCategoryRes> categories = studyCategoryService.getUserCategoryByDate(userId, date);
 
         return toStudyResList(studies, categories);
+    }
+
+    /**
+     * 특정 기간에 대하여, 해당 기간 동안의 공부 정보를 받아온다.
+     * studyTimeService 로부터 특정 기간 동안의 모든 기록(카테고리/임시 토픽 - 시간)을 받아오고
+     * dailyStudyInfoService 로부터 해당 날짜의 시작/종료 시간 및 메모를 받아와 합쳐서 반환한다.
+     * @param userId 검색하고자 하는 user 의 id
+     * @param period 검색하고자 하는 기간
+     * @return 특정 날짜 구간에 대한 공부 정보 리스트
+     */
+    public List<GetDailyStudyRes> getDailyStudyTimeByPeriod(Long userId, PeriodDto period) {
+        List<GetDailyStudyDto> studies = studyTimeService.getDailyStudyList(userId, period);
+        List<GetDailyStudyInfoDto> infos = dailyStudyInfoService.getDailyStudyInfoList(userId, period);
+
+        return toDailyStudyList(studies, infos);
     }
 
     /**
@@ -88,5 +103,30 @@ public class StudyTimeFacade {
         combined.addAll(temporary);
 
         return combined;
+    }
+
+    /**
+     * 두 리스트에서 값을 합쳐 반환한다.
+     * studies 는 특정 기간 동안 모든 카테고리(임시토픽) 당 공부 시간에 대한 정보이고, infos 는 특정 날짜의 시작/종료 시간 및 메모
+     * 에 대한 정보이다.
+     * 따라서, studies 로부터 공부 날짜와 그에 따른 공부 리스트를 map 으로 구성하여, 반환 시 이를 기반으로 공부 날짜를 매칭하여 반환
+     * @param studies 카테고리(임시토픽) 공부시간
+     * @param infos 하루의 정보
+     * @return 합친 것
+     */
+    private List<GetDailyStudyRes> toDailyStudyList(List<GetDailyStudyDto> studies, List<GetDailyStudyInfoDto> infos) {
+
+        Map<LocalDate, List<StudyList>> studyMap =
+                studies.stream().collect(Collectors.toMap(GetDailyStudyDto::studiedAt, GetDailyStudyDto::studyList));
+
+        return infos.stream()
+                .map(info -> GetDailyStudyRes.builder()
+                        .studiedAt(info.studiedAt())
+                        .startAt(info.startAt())
+                        .endedAt(info.endAt())
+                        .memo(info.memo())
+                        .studyList(studyMap.getOrDefault(info.studiedAt(), List.of()))
+                        .build())
+                .toList();
     }
 }

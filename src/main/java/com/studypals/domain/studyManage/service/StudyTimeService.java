@@ -3,7 +3,9 @@ package com.studypals.domain.studyManage.service;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.studypals.domain.studyManage.dto.GetDailyStudyDto;
 import com.studypals.domain.studyManage.dto.GetStudyDto;
+import com.studypals.domain.studyManage.dto.PeriodDto;
 
 /**
  * 공부 시간을 반환하거나, 통계를 담당합니다.
@@ -26,4 +28,14 @@ public interface StudyTimeService {
      * @return 해당 날짜에 사용자가 공부한 카테고리id or 이름 - 시간(초 단위)
      */
     List<GetStudyDto> getStudyList(Long userId, LocalDate date);
+
+    /**
+     * 워커 클래스로부터 StudyTime 에 대한 리스트를 받아, 이를 GetDailyStudyDto 로 변환하여 반환합니다.
+     * StudyTime 은 하나의 (날짜 - 카테고리(임시 토픽) - 공부 시간) 으로 이루어 있고 이를 날짜로 그룹화하여,
+     * 각 날짜 별로 하나의 객체로 간추려 반환하도록 하였습니다.
+     * @param userId 검색하고자 하는 user의 id
+     * @param period 기간
+     * @return 간추린 정보
+     */
+    List<GetDailyStudyDto> getDailyStudyList(Long userId, PeriodDto period);
 }
