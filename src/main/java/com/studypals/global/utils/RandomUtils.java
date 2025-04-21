@@ -1,6 +1,7 @@
 package com.studypals.global.utils;
 
 import java.security.SecureRandom;
+import java.util.UUID;
 
 public class RandomUtils {
     private static final String CHARACTERS_ALPHA_NUMERIC =
@@ -14,6 +15,10 @@ public class RandomUtils {
 
     public static String generateUpperAlphaNumericCode(int length) {
         return generateRandomCode(length, CHARACTERS_UPPERCASE_NUMERIC);
+    }
+
+    public static String generateUUID() {
+        return UUID.randomUUID().toString();
     }
 
     private static String generateRandomCode(int length, String characterPool) {

@@ -9,6 +9,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.*;
 
+import com.studypals.domain.chatManage.entity.ChatRoom;
+
 /**
  * Group 에 대한 엔티티입니다.
  *
@@ -55,7 +57,12 @@ public class Group {
     @Column(name = "is_approval_required", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isApprovalRequired = false;
 
-    @Column(name = "created_at")
+    @Column(name = "created_Date")
     @CreatedDate
     private LocalDate createdDate;
+
+    @OneToOne
+    @JoinColumn(name = "chat_room_id", nullable = false, unique = true)
+    private ChatRoom chatRoom;
+
 }
