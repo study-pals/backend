@@ -46,4 +46,16 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
 """,
             nativeQuery = true)
     List<ChatRoom> findChatRoomsByUserId(@Param("userId") Long userId);
+
+    @Query(
+            value =
+                    """
+    SELECT COUNT(*)
+    FROM group_member gm
+    JOIN `group` g ON g.id = gm.group_id
+    WHERE gm.member_id   = :memberId
+      AND g.chat_room_id = :chatRoomId
+""",
+            nativeQuery = true)
+    long countMemberInRoom(@Param("memberId") Long memberId, @Param("chatRoomId") String chatRoomId);
 }

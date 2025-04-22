@@ -53,7 +53,7 @@ public class RedisSaveBuilder {
         return this;
     }
 
-    public RedisSaveBuilder Object(Object object) {
+    public RedisSaveBuilder object(Object object) {
         this.object = object;
         this.isObject = true;
         return this;

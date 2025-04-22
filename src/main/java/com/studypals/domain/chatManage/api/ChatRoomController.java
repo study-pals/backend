@@ -1,9 +1,11 @@
-package com.studypals.domain.chatManage.worker;
+package com.studypals.domain.chatManage.api;
+
+import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.chatManage.dao.ChatRoomRepository;
-import com.studypals.global.annotations.Worker;
+import com.studypals.domain.chatManage.worker.ChatRoomReader;
+import com.studypals.domain.chatManage.worker.ChatRoomWriter;
 
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
@@ -27,8 +29,10 @@ import com.studypals.global.annotations.Worker;
  * @see
  * @since 2025-04-21
  */
-@Worker
+@RestController
 @RequiredArgsConstructor
-public class ChatRoomWriter {
-    private final ChatRoomRepository chatRoomRepository;
+public class ChatRoomController {
+
+    private final ChatRoomReader chatRoomReader;
+    private final ChatRoomWriter chatRoomWriter;
 }

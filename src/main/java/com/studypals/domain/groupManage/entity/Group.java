@@ -61,8 +61,9 @@ public class Group {
     @CreatedDate
     private LocalDate createdDate;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "chat_room_id", nullable = false, unique = true)
+    @Setter
     private ChatRoom chatRoom;
 
 }
