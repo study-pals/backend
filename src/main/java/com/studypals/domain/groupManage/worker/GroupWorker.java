@@ -2,6 +2,7 @@ package com.studypals.domain.groupManage.worker;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
@@ -10,6 +11,7 @@ import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
+import com.studypals.global.utils.RandomUtils;
 
 /**
  * group 도메인의 조회용 Worker 클래스입니다.
@@ -32,11 +34,18 @@ public class GroupWorker {
 
     public Group create(CreateGroupReq dto) {
         Group group = groupMapper.toEntity(dto);
+
         if (!groupTagRepository.existsById(dto.tag())) {
             throw new GroupException(GroupErrorCode.GROUP_CREATE_FAIL, "no such tag.");
         }
 
         try {
+            // ChatWriter 등의 worker 클래스를 사용할까 하였으나, worker 클래스 간의 의존성이 복잡하게 꼬일 것 같아서 제외
+            ChatRoom chatRoom = ChatRoom.builder()
+                    .name(group.getName())
+                    .id(RandomUtils.generateUUID())
+                    .build();
+            group.setChatRoom(chatRoom);
             groupRepository.save(group);
         } catch (Exception e) {
             throw new GroupException(GroupErrorCode.GROUP_CREATE_FAIL);

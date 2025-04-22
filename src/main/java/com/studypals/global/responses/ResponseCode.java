@@ -50,7 +50,11 @@ public enum ResponseCode {
 
     // I01 - Image
     IMAGE_UPLOAD("I01-00"),
-    IMAGE_ACCESS("I01-01");
+    IMAGE_ACCESS("I01-01"),
+
+    // C01 - 단순 채팅
+    CHAT_SEND("C01-01"),
+    CHAT_JOIN("C01-02");
 
     private final String code;
 
