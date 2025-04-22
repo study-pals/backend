@@ -1,5 +1,7 @@
 package com.studypals.global.websocket;
 
+import java.time.Instant;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -11,9 +13,12 @@ import org.springframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.worker.ChatRoomReader;
-import com.studypals.global.redis.RedisRepository;
+import com.studypals.global.exceptions.errorCode.ChatErrorCode;
+import com.studypals.global.exceptions.exception.ChatException;
 import com.studypals.global.security.jwt.JwtToken;
 import com.studypals.global.security.jwt.JwtUtils;
+import com.studypals.global.websocket.SessionSave.SessionInfo;
+import com.studypals.global.websocket.SessionSave.SessionRepository;
 
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
@@ -40,80 +45,82 @@ import com.studypals.global.security.jwt.JwtUtils;
 @Component
 @RequiredArgsConstructor
 public class StompAuthChannelInterceptor implements ChannelInterceptor {
-    private final JwtUtils jwtUtils;
-    private final ChatRoomReader chatRoomReader;
-    private final RedisRepository redisRepository;
 
     private static final String ACCESS_HEADER = "Authorization";
-    private static final String USER_KEY_PREFIX = "ws:session:user:";
-    private static final String ROOM_KEY_PREFIX = "ws:session:room:";
+
+    private final JwtUtils jwtUtils;
+    private final ChatRoomReader chatRoomReader;
+    private final SessionRepository sessionRepository;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
-        try {
+        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+            handleConnect(accessor);
+        }
 
-            if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                String jwtToken = accessor.getFirstNativeHeader(ACCESS_HEADER);
-                jwtToken = resolveToken(jwtToken);
-
-                JwtUtils.JwtData jwtData = jwtUtils.tokenInfo(jwtToken);
-                if (jwtData.isInvalid()) {
-                    throw new IllegalArgumentException("token invalid");
-                }
-                Long userId = jwtData.getId();
-                String sessionId = accessor.getSessionId();
-
-                saveUserSession(sessionId, userId);
-            }
-
-            if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-                String destination = accessor.getDestination();
-                assert destination != null;
-
-                String roomId = extractRoomIdFromDestination(destination);
-                String sessionId = accessor.getSessionId();
-                Long userId = getUserIdBySessionId(sessionId);
-
-                saveRoomSession(sessionId, roomId);
-
-                if (!chatRoomReader.isMemberOfChatRoom(userId, roomId)) {
-                    throw new IllegalArgumentException("user not include in this chat room");
-                }
-            }
-
-        } catch (Exception e) {
-            System.out.println("fail to pre ws connect and sub");
-            return null;
+        if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+            handleSubscribe(accessor);
         }
         return message;
+    }
+
+    @Override
+    public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+            sessionRepository.clear(accessor.getSessionId());
+        }
+    }
+
+    private void handleConnect(StompHeaderAccessor accessor) {
+        String raw = accessor.getFirstNativeHeader(ACCESS_HEADER);
+        String token = resolveToken(raw);
+
+        JwtUtils.JwtData jwtData = jwtUtils.tokenInfo(token);
+        if (jwtData.isInvalid()) throw new ChatException(ChatErrorCode.CHAT_AUTH_FAIL, "jwt invalid");
+
+        Long userId = jwtData.getId();
+        String sessionId = accessor.getSessionId();
+
+        // 저장소에 세션 최초 등록
+        SessionInfo info = new SessionInfo(sessionId, userId, null, Instant.now());
+        sessionRepository.save(info);
+    }
+
+    private void handleSubscribe(StompHeaderAccessor accessor) {
+        String destination = accessor.getDestination();
+        String roomId = extractRoomIdFromDestination(destination);
+        String sessionId = accessor.getSessionId();
+
+        // 세션 존재 & userId 확보
+        Long userId = sessionRepository
+                .findBySessionId(sessionId)
+                .map(SessionInfo::userId)
+                .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_SUB_FAIL, "can't find sesison"));
+
+        // 권한 체크
+        if (!chatRoomReader.isMemberOfChatRoom(userId, roomId)) {
+            throw new ChatException(ChatErrorCode.CHAT_SUB_FAIL, "user not in chat room");
+        }
+
+        // 세션-방 매핑 갱신
+        sessionRepository.updateRoom(sessionId, roomId);
     }
 
     private String resolveToken(String bearerToken) {
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(JwtToken.BEARER_PREFIX)) {
             return bearerToken.substring(JwtToken.BEARER_PREFIX_LENGTH);
         }
-        return null;
-    }
-
-    private void saveUserSession(String sessionId, Long userId) {
-        redisRepository.save(USER_KEY_PREFIX + sessionId, userId.toString());
-    }
-
-    private void saveRoomSession(String sessionId, String roomId) {
-        redisRepository.save(ROOM_KEY_PREFIX + sessionId, roomId);
+        throw new ChatException(ChatErrorCode.CHAT_AUTH_FAIL, "jwt invalid");
     }
 
     private String extractRoomIdFromDestination(String destination) {
-        // 예: "/sub/chat/room/{roomId}" 형식에서 {roomId}만 추출
+        // 예: "/sub/chat/room/{roomId}"
         if (destination != null && destination.contains("/chat/room/")) {
-            return destination.substring(destination.lastIndexOf("/") + 1);
+            return destination.substring(destination.lastIndexOf('/') + 1);
         }
-        throw new IllegalArgumentException("Invalid destination format: " + destination);
-    }
-
-    private Long getUserIdBySessionId(String sessionId) {
-        return Long.parseLong(redisRepository.get(USER_KEY_PREFIX + sessionId));
+        throw new ChatException(ChatErrorCode.CHAT_SUB_FAIL, "extract destination fail");
     }
 }

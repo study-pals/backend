@@ -29,7 +29,7 @@ public class ChatException extends BaseException {
         super(errorCode);
     }
 
-    protected ChatException(ErrorCode errorCode, String logMessage) {
+    public ChatException(ErrorCode errorCode, String logMessage) {
         super(errorCode, logMessage);
     }
 
