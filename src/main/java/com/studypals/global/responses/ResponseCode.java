@@ -53,8 +53,16 @@ public enum ResponseCode {
     IMAGE_ACCESS("I01-01"),
 
     // C01 - 단순 채팅
-    CHAT_SEND("C01-01"),
-    CHAT_JOIN("C01-02");
+    CHAT_CONNECT("C01-01"),
+    CHAT_AUTH("C01-02"),
+    CHAT_PUB("C01-03"),
+    CHAT_SUB("C01-04"),
+    CHAT_DISSUB("C01-05"),
+    CHAT_DISCONNECT("C01-06"),
+
+    // C02 - 채팅을 통한 텍스트 외 전송
+    CHAT_IMAGE("C02-01"),
+    CHAT_FILE("C02-02");
 
     private final String code;
 

@@ -23,7 +23,7 @@ import com.studypals.global.responses.ResponseCode;
  */
 @RequiredArgsConstructor
 public enum ChatErrorCode implements ErrorCode {
-    CHAT_SEND_FAIL(ResponseCode.CHAT_SEND, HttpStatus.BAD_REQUEST, "can't send chat");
+    CHAT_SEND_FAIL(ResponseCode.CHAT_PUB, HttpStatus.BAD_REQUEST, "can't send chat");
 
     private final ResponseCode responseCode;
     private final HttpStatus status;
