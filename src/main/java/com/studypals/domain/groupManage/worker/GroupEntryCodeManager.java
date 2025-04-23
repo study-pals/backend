@@ -30,7 +30,7 @@ public class GroupEntryCodeManager {
     private final GroupEntryCodeRedisRepository groupEntryCodeRepository;
 
     public String generate(Long groupId) {
-        String code = RandomUtils.generateUpperAlphaNumericCode(GROUP_ENTRY_CODE_LENGTH);
+        String code = generateNonDuplicatedCode();
         GroupEntryCode entryCode = new GroupEntryCode(code, groupId);
         groupEntryCodeRepository.save(entryCode);
 
@@ -42,5 +42,18 @@ public class GroupEntryCodeManager {
                 .findById(entryCode)
                 .orElseThrow(() -> new GroupException(GroupErrorCode.GROUP_CODE_NOT_FOUND))
                 .getId();
+    }
+
+    private String generateNonDuplicatedCode() {
+        String code;
+        do {
+            code = RandomUtils.generateUpperAlphaNumericCode(GROUP_ENTRY_CODE_LENGTH);
+        } while (isDuplicatedCode(code));
+
+        return code;
+    }
+
+    private boolean isDuplicatedCode(String code) {
+        return groupEntryCodeRepository.existsById(code);
     }
 }
