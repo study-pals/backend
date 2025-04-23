@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
-import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 
 @Repository
 public interface GroupMemberCustomRepository {
@@ -17,7 +17,7 @@ public interface GroupMemberCustomRepository {
      * @param groupId 조회할 그룹 ID
      * @param limit 조회할 그룹원 수
      * @return 그룹장 포함 대표 멤버 프로필 이미지 리스트
-     * @see GroupMemberProfileImageDto
+     * @see GroupMemberProfileDto
      */
-    List<GroupMemberProfileImageDto> findTopNMemberByJoinedAt(Long groupId, int limit);
+    List<GroupMemberProfileDto> findTopNMemberByJoinedAt(Long groupId, int limit);
 }

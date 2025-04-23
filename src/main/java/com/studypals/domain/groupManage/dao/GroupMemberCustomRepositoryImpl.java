@@ -7,9 +7,11 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.entity.GroupRole;
 
 @RequiredArgsConstructor
@@ -17,28 +19,23 @@ public class GroupMemberCustomRepositoryImpl implements GroupMemberCustomReposit
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<GroupMemberProfileImageDto> findTopNMemberByJoinedAt(Long groupId, int limit) {
-        // 그룹장 조회
-        GroupMemberProfileImageDto leader = queryFactory
-                .select(Projections.constructor(GroupMemberProfileImageDto.class, member.imageUrl, groupMember.role))
+    public List<GroupMemberProfileDto> findTopNMemberByJoinedAt(Long groupId, int limit) {
+        return queryFactory
+                .select(Projections.constructor(
+                        GroupMemberProfileDto.class, member.id, member.nickname, member.imageUrl, groupMember.role))
                 .from(groupMember)
                 .join(member)
                 .on(groupMember.member.id.eq(member.id))
-                .where(groupMember.group.id.eq(groupId), groupMember.role.eq(GroupRole.LEADER))
-                .fetchOne();
-
-        // 일반 멤버 조회
-        List<GroupMemberProfileImageDto> members = queryFactory
-                .select(Projections.constructor(GroupMemberProfileImageDto.class, member.imageUrl, groupMember.role))
-                .from(groupMember)
-                .join(member)
-                .on(groupMember.member.id.eq(member.id))
-                .where(groupMember.group.id.eq(groupId), groupMember.role.eq(GroupRole.MEMBER))
-                .orderBy(groupMember.joinedAt.desc())
-                .limit(limit - 1)
+                .where(groupMember.group.id.eq(groupId))
+                .orderBy(orderByLeaderPriority(), groupMember.joinedAt.desc())
                 .fetch();
-        members.add(leader);
+    }
 
-        return members;
+    private OrderSpecifier<Integer> orderByLeaderPriority() {
+        return new CaseBuilder()
+                .when(groupMember.role.eq(GroupRole.LEADER))
+                .then(0)
+                .otherwise(1)
+                .asc();
     }
 }
