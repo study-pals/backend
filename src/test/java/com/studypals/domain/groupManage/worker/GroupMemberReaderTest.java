@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
-import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.entity.GroupRole;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,14 +29,14 @@ public class GroupMemberReaderTest {
         // given
         Long groupId = 1L;
         int limit = 2;
-        List<GroupMemberProfileImageDto> profiles = List.of(
-                new GroupMemberProfileImageDto("imageUrl url", GroupRole.LEADER),
-                new GroupMemberProfileImageDto("imageUrl url", GroupRole.MEMBER));
+        List<GroupMemberProfileDto> profiles = List.of(
+                new GroupMemberProfileDto(1L, "name", "imageUrl url", GroupRole.LEADER),
+                new GroupMemberProfileDto(2L, "name2", "imageUrl url", GroupRole.MEMBER));
 
         given(groupMemberRepository.findTopNMemberByJoinedAt(groupId, limit)).willReturn(profiles);
 
         // when
-        List<GroupMemberProfileImageDto> actual = groupMemberReader.getTopNMemberProfiles(groupId, limit);
+        List<GroupMemberProfileDto> actual = groupMemberReader.getTopNMemberProfiles(groupId, limit);
 
         // then
         assertThat(actual).isEqualTo(profiles);

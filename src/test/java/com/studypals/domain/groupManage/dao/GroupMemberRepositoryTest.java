@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRole;
@@ -58,12 +58,14 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
         GroupMember leader = insertGroupMember(group, member1, GroupRole.LEADER);
         GroupMember member = insertGroupMember(group, member2, GroupRole.MEMBER);
 
-        List<GroupMemberProfileImageDto> expected = List.of(
-                new GroupMemberProfileImageDto(member1.getImageUrl(), leader.getRole()),
-                new GroupMemberProfileImageDto(member2.getImageUrl(), member.getRole()));
+        List<GroupMemberProfileDto> expected = List.of(
+                new GroupMemberProfileDto(
+                        member1.getId(), member1.getNickname(), member1.getImageUrl(), leader.getRole()),
+                new GroupMemberProfileDto(
+                        member2.getId(), member2.getNickname(), member2.getImageUrl(), member.getRole()));
 
         // when
-        List<GroupMemberProfileImageDto> actual =
+        List<GroupMemberProfileDto> actual =
                 groupMemberRepository.findTopNMemberByJoinedAt(group.getId(), group.getTotalMember());
 
         // then
