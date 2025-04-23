@@ -110,14 +110,14 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                         .startTime(LocalTime.of(9, 0))
                         .endTime(LocalTime.of(11, 0))
                         .memo("집중 잘 됨")
-                        .studyList(List.of(new StudyList(null, "알고리즘", 60L), new StudyList(2L, null, 30L)))
+                        .studies(List.of(new StudyList(null, "알고리즘", 60L), new StudyList(2L, null, 30L)))
                         .build(),
                 GetDailyStudyRes.builder()
                         .studiedDate(LocalDate.of(2024, 4, 3))
                         .startTime(LocalTime.of(11, 0))
                         .endTime(LocalTime.of(13, 0))
                         .memo("집중 잘 됨")
-                        .studyList(List.of(
+                        .studies(List.of(
                                 new StudyList(1L, null, 60L),
                                 new StudyList(2L, null, 30L),
                                 new StudyList(null, "토익", 30L)))
@@ -151,12 +151,12 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data[].startTime").description("해당 날짜 공부 시작 시간"),
                                 fieldWithPath("data[].endTime").description("해당 날짜 공부 종료 시간"),
                                 fieldWithPath("data[].memo").description("간단한 메모"),
-                                fieldWithPath("data[].studyList[].categoryId")
+                                fieldWithPath("data[].studies[].categoryId")
                                         .description("카테고리 ID (없으면 null)")
                                         .optional(),
-                                fieldWithPath("data[].studyList[].teporaryName")
+                                fieldWithPath("data[].studies[].teporaryName")
                                         .description("임시 카테고리 이름 (없으면 null)")
                                         .optional(),
-                                fieldWithPath("data[].studyList[].time").description("해당 항목 공부 시간 (분)"))));
+                                fieldWithPath("data[].studies[].time").description("해당 항목 공부 시간 (분)"))));
     }
 }

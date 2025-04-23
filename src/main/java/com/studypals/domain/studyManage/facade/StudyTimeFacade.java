@@ -125,7 +125,7 @@ public class StudyTimeFacade {
                         .startTime(info.startTime())
                         .endTime(info.endTime())
                         .memo(info.memo())
-                        .studyList(studyMap.getOrDefault(info.studiedDate(), List.of()))
+                        .studies(studyMap.getOrDefault(info.studiedDate(), List.of()))
                         .build())
                 .toList();
     }

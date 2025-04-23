@@ -48,7 +48,7 @@ public class StudyTime {
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 

@@ -20,7 +20,7 @@ public interface DailyStudyInfoService {
      * period 는 시작 날짜와 종료 날짜에 대한 dto 이며, 해당 날짜를 포함한 결과를 반환합니다.
      * 공부 날짜에 대해, 시작 시간, 종료 시간, 메모, 각 카테고리(임시 토픽) 별 공부 시간이 포함됩니다.
      * @param userId 검색하고자 하는 유저의 아이디
-     * @param period 기간
+     * @param period 기간 - 시작 날짜는 종료 날짜보다 이전이거나 같아야 하며, 미래 날짜는 허용되지 않습니다
      * @return 날짜 별, 시작, 종료 시간 및 카테고리 별 공부 시간
      */
     List<GetDailyStudyInfoDto> getDailyStudyInfoList(Long userId, PeriodDto period);
