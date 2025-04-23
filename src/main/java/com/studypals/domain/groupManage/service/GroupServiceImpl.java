@@ -7,9 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.dto.CreateGroupReq;
-import com.studypals.domain.groupManage.dto.GetGroupTagRes;
-import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
+import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.worker.*;
@@ -32,11 +30,15 @@ import com.studypals.domain.groupManage.worker.*;
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
+    private static final int GROUP_SUMMARY_MEMBER_COUNT = 5;
+
     private final GroupWorker groupWorker;
     private final GroupReader groupReader;
     private final GroupMemberWorker groupMemberWorker;
+    private final GroupMemberReader groupMemberReader;
+
     private final GroupAuthorityValidator authorityValidator;
-    private final GroupEntryCodeGenerator entryCodeGenerator;
+    private final GroupEntryCodeManager entryCodeManager;
 
     private final GroupMapper groupMapper;
 
@@ -58,8 +60,19 @@ public class GroupServiceImpl implements GroupService {
     public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
         Group group = groupReader.getById(groupId);
         authorityValidator.validate(userId);
-        String entryCode = entryCodeGenerator.generate(group.getId());
+        String entryCode = entryCodeManager.generate(group.getId());
 
         return new GroupEntryCodeRes(group.getId(), entryCode);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GroupSummaryRes getGroupSummary(String entryCode) {
+        Long groupId = entryCodeManager.getGroupId(entryCode);
+        Group group = groupReader.getById(groupId);
+        List<GroupMemberProfileDto> profiles =
+                groupMemberReader.getTopNMemberProfiles(groupId, GROUP_SUMMARY_MEMBER_COUNT);
+
+        return GroupSummaryRes.of(group, profiles);
     }
 }

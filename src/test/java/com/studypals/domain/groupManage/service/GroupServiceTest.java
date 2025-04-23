@@ -2,6 +2,8 @@ package com.studypals.domain.groupManage.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 
@@ -13,11 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.groupManage.dto.CreateGroupReq;
-import com.studypals.domain.groupManage.dto.GetGroupTagRes;
-import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
+import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.domain.groupManage.worker.*;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
@@ -45,10 +46,13 @@ public class GroupServiceTest {
     private GroupMemberWorker groupMemberWorker;
 
     @Mock
+    private GroupMemberReader groupMemberReader;
+
+    @Mock
     private GroupAuthorityValidator authorityValidator;
 
     @Mock
-    private GroupEntryCodeGenerator entryCodeGenerator;
+    private GroupEntryCodeManager entryCodeManager;
 
     @Mock
     private GroupMapper groupMapper;
@@ -135,7 +139,7 @@ public class GroupServiceTest {
 
         given(mockGroup.getId()).willReturn(groupId);
         given(groupReader.getById(groupId)).willReturn(mockGroup);
-        given(entryCodeGenerator.generate(groupId)).willReturn(entryCode);
+        given(entryCodeManager.generate(groupId)).willReturn(entryCode);
 
         // when
         GroupEntryCodeRes actual = groupService.generateEntryCode(userId, groupId);
@@ -174,5 +178,42 @@ public class GroupServiceTest {
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
+    }
+
+    @Test
+    void getGroupSummary_success() {
+        // given
+        String entryCode = "entry code";
+        Group group = Group.builder()
+                .id(1L)
+                .name("group")
+                .tag("tag")
+                .isOpen(true)
+                .totalMember(5)
+                .build();
+        List<GroupMemberProfileDto> profiles = List.of(
+                new GroupMemberProfileDto(1L, "name", "imageUrl url", GroupRole.LEADER),
+                new GroupMemberProfileDto(2L, "name2", "imageUrl url", GroupRole.MEMBER));
+        GroupSummaryRes expected = GroupSummaryRes.builder()
+                .id(group.getId())
+                .name(group.getName())
+                .tag(group.getTag())
+                .isOpen(group.getIsOpen())
+                .memberCount(group.getTotalMember())
+                .profiles(profiles.stream()
+                        .map(it -> new GroupSummaryRes.GroupMemberProfileImageDto(it.imageUrl(), it.role()))
+                        .toList())
+                .build();
+
+        given(entryCodeManager.getGroupId(entryCode)).willReturn(group.getId());
+        given(groupReader.getById(group.getId())).willReturn(group);
+        given(groupMemberReader.getTopNMemberProfiles(eq(group.getId()), anyInt()))
+                .willReturn(profiles);
+
+        // when
+        GroupSummaryRes actual = groupService.getGroupSummary(entryCode);
+
+        // then
+        assertThat(actual).isEqualTo(expected);
     }
 }
