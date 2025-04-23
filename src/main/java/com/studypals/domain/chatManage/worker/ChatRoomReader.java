@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dao.ChatRoomRepository;
 import com.studypals.domain.chatManage.entity.ChatRoom;
-import com.studypals.domain.groupManage.dao.GroupMemberRepository;
-import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.global.annotations.Worker;
 
 /**
@@ -37,8 +35,6 @@ import com.studypals.global.annotations.Worker;
 public class ChatRoomReader {
 
     private final ChatRoomRepository chatRoomRepository;
-    private GroupMemberRepository groupMemberRepository;
-    private GroupRepository groupRepository;
 
     public List<ChatRoom> findByUserId(Long userId) {
         return chatRoomRepository.findChatRoomsByUserId(userId);
