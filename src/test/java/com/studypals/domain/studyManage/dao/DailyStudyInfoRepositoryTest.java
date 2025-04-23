@@ -10,12 +10,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.entity.DailyStudyInfo;
+import com.studypals.testModules.testSupport.DataJpaSupport;
 
 /**
  * {@link  DailyStudyInfoRepository} 에 대한 테스트코드입니다.
@@ -23,10 +22,8 @@ import com.studypals.domain.studyManage.entity.DailyStudyInfo;
  * @author jack8
  * @since 2025-04-19
  */
-@DataJpaTest
 @DisplayName("DailyStudyInfo_JPA_test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class DailyStudyInfoRepositoryTest {
+class DailyStudyInfoRepositoryTest extends DataJpaSupport {
 
     @Autowired
     private TestEntityManager em;
