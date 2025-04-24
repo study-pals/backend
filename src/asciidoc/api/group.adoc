@@ -123,3 +123,51 @@ include::{snippets}/group-controller-rest-docs-test/get-group-summary_success/qu
 
 include::{snippets}/group-controller-rest-docs-test/get-group-summary_success/http-response.adoc[]
 include::{snippets}/group-controller-rest-docs-test/get-group-summary_success/response-fields.adoc[]
+
+=== 그룹 가입 관련 API
+
+==== 1. 그룹 가입
+
+*Description* +
+
+'''
+
+초대 코드로 그룹에 가입합니다.
+해당 그룹이 가입 승인을 요구하지 않을 때만 가능합니다.
+
+*Request* +
+
+'''
+
+include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/http-request.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/request-fields.adoc[]
+
+*Response* +
+
+'''
+
+include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/http-response.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/response-headers.adoc[]
+
+==== 2. 그룹 가입 요청
+
+*Description* +
+
+'''
+
+초대 코드로 그룹에 가입을 요청합니다.
+해당 그룹이 가입 승인을 요구할 때만 가능합니다.
+
+*Request* +
+
+'''
+
+include::{snippets}/group-entry-controller-rest-docs-test/request-participant_success/http-request.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/request-participant_success/request-fields.adoc[]
+
+*Response* +
+
+'''
+
+include::{snippets}/group-entry-controller-rest-docs-test/request-participant_success/http-response.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/request-participant_success/response-headers.adoc[]
