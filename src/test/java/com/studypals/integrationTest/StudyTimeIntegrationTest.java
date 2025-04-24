@@ -29,7 +29,7 @@ import com.studypals.testModules.testSupport.IntegrationSupport;
 public class StudyTimeIntegrationTest extends IntegrationSupport {
 
     @Test
-    @DisplayName("GET /studies/- 카테고리 + 시간 존재")
+    @DisplayName("GET /studies/stat- 카테고리 + 시간 존재")
     void getStudyTimeByDate_success_withData() throws Exception {
         // given
         CreateUserVar user = createUser();

@@ -20,7 +20,7 @@ import com.studypals.global.responses.ResponseCode;
 /**
  * 공부 시간 데이터 전반에 대한 컨트롤러입니다. 담당하는 엔드포인트는 다음과 같습니다.
  * <pre>
- *     - GET /studies/{date}        : 해당 날짜의 카테고리 및 공부 시간 반환(쿼리 파라미터, date)
+ *     - GET /studies/stat        : 해당 날짜의 카테고리 및 공부 시간 반환(쿼리 파라미터, date)
  *     - GET /studies/stat          : 특정 기간 간 통계를 받아옵니다(쿼리 파라미터, start/end)
  * </pre>
  *
