@@ -26,7 +26,7 @@ import com.studypals.domain.groupManage.service.GroupEntryService;
 @RequestMapping("/groups")
 @RequiredArgsConstructor
 public class GroupEntryController {
-    private GroupEntryService groupEntryService;
+    private final GroupEntryService groupEntryService;
 
     @PostMapping("/{groupId}/join")
     public ResponseEntity<Void> joinGroup(

@@ -25,9 +25,9 @@ import com.studypals.global.annotations.Worker;
 @Worker
 @RequiredArgsConstructor
 public class GroupEntryRequestWorker {
-    private MemberRepository memberRepository;
-    private GroupEntryRequestRepository entryRequestRepository;
-    private GroupEntryRequestMapper mapper;
+    private final MemberRepository memberRepository;
+    private final GroupEntryRequestRepository entryRequestRepository;
+    private final GroupEntryRequestMapper mapper;
 
     public GroupEntryRequest createRequest(Long userId, Group group) {
         Member member = memberRepository.getReferenceById(userId);

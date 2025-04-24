@@ -32,10 +32,10 @@ import com.studypals.global.exceptions.exception.GroupException;
 @Service
 @RequiredArgsConstructor
 public class GroupEntryServiceImpl implements GroupEntryService {
-    private GroupReader groupReader;
-    private GroupMemberWorker groupMemberWorker;
-    private GroupEntryCodeManager entryCodeManager;
-    private GroupEntryRequestWorker entryRequestWorker;
+    private final GroupReader groupReader;
+    private final GroupMemberWorker groupMemberWorker;
+    private final GroupEntryCodeManager entryCodeManager;
+    private final GroupEntryRequestWorker entryRequestWorker;
 
     @Override
     @Transactional
