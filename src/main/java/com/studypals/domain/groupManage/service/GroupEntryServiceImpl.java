@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.dto.GroupEntryInfo;
+import com.studypals.domain.groupManage.dto.GroupEntryReq;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.worker.GroupEntryCodeManager;
 import com.studypals.domain.groupManage.worker.GroupEntryRequestWorker;
@@ -39,7 +39,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
     @Override
     @Transactional
-    public Long joinGroup(Long userId, GroupEntryInfo entryInfo) {
+    public Long joinGroup(Long userId, GroupEntryReq entryInfo) {
         Group group = groupReader.getById(entryInfo.groupId());
         if (!group.isOpen()) {
             throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "can't join without permission");
@@ -52,7 +52,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
     @Override
     @Transactional
-    public Long requestParticipant(Long userId, GroupEntryInfo entryInfo) {
+    public Long requestParticipant(Long userId, GroupEntryReq entryInfo) {
         Group group = groupReader.getById(entryInfo.groupId());
         if (group.isOpen()) {
             throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "should join without permission");

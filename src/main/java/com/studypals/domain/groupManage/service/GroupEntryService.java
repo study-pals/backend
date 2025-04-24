@@ -1,6 +1,6 @@
 package com.studypals.domain.groupManage.service;
 
-import com.studypals.domain.groupManage.dto.GroupEntryInfo;
+import com.studypals.domain.groupManage.dto.GroupEntryReq;
 
 /**
  * GroupEntryService 의 인터페이스입니다. 메서드를 정의합니다.
@@ -20,17 +20,17 @@ public interface GroupEntryService {
      * 공개 그룹에 승인 없이 바로 가입합니다.
      *
      * @param userId 가입할 사용자 ID
-     * @param entryInfo 가입할 그룹 정보 {@link GroupEntryInfo}
+     * @param entryInfo 가입할 그룹 정보 {@link GroupEntryReq}
      * @return {@link com.studypals.domain.groupManage.entity.GroupMember} ID
      */
-    Long joinGroup(Long userId, GroupEntryInfo entryInfo);
+    Long joinGroup(Long userId, GroupEntryReq entryInfo);
 
     /**
      * 비공개 그룹에 가입 요청을 보냅니다.
      *
      * @param userId 요청할 사용자 ID
-     * @param entryInfo 요청할 그룹 정보 {@link GroupEntryInfo}
+     * @param entryInfo 요청할 그룹 정보 {@link GroupEntryReq}
      * @return {@link com.studypals.domain.groupManage.entity.GroupEntryRequest} ID
      */
-    Long requestParticipant(Long userId, GroupEntryInfo entryInfo);
+    Long requestParticipant(Long userId, GroupEntryReq entryInfo);
 }

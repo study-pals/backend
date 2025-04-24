@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.groupManage.dto.GroupEntryInfo;
+import com.studypals.domain.groupManage.dto.GroupEntryReq;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.groupManage.entity.GroupMember;
@@ -46,7 +46,7 @@ public class GroupEntryServiceTest {
         Long userId = 1L;
         Long joinId = 1L;
         Group group = Group.builder().id(1L).isOpen(true).build();
-        GroupEntryInfo entryInfo = new GroupEntryInfo(group.getId(), "entryCode");
+        GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
         GroupMember groupMember = GroupMember.builder().id(joinId).build();
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
@@ -64,7 +64,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Group group = Group.builder().isOpen(false).build();
-        GroupEntryInfo entryInfo = new GroupEntryInfo(1L, "entryCode");
+        GroupEntryReq entryInfo = new GroupEntryReq(1L, "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
 
@@ -79,7 +79,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Group group = Group.builder().id(2L).isOpen(true).build();
-        GroupEntryInfo entryInfo = new GroupEntryInfo(1L, "entryCode");
+        GroupEntryReq entryInfo = new GroupEntryReq(1L, "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
@@ -97,7 +97,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Group group = Group.builder().id(1L).isOpen(false).build();
-        GroupEntryInfo entryInfo = new GroupEntryInfo(group.getId(), "entryCode");
+        GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
         GroupEntryRequest entryRequest = GroupEntryRequest.builder().id(1L).build();
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
@@ -115,7 +115,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Group group = Group.builder().id(1L).isOpen(true).build();
-        GroupEntryInfo entryInfo = new GroupEntryInfo(group.getId(), "entryCode");
+        GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
 
@@ -130,7 +130,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Group group = Group.builder().id(1L).isOpen(false).build();
-        GroupEntryInfo entryInfo = new GroupEntryInfo(group.getId(), "entryCode");
+        GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
