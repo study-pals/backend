@@ -44,6 +44,13 @@ public class GroupEntryCodeManager {
                 .getId();
     }
 
+    public void validateCode(Long groupId, String entryCode) {
+        Long actualGroupId = getGroupId(entryCode);
+        if (!actualGroupId.equals(groupId)) {
+            throw new GroupException(GroupErrorCode.GROUP_CODE_INVALID);
+        }
+    }
+
     private String generateNonDuplicatedCode() {
         String code;
         do {

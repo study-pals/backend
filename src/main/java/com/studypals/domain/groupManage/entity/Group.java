@@ -58,4 +58,8 @@ public class Group {
     @Column(name = "created_at")
     @CreatedDate
     private LocalDate createdDate;
+
+    public void joinNewMember() {
+        totalMember++;
+    }
 }
