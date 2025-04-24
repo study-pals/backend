@@ -41,7 +41,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Transactional
     public Long joinGroup(Long userId, GroupEntryReq entryInfo) {
         Group group = groupReader.getById(entryInfo.groupId());
-        if (!group.isOpen()) {
+        if (group.isApprovalRequired()) {
             throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "can't join without permission");
         }
 
@@ -54,7 +54,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Transactional
     public Long requestParticipant(Long userId, GroupEntryReq entryInfo) {
         Group group = groupReader.getById(entryInfo.groupId());
-        if (group.isOpen()) {
+        if (!group.isApprovalRequired()) {
             throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "should join without permission");
         }
 
