@@ -15,6 +15,15 @@ import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.entity.GroupRole;
 
+/**
+ * {@link GroupMemberReader} 에 대한 단위 테스트입니다.
+ *
+ * <p>성공 케이스와 예외 케이스에 대한 테스트입니다.
+ *
+ * @author s0o0bn
+ * @see GroupMemberReader
+ * @since 2025-04-19
+ */
 @ExtendWith(MockitoExtension.class)
 public class GroupMemberReaderTest {
 

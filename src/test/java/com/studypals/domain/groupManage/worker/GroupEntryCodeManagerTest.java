@@ -1,7 +1,6 @@
 package com.studypals.domain.groupManage.worker;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
 import java.util.Optional;
@@ -17,6 +16,15 @@ import com.studypals.domain.groupManage.entity.GroupEntryCode;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
+/**
+ * {@link GroupEntryCodeManager} 에 대한 단위 테스트입니다.
+ *
+ * <p>성공 케이스와 예외 케이스에 대한 테스트입니다.
+ *
+ * @author s0o0bn
+ * @see GroupEntryCodeManager
+ * @since 2025-04-16
+ */
 @ExtendWith(MockitoExtension.class)
 public class GroupEntryCodeManagerTest {
 
@@ -69,5 +77,33 @@ public class GroupEntryCodeManagerTest {
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
+    }
+
+    @Test
+    void validateCode_success() {
+        // given
+        Long groupId = 1L;
+        String entryCode = "entry code";
+        GroupEntryCode groupEntryCode = new GroupEntryCode(entryCode, groupId);
+
+        given(entryCodeRepository.findById(entryCode)).willReturn(Optional.of(groupEntryCode));
+
+        // when & then
+        assertThatCode(() -> entryCodeManager.validateCode(groupId, entryCode)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void validateCode_fail_entryCodeNotEquals() {
+        // given
+        Long groupId = 1L;
+        String entryCode = "entry code";
+        GroupEntryCode groupEntryCode = new GroupEntryCode(entryCode, 2L);
+
+        given(entryCodeRepository.findById(entryCode)).willReturn(Optional.of(groupEntryCode));
+
+        // when & then
+        assertThatThrownBy(() -> entryCodeManager.validateCode(groupId, entryCode))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_CODE_INVALID);
     }
 }

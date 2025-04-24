@@ -1,0 +1,145 @@
+package com.studypals.domain.groupManage.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.studypals.domain.groupManage.dto.GroupEntryInfo;
+import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupEntryRequest;
+import com.studypals.domain.groupManage.entity.GroupMember;
+import com.studypals.domain.groupManage.worker.GroupEntryCodeManager;
+import com.studypals.domain.groupManage.worker.GroupEntryRequestWorker;
+import com.studypals.domain.groupManage.worker.GroupMemberWorker;
+import com.studypals.domain.groupManage.worker.GroupReader;
+import com.studypals.global.exceptions.errorCode.GroupErrorCode;
+import com.studypals.global.exceptions.exception.GroupException;
+
+@ExtendWith(MockitoExtension.class)
+public class GroupEntryServiceTest {
+
+    @Mock
+    private GroupReader groupReader;
+
+    @Mock
+    private GroupMemberWorker groupMemberWorker;
+
+    @Mock
+    private GroupEntryCodeManager entryCodeManager;
+
+    @Mock
+    private GroupEntryRequestWorker entryRequestWorker;
+
+    @InjectMocks
+    private GroupEntryServiceImpl groupEntryService;
+
+    @Test
+    void joinGroup_success() {
+        // given
+        Long userId = 1L;
+        Long joinId = 1L;
+        Group group = Group.builder().id(1L).isOpen(true).build();
+        GroupEntryInfo entryInfo = new GroupEntryInfo(group.getId(), "entryCode");
+        GroupMember groupMember = GroupMember.builder().id(joinId).build();
+
+        given(groupReader.getById(entryInfo.groupId())).willReturn(group);
+        given(groupMemberWorker.createMember(userId, group)).willReturn(groupMember);
+
+        // when
+        Long actual = groupEntryService.joinGroup(userId, entryInfo);
+
+        // then
+        assertThat(actual).isEqualTo(joinId);
+    }
+
+    @Test
+    void joinGroup_fail_groupNotPublic() {
+        // given
+        Long userId = 1L;
+        Group group = Group.builder().isOpen(false).build();
+        GroupEntryInfo entryInfo = new GroupEntryInfo(1L, "entryCode");
+
+        given(groupReader.getById(entryInfo.groupId())).willReturn(group);
+
+        // when & then
+        assertThatThrownBy(() -> groupEntryService.joinGroup(userId, entryInfo))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
+    }
+
+    @Test
+    void joinGroup_fail_entryCodeInvalid() {
+        // given
+        Long userId = 1L;
+        Group group = Group.builder().id(2L).isOpen(true).build();
+        GroupEntryInfo entryInfo = new GroupEntryInfo(1L, "entryCode");
+
+        given(groupReader.getById(entryInfo.groupId())).willReturn(group);
+        willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
+                .given(entryCodeManager)
+                .validateCode(group.getId(), entryInfo.entryCode());
+
+        // when & then
+        assertThatThrownBy(() -> groupEntryService.joinGroup(userId, entryInfo))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
+    }
+
+    @Test
+    void requestParticipant_success() {
+        // given
+        Long userId = 1L;
+        Group group = Group.builder().id(1L).isOpen(false).build();
+        GroupEntryInfo entryInfo = new GroupEntryInfo(group.getId(), "entryCode");
+        GroupEntryRequest entryRequest = GroupEntryRequest.builder().id(1L).build();
+
+        given(groupReader.getById(entryInfo.groupId())).willReturn(group);
+        given(entryRequestWorker.createRequest(userId, group)).willReturn(entryRequest);
+
+        // when
+        Long actual = groupEntryService.requestParticipant(userId, entryInfo);
+
+        // then
+        assertThat(actual).isEqualTo(entryRequest.getId());
+    }
+
+    @Test
+    void requestParticipant_fail_publicGroup() {
+        // given
+        Long userId = 1L;
+        Group group = Group.builder().id(1L).isOpen(true).build();
+        GroupEntryInfo entryInfo = new GroupEntryInfo(group.getId(), "entryCode");
+
+        given(groupReader.getById(entryInfo.groupId())).willReturn(group);
+
+        // when & then
+        assertThatThrownBy(() -> groupEntryService.requestParticipant(userId, entryInfo))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
+    }
+
+    @Test
+    void requestParticipant_fail_entryCodeInvalid() {
+        // given
+        Long userId = 1L;
+        Group group = Group.builder().id(1L).isOpen(false).build();
+        GroupEntryInfo entryInfo = new GroupEntryInfo(group.getId(), "entryCode");
+
+        given(groupReader.getById(entryInfo.groupId())).willReturn(group);
+        willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
+                .given(entryCodeManager)
+                .validateCode(group.getId(), entryInfo.entryCode());
+
+        // when & then
+        assertThatThrownBy(() -> groupEntryService.requestParticipant(userId, entryInfo))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
+    }
+}

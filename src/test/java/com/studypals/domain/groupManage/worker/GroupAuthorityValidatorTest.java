@@ -17,6 +17,15 @@ import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
+/**
+ * {@link GroupAuthorityValidator} 에 대한 단위 테스트입니다.
+ *
+ * <p>성공 케이스와 예외 케이스에 대한 테스트입니다.
+ *
+ * @author s0o0bn
+ * @see GroupAuthorityValidator
+ * @since 2025-04-16
+ */
 @ExtendWith(MockitoExtension.class)
 public class GroupAuthorityValidatorTest {
 
