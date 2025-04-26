@@ -49,7 +49,7 @@ public class StudySessionController {
     public ResponseEntity<Response<Long>> end(
             @AuthenticationPrincipal Long userId, @Valid @RequestBody EndStudyReq req) {
 
-        Long response = studySessionService.endStudy(userId, req.endedAt());
+        Long response = studySessionService.endStudy(userId, req.endTime());
 
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_START, response, "success end"));
     }

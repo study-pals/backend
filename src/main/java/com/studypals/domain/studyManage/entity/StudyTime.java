@@ -19,7 +19,7 @@ import com.studypals.domain.memberManage.entity.Member;
  * Long id;
  * Member member;
  * StudyCategory studyCategory;
- * LocalDate studiedAt;
+ * LocalDate studiedDate;
  * Long time;
  *     }
  * </pre>
@@ -60,7 +60,7 @@ public class StudyTime {
     private String temporaryName;
 
     @Column(name = "studied_at", nullable = false)
-    private LocalDate studiedAt;
+    private LocalDate studiedDate;
 
     @Column(name = "time", nullable = false)
     @Builder.Default

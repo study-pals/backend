@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
+import com.studypals.domain.studyManage.dto.PeriodDto;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.global.annotations.Worker;
 
@@ -27,6 +28,10 @@ public class StudyTimeReader {
     private final StudyTimeRepository studyTimeRepository;
 
     public List<StudyTime> getListByMemberAndDate(Long userId, LocalDate date) {
-        return studyTimeRepository.findByMemberIdAndStudiedAt(userId, date);
+        return studyTimeRepository.findByMemberIdAndStudiedDate(userId, date);
+    }
+
+    public List<StudyTime> getListByMemberAndDateByPeriod(Long userId, PeriodDto periodDto) {
+        return studyTimeRepository.findAllByMemberIdAndStudiedDateBetween(userId, periodDto.start(), periodDto.end());
     }
 }

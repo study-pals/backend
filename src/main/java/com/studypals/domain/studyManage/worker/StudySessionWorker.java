@@ -36,10 +36,10 @@ public class StudySessionWorker {
      * 갈린다.
      * @param userId 사용자 id
      * @param status redis 에 저장된 사용자 상태
-     * @param studiedAt 언제 공부했는지에 대한 날짜(today)
+     * @param studiedDate 언제 공부했는지에 대한 날짜(today)
      * @param time 초 단위 공부 시간
      */
-    public void upsert(Long userId, StudyStatus status, LocalDate studiedAt, Long time) {
+    public void upsert(Long userId, StudyStatus status, LocalDate studiedDate, Long time) {
 
         Long categoryId = status.getCategoryId();
         String temporaryName = status.getTemporaryName();
@@ -50,19 +50,19 @@ public class StudySessionWorker {
 
         if (categoryId != null) { // 카테고리에 대한 공부인 경우
             Optional<StudyTime> optional =
-                    studyTimeRepository.findByMemberIdAndStudiedAtAndCategoryId(userId, studiedAt, categoryId);
+                    studyTimeRepository.findByMemberIdAndStudiedDateAndCategoryId(userId, studiedDate, categoryId);
             if (optional.isPresent()) {
                 optional.get().addTime(time); // 이미 해당 레코드가 존재하면, 시간만 더해준다.
             } else {
-                createWithCategory(member, categoryId, studiedAt, time); // 해당 레코드가 존재하지 않으면 새로 저장한다.
+                createWithCategory(member, categoryId, studiedDate, time); // 해당 레코드가 존재하지 않으면 새로 저장한다.
             }
         } else if (temporaryName != null) { // 임시 이름에 대한 공부인 경우
-            Optional<StudyTime> optional =
-                    studyTimeRepository.findByMemberIdAndStudiedAtAndTemporaryName(userId, studiedAt, temporaryName);
+            Optional<StudyTime> optional = studyTimeRepository.findByMemberIdAndStudiedDateAndTemporaryName(
+                    userId, studiedDate, temporaryName);
             if (optional.isPresent()) {
                 optional.get().addTime(time); // 이미 존재하는 경우, 시간만 더해준다.
             } else {
-                createWithTemporaryName(member, temporaryName, studiedAt, time); // 존재하지 않는 경우 새로 저장한다.
+                createWithTemporaryName(member, temporaryName, studiedDate, time); // 존재하지 않는 경우 새로 저장한다.
             }
         } else { // 모두 다 null 인 경우 실패
             throw new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL, "both id, name null in redis");
@@ -73,15 +73,15 @@ public class StudySessionWorker {
      * 카테고리에 대한 공부 일 시, 해당 메서드를 통해 studyTime 테이블에 데이터를 저장한다.
      * @param member 사용자
      * @param categoryId 카테고리 아이디
-     * @param studiedAt 공부 날짜(today)
+     * @param studiedDate 공부 날짜(today)
      * @param time 초 단위 공부 시간
      */
-    public void createWithCategory(Member member, Long categoryId, LocalDate studiedAt, Long time) {
+    public void createWithCategory(Member member, Long categoryId, LocalDate studiedDate, Long time) {
         StudyCategory studyCategory = studyCategoryRepository.getReferenceById(categoryId);
         StudyTime newStudyTime = StudyTime.builder()
                 .member(member)
                 .category(studyCategory)
-                .studiedAt(studiedAt)
+                .studiedDate(studiedDate)
                 .time(time)
                 .build();
 
@@ -92,15 +92,15 @@ public class StudySessionWorker {
      * 임시 이름에 대한 공부 일 시, 해당 메서드를 통해 studyTime 테이블에 데이터를 저장한다.
      * @param member 사용자
      * @param temporaryName 임시 이름
-     * @param studiedAt 공부 날짜(today)
+     * @param studiedDate 공부 날짜(today)
      * @param time 초 단위 공부 시간
      */
-    public void createWithTemporaryName(Member member, String temporaryName, LocalDate studiedAt, Long time) {
+    public void createWithTemporaryName(Member member, String temporaryName, LocalDate studiedDate, Long time) {
 
         StudyTime newStudyTime = StudyTime.builder()
                 .member(member)
                 .temporaryName(temporaryName)
-                .studiedAt(studiedAt)
+                .studiedDate(studiedDate)
                 .time(time)
                 .build();
 

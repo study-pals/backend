@@ -53,7 +53,7 @@ public class Member {
 
     @Column(name = "created_at")
     @CreatedDate
-    private LocalDate createdAt;
+    private LocalDate createdDate;
 
     @Column(name = "token")
     @Builder.Default

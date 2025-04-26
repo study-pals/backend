@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.studyManage.entity.StudyTime;
@@ -21,20 +19,16 @@ import com.studypals.domain.studyManage.entity.StudyTime;
 @Repository
 public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
 
-    List<StudyTime> findByMemberIdAndStudiedAt(Long memberId, LocalDate studiedAt);
+    // tested
+    List<StudyTime> findByMemberIdAndStudiedDate(Long memberId, LocalDate studiedDate);
 
-    @Query(
-            """
-        SELECT COALESCE(SUM(s.time), 0)
-        FROM StudyTime s
-        WHERE s.member.id = :memberId AND s.studiedAt = :studiedAt
-        """)
-    Long sumTimeByMemberAndDate(@Param("memberId") Long memberId, @Param("studiedAt") LocalDate studiedAt);
+    // tested
+    List<StudyTime> findAllByMemberIdAndStudiedDateBetween(Long memberId, LocalDate start, LocalDate end);
 
-    List<StudyTime> findByMemberIdAndStudiedAtBetween(Long memberId, LocalDate start, LocalDate end);
+    // tested
+    Optional<StudyTime> findByMemberIdAndStudiedDateAndCategoryId(
+            Long memberId, LocalDate studiedDate, Long categoryId);
 
-    Optional<StudyTime> findByMemberIdAndStudiedAtAndCategoryId(Long memberId, LocalDate studiedAt, Long categoryId);
-
-    Optional<StudyTime> findByMemberIdAndStudiedAtAndTemporaryName(
-            Long memberId, LocalDate studiedAt, String temporaryName);
+    Optional<StudyTime> findByMemberIdAndStudiedDateAndTemporaryName(
+            Long memberId, LocalDate studiedDate, String temporaryName);
 }

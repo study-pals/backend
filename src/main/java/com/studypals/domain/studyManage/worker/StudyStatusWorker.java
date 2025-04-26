@@ -4,12 +4,16 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.memberManage.worker.MemberReader;
+import com.studypals.domain.studyManage.dao.DailyStudyInfoRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
+import com.studypals.domain.studyManage.entity.DailyStudyInfo;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
+import com.studypals.global.utils.TimeUtils;
 
 /**
  * 공부 상태를 나타내는 studyStatus 의 저장/조회 및, 해당 객체의 생성에 대한
@@ -28,6 +32,9 @@ import com.studypals.global.exceptions.exception.StudyException;
 public class StudyStatusWorker {
 
     private final StudyStatusRedisRepository studyStatusRedisRepository;
+    private final DailyStudyInfoRepository dailyStudyInfoRepository;
+    private final MemberReader memberReader;
+    private final TimeUtils timeUtils;
 
     public Optional<StudyStatus> find(Long id) {
         return studyStatusRedisRepository.findById(id);
@@ -40,10 +47,23 @@ public class StudyStatusWorker {
      * @return 만들어진 객체
      */
     public StudyStatus firstStatus(Long userId, StartStudyReq dto) {
+
+        DailyStudyInfo summary = DailyStudyInfo.builder()
+                .member(memberReader.get(userId))
+                .studiedDate(timeUtils.getToday())
+                .startTime(dto.startTime())
+                .build();
+
+        try {
+            dailyStudyInfoRepository.save(summary);
+        } catch (Exception e) {
+            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL);
+        }
+
         return StudyStatus.builder()
                 .id(userId)
                 .studying(true)
-                .startTime(dto.startAt())
+                .startTime(dto.startTime())
                 .categoryId(dto.categoryId())
                 .temporaryName(dto.temporaryName())
                 .build();
@@ -72,7 +92,7 @@ public class StudyStatusWorker {
     public StudyStatus restartStatus(StudyStatus status, StartStudyReq dto) {
         return status.update()
                 .studying(true)
-                .startTime(dto.startAt())
+                .startTime(dto.startTime())
                 .categoryId(dto.categoryId())
                 .temporaryName(dto.temporaryName())
                 .build();

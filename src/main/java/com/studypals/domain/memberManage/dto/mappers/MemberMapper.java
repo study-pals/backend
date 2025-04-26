@@ -25,7 +25,7 @@ public interface MemberMapper {
 
     @Mapping(target = "password", source = "encodedPassword") // password는 별도 인자
     @Mapping(target = "id", ignore = true) // DB가 자동 생성
-    @Mapping(target = "createdAt", ignore = true) // Auditing에 의해 자동 생성
+    @Mapping(target = "createdDate", ignore = true) // Auditing에 의해 자동 생성
     @Mapping(target = "token", ignore = true) // 디폴트값으로 설정됨
     Member toEntity(CreateMemberReq req, String encodedPassword);
 }

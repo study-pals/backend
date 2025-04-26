@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author jack8
  * @since 2025-04-13
  */
-public record StartStudyReq(Long categoryId, String temporaryName, LocalTime startAt) {
+public record StartStudyReq(Long categoryId, String temporaryName, LocalTime startTime) {
     @AssertTrue(message = "categoryId와 temporaryName 중 하나만 존재해야 합니다.")
     @JsonIgnore
     public boolean isValidExclusive() {

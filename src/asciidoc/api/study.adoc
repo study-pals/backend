@@ -230,14 +230,14 @@ include::{snippets}/study-session-controller-rest-docs-test/end_success/http-res
 1. 공부시간이 없는 category, temporary name의 공부 기록 또한 가져옵니다.
 2. "오늘"보다 이후의 날짜의 요청에 대해선 해당 날짜의 카테고리 리스트만 반환됩니다.
 3. 아무것도 기록되지 않는 날짜의 요청에 대해선,  해당 날짜의 카테고리 리스트만 반환됩니다.
-4. path parameter로 날짜가 주어져야 합니다.
+4. query parameter로 날짜가 주어져야 합니다.
 
 
 
 *REQUEST* +
 
 '''
-include::{snippets}/study-time-controller-rest-docs-test/get-study-time-by-date_success/path-parameters.adoc[]
+include::{snippets}/study-time-controller-rest-docs-test/get-study-time-by-date_success/query-parameters.adoc[]
 include::{snippets}/study-time-controller-rest-docs-test/get-study-time-by-date_success/http-request.adoc[]
 
 *RESPONSE* +
@@ -246,4 +246,32 @@ include::{snippets}/study-time-controller-rest-docs-test/get-study-time-by-date_
 
 include::{snippets}/study-time-controller-rest-docs-test/get-study-time-by-date_success/response-fields.adoc[]
 include::{snippets}/study-time-controller-rest-docs-test/get-study-time-by-date_success/http-response.adoc[]
+
+==== 2. 특정 기간 간 공부 데이터 가져오기
+
+*Description* +
+
+'''
+
+특정 날짜의, 유저의 공부 기록을 반환
+
+1. 특정 기간 동안, 공부 시작 시간, 공부 종료 시간, 메모 및 카테고리/임시 토픽 별 공부 시간을 가져옵니다.
+2. 데이터가 있는 경우(즉, 값이 존재하는 경우) 에 대해서만 가져옵니다.
+3. query parameter 로 시작과 종료에 대한 데이터가 주어져야 합니다.
+
+
+
+
+*REQUEST* +
+
+'''
+include::{snippets}/study-time-controller-rest-docs-test/studies-date-by-period_success/query-parameters.adoc[]
+include::{snippets}/study-time-controller-rest-docs-test/studies-date-by-period_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/study-time-controller-rest-docs-test/studies-date-by-period_success/response-fields.adoc[]
+include::{snippets}/study-time-controller-rest-docs-test/studies-date-by-period_success/http-response.adoc[]
 

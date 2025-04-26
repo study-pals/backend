@@ -69,7 +69,7 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("temporaryName")
                                         .description("임시 카테고리 이름")
                                         .attributes(constraints("categoryId 와 상호 베타적")),
-                                fieldWithPath("startAt").description("공부 시작 시간 - HH:mm 형식")),
+                                fieldWithPath("startTime").description("공부 시작 시간 - HH:mm 형식")),
                         responseFields(
                                 fieldWithPath("code").description("U03-03 고정"),
                                 fieldWithPath("status").description("응답 상태 (예: success 또는 fail)"),
@@ -101,7 +101,7 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
-                        requestFields(fieldWithPath("endedAt").description("공부 종료 시간 - HH:mm 형식")),
+                        requestFields(fieldWithPath("endTime").description("공부 종료 시간 - HH:mm 형식")),
                         responseFields(
                                 fieldWithPath("code").description("U03-03 고정"),
                                 fieldWithPath("status").description("응답 상태 (예: success 또는 fail)"),

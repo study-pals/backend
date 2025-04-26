@@ -18,6 +18,7 @@ import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyStatus;
+import com.studypals.domain.studyManage.worker.DailyInfoWriter;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
 import com.studypals.global.utils.TimeUtils;
@@ -36,6 +37,9 @@ class StudySessionServiceTest {
 
     @Mock
     private StudyStatusWorker studyStatusWorker;
+
+    @Mock
+    private DailyInfoWriter dailyInfoWriter; // no delete
 
     @Mock
     private StudyTimeMapper mapper;
