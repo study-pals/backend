@@ -8,4 +8,4 @@ package com.studypals.domain.studyManage.dto;
  * @see GetDailyStudyDto
  * @since 2025-04-19
  */
-public record StudyList(Long categoryId, String teporaryName, Long time) {}
+public record StudyList(Long categoryId, String temporaryName, Long time) {}
