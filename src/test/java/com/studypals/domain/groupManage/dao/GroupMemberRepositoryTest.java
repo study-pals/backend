@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
@@ -35,9 +36,17 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
                 .build());
     }
 
-    private Group insertGroup() {
-        return em.persist(
-                Group.builder().name("group").tag("tag").totalMember(2).build());
+    private ChatRoom insertChatRoom(String name) {
+        return em.persist(ChatRoom.builder().id("chat_room_id").name(name).build());
+    }
+
+    private Group insertGroup(ChatRoom chatRoom) {
+        return em.persist(Group.builder()
+                .name("group")
+                .tag("tag")
+                .chatRoom(chatRoom)
+                .totalMember(2)
+                .build());
     }
 
     private GroupMember insertGroupMember(Group group, Member member, GroupRole role) {
@@ -54,7 +63,8 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
         // given
         Member member1 = insertMember("username1", "member1");
         Member member2 = insertMember("username2", "member2");
-        Group group = insertGroup();
+        ChatRoom chatRoom = insertChatRoom("chat_room");
+        Group group = insertGroup(chatRoom);
         GroupMember leader = insertGroupMember(group, member1, GroupRole.LEADER);
         GroupMember member = insertGroupMember(group, member2, GroupRole.MEMBER);
 

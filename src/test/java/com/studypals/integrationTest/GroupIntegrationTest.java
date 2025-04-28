@@ -77,7 +77,6 @@ public class GroupIntegrationTest extends IntegrationSupport {
 
         // then
         result.andExpect(status().isCreated()).andExpect(header().string("Location", matchesPattern("/groups/\\d+")));
-        ;
     }
 
     @Test
@@ -130,10 +129,16 @@ public class GroupIntegrationTest extends IntegrationSupport {
     }
 
     private CreateGroupVar createGroup(Long userId, String name, String tag) {
+        String chatRoomInsertQuery =
+                """
+                INSERT INTO chat_room (id, name)
+                VALUE(?, ?)
+                """;
+        jdbcTemplate.update(chatRoomInsertQuery, "chat_room_id", "chat_room_name");
         String insertQuery =
                 """
-                INSERT INTO `group` (name, tag)
-                VALUE(?, ?)
+                INSERT INTO `group` (name, tag, chat_room_id)
+                VALUE(?, ?, ?)
                 """;
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -142,6 +147,7 @@ public class GroupIntegrationTest extends IntegrationSupport {
                     PreparedStatement ps = con.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
                     ps.setString(1, name);
                     ps.setString(2, tag);
+                    ps.setString(3, "chat_room_id");
                     return ps;
                 },
                 keyHolder);
