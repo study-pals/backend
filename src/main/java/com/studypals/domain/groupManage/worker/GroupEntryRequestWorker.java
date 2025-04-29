@@ -6,7 +6,6 @@ import com.studypals.domain.groupManage.dao.GroupEntryRequestRepository;
 import com.studypals.domain.groupManage.dto.mappers.GroupEntryRequestMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
-import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.annotations.Worker;
 
@@ -25,12 +24,10 @@ import com.studypals.global.annotations.Worker;
 @Worker
 @RequiredArgsConstructor
 public class GroupEntryRequestWorker {
-    private final MemberRepository memberRepository;
     private final GroupEntryRequestRepository entryRequestRepository;
     private final GroupEntryRequestMapper mapper;
 
-    public GroupEntryRequest createRequest(Long userId, Group group) {
-        Member member = memberRepository.getReferenceById(userId);
+    public GroupEntryRequest createRequest(Member member, Group group) {
         GroupEntryRequest entryRequest = mapper.toEntity(member, group);
         entryRequestRepository.save(entryRequest);
 

@@ -11,6 +11,8 @@ import com.studypals.domain.groupManage.worker.GroupEntryCodeManager;
 import com.studypals.domain.groupManage.worker.GroupEntryRequestWorker;
 import com.studypals.domain.groupManage.worker.GroupMemberWorker;
 import com.studypals.domain.groupManage.worker.GroupReader;
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
@@ -32,6 +34,7 @@ import com.studypals.global.exceptions.exception.GroupException;
 @Service
 @RequiredArgsConstructor
 public class GroupEntryServiceImpl implements GroupEntryService {
+    private final MemberReader memberReader;
     private final GroupReader groupReader;
     private final GroupMemberWorker groupMemberWorker;
     private final GroupEntryCodeManager entryCodeManager;
@@ -59,6 +62,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
         }
 
         entryCodeManager.validateCode(group.getId(), entryInfo.entryCode());
-        return entryRequestWorker.createRequest(userId, group).getId();
+        Member member = memberReader.getRef(userId);
+        return entryRequestWorker.createRequest(member, group).getId();
     }
 }
