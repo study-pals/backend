@@ -14,7 +14,6 @@ import com.studypals.domain.groupManage.dao.GroupEntryRequestRepository;
 import com.studypals.domain.groupManage.dto.mappers.GroupEntryRequestMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
-import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
@@ -30,9 +29,6 @@ import com.studypals.global.exceptions.exception.GroupException;
  */
 @ExtendWith(MockitoExtension.class)
 public class GroupEntryRequestWorkerTest {
-
-    @Mock
-    private MemberRepository memberRepository;
 
     @Mock
     private GroupEntryRequestRepository entryRequestRepository;
@@ -57,11 +53,10 @@ public class GroupEntryRequestWorkerTest {
         // given
         Long userId = 1L;
 
-        given(memberRepository.getReferenceById(userId)).willReturn(mockMember);
         given(entryRequestMapper.toEntity(mockMember, mockGroup)).willReturn(mockGroupEntryRequest);
 
         // when
-        GroupEntryRequest actual = entryRequestWorker.createRequest(userId, mockGroup);
+        GroupEntryRequest actual = entryRequestWorker.createRequest(mockMember, mockGroup);
 
         // then
         assertThat(actual).isEqualTo(mockGroupEntryRequest);
@@ -72,13 +67,12 @@ public class GroupEntryRequestWorkerTest {
         // given
         Long userId = 1L;
 
-        given(memberRepository.getReferenceById(userId)).willReturn(mockMember);
         given(entryRequestMapper.toEntity(mockMember, mockGroup)).willReturn(mockGroupEntryRequest);
         given(entryRequestRepository.save(mockGroupEntryRequest))
                 .willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL));
 
         // when & then
-        assertThatThrownBy(() -> entryRequestWorker.createRequest(userId, mockGroup))
+        assertThatThrownBy(() -> entryRequestWorker.createRequest(mockMember, mockGroup))
                 .extracting("errorCode")
                 .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
     }

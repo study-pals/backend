@@ -19,11 +19,16 @@ import com.studypals.domain.groupManage.worker.GroupEntryCodeManager;
 import com.studypals.domain.groupManage.worker.GroupEntryRequestWorker;
 import com.studypals.domain.groupManage.worker.GroupMemberWorker;
 import com.studypals.domain.groupManage.worker.GroupReader;
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
 @ExtendWith(MockitoExtension.class)
 public class GroupEntryServiceTest {
+
+    @Mock
+    private MemberReader memberReader;
 
     @Mock
     private GroupReader groupReader;
@@ -37,6 +42,9 @@ public class GroupEntryServiceTest {
     @Mock
     private GroupEntryRequestWorker entryRequestWorker;
 
+    @Mock
+    private Member mockMember;
+
     @InjectMocks
     private GroupEntryServiceImpl groupEntryService;
 
@@ -45,7 +53,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Long joinId = 1L;
-        Group group = Group.builder().id(1L).isOpen(true).build();
+        Group group = Group.builder().id(1L).isApprovalRequired(false).build();
         GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
         GroupMember groupMember = GroupMember.builder().id(joinId).build();
 
@@ -60,10 +68,10 @@ public class GroupEntryServiceTest {
     }
 
     @Test
-    void joinGroup_fail_groupNotPublic() {
+    void joinGroup_fail_groupJoinApprovalRequired() {
         // given
         Long userId = 1L;
-        Group group = Group.builder().isOpen(false).build();
+        Group group = Group.builder().isApprovalRequired(true).build();
         GroupEntryReq entryInfo = new GroupEntryReq(1L, "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
@@ -78,7 +86,7 @@ public class GroupEntryServiceTest {
     void joinGroup_fail_entryCodeInvalid() {
         // given
         Long userId = 1L;
-        Group group = Group.builder().id(2L).isOpen(true).build();
+        Group group = Group.builder().id(2L).isApprovalRequired(false).build();
         GroupEntryReq entryInfo = new GroupEntryReq(1L, "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
@@ -96,12 +104,13 @@ public class GroupEntryServiceTest {
     void requestParticipant_success() {
         // given
         Long userId = 1L;
-        Group group = Group.builder().id(1L).isOpen(false).build();
+        Group group = Group.builder().id(1L).isApprovalRequired(true).build();
         GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
         GroupEntryRequest entryRequest = GroupEntryRequest.builder().id(1L).build();
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
-        given(entryRequestWorker.createRequest(userId, group)).willReturn(entryRequest);
+        given(memberReader.getRef(userId)).willReturn(mockMember);
+        given(entryRequestWorker.createRequest(mockMember, group)).willReturn(entryRequest);
 
         // when
         Long actual = groupEntryService.requestParticipant(userId, entryInfo);
@@ -111,10 +120,10 @@ public class GroupEntryServiceTest {
     }
 
     @Test
-    void requestParticipant_fail_publicGroup() {
+    void requestParticipant_fail_approvalNotRequired() {
         // given
         Long userId = 1L;
-        Group group = Group.builder().id(1L).isOpen(true).build();
+        Group group = Group.builder().id(1L).isApprovalRequired(false).build();
         GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
@@ -129,7 +138,7 @@ public class GroupEntryServiceTest {
     void requestParticipant_fail_entryCodeInvalid() {
         // given
         Long userId = 1L;
-        Group group = Group.builder().id(1L).isOpen(false).build();
+        Group group = Group.builder().id(1L).isApprovalRequired(true).build();
         GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
