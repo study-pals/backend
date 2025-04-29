@@ -110,11 +110,11 @@ public class GroupEntryServiceTest {
     }
 
     @Test
-    void joinGroup_fail_byMaxMemberLimit() {
+    void joinGroup_fail_groupMemberLimitExceed() {
         // given
         Long userId = 1L;
         Group group = Group.builder()
-                .id(2L)
+                .id(1L)
                 .totalMember(10)
                 .maxMember(10)
                 .isApprovalRequired(false)
@@ -122,6 +122,9 @@ public class GroupEntryServiceTest {
         GroupEntryReq entryInfo = new GroupEntryReq(1L, "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
+        willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
+                .given(groupMemberWorker)
+                .createMember(userId, group);
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.joinGroup(userId, entryInfo))
@@ -154,7 +157,7 @@ public class GroupEntryServiceTest {
     }
 
     @Test
-    void requestParticipant_fail_approvalNotRequired() {
+    void requestParticipant_fail_newRequestNotAvailable() {
         // given
         Long userId = 1L;
         Group group = Group.builder()
@@ -166,6 +169,9 @@ public class GroupEntryServiceTest {
         GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
+        willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
+                .given(entryRequestWorker)
+                .validateNewRequestAvailable(group);
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.requestParticipant(userId, entryInfo))
@@ -189,26 +195,6 @@ public class GroupEntryServiceTest {
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
                 .given(entryCodeManager)
                 .validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
-
-        // when & then
-        assertThatThrownBy(() -> groupEntryService.requestParticipant(userId, entryInfo))
-                .extracting("errorCode")
-                .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
-    }
-
-    @Test
-    void requestParticipant_fail_byMaxMemberLimit() {
-        // given
-        Long userId = 1L;
-        Group group = Group.builder()
-                .id(1L)
-                .totalMember(10)
-                .maxMember(10)
-                .isApprovalRequired(true)
-                .build();
-        GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
-
-        given(groupReader.getById(entryInfo.groupId())).willReturn(group);
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.requestParticipant(userId, entryInfo))

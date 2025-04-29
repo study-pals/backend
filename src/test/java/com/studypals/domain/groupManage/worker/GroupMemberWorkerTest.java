@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
+import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dto.mappers.GroupMemberMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
@@ -34,6 +35,9 @@ public class GroupMemberWorkerTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private GroupRepository groupRepository;
 
     @Mock
     private GroupMemberRepository groupMemberRepository;
@@ -93,9 +97,12 @@ public class GroupMemberWorkerTest {
     void createMember_success() {
         // given
         Long memberId = 1L;
+        Long groupId = 1L;
         GroupRole role = GroupRole.MEMBER;
 
+        given(mockGroup.getId()).willReturn(groupId);
         given(mockGroupMember.getRole()).willReturn(role);
+        given(groupRepository.increaseGroupMember(groupId)).willReturn(1);
         given(memberRepository.getReferenceById(memberId)).willReturn(mockMember);
         given(groupMemberMapper.toEntity(mockMember, mockGroup, role)).willReturn(mockGroupMember);
 
@@ -111,12 +118,32 @@ public class GroupMemberWorkerTest {
     void createMember_fail_whileSave() {
         // given
         Long memberId = 1L;
+        Long groupId = 1L;
         GroupRole role = GroupRole.MEMBER;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_MEMBER_CREATE_FAIL;
 
+        given(mockGroup.getId()).willReturn(groupId);
         given(memberRepository.getReferenceById(memberId)).willReturn(mockMember);
+        given(groupRepository.increaseGroupMember(groupId)).willReturn(1);
         given(groupMemberMapper.toEntity(mockMember, mockGroup, role)).willReturn(mockGroupMember);
         given(groupMemberRepository.save(mockGroupMember)).willThrow(new GroupException(errorCode));
+
+        // when & then
+        assertThatThrownBy(() -> groupMemberWorker.createMember(memberId, mockGroup))
+                .isInstanceOf(GroupException.class)
+                .extracting("errorCode")
+                .isEqualTo(errorCode);
+    }
+
+    @Test
+    void createMember_fail_memberLimitExceed() {
+        // given
+        Long memberId = 1L;
+        Long groupId = 1L;
+        GroupErrorCode errorCode = GroupErrorCode.GROUP_JOIN_FAIL;
+
+        given(mockGroup.getId()).willReturn(groupId);
+        given(groupRepository.increaseGroupMember(groupId)).willReturn(0);
 
         // when & then
         assertThatThrownBy(() -> groupMemberWorker.createMember(memberId, mockGroup))
