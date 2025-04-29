@@ -44,10 +44,13 @@ public class GroupEntryCodeManager {
                 .getId();
     }
 
-    public void validateCode(Long groupId, String entryCode) {
+    public void validateCodeBelongsToGroup(Long groupId, String entryCode) {
         Long actualGroupId = getGroupId(entryCode);
         if (!actualGroupId.equals(groupId)) {
-            throw new GroupException(GroupErrorCode.GROUP_CODE_INVALID);
+            throw new GroupException(
+                    GroupErrorCode.GROUP_CODE_INVALID,
+                    String.format(
+                            "Invalid group code: expected groupId=%d, actual groupId=%d", groupId, actualGroupId));
         }
     }
 

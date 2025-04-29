@@ -59,7 +59,13 @@ public class Group {
     @CreatedDate
     private LocalDate createdDate;
 
+    public boolean isFullMember() {
+        return totalMember.equals(maxMember);
+    }
+
     public void joinNewMember() {
-        totalMember++;
+        if (totalMember < maxMember) {
+            totalMember++;
+        }
     }
 }

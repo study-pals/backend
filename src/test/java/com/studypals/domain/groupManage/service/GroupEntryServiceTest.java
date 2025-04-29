@@ -71,7 +71,11 @@ public class GroupEntryServiceTest {
     void joinGroup_fail_groupJoinApprovalRequired() {
         // given
         Long userId = 1L;
-        Group group = Group.builder().isApprovalRequired(true).build();
+        Group group = Group.builder()
+                .totalMember(1)
+                .maxMember(10)
+                .isApprovalRequired(true)
+                .build();
         GroupEntryReq entryInfo = new GroupEntryReq(1L, "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
@@ -86,13 +90,38 @@ public class GroupEntryServiceTest {
     void joinGroup_fail_entryCodeInvalid() {
         // given
         Long userId = 1L;
-        Group group = Group.builder().id(2L).isApprovalRequired(false).build();
+        Group group = Group.builder()
+                .id(2L)
+                .totalMember(1)
+                .maxMember(10)
+                .isApprovalRequired(false)
+                .build();
         GroupEntryReq entryInfo = new GroupEntryReq(1L, "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
                 .given(entryCodeManager)
-                .validateCode(group.getId(), entryInfo.entryCode());
+                .validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
+
+        // when & then
+        assertThatThrownBy(() -> groupEntryService.joinGroup(userId, entryInfo))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
+    }
+
+    @Test
+    void joinGroup_fail_byMaxMemberLimit() {
+        // given
+        Long userId = 1L;
+        Group group = Group.builder()
+                .id(2L)
+                .totalMember(10)
+                .maxMember(10)
+                .isApprovalRequired(false)
+                .build();
+        GroupEntryReq entryInfo = new GroupEntryReq(1L, "entryCode");
+
+        given(groupReader.getById(entryInfo.groupId())).willReturn(group);
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.joinGroup(userId, entryInfo))
@@ -104,7 +133,12 @@ public class GroupEntryServiceTest {
     void requestParticipant_success() {
         // given
         Long userId = 1L;
-        Group group = Group.builder().id(1L).isApprovalRequired(true).build();
+        Group group = Group.builder()
+                .id(1L)
+                .totalMember(1)
+                .maxMember(10)
+                .isApprovalRequired(true)
+                .build();
         GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
         GroupEntryRequest entryRequest = GroupEntryRequest.builder().id(1L).build();
 
@@ -123,7 +157,12 @@ public class GroupEntryServiceTest {
     void requestParticipant_fail_approvalNotRequired() {
         // given
         Long userId = 1L;
-        Group group = Group.builder().id(1L).isApprovalRequired(false).build();
+        Group group = Group.builder()
+                .id(1L)
+                .totalMember(1)
+                .maxMember(10)
+                .isApprovalRequired(false)
+                .build();
         GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
@@ -138,13 +177,38 @@ public class GroupEntryServiceTest {
     void requestParticipant_fail_entryCodeInvalid() {
         // given
         Long userId = 1L;
-        Group group = Group.builder().id(1L).isApprovalRequired(true).build();
+        Group group = Group.builder()
+                .id(1L)
+                .totalMember(1)
+                .maxMember(10)
+                .isApprovalRequired(true)
+                .build();
         GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
                 .given(entryCodeManager)
-                .validateCode(group.getId(), entryInfo.entryCode());
+                .validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
+
+        // when & then
+        assertThatThrownBy(() -> groupEntryService.requestParticipant(userId, entryInfo))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
+    }
+
+    @Test
+    void requestParticipant_fail_byMaxMemberLimit() {
+        // given
+        Long userId = 1L;
+        Group group = Group.builder()
+                .id(1L)
+                .totalMember(10)
+                .maxMember(10)
+                .isApprovalRequired(true)
+                .build();
+        GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
+
+        given(groupReader.getById(entryInfo.groupId())).willReturn(group);
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.requestParticipant(userId, entryInfo))

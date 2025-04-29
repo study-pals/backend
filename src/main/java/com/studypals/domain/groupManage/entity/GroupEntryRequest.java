@@ -45,5 +45,5 @@ public class GroupEntryRequest {
 
     @Column(name = "created_at")
     @CreatedDate
-    private LocalDate createdAt;
+    private LocalDate createdDate;
 }

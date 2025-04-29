@@ -80,7 +80,7 @@ public class GroupEntryCodeManagerTest {
     }
 
     @Test
-    void validateCode_success() {
+    void validateCodeBelongsToGroup_success() {
         // given
         Long groupId = 1L;
         String entryCode = "entry code";
@@ -89,11 +89,12 @@ public class GroupEntryCodeManagerTest {
         given(entryCodeRepository.findById(entryCode)).willReturn(Optional.of(groupEntryCode));
 
         // when & then
-        assertThatCode(() -> entryCodeManager.validateCode(groupId, entryCode)).doesNotThrowAnyException();
+        assertThatCode(() -> entryCodeManager.validateCodeBelongsToGroup(groupId, entryCode))
+                .doesNotThrowAnyException();
     }
 
     @Test
-    void validateCode_fail_entryCodeNotEquals() {
+    void validateCodeBelongsToGroup_fail_entryCodeNotEquals() {
         // given
         Long groupId = 1L;
         String entryCode = "entry code";
@@ -102,7 +103,7 @@ public class GroupEntryCodeManagerTest {
         given(entryCodeRepository.findById(entryCode)).willReturn(Optional.of(groupEntryCode));
 
         // when & then
-        assertThatThrownBy(() -> entryCodeManager.validateCode(groupId, entryCode))
+        assertThatThrownBy(() -> entryCodeManager.validateCodeBelongsToGroup(groupId, entryCode))
                 .extracting("errorCode")
                 .isEqualTo(GroupErrorCode.GROUP_CODE_INVALID);
     }

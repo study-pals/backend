@@ -11,6 +11,6 @@ import com.studypals.domain.memberManage.entity.Member;
 public interface GroupEntryRequestMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdDate", ignore = true)
     GroupEntryRequest toEntity(Member member, Group group);
 }

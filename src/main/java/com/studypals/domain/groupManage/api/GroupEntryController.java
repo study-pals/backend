@@ -32,7 +32,7 @@ public class GroupEntryController {
     public ResponseEntity<Void> joinGroup(@AuthenticationPrincipal Long userId, @RequestBody GroupEntryReq req) {
         Long joinId = groupEntryService.joinGroup(userId, req);
 
-        return ResponseEntity.created(URI.create("/groups/" + req.groupId() + "/members/" + joinId))
+        return ResponseEntity.created(URI.create(String.format("/groups/%d/members/%d", req.groupId(), joinId)))
                 .build();
     }
 
@@ -41,7 +41,7 @@ public class GroupEntryController {
             @AuthenticationPrincipal Long userId, @RequestBody GroupEntryReq req) {
         Long requestId = groupEntryService.requestParticipant(userId, req);
 
-        return ResponseEntity.created(URI.create("/groups/" + req.groupId() + "/requests/" + requestId))
+        return ResponseEntity.created(URI.create(String.format("/groups/%d/requests/%d", req.groupId(), requestId)))
                 .build();
     }
 }

@@ -44,12 +44,15 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Transactional
     public Long joinGroup(Long userId, GroupEntryReq entryInfo) {
         Group group = groupReader.getById(entryInfo.groupId());
+        if (group.isFullMember()) {
+            throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "group already full of member");
+        }
         if (group.isApprovalRequired()) {
             throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "can't join without permission");
         }
 
+        entryCodeManager.validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
         group.joinNewMember();
-        entryCodeManager.validateCode(group.getId(), entryInfo.entryCode());
         return groupMemberWorker.createMember(userId, group).getId();
     }
 
@@ -57,11 +60,14 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Transactional
     public Long requestParticipant(Long userId, GroupEntryReq entryInfo) {
         Group group = groupReader.getById(entryInfo.groupId());
+        if (group.isFullMember()) {
+            throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "group already full of member");
+        }
         if (!group.isApprovalRequired()) {
             throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "should join without permission");
         }
 
-        entryCodeManager.validateCode(group.getId(), entryInfo.entryCode());
+        entryCodeManager.validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
         Member member = memberReader.getRef(userId);
         return entryRequestWorker.createRequest(member, group).getId();
     }
