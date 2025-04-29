@@ -1,6 +1,9 @@
 package com.studypals.domain.groupManage.dao;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.groupManage.entity.Group;
@@ -18,4 +21,14 @@ import com.studypals.domain.groupManage.entity.Group;
  * @since 2025-04-12
  */
 @Repository
-public interface GroupRepository extends JpaRepository<Group, Long> {}
+public interface GroupRepository extends JpaRepository<Group, Long> {
+
+    @Modifying
+    @Query(
+            """
+        UPDATE Group g
+        SET g.totalMember = g.totalMember + 1
+        WHERE g.id = :groupId AND g.totalMember < g.maxMember
+    """)
+    int increaseGroupMember(@Param("groupId") Long groupId);
+}

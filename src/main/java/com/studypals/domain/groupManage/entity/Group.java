@@ -62,10 +62,4 @@ public class Group {
     public boolean isFullMember() {
         return totalMember.equals(maxMember);
     }
-
-    public void joinNewMember() {
-        if (totalMember < maxMember) {
-            totalMember++;
-        }
-    }
 }

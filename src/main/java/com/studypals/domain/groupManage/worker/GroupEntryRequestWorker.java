@@ -8,6 +8,8 @@ import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.annotations.Worker;
+import com.studypals.global.exceptions.errorCode.GroupErrorCode;
+import com.studypals.global.exceptions.exception.GroupException;
 
 /**
  * group entry request 도메인의 기본 Worker 클래스입니다.
@@ -26,6 +28,15 @@ import com.studypals.global.annotations.Worker;
 public class GroupEntryRequestWorker {
     private final GroupEntryRequestRepository entryRequestRepository;
     private final GroupEntryRequestMapper mapper;
+
+    public void validateNewRequestAvailable(Group group) {
+        if (group.isFullMember()) {
+            throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "group already full of member");
+        }
+        if (!group.isApprovalRequired()) {
+            throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "should join without permission");
+        }
+    }
 
     public GroupEntryRequest createRequest(Member member, Group group) {
         GroupEntryRequest entryRequest = mapper.toEntity(member, group);

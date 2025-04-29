@@ -3,6 +3,7 @@ package com.studypals.domain.groupManage.worker;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
+import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dto.mappers.GroupMemberMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
@@ -29,6 +30,7 @@ import com.studypals.global.exceptions.exception.GroupException;
 @RequiredArgsConstructor
 public class GroupMemberWorker {
     private final MemberRepository memberRepository;
+    private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberMapper groupMemberMapper;
 
@@ -38,6 +40,11 @@ public class GroupMemberWorker {
     }
 
     public GroupMember createMember(Long memberId, Group group) {
+        int updated = groupRepository.increaseGroupMember(group.getId());
+        if (updated == 0) {
+            throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "group member limit exceed");
+        }
+
         Member member = memberRepository.getReferenceById(memberId);
         return create(member, group, GroupRole.MEMBER);
     }
