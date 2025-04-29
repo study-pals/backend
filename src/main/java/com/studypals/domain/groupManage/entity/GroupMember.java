@@ -27,7 +27,9 @@ import com.studypals.domain.memberManage.entity.Member;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "group_member")
+@Table(
+        name = "group_member",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"group_id", "member_id"})})
 public class GroupMember {
 
     @Id
