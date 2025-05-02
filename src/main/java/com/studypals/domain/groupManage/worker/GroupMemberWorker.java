@@ -42,7 +42,7 @@ public class GroupMemberWorker {
     public GroupMember createMember(Long memberId, Group group) {
         int updated = groupRepository.increaseGroupMember(group.getId());
         if (updated == 0) {
-            throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "group member limit exceed");
+            throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "group member limit exceeded");
         }
 
         Member member = memberRepository.getReferenceById(memberId);

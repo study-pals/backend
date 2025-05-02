@@ -60,6 +60,6 @@ public class Group {
     private LocalDate createdDate;
 
     public boolean isFullMember() {
-        return totalMember.equals(maxMember);
+        return totalMember >= maxMember;
     }
 }
