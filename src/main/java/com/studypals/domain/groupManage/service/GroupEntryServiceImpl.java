@@ -12,7 +12,12 @@ import com.studypals.domain.groupManage.dto.GroupEntryReq;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.dto.GroupSummaryRes;
 import com.studypals.domain.groupManage.entity.Group;
-import com.studypals.domain.groupManage.worker.*;
+import com.studypals.domain.groupManage.worker.GroupAuthorityValidator;
+import com.studypals.domain.groupManage.worker.GroupEntryCodeManager;
+import com.studypals.domain.groupManage.worker.GroupEntryRequestWorker;
+import com.studypals.domain.groupManage.worker.GroupMemberReader;
+import com.studypals.domain.groupManage.worker.GroupMemberWorker;
+import com.studypals.domain.groupManage.worker.GroupReader;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
@@ -36,6 +41,7 @@ import com.studypals.global.exceptions.exception.GroupException;
 @Service
 @RequiredArgsConstructor
 public class GroupEntryServiceImpl implements GroupEntryService {
+    /** 그룹 요약 정보 조회 시 포함되는 그룹 멤버 수 */
     private static final int GROUP_SUMMARY_MEMBER_COUNT = 5;
 
     private final MemberReader memberReader;
