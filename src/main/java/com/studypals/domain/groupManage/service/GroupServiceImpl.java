@@ -11,6 +11,8 @@ import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.worker.*;
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
 
 /**
  * group service 의 구현 클래스입니다.
@@ -32,6 +34,7 @@ import com.studypals.domain.groupManage.worker.*;
 public class GroupServiceImpl implements GroupService {
     private static final int GROUP_SUMMARY_MEMBER_COUNT = 5;
 
+    private final MemberReader memberReader;
     private final GroupWorker groupWorker;
     private final GroupReader groupReader;
     private final GroupMemberWorker groupMemberWorker;
@@ -51,7 +54,8 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public Long createGroup(Long userId, CreateGroupReq dto) {
         Group group = groupWorker.create(dto);
-        groupMemberWorker.createLeader(userId, group);
+        Member member = memberReader.getRef(userId);
+        groupMemberWorker.createLeader(member, group);
         return group.getId();
     }
 

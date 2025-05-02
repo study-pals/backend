@@ -49,7 +49,8 @@ public class GroupEntryServiceImpl implements GroupEntryService {
         }
 
         entryCodeManager.validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
-        return groupMemberWorker.createMember(userId, group).getId();
+        Member member = memberReader.getRef(userId);
+        return groupMemberWorker.createMember(member, group).getId();
     }
 
     @Override

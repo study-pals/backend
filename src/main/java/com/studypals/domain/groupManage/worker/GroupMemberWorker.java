@@ -8,7 +8,6 @@ import com.studypals.domain.groupManage.dto.mappers.GroupMemberMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRole;
-import com.studypals.domain.memberManage.dao.MemberRepository;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
@@ -29,23 +28,20 @@ import com.studypals.global.exceptions.exception.GroupException;
 @Worker
 @RequiredArgsConstructor
 public class GroupMemberWorker {
-    private final MemberRepository memberRepository;
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberMapper groupMemberMapper;
 
-    public GroupMember createLeader(Long memberId, Group group) {
-        Member member = memberRepository.getReferenceById(memberId);
+    public GroupMember createLeader(Member member, Group group) {
         return create(member, group, GroupRole.LEADER);
     }
 
-    public GroupMember createMember(Long memberId, Group group) {
+    public GroupMember createMember(Member member, Group group) {
         int updated = groupRepository.increaseGroupMember(group.getId());
         if (updated == 0) {
             throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "group member limit exceeded");
         }
 
-        Member member = memberRepository.getReferenceById(memberId);
         return create(member, group, GroupRole.MEMBER);
     }
 
