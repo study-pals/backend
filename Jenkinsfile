@@ -33,15 +33,6 @@ pipeline {
         /* 2) Git 체크아웃 -------------------------------------------------- */
         stage('CheckOut') { steps { checkout scm } }
 
-        /* 3) 테스트 -------------------------------------------------------- */
-        stage('Test') {
-            steps {
-                // 테스트 시에는 test DB/Redis 를 사용하도록 profile 만 test 로 덮어쓰기
-                withEnv(['SPRING_PROFILES_ACTIVE=test']) {
-                    sh './gradlew test'
-                }
-            }
-        }
 
         /* 3 + 4) 테스트 와 빌드  --------------------------------------------- */
         stage('Build') { steps { sh './gradlew clean build' } }
