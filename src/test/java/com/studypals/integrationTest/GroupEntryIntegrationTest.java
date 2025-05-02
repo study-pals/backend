@@ -36,8 +36,8 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
     @WithMockUser
     void joinGroup_success() throws Exception {
         // given
-        CreateUserVar user = createUser();
-        CreateGroupVar group = createGroup(user.getUserId(), "group", "tag", false);
+        CreateGroupVar group = createGroup(createUser().getUserId(), "group", "tag", false);
+        CreateUserVar user = createUser("member_username", "member");
         GroupEntryCode groupEntryCode = new GroupEntryCode("1A2B3C", group.groupId());
         GroupEntryReq req = new GroupEntryReq(group.groupId(), groupEntryCode.getCode());
 
