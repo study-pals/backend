@@ -1,5 +1,6 @@
 package com.studypals.domain.groupManage.restDocsTest;
 
+import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -7,11 +8,15 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -22,7 +27,11 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.groupManage.api.GroupEntryController;
 import com.studypals.domain.groupManage.dto.*;
+import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.service.GroupEntryService;
+import com.studypals.global.responses.CommonResponse;
+import com.studypals.global.responses.Response;
+import com.studypals.global.responses.ResponseCode;
 import com.studypals.testModules.testSupport.RestDocsSupport;
 
 /**
@@ -36,11 +45,79 @@ import com.studypals.testModules.testSupport.RestDocsSupport;
 @WebMvcTest(GroupEntryController.class)
 public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
 
-    //    @MockitoBean
-    //    private GroupService groupService;
-
     @MockitoBean
     private GroupEntryService groupEntryService;
+
+    @Test
+    @WithMockUser
+    void generateEntryCode_success() throws Exception {
+        // given
+        Long groupId = 1L;
+        GroupEntryCodeRes entryCodeRes = new GroupEntryCodeRes(groupId, "A1B2C3");
+        Response<GroupEntryCodeRes> expected = CommonResponse.success(ResponseCode.GROUP_ENTRY_CODE, entryCodeRes);
+
+        given(groupEntryService.generateEntryCode(any(), any())).willReturn(entryCodeRes);
+
+        // when
+        ResultActions result = mockMvc.perform(post("/groups/" + groupId + "/entry-code"));
+
+        // then
+        result.andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/groups/1/entry-code/" + entryCodeRes.code()))
+                .andExpect(hasKey(expected))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        responseFields(
+                                fieldWithPath("data.groupId").description("그룹 ID"),
+                                fieldWithPath("data.code").description("그룹 초대 코드 | 6자리의 대문자 알파벳, 숫자 조합"),
+                                fieldWithPath("code").description("응답 코드"),
+                                fieldWithPath("status").description("응답 상태"),
+                                fieldWithPath("message").description("응답 메시지")),
+                        responseHeaders(headerWithName("Location").description("생성된 그룹 초대 코드"))));
+    }
+
+    @Test
+    void getGroupSummary_success() throws Exception {
+        // given
+        String entryCode = "A1B2C3";
+        List<GroupSummaryRes.GroupMemberProfileImageDto> profiles = List.of(
+                new GroupSummaryRes.GroupMemberProfileImageDto("imageUrl url", GroupRole.LEADER),
+                new GroupSummaryRes.GroupMemberProfileImageDto("imageUrl url", GroupRole.MEMBER));
+        GroupSummaryRes groupSummaryRes = GroupSummaryRes.builder()
+                .id(1L)
+                .name("group name")
+                .tag("tag")
+                .isOpen(true)
+                .memberCount(2)
+                .profiles(profiles)
+                .build();
+        Response<GroupSummaryRes> expected = CommonResponse.success(ResponseCode.GROUP_SUMMARY, groupSummaryRes);
+
+        given(groupEntryService.getGroupSummary(entryCode)).willReturn(groupSummaryRes);
+
+        // when
+        ResultActions result = mockMvc.perform(get("/groups/summary").param("entryCode", entryCode));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(hasKey(expected))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        queryParameters(parameterWithName("entryCode").description("그룹 초대 코드")),
+                        responseFields(
+                                fieldWithPath("data.id").description("그룹 ID"),
+                                fieldWithPath("data.name").description("그룹명"),
+                                fieldWithPath("data.tag").description("그룹 태그"),
+                                fieldWithPath("data.isOpen").description("그룹 공개 여부"),
+                                fieldWithPath("data.memberCount").description("그룹 전체 멤버 수"),
+                                fieldWithPath("data.profiles[].imageUrl").description("그룹 멤버 프로필 이미지"),
+                                fieldWithPath("data.profiles[].role").description("그룹 멤버 권한 | LEADER, MEMBER"),
+                                fieldWithPath("code").description("응답 코드"),
+                                fieldWithPath("status").description("응답 상태"),
+                                fieldWithPath("message").description("응답 메시지"))));
+    }
 
     @Test
     @WithMockUser
