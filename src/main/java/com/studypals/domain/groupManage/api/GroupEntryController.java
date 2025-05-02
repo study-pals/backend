@@ -2,6 +2,9 @@ package com.studypals.domain.groupManage.api;
 
 import java.net.URI;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -46,13 +49,15 @@ public class GroupEntryController {
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<Response<GroupSummaryRes>> getGroupSummary(@RequestParam String entryCode) {
+    public ResponseEntity<Response<GroupSummaryRes>> getGroupSummary(
+            @RequestParam(required = true) @Size(min = 6, max = 6, message = "entry code must be 6 length.")
+                    String entryCode) {
         GroupSummaryRes response = groupEntryService.getGroupSummary(entryCode);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_SUMMARY, response));
     }
 
     @PostMapping("/join")
-    public ResponseEntity<Void> joinGroup(@AuthenticationPrincipal Long userId, @RequestBody GroupEntryReq req) {
+    public ResponseEntity<Void> joinGroup(@AuthenticationPrincipal Long userId, @Valid @RequestBody GroupEntryReq req) {
         Long joinId = groupEntryService.joinGroup(userId, req);
 
         return ResponseEntity.created(URI.create(String.format("/groups/%d/members/%d", req.groupId(), joinId)))
@@ -61,7 +66,7 @@ public class GroupEntryController {
 
     @PostMapping("/request-entry")
     public ResponseEntity<Void> requestGroupParticipant(
-            @AuthenticationPrincipal Long userId, @RequestBody GroupEntryReq req) {
+            @AuthenticationPrincipal Long userId, @Valid @RequestBody GroupEntryReq req) {
         Long requestId = groupEntryService.requestParticipant(userId, req);
 
         return ResponseEntity.created(URI.create(String.format("/groups/%d/requests/%d", req.groupId(), requestId)))
