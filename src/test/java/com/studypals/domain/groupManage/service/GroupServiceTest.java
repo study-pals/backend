@@ -21,6 +21,8 @@ import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.domain.groupManage.worker.*;
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
@@ -35,6 +37,9 @@ import com.studypals.global.exceptions.exception.GroupException;
  */
 @ExtendWith(MockitoExtension.class)
 public class GroupServiceTest {
+
+    @Mock
+    private MemberReader memberReader;
 
     @Mock
     private GroupWorker groupWorker;
@@ -56,6 +61,9 @@ public class GroupServiceTest {
 
     @Mock
     private GroupMapper groupMapper;
+
+    @Mock
+    private Member mockMember;
 
     @Mock
     private Group mockGroup;
@@ -87,6 +95,7 @@ public class GroupServiceTest {
         Long userId = 1L;
         CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
+        given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupWorker.create(req)).willReturn(mockGroup);
 
         // when
@@ -119,8 +128,9 @@ public class GroupServiceTest {
         GroupErrorCode errorCode = GroupErrorCode.GROUP_MEMBER_CREATE_FAIL;
         CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
+        given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupWorker.create(req)).willReturn(mockGroup);
-        given(groupMemberWorker.createLeader(userId, mockGroup)).willThrow(new GroupException(errorCode));
+        given(groupMemberWorker.createLeader(mockMember, mockGroup)).willThrow(new GroupException(errorCode));
 
         // when & then
         assertThatThrownBy(() -> groupService.createGroup(userId, req))
@@ -155,7 +165,7 @@ public class GroupServiceTest {
         Long groupId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_FORBIDDEN;
 
-        willThrow(new GroupException(errorCode)).given(authorityValidator).validate(userId);
+        willThrow(new GroupException(errorCode)).given(authorityValidator).validate(userId, groupId);
 
         // when & then
         assertThatThrownBy(() -> groupService.generateEntryCode(userId, groupId))

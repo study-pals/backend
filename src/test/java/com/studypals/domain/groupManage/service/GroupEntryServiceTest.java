@@ -57,8 +57,9 @@ public class GroupEntryServiceTest {
         GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
         GroupMember groupMember = GroupMember.builder().id(joinId).build();
 
+        given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
-        given(groupMemberWorker.createMember(userId, group)).willReturn(groupMember);
+        given(groupMemberWorker.createMember(mockMember, group)).willReturn(groupMember);
 
         // when
         Long actual = groupEntryService.joinGroup(userId, entryInfo);
@@ -121,10 +122,11 @@ public class GroupEntryServiceTest {
                 .build();
         GroupEntryReq entryInfo = new GroupEntryReq(1L, "entryCode");
 
+        given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
                 .given(groupMemberWorker)
-                .createMember(userId, group);
+                .createMember(mockMember, group);
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.joinGroup(userId, entryInfo))
