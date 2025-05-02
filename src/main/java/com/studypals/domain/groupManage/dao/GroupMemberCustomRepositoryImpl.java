@@ -28,6 +28,7 @@ public class GroupMemberCustomRepositoryImpl implements GroupMemberCustomReposit
                 .on(groupMember.member.id.eq(member.id))
                 .where(groupMember.group.id.eq(groupId))
                 .orderBy(orderByLeaderPriority(), groupMember.joinedAt.desc())
+                .limit(limit)
                 .fetch();
     }
 
