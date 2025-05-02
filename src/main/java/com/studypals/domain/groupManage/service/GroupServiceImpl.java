@@ -32,17 +32,10 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
-    private static final int GROUP_SUMMARY_MEMBER_COUNT = 5;
-
     private final MemberReader memberReader;
     private final GroupWorker groupWorker;
     private final GroupReader groupReader;
     private final GroupMemberWorker groupMemberWorker;
-    private final GroupMemberReader groupMemberReader;
-
-    private final GroupAuthorityValidator authorityValidator;
-    private final GroupEntryCodeManager entryCodeManager;
-
     private final GroupMapper groupMapper;
 
     @Override
@@ -57,26 +50,5 @@ public class GroupServiceImpl implements GroupService {
         Member member = memberReader.getRef(userId);
         groupMemberWorker.createLeader(member, group);
         return group.getId();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
-        Group group = groupReader.getById(groupId);
-        authorityValidator.validate(userId, groupId);
-        String entryCode = entryCodeManager.generate(group.getId());
-
-        return new GroupEntryCodeRes(group.getId(), entryCode);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public GroupSummaryRes getGroupSummary(String entryCode) {
-        Long groupId = entryCodeManager.getGroupId(entryCode);
-        Group group = groupReader.getById(groupId);
-        List<GroupMemberProfileDto> profiles =
-                groupMemberReader.getTopNMemberProfiles(groupId, GROUP_SUMMARY_MEMBER_COUNT);
-
-        return GroupSummaryRes.of(group, profiles);
     }
 }

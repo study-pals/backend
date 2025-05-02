@@ -8,13 +8,20 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
 import com.studypals.domain.groupManage.dto.GroupEntryReq;
+import com.studypals.domain.groupManage.dto.GroupSummaryRes;
 import com.studypals.domain.groupManage.service.GroupEntryService;
+import com.studypals.global.responses.CommonResponse;
+import com.studypals.global.responses.Response;
+import com.studypals.global.responses.ResponseCode;
 
 /**
  * 그룹 가입 관리에 대한 컨트롤러입니다. 담당하는 엔드포인트는 다음과 같습니다.
  *
  * <pre>
+ *     - POST /groups/{groupId}/entry-code : 그룹 초대 코드 생성
+ *     - GET /groups/summary : 그룹 대표 정보 조회
  *     - POST /groups/join : 공개 그룹에 가입
  *     - POST /groups/request-entry : 비공개 그룹 가입 요청
  * </pre>
@@ -27,6 +34,22 @@ import com.studypals.domain.groupManage.service.GroupEntryService;
 @RequiredArgsConstructor
 public class GroupEntryController {
     private final GroupEntryService groupEntryService;
+
+    @PostMapping("/{groupId}/entry-code")
+    public ResponseEntity<Response<GroupEntryCodeRes>> generateEntryCode(
+            @AuthenticationPrincipal Long userId, @PathVariable Long groupId) {
+        GroupEntryCodeRes codeResponse = groupEntryService.generateEntryCode(userId, groupId);
+        Response<GroupEntryCodeRes> response = CommonResponse.success(ResponseCode.GROUP_ENTRY_CODE, codeResponse);
+
+        return ResponseEntity.created(URI.create("/groups/" + groupId + "/entry-code/" + codeResponse.code()))
+                .body(response);
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<Response<GroupSummaryRes>> getGroupSummary(@RequestParam String entryCode) {
+        GroupSummaryRes response = groupEntryService.getGroupSummary(entryCode);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_SUMMARY, response));
+    }
 
     @PostMapping("/join")
     public ResponseEntity<Void> joinGroup(@AuthenticationPrincipal Long userId, @RequestBody GroupEntryReq req) {
