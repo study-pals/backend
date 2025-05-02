@@ -88,7 +88,7 @@ pipeline {
                 def author = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
                 def shortSha = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
-                def jenkinsUrl = env.BUILD_URL.replace(env.JENKINS_INTERNAL_URL, env.JENKINS_EXTERNAL_URL)
+                def jenkinsUrl = "http://jack8226.ddns.net:3005/job/study-pal/${env.BUILD_NUMBER}/"
                 def reportUrl = "${jenkinsUrl}execution/node/3/ws/build/reports/tests/test/index.html"
 
                 def desc = """
@@ -124,7 +124,7 @@ pipeline {
                 def author = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
                 def shortSha = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
-                def jenkinsUrl = env.BUILD_URL.replace(env.JENKINS_INTERNAL_URL, env.JENKINS_EXTERNAL_URL)
+                def jenkinsUrl = "http://jack8226.ddns.net:3005/job/study-pal/${env.BUILD_NUMBER}/"
                 def reportUrl = "${jenkinsUrl}execution/node/3/ws/build/reports/tests/test/index.html"
 
                 def desc = """
