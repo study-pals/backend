@@ -44,7 +44,7 @@ public class GroupAuthorityValidatorTest {
         Long userId = 1L;
 
         given(mockGroupMember.isLeader()).willReturn(true);
-        given(groupMemberRepository.findByMemberId(userId)).willReturn(Optional.of(mockGroupMember));
+        given(groupMemberRepository.findByMemberIdAndGroupId(userId)).willReturn(Optional.of(mockGroupMember));
 
         // when & then
         assertThatCode(() -> groupAuthorityValidator.validate(userId)).doesNotThrowAnyException();
@@ -56,7 +56,7 @@ public class GroupAuthorityValidatorTest {
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_MEMBER_NOT_FOUND;
 
-        given(groupMemberRepository.findByMemberId(userId)).willReturn(Optional.empty());
+        given(groupMemberRepository.findByMemberIdAndGroupId(userId)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> groupAuthorityValidator.validate(userId))
@@ -72,7 +72,7 @@ public class GroupAuthorityValidatorTest {
         GroupErrorCode errorCode = GroupErrorCode.GROUP_FORBIDDEN;
 
         given(mockGroupMember.isLeader()).willReturn(false);
-        given(groupMemberRepository.findByMemberId(userId)).willReturn(Optional.of(mockGroupMember));
+        given(groupMemberRepository.findByMemberIdAndGroupId(userId)).willReturn(Optional.of(mockGroupMember));
 
         // when & then
         assertThatThrownBy(() -> groupAuthorityValidator.validate(userId))

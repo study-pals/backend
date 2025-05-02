@@ -26,9 +26,9 @@ import com.studypals.global.exceptions.exception.GroupException;
 public class GroupAuthorityValidator {
     private final GroupMemberRepository groupMemberRepository;
 
-    public void validate(Long memberId) {
+    public void validate(Long memberId, Long groupId) {
         GroupMember member = groupMemberRepository
-                .findByMemberId(memberId)
+                .findByMemberIdAndGroupId(memberId, groupId)
                 .orElseThrow(() -> new GroupException(GroupErrorCode.GROUP_MEMBER_NOT_FOUND));
         if (!member.isLeader()) {
             throw new GroupException(GroupErrorCode.GROUP_FORBIDDEN);
