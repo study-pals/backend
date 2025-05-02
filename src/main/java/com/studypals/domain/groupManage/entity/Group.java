@@ -49,13 +49,17 @@ public class Group {
 
     @Builder.Default
     @Column(name = "is_open", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean isOpen = false;
+    private boolean isOpen = false;
 
     @Builder.Default
     @Column(name = "is_approval_required", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean isApprovalRequired = false;
+    private boolean isApprovalRequired = false;
 
     @Column(name = "created_at")
     @CreatedDate
     private LocalDate createdDate;
+
+    public boolean isFullMember() {
+        return totalMember >= maxMember;
+    }
 }

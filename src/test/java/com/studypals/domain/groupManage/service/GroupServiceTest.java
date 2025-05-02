@@ -198,7 +198,7 @@ public class GroupServiceTest {
                 .id(group.getId())
                 .name(group.getName())
                 .tag(group.getTag())
-                .isOpen(group.getIsOpen())
+                .isOpen(group.isOpen())
                 .memberCount(group.getTotalMember())
                 .profiles(profiles.stream()
                         .map(it -> new GroupSummaryRes.GroupMemberProfileImageDto(it.imageUrl(), it.role()))
