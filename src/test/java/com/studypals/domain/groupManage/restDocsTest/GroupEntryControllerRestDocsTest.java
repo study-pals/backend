@@ -105,7 +105,9 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
-                        queryParameters(parameterWithName("entryCode").description("그룹 초대 코드")),
+                        queryParameters(parameterWithName("entryCode")
+                                .description("그룹 초대 코드")
+                                .attributes(constraints("문자열 길이 6"))),
                         responseFields(
                                 fieldWithPath("data.id").description("그룹 ID"),
                                 fieldWithPath("data.name").description("그룹명"),
@@ -145,7 +147,7 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("groupId").description("그룹 ID").attributes(constraints("not null")),
                                 fieldWithPath("entryCode")
                                         .description("그룹 초대 코드")
-                                        .attributes(constraints("not null"))),
+                                        .attributes(constraints("문자열 길이 6"))),
                         responseHeaders(headerWithName("Location").description("추가된 그룹 멤버 id"))));
     }
 
@@ -175,7 +177,7 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("groupId").description("그룹 ID").attributes(constraints("not null")),
                                 fieldWithPath("entryCode")
                                         .description("그룹 초대 코드")
-                                        .attributes(constraints("not null"))),
+                                        .attributes(constraints("문자열 길이 6"))),
                         responseHeaders(headerWithName("Location").description("추가된 그룹 가입 요청 id"))));
     }
 }

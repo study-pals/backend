@@ -8,6 +8,18 @@ import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.global.annotations.Worker;
 
+/**
+ * group member 도메인의 조회 Worker 클래스입니다.
+ *
+ * <p>group member 관련 조회 로직을 수행합니다.
+ *
+ *
+ * <p><b>빈 관리:</b><br>
+ * Worker
+ *
+ * @author s0o0bn
+ * @since 2025-04-19
+ */
 @Worker
 @RequiredArgsConstructor
 public class GroupMemberReader {

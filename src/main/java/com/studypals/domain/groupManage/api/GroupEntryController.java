@@ -50,7 +50,8 @@ public class GroupEntryController {
 
     @GetMapping("/summary")
     public ResponseEntity<Response<GroupSummaryRes>> getGroupSummary(
-            @RequestParam(required = true) @Size(min = 6, max = 6, message = "entry code must be 6 length.")
+            @RequestParam(required = true)
+                    @Size(min = 6, max = 6, message = "entry code must be exactly 6 characters long.")
                     String entryCode) {
         GroupSummaryRes response = groupEntryService.getGroupSummary(entryCode);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_SUMMARY, response));

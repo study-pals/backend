@@ -13,9 +13,9 @@ import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
 /**
- * group 도메인의 기본 Worker 클래스입니다.
+ * group 도메인의 조회 Worker 클래스입니다.
  *
- * <p>group 관련 CUD 로직을 수행합니다.
+ * <p>group 관련 조회 로직을 수행합니다.
  *
  *
  * <p><b>빈 관리:</b><br>

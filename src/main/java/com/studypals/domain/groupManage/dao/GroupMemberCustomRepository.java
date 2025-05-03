@@ -6,6 +6,15 @@ import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 
+/**
+ * {@link com.studypals.domain.groupManage.entity.GroupMember} 엔티티에 대한 커스텀 dao 클래스입니다.
+ *
+ * <p>커스텀 쿼리 선언을 위한 Repository
+ *
+ * @author s0o0bn
+ * @see com.studypals.domain.groupManage.entity.GroupMember
+ * @since 2025-04-19
+ */
 @Repository
 public interface GroupMemberCustomRepository {
 
