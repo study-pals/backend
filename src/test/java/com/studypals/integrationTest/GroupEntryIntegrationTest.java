@@ -60,7 +60,7 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
         // given
         CreateUserVar user = createUser();
         CreateGroupVar group = createGroup(user.getUserId(), "group", "tag");
-        GroupEntryCode entryCode = new GroupEntryCode("entry-code", group.groupId());
+        GroupEntryCode entryCode = new GroupEntryCode("A1B2C3", group.groupId());
 
         entryCodeRedisRepository.save(entryCode);
 
