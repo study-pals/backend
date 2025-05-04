@@ -131,6 +131,7 @@ tasks.named('test', Test) {
     useJUnitPlatform()
     outputs.dir snippetsDir
     environment envProps
+    systemProperty 'spring.profiles.active', 'test'
 }
 
 asciidoctor {
