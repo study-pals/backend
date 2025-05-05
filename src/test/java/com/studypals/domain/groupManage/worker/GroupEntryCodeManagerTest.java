@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
+import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryCode;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
@@ -82,28 +83,28 @@ public class GroupEntryCodeManagerTest {
     @Test
     void validateCodeBelongsToGroup_success() {
         // given
-        Long groupId = 1L;
+        Group group = Group.builder().id(1L).build();
         String entryCode = "entry code";
-        GroupEntryCode groupEntryCode = new GroupEntryCode(entryCode, groupId);
+        GroupEntryCode groupEntryCode = new GroupEntryCode(entryCode, group.getId());
 
         given(entryCodeRepository.findById(entryCode)).willReturn(Optional.of(groupEntryCode));
 
         // when & then
-        assertThatCode(() -> entryCodeManager.validateCodeBelongsToGroup(groupId, entryCode))
+        assertThatCode(() -> entryCodeManager.validateCodeBelongsToGroup(group, entryCode))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void validateCodeBelongsToGroup_fail_entryCodeNotEquals() {
         // given
-        Long groupId = 1L;
+        Group group = Group.builder().id(1L).build();
         String entryCode = "entry code";
         GroupEntryCode groupEntryCode = new GroupEntryCode(entryCode, 2L);
 
         given(entryCodeRepository.findById(entryCode)).willReturn(Optional.of(groupEntryCode));
 
         // when & then
-        assertThatThrownBy(() -> entryCodeManager.validateCodeBelongsToGroup(groupId, entryCode))
+        assertThatThrownBy(() -> entryCodeManager.validateCodeBelongsToGroup(group, entryCode))
                 .extracting("errorCode")
                 .isEqualTo(GroupErrorCode.GROUP_CODE_INVALID);
     }

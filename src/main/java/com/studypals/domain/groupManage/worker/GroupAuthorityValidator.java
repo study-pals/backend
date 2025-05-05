@@ -1,11 +1,10 @@
 package com.studypals.domain.groupManage.worker;
 
-import org.springframework.stereotype.Component;
-
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.entity.GroupMember;
+import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
@@ -21,7 +20,7 @@ import com.studypals.global.exceptions.exception.GroupException;
  * @author s0o0bn
  * @since 2025-04-15
  */
-@Component
+@Worker
 @RequiredArgsConstructor
 public class GroupAuthorityValidator {
     private final GroupMemberRepository groupMemberRepository;

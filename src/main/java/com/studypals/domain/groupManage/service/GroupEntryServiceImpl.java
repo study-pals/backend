@@ -56,11 +56,10 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Override
     @Transactional(readOnly = true)
     public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
-        Group group = groupReader.getById(groupId);
         authorityValidator.validate(userId, groupId);
-        String entryCode = entryCodeManager.generate(group.getId());
+        String entryCode = entryCodeManager.generate(groupId);
 
-        return new GroupEntryCodeRes(group.getId(), entryCode);
+        return new GroupEntryCodeRes(groupId, entryCode);
     }
 
     @Override
@@ -69,7 +68,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
         Long groupId = entryCodeManager.getGroupId(entryCode);
         Group group = groupReader.getById(groupId);
         List<GroupMemberProfileDto> profiles =
-                groupMemberReader.getTopNMemberProfiles(groupId, GROUP_SUMMARY_MEMBER_COUNT);
+                groupMemberReader.getTopNMemberProfiles(group, GROUP_SUMMARY_MEMBER_COUNT);
 
         return GroupSummaryRes.of(group, profiles);
     }
@@ -82,7 +81,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
             throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "can't join without permission");
         }
 
-        entryCodeManager.validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
+        entryCodeManager.validateCodeBelongsToGroup(group, entryInfo.entryCode());
         Member member = memberReader.getRef(userId);
         return groupMemberWorker.createMember(member, group).getId();
     }
@@ -92,7 +91,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     public Long requestParticipant(Long userId, GroupEntryReq entryInfo) {
         Group group = groupReader.getById(entryInfo.groupId());
         entryRequestWorker.validateNewRequestAvailable(group);
-        entryCodeManager.validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
+        entryCodeManager.validateCodeBelongsToGroup(group, entryInfo.entryCode());
         Member member = memberReader.getRef(userId);
         return entryRequestWorker.createRequest(member, group).getId();
     }

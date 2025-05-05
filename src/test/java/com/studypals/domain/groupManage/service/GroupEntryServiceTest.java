@@ -64,11 +64,9 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Long groupId = 1L;
-        Group group = Group.builder().id(1L).build();
         String entryCode = "A1B2C3";
         GroupEntryCodeRes expected = new GroupEntryCodeRes(groupId, entryCode);
 
-        given(groupReader.getById(groupId)).willReturn(group);
         given(entryCodeManager.generate(groupId)).willReturn(entryCode);
 
         // when
@@ -86,22 +84,6 @@ public class GroupEntryServiceTest {
         GroupErrorCode errorCode = GroupErrorCode.GROUP_FORBIDDEN;
 
         willThrow(new GroupException(errorCode)).given(authorityValidator).validate(userId, groupId);
-
-        // when & then
-        assertThatThrownBy(() -> groupEntryService.generateEntryCode(userId, groupId))
-                .isInstanceOf(GroupException.class)
-                .extracting("errorCode")
-                .isEqualTo(errorCode);
-    }
-
-    @Test
-    void generateEntryCode_fail_groupNotFound() {
-        // given
-        Long userId = 1L;
-        Long groupId = 1L;
-        GroupErrorCode errorCode = GroupErrorCode.GROUP_NOT_FOUND;
-
-        given(groupReader.getById(groupId)).willThrow(new GroupException(errorCode));
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.generateEntryCode(userId, groupId))
@@ -137,8 +119,7 @@ public class GroupEntryServiceTest {
 
         given(entryCodeManager.getGroupId(entryCode)).willReturn(group.getId());
         given(groupReader.getById(group.getId())).willReturn(group);
-        given(groupMemberReader.getTopNMemberProfiles(eq(group.getId()), anyInt()))
-                .willReturn(profiles);
+        given(groupMemberReader.getTopNMemberProfiles(eq(group), anyInt())).willReturn(profiles);
 
         // when
         GroupSummaryRes actual = groupEntryService.getGroupSummary(entryCode);
@@ -201,7 +182,7 @@ public class GroupEntryServiceTest {
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
                 .given(entryCodeManager)
-                .validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
+                .validateCodeBelongsToGroup(group, entryInfo.entryCode());
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.joinGroup(userId, entryInfo))
@@ -295,7 +276,7 @@ public class GroupEntryServiceTest {
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
                 .given(entryCodeManager)
-                .validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
+                .validateCodeBelongsToGroup(group, entryInfo.entryCode());
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.requestParticipant(userId, entryInfo))
