@@ -77,7 +77,9 @@ include::{snippets}/group-controller-rest-docs-test/create-group_success/http-re
 include::{snippets}/group-controller-rest-docs-test/create-group_success/response-headers.adoc[]
 include::{snippets}/group-controller-rest-docs-test/create-group_success/http-response.adoc[]
 
-==== 3. 초대 코드 생성
+=== 그룹 가입 관련 API
+
+==== 1. 초대 코드 생성
 
 *Description* +
 
@@ -89,17 +91,17 @@ include::{snippets}/group-controller-rest-docs-test/create-group_success/http-re
 
 '''
 
-include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/http-request.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/http-request.adoc[]
 
 *Response* +
 
 '''
 
-include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/response-headers.adoc[]
-include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/response-fields.adoc[]
-include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/http-response.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/response-headers.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/response-fields.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/http-response.adoc[]
 
-==== 4. 그룹 대표 정보 조회
+==== 2. 그룹 대표 정보 조회
 
 *Description* +
 
@@ -114,19 +116,17 @@ include::{snippets}/group-controller-rest-docs-test/generate-entry-code_success/
 
 '''
 
-include::{snippets}/group-controller-rest-docs-test/get-group-summary_success/http-request.adoc[]
-include::{snippets}/group-controller-rest-docs-test/get-group-summary_success/query-parameters.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/get-group-summary_success/http-request.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/get-group-summary_success/query-parameters.adoc[]
 
 *Response* +
 
 '''
 
-include::{snippets}/group-controller-rest-docs-test/get-group-summary_success/http-response.adoc[]
-include::{snippets}/group-controller-rest-docs-test/get-group-summary_success/response-fields.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/get-group-summary_success/http-response.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/get-group-summary_success/response-fields.adoc[]
 
-=== 그룹 가입 관련 API
-
-==== 1. 그룹 가입
+==== 3. 그룹 가입
 
 *Description* +
 
@@ -149,7 +149,7 @@ include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/req
 include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/http-response.adoc[]
 include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/response-headers.adoc[]
 
-==== 2. 그룹 가입 요청
+==== 4. 그룹 가입 요청
 
 *Description* +
 

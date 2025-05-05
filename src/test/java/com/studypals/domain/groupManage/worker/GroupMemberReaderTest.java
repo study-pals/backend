@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupRole;
 
 /**
@@ -36,16 +37,17 @@ public class GroupMemberReaderTest {
     @Test
     void getTopNMemberProfiles_success() {
         // given
-        Long groupId = 1L;
+        Group group = Group.builder().id(1L).build();
         int limit = 2;
         List<GroupMemberProfileDto> profiles = List.of(
                 new GroupMemberProfileDto(1L, "name", "imageUrl url", GroupRole.LEADER),
                 new GroupMemberProfileDto(2L, "name2", "imageUrl url", GroupRole.MEMBER));
 
-        given(groupMemberRepository.findTopNMemberByJoinedAt(groupId, limit)).willReturn(profiles);
+        given(groupMemberRepository.findTopNMemberByJoinedAt(group.getId(), limit))
+                .willReturn(profiles);
 
         // when
-        List<GroupMemberProfileDto> actual = groupMemberReader.getTopNMemberProfiles(groupId, limit);
+        List<GroupMemberProfileDto> actual = groupMemberReader.getTopNMemberProfiles(group, limit);
 
         // then
         assertThat(actual).isEqualTo(profiles);

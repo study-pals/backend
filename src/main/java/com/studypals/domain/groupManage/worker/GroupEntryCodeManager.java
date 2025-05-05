@@ -1,11 +1,11 @@
 package com.studypals.domain.groupManage.worker;
 
-import org.springframework.stereotype.Component;
-
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
+import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryCode;
+import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 import com.studypals.global.utils.RandomUtils;
@@ -22,7 +22,7 @@ import com.studypals.global.utils.RandomUtils;
  * @author s0o0bn
  * @since 2025-04-15
  */
-@Component
+@Worker
 @RequiredArgsConstructor
 public class GroupEntryCodeManager {
     private static final int GROUP_ENTRY_CODE_LENGTH = 6;
@@ -44,13 +44,14 @@ public class GroupEntryCodeManager {
                 .getId();
     }
 
-    public void validateCodeBelongsToGroup(Long groupId, String entryCode) {
+    public void validateCodeBelongsToGroup(Group group, String entryCode) {
         Long actualGroupId = getGroupId(entryCode);
-        if (!actualGroupId.equals(groupId)) {
+        if (!actualGroupId.equals(group.getId())) {
             throw new GroupException(
                     GroupErrorCode.GROUP_CODE_INVALID,
                     String.format(
-                            "Invalid group code: expected groupId=%d, actual groupId=%d", groupId, actualGroupId));
+                            "Invalid group code: expected groupId=%d, actual groupId=%d",
+                            group.getId(), actualGroupId));
         }
     }
 

@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
-import com.studypals.domain.groupManage.entity.GroupEntryCode;
 import com.studypals.global.responses.ResponseCode;
 
 /**
@@ -68,47 +67,6 @@ public class GroupIntegrationTest extends AbstractGroupIntegrationTest {
         // then
         result.andExpect(status().isCreated()).andExpect(header().string("Location", matchesPattern("/groups/\\d+")));
         ;
-    }
-
-    @Test
-    @DisplayName("POST /groups/:id/entry-code")
-    void generateEntryCode_success() throws Exception {
-        // given
-        CreateUserVar user = createUser();
-        CreateGroupVar group = createGroup(user.getUserId(), "group", "tag");
-
-        // when
-        ResultActions result = mockMvc.perform(post("/groups/" + group.groupId() + "/entry-code")
-                .header("Authorization", "Bearer " + user.getAccessToken()));
-
-        // then
-        result.andExpect(status().isCreated())
-                .andExpect(header().string("Location", matchesPattern("/groups/\\d+/entry-code/[A-Z0-9]+")))
-                .andExpect(hasKey("code", ResponseCode.GROUP_ENTRY_CODE.getCode()))
-                .andExpect(jsonPath("$.data.code").isString());
-    }
-
-    @Test
-    @DisplayName("GET /groups/summary")
-    void getGroupSummary_success() throws Exception {
-        // given
-        CreateUserVar user = createUser();
-        CreateGroupVar group = createGroup(user.getUserId(), "group", "tag");
-        GroupEntryCode entryCode = new GroupEntryCode("entry-code", group.groupId());
-
-        entryCodeRedisRepository.save(entryCode);
-
-        // when
-        ResultActions result = mockMvc.perform(get("/groups/summary")
-                .param("entryCode", entryCode.getCode())
-                .header("Authorization", "Bearer " + user.getAccessToken()));
-
-        // then
-        result.andExpect(status().isOk())
-                .andExpect(hasKey("code", ResponseCode.GROUP_SUMMARY.getCode()))
-                .andExpect(jsonPath("$.data.id").value(group.groupId()))
-                .andExpect(jsonPath("$.data.name").value(group.name()))
-                .andExpect(jsonPath("$.data.profiles.length()").value(1));
     }
 
     private void createGroupTag(String name) {

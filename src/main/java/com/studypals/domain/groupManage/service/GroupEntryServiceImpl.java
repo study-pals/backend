@@ -1,14 +1,21 @@
 package com.studypals.domain.groupManage.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
 import com.studypals.domain.groupManage.dto.GroupEntryReq;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupSummaryRes;
 import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.worker.GroupAuthorityValidator;
 import com.studypals.domain.groupManage.worker.GroupEntryCodeManager;
 import com.studypals.domain.groupManage.worker.GroupEntryRequestWorker;
+import com.studypals.domain.groupManage.worker.GroupMemberReader;
 import com.studypals.domain.groupManage.worker.GroupMemberWorker;
 import com.studypals.domain.groupManage.worker.GroupReader;
 import com.studypals.domain.memberManage.entity.Member;
@@ -34,11 +41,37 @@ import com.studypals.global.exceptions.exception.GroupException;
 @Service
 @RequiredArgsConstructor
 public class GroupEntryServiceImpl implements GroupEntryService {
+    /** 그룹 요약 정보 조회 시 포함되는 그룹 멤버 수 */
+    private static final int GROUP_SUMMARY_MEMBER_COUNT = 5;
+
     private final MemberReader memberReader;
     private final GroupReader groupReader;
     private final GroupMemberWorker groupMemberWorker;
+    private final GroupMemberReader groupMemberReader;
+
+    private final GroupAuthorityValidator authorityValidator;
     private final GroupEntryCodeManager entryCodeManager;
     private final GroupEntryRequestWorker entryRequestWorker;
+
+    @Override
+    @Transactional(readOnly = true)
+    public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
+        authorityValidator.validate(userId, groupId);
+        String entryCode = entryCodeManager.generate(groupId);
+
+        return new GroupEntryCodeRes(groupId, entryCode);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GroupSummaryRes getGroupSummary(String entryCode) {
+        Long groupId = entryCodeManager.getGroupId(entryCode);
+        Group group = groupReader.getById(groupId);
+        List<GroupMemberProfileDto> profiles =
+                groupMemberReader.getTopNMemberProfiles(group, GROUP_SUMMARY_MEMBER_COUNT);
+
+        return GroupSummaryRes.of(group, profiles);
+    }
 
     @Override
     @Transactional
@@ -48,8 +81,9 @@ public class GroupEntryServiceImpl implements GroupEntryService {
             throw new GroupException(GroupErrorCode.GROUP_JOIN_FAIL, "can't join without permission");
         }
 
-        entryCodeManager.validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
-        return groupMemberWorker.createMember(userId, group).getId();
+        entryCodeManager.validateCodeBelongsToGroup(group, entryInfo.entryCode());
+        Member member = memberReader.getRef(userId);
+        return groupMemberWorker.createMember(member, group).getId();
     }
 
     @Override
@@ -57,7 +91,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     public Long requestParticipant(Long userId, GroupEntryReq entryInfo) {
         Group group = groupReader.getById(entryInfo.groupId());
         entryRequestWorker.validateNewRequestAvailable(group);
-        entryCodeManager.validateCodeBelongsToGroup(group.getId(), entryInfo.entryCode());
+        entryCodeManager.validateCodeBelongsToGroup(group, entryInfo.entryCode());
         Member member = memberReader.getRef(userId);
         return entryRequestWorker.createRequest(member, group).getId();
     }
