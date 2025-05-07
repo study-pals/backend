@@ -43,8 +43,7 @@ public class StudyCategoryReader {
     public List<StudyCategory> getListByMemberAndDay(Long userId, int dayBit) {
 
         return studyCategoryRepository.findByMemberId(userId).stream()
-                .filter(category -> ((category.getDayBelong() & dayBit) != 0)
-                        || category.getDayBelong().equals(0))
+                .filter(category -> ((category.getDayBelong() & dayBit) != 0) || category.getDayBelong() == 0)
                 .toList();
     }
 
