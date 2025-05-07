@@ -13,8 +13,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyTime;
+import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.testModules.testSupport.DataJpaSupport;
 
 /**
@@ -42,6 +42,7 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
 
     private StudyTime make(Member member, String temporaryName, LocalDate date, Long time) {
         return StudyTime.builder()
+                .studyType(StudyType.TEMPORARY)
                 .temporaryName(temporaryName)
                 .member(member)
                 .studiedDate(date)
@@ -49,11 +50,13 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
                 .build();
     }
 
-    private StudyCategory make(Member member, String name, Integer dayBelong) {
-        return StudyCategory.builder()
+    private StudyTime make(Member member, Long typeId, LocalDate date, Long time) {
+        return StudyTime.builder()
+                .studyType(StudyType.PERSONAL)
+                .typeId(typeId)
                 .member(member)
-                .name(name)
-                .dayBelong(dayBelong)
+                .studiedDate(date)
+                .time(time)
                 .build();
     }
 
@@ -68,7 +71,7 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
         // when & than
         assertThatThrownBy(() -> studyTimeRepository.save(studyTime))
                 .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessageContaining("must have value temporary name or category");
+                .hasMessageContaining("must have value temporary name or typeId");
     }
 
     @Test
@@ -137,53 +140,39 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
     }
 
     @Test
-    void findByMemberIdAndStudiedDateAndCategoryId_success() {
+    void findByStudyType_success() {
         // given
         Member member = insertMember();
-        LocalDate studiedDate = LocalDate.of(2024, 4, 1);
+        LocalDate march = LocalDate.of(2024, 3, 1);
+        Long typeId = 1L;
 
-        StudyCategory category = em.persist(make(member, "category", 127));
-        em.persist(StudyTime.builder()
-                .category(category)
-                .temporaryName(null)
-                .studiedDate(studiedDate)
-                .time(100L)
-                .member(member)
-                .build());
+        em.persist(make(member, typeId, march, 100L));
+
         em.flush();
         em.clear();
 
         // when
-        Optional<StudyTime> results = studyTimeRepository.findByMemberIdAndStudiedDateAndCategoryId(
-                member.getId(), studiedDate, category.getId());
+        Optional<StudyTime> result =
+                studyTimeRepository.findByStudyType(member.getId(), march, StudyType.PERSONAL.name(), typeId);
 
         // then
-        assertThat(results).isNotEmpty();
-        assertThat(results.get().getCategory().getName()).isEqualTo("category");
+        assertThat(result).isNotEmpty();
+        assertThat(result.get().getTime()).isEqualTo(100L);
     }
 
     @Test
-    void findByMemberIdAndStudiedDateAndTemporaryName_success() {
+    void findByTemporaryName_success() {
         // given
         Member member = insertMember();
-        LocalDate studiedDate = LocalDate.of(2024, 4, 1);
+        LocalDate march = LocalDate.of(2024, 3, 1);
+        String name = "temporary name";
 
-        em.persist(StudyTime.builder()
-                .category(null)
-                .temporaryName("name")
-                .studiedDate(studiedDate)
-                .time(100L)
-                .member(member)
-                .build());
+        em.persist(make(member, name, march, 100L));
+
         em.flush();
         em.clear();
 
         // when
-        Optional<StudyTime> results =
-                studyTimeRepository.findByMemberIdAndStudiedDateAndTemporaryName(member.getId(), studiedDate, "name");
-
-        // then
-        assertThat(results).isNotEmpty();
-        assertThat(results.get().getTemporaryName()).isEqualTo("name");
+        Optional<StudyTime> result = studyTimeRepository.findByTemporaryName(member.getId(), march, name);
     }
 }

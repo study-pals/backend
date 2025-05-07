@@ -67,7 +67,7 @@ public class StudyStatusWorker {
                 .id(member.getId())
                 .studying(true)
                 .startTime(dto.startTime())
-                .studyType(dto.type())
+                .studyType(dto.studyType())
                 .typeId(dto.typeId())
                 .temporaryName(dto.temporaryName())
                 .build();
@@ -98,7 +98,7 @@ public class StudyStatusWorker {
         return status.update()
                 .studying(true)
                 .startTime(dto.startTime())
-                .studyType(dto.type())
+                .studyType(dto.studyType())
                 .typeId(dto.typeId())
                 .temporaryName(dto.temporaryName())
                 .build();

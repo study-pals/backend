@@ -39,7 +39,7 @@ public class TemporarStudyRenderStrategy implements StudyRenderStrategy {
     public List<GetStudyRes> compose(List<GetStudyDto> studies, List<GetCategoryRes> unused) {
         return studies.stream()
                 .map(s -> GetStudyRes.builder()
-                        .type(getType())
+                        .studyType(getType())
                         .name(s.temporaryName())
                         .time(s.time())
                         .build())

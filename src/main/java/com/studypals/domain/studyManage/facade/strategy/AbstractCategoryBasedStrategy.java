@@ -41,7 +41,7 @@ public abstract class AbstractCategoryBasedStrategy implements StudyRenderStrate
         // map의 id 인 typeId에 대하여 categories의 id와 매핑시킵니다. 만약 map에 존재하지 않으면 0이 들어갑니다.
         return categories.stream()
                 .map(c -> GetStudyRes.builder()
-                        .type(getType())
+                        .studyType(getType())
                         .typeId(c.typeId())
                         .name(c.name())
                         .color(c.color())

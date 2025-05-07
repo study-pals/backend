@@ -28,7 +28,7 @@ import com.studypals.domain.memberManage.entity.Member;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         name = "study_time",
-        indexes = {@Index(name = "idx_member_studied", columnList = "member_id, studied_at")})
+        indexes = {@Index(name = "idx_member_studied", columnList = "member_id, studied_date")})
 public class StudyTime {
 
     @Id

@@ -5,9 +5,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
@@ -25,6 +27,7 @@ import com.studypals.domain.studyManage.api.StudyTimeController;
 import com.studypals.domain.studyManage.dto.GetDailyStudyRes;
 import com.studypals.domain.studyManage.dto.GetStudyRes;
 import com.studypals.domain.studyManage.dto.StudyList;
+import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.facade.StudyTimeFacade;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -45,21 +48,25 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
 
         List<GetStudyRes> response = List.of(
                 GetStudyRes.builder()
-                        .categoryId(1L)
+                        .studyType(StudyType.PERSONAL)
+                        .typeId(1L)
                         .name("자바")
                         .color("#FFCC00")
                         .description("자바 공부")
                         .time(120L)
                         .build(),
                 GetStudyRes.builder()
-                        .categoryId(null)
-                        .name(null)
+                        .studyType(StudyType.TEMPORARY)
                         .color(null)
                         .description(null)
-                        .temporaryName("백준 공부")
+                        .name("백준 공부")
                         .time(500L)
                         .build(),
-                GetStudyRes.builder().temporaryName("임시 카테고리").time(60L).build());
+                GetStudyRes.builder()
+                        .studyType(StudyType.TEMPORARY)
+                        .name("임시 카테고리")
+                        .time(60L)
+                        .build());
 
         Response<List<GetStudyRes>> expected =
                 CommonResponse.success(ResponseCode.STUDY_TIME_PARTIAL, response, "data of date");
@@ -82,14 +89,15 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("code").description("응답 코드"),
                                 fieldWithPath("status").description("응답 상태"),
                                 fieldWithPath("message").description("응답 메시지"),
-                                fieldWithPath("data[].categoryId")
-                                        .description("카테고리 ID")
+                                fieldWithPath("data[].studyType").description("타입 종류"),
+                                fieldWithPath("data[].typeId")
+                                        .description("해당 타입의 id")
                                         .optional(),
                                 fieldWithPath("data[].name")
                                         .description("카테고리 이름")
                                         .optional(),
-                                fieldWithPath("data[].temporaryName")
-                                        .description("임시 카테고리 이름")
+                                fieldWithPath("data[].name")
+                                        .description("카테고리 이름 / 혹은 TEMPORARY 시 임시 카테고리 이름")
                                         .optional(),
                                 fieldWithPath("data[].color")
                                         .description("카테고리 색상")
@@ -110,7 +118,9 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                         .startTime(LocalTime.of(9, 0))
                         .endTime(LocalTime.of(11, 0))
                         .memo("집중 잘 됨")
-                        .studies(List.of(new StudyList(null, "알고리즘", 60L), new StudyList(2L, null, 30L)))
+                        .studies(List.of(
+                                new StudyList(StudyType.TEMPORARY, null, "알고리즘", 60L),
+                                new StudyList(StudyType.PERSONAL, 2L, null, 30L)))
                         .build(),
                 GetDailyStudyRes.builder()
                         .studiedDate(LocalDate.of(2024, 4, 3))
@@ -118,9 +128,9 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                         .endTime(LocalTime.of(13, 0))
                         .memo("집중 잘 됨")
                         .studies(List.of(
-                                new StudyList(1L, null, 60L),
-                                new StudyList(2L, null, 30L),
-                                new StudyList(null, "토익", 30L)))
+                                new StudyList(StudyType.PERSONAL, 1L, null, 60L),
+                                new StudyList(StudyType.PERSONAL, 2L, null, 30L),
+                                new StudyList(StudyType.TEMPORARY, null, "토익", 30L)))
                         .build());
 
         Response<List<GetDailyStudyRes>> expectedResponse =
@@ -151,8 +161,9 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data[].startTime").description("해당 날짜 공부 시작 시간"),
                                 fieldWithPath("data[].endTime").description("해당 날짜 공부 종료 시간"),
                                 fieldWithPath("data[].memo").description("간단한 메모"),
-                                fieldWithPath("data[].studies[].categoryId")
-                                        .description("카테고리 ID (없으면 null)")
+                                fieldWithPath("data[].studies[].studyType").description("타입 종류"),
+                                fieldWithPath("data[].studies[].typeId")
+                                        .description("해당 타입의 ID (없으면 null)")
                                         .optional(),
                                 fieldWithPath("data[].studies[].temporaryName")
                                         .description("임시 카테고리 이름 (없으면 null)")

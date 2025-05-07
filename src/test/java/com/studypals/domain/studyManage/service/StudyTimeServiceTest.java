@@ -19,6 +19,7 @@ import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.PeriodDto;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyTime;
+import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.StudyTimeReader;
 import com.studypals.global.utils.TimeUtils;
 
@@ -77,7 +78,7 @@ class StudyTimeServiceTest {
         // given
         Long userId = 1L;
         LocalDate today = LocalDate.of(2025, 4, 14);
-        GetStudyDto dto = new GetStudyDto(1L, null, 3600L);
+        GetStudyDto dto = new GetStudyDto(StudyType.PERSONAL, 1L, null, 3600L);
 
         given(timeUtils.getToday()).willReturn(today);
         given(studyTimeReader.getListByMemberAndDate(userId, today)).willReturn(List.of(mockStudyTime));

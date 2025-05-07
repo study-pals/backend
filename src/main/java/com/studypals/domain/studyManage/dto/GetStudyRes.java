@@ -11,4 +11,4 @@ import com.studypals.domain.studyManage.entity.StudyType;
  * @since 2025-04-14
  */
 @Builder
-public record GetStudyRes(StudyType type, Long typeId, String name, String color, String description, Long time) {}
+public record GetStudyRes(StudyType studyType, Long typeId, String name, String color, String description, Long time) {}

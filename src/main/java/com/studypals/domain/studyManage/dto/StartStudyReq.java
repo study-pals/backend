@@ -13,7 +13,7 @@ import com.studypals.domain.studyManage.entity.StudyType;
  * @author jack8
  * @since 2025-04-13
  */
-public record StartStudyReq(StudyType type, Long typeId, String temporaryName, LocalTime startTime) {
+public record StartStudyReq(StudyType studyType, Long typeId, String temporaryName, LocalTime startTime) {
     @AssertTrue(message = "typeId 와 temporaryName 중 하나만 존재해야 합니다.")
     @JsonIgnore
     public boolean isValidExclusive() {
