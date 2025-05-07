@@ -10,4 +10,10 @@ import com.studypals.domain.studyManage.entity.StudyType;
  * @see GetDailyStudyDto
  * @since 2025-04-19
  */
-public record StudyList(StudyType type, Long typeId, String temporaryName, Long time) {}
+public record StudyList(StudyType type, Long typeId, String temporaryName, Long time) {
+    public StudyList {
+        if (time != null && time < 0) {
+            throw new IllegalArgumentException("study time must be non-negative");
+        }
+    }
+}

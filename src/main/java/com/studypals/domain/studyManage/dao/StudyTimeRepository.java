@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.studyManage.entity.StudyTime;
@@ -26,9 +28,33 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
     // tested
     List<StudyTime> findAllByMemberIdAndStudiedDateBetween(Long memberId, LocalDate start, LocalDate end);
 
-    Optional<StudyTime> findByMemberIdAndStudiedDateAndStudyTypeAndTypeId(
-            Long memberId, LocalDate studiedDate, StudyType type, Long typeId);
+    @Query(
+            value =
+                    """
+        SELECT * FROM study_time
+        WHERE member_id = :memberId
+        AND studied_Date = :studiedDate
+        AND study_type = :studyType
+        AND type_id = :typeId
+    """,
+            nativeQuery = true)
+    Optional<StudyTime> findByStudyType(
+            @Param("memberId") Long memberId,
+            @Param("studiedDate") LocalDate studiedDate,
+            @Param("studyType") StudyType studyType,
+            @Param("typeId") Long typeId);
 
-    Optional<StudyTime> findByMemberIdAndStudiedDateAndTemporaryName(
-            Long memberId, LocalDate studiedDate, String temporaryName);
+    @Query(
+            value =
+                    """
+        SELECT * FROM study_time
+        WHERE member_id = :memberId
+        AND studied_date = :studiedDate
+        AND temporary_name = :temporaryName
+    """,
+            nativeQuery = true)
+    Optional<StudyTime> findByTemporaryName(
+            @Param("memberId") Long memberId,
+            @Param("studiedDate") LocalDate studiedDate,
+            @Param("temporaryName") String temporaryName);
 }

@@ -30,8 +30,7 @@ public abstract class AbstractStudyPersistenceStrategy implements StudyTimePersi
 
     @Override
     public Optional<StudyTime> find(Member member, StudyStatus status, LocalDate studiedDate) {
-        return studyTimeRepository.findByMemberIdAndStudiedDateAndStudyTypeAndTypeId(
-                member.getId(), studiedDate, getType(), status.getTypeId());
+        return studyTimeRepository.findByStudyType(member.getId(), studiedDate, getType(), status.getTypeId());
     }
 
     @Override

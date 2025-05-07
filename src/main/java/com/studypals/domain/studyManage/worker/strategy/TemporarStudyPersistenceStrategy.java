@@ -40,8 +40,7 @@ public class TemporarStudyPersistenceStrategy implements StudyTimePersistenceStr
 
     @Override
     public Optional<StudyTime> find(Member member, StudyStatus status, LocalDate studiedDate) {
-        return studyTimeRepository.findByMemberIdAndStudiedDateAndTemporaryName(
-                member.getId(), studiedDate, status.getTemporaryName());
+        return studyTimeRepository.findByTemporaryName(member.getId(), studiedDate, status.getTemporaryName());
     }
 
     @Override

@@ -50,7 +50,7 @@ public class StudyTime {
     @Column(name = "temporary_name", nullable = true, length = 255)
     private String temporaryName;
 
-    @Column(name = "studied_at", nullable = false)
+    @Column(name = "studied_date", nullable = false)
     private LocalDate studiedDate;
 
     @Column(name = "time", nullable = false)

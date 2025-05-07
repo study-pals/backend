@@ -20,6 +20,10 @@ import com.studypals.domain.studyManage.entity.StudyType;
  */
 public interface StudyRenderStrategy {
 
+    /**
+     * studyType에 대한 정보를 반환합니다. 해당 전략 패턴이 지원하는 타입에 대한 정보입니다.
+     * @return 지원하는 StudyType 정보
+     */
     StudyType getType();
     /**
      * {@code  StudyRenderStrategyFactory} 에서 List 주입된 객체들에 대하여, 어떤 객체를 반환할지 판별하기 위해
@@ -30,12 +34,14 @@ public interface StudyRenderStrategy {
     boolean supports(StudyType type);
 
     /**
-     * studies와 categories 의 정보를 합칩니다. studies는 공부한 데이터가 들어가 있으며 categories는 해당
-     * 카테고리에 대한 정보가 포함되어 있습니다. studies에 포함된 카테고리 id 및 type을 기반으로,
-     * 적절한 카테고리 데이터를 매칭시켜 반환합니다.
-     * @param studies 공부 시간에 대한 정보. type, typeId, studyTime 등의 데이터
-     * @param categories 카테고리 정보. 특정 날짜에 대한 모든 카테고리 데이터가 포함되어 있습니다.
-     * @return 두 파라미터의 값을 id에 대해 매핑하여 합친 데이터
+     * studies와 categories의 정보를 합칩니다.
+     * studies는 공부한 데이터가 들어가 있으며, categories는 해당 카테고리에 대한 정보가 포함되어 있습니다.
+     * studies에 포함된 카테고리의 id 및 type을 기반으로, 적절한 카테고리 데이터를 매칭시켜 반환합니다.
+     *
+     * @param studies 공부 시간에 대한 정보 목록 (null이 될 수 없으며, 비어 있을 수는 있음)
+     * @param categories 카테고리 정보 목록 (null이 될 수 없으며, 비어 있을 수는 있음)
+     * @return 두 리스트를 id 기준으로 매핑하여 합친 데이터 목록. 일치하는 항목이 없으면 빈 리스트 반환.
+     * @throws NullPointerException studies 또는 categories가 null인 경우
      */
     List<GetStudyRes> compose(List<GetStudyDto> studies, List<GetCategoryRes> categories);
 }
