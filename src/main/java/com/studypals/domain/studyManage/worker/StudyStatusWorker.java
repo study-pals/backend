@@ -35,6 +35,11 @@ public class StudyStatusWorker {
     private final DailyStudyInfoRepository dailyStudyInfoRepository;
     private final TimeUtils timeUtils;
 
+    /**
+     * id에 대하여 studyStatus 를 redis로 부터 검색합니다.
+     * @param id 검색하고자 하는 studyStatus의 id 이자, user의 id
+     * @return Optional - study status
+     */
     public Optional<StudyStatus> find(Long id) {
         return studyStatusRedisRepository.findById(id);
     }
@@ -55,10 +60,9 @@ public class StudyStatusWorker {
         try {
             dailyStudyInfoRepository.save(summary);
         } catch (Exception e) {
-            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL);
+            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL, "fail to create daily study info");
         }
 
-        // todo : mapper class 로 이동?
         return StudyStatus.builder()
                 .id(member.getId())
                 .studying(true)

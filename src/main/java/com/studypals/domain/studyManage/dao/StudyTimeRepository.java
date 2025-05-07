@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.studyManage.entity.StudyTime;
-import com.studypals.domain.studyManage.entity.StudyType;
 
 /**
  * {@link StudyTime} 에 대한 JPA DAO 클래스입니다.
@@ -41,7 +40,7 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
     Optional<StudyTime> findByStudyType(
             @Param("memberId") Long memberId,
             @Param("studiedDate") LocalDate studiedDate,
-            @Param("studyType") StudyType studyType,
+            @Param("studyType") String studyType,
             @Param("typeId") Long typeId);
 
     @Query(

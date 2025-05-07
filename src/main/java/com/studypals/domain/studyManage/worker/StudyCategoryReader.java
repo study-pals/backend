@@ -35,7 +35,7 @@ public class StudyCategoryReader {
     }
 
     /**
-     * 특정 날짜의, 해당 유저의 카테고리를 가져오는 메서드
+     * 특정 날짜의, 해당 유저의 카테고리를 가져오는 메서드. dayBelong이 0인 경우 주간 카테고리이므로 해당 데이터도 가져온다.
      * @param userId 검색할 유저의 아이디
      * @param dayBit 검색할 요일 / 비트 / 가령 수요일이면 0b0000100 (4) 로 정의
      * @return 카테고리 리스트
@@ -43,7 +43,8 @@ public class StudyCategoryReader {
     public List<StudyCategory> getListByMemberAndDay(Long userId, int dayBit) {
 
         return studyCategoryRepository.findByMemberId(userId).stream()
-                .filter(category -> (category.getDayBelong() & dayBit) != 0)
+                .filter(category -> ((category.getDayBelong() & dayBit) != 0)
+                        || category.getDayBelong().equals(0))
                 .toList();
     }
 

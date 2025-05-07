@@ -35,7 +35,7 @@ public abstract class AbstractCategoryBasedStrategy implements StudyRenderStrate
     public List<GetStudyRes> compose(List<GetStudyDto> studies, List<GetCategoryRes> categories) {
         // studies 를 typeId / time 으로 매핑하여 저장합니다.
         Map<Long, Long> timeMap = studies.stream()
-                .filter(dto -> dto.type() == getType() && dto.typeId() != null)
+                .filter(dto -> dto.studyType() == getType() && dto.typeId() != null)
                 .collect(Collectors.toMap(GetStudyDto::typeId, GetStudyDto::time));
 
         // map의 id 인 typeId에 대하여 categories의 id와 매핑시킵니다. 만약 map에 존재하지 않으면 0이 들어갑니다.

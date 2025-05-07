@@ -92,7 +92,7 @@ public class StudySessionServiceImpl implements StudySessionService {
         // 2) DB에 공부시간 및 종료 시간 upsert
         Member member = memberReader.getRef(userId);
         studySessionWorker.upsert(member, status, today, durationInSec);
-        dailyInfoWriter.updateEndtime(userId, today, endTime);
+        dailyInfoWriter.updateEndtime(member, today, endTime);
 
         // 3) 레디스 상태 값 리셋
         status = studyStatusWorker.resetStatus(status, durationInSec);

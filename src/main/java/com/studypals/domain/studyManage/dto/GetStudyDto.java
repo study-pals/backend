@@ -8,4 +8,4 @@ import com.studypals.domain.studyManage.entity.StudyType;
  * @author jack8
  * @since 2025-04-14
  */
-public record GetStudyDto(StudyType type, Long typeId, String temporaryName, Long time) {}
+public record GetStudyDto(StudyType studyType, Long typeId, String temporaryName, Long time) {}

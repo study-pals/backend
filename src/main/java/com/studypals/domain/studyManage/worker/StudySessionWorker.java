@@ -28,6 +28,8 @@ public class StudySessionWorker {
     private final StudyTimeRepository studyTimeRepository;
     private final StudyTimePersistenceStrategyFactory strategyFactory;
 
+    private static final Long TOKEN_CALCULATE_VALUE = 60L;
+
     /**
      * studyTime 을 최신화하는 메서드. category에 대한 공부인지, temporaryName 에 대한 공부인지에 따라
      * 갈린다.
@@ -55,6 +57,6 @@ public class StudySessionWorker {
     }
 
     private Long calculateToken(Long time) {
-        return time / 60; // 어떤 값이 올지 몰라서 일단 1분당 토큰 1개 / 나중에 확정되면 숫자를 따로 뺄 예정
+        return time / TOKEN_CALCULATE_VALUE;
     }
 }

@@ -16,4 +16,9 @@ import com.studypals.domain.studyManage.entity.StudyType;
  * @since 2025-04-13
  */
 public record StartStudyRes(
-        boolean studying, LocalTime startTime, Long studyTime, StudyType type, Long typeId, String temporaryName) {}
+        boolean studying,
+        LocalTime startTime,
+        Long studyTime,
+        StudyType studyType,
+        Long typeId,
+        String temporaryName) {}

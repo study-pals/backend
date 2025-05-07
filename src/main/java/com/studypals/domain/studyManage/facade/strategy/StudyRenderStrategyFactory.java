@@ -58,9 +58,9 @@ public class StudyRenderStrategyFactory {
                                             "maybe, StudyType value invalid so can't find strategy object"));
                             // 위에서 찾은 type에 대해 studies에서 이를 찾고 리스트로 변환
                             List<GetStudyDto> filtered = studies.stream()
-                                    .filter(d -> d.type() == type)
+                                    .filter(d -> d.studyType() == type)
                                     .toList();
-                            // infoByType에서 위에서 찾은 type(map의 id)를 검색/반환
+                            // infoByType에서 위에서 찾은 studyType(map의 id)를 검색/반환
                             List<GetCategoryRes> categories = infoByType.getOrDefault(type, List.of());
                             // 각 전략 객체의 compose를 호출/스트림으로 변환
                             return s.compose(filtered, categories).stream();

@@ -5,6 +5,7 @@ import java.time.LocalTime;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dao.DailyStudyInfoRepository;
 import com.studypals.domain.studyManage.entity.DailyStudyInfo;
 import com.studypals.global.annotations.Worker;
@@ -27,14 +28,15 @@ public class DailyInfoWriter {
      * daily info 엔티티에서 종료 시간을 최신화 합니다. 종료 시간은 가장 마지막에 종료되는 시각이므로, 최신화가 되어야 합니다.
      * 종료 시간이 들어가지 않아있는 경우, 아침 6시로 간주하여야 합니다.
      * <p> NOT TESTED / simple logic </p>
-     * @param userId 갱신할 user 의 id
+     * @param member 갱신할 user 의 엔티티
      * @param studiedDate 공부 날짜(검색을 위한)
      * @param endedAt 종료 시간(갱신을 위한)
      */
-    public void updateEndtime(Long userId, LocalDate studiedDate, LocalTime endedAt) {
+    public void updateEndtime(Member member, LocalDate studiedDate, LocalTime endedAt) {
         DailyStudyInfo summary = dailyStudyInfoRepository
-                .findByMemberIdAndStudiedDate(userId, studiedDate)
-                .orElseThrow(() -> new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL));
+                .findByMemberIdAndStudiedDate(member.getId(), studiedDate)
+                .orElseThrow(() -> new StudyException(
+                        StudyErrorCode.STUDY_TIME_END_FAIL, "can't update end time in" + "[DailyInfoWriter]"));
 
         summary.setEndTime(endedAt);
     }
