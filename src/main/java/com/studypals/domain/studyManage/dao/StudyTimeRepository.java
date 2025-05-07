@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.studyManage.entity.StudyTime;
+import com.studypals.domain.studyManage.entity.StudyType;
 
 /**
  * {@link StudyTime} 에 대한 JPA DAO 클래스입니다.
@@ -25,9 +26,8 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
     // tested
     List<StudyTime> findAllByMemberIdAndStudiedDateBetween(Long memberId, LocalDate start, LocalDate end);
 
-    // tested
-    Optional<StudyTime> findByMemberIdAndStudiedDateAndCategoryId(
-            Long memberId, LocalDate studiedDate, Long categoryId);
+    Optional<StudyTime> findByMemberIdAndStudiedDateAndStudyTypeAndTypeId(
+            Long memberId, LocalDate studiedDate, StudyType type, Long typeId);
 
     Optional<StudyTime> findByMemberIdAndStudiedDateAndTemporaryName(
             Long memberId, LocalDate studiedDate, String temporaryName);

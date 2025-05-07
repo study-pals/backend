@@ -3,6 +3,7 @@ package com.studypals.domain.studyManage.dto;
 import java.time.LocalTime;
 
 import com.studypals.domain.studyManage.entity.StudyStatus;
+import com.studypals.domain.studyManage.entity.StudyType;
 
 /**
  * 공부 시작에 대한 dto 입니다. controller -> service
@@ -15,4 +16,4 @@ import com.studypals.domain.studyManage.entity.StudyStatus;
  * @since 2025-04-13
  */
 public record StartStudyRes(
-        boolean studying, LocalTime startTime, Long studyTime, Long categoryId, String temporaryName) {}
+        boolean studying, LocalTime startTime, Long studyTime, StudyType type, Long typeId, String temporaryName) {}
