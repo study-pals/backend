@@ -27,6 +27,7 @@ import com.studypals.domain.studyManage.api.CategoryController;
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
 import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
+import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.service.StudyCategoryService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -139,8 +140,8 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
     void read_success() throws Exception {
         // given
         List<GetCategoryRes> list = List.of(
-                new GetCategoryRes(1L, "백엔드", "#FFAA00", 12, "Spring 공부"),
-                new GetCategoryRes(2L, "알고리즘", "#00CCFF", 14, "문제풀이"));
+                new GetCategoryRes(StudyType.PERSONAL, 1L, "백준", "#FFAA00", 12, "Spring 공부"),
+                new GetCategoryRes(StudyType.PERSONAL, 2L, "알고리즘", "#00CCFF", 14, "문제풀이"));
         Response<List<GetCategoryRes>> expected = CommonResponse.success(ResponseCode.STUDY_CATEGORY_LIST, list);
 
         given(studyCategoryService.getUserCategory(any())).willReturn(list);
@@ -155,7 +156,8 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                         httpRequest(),
                         httpResponse(),
                         responseFields(
-                                fieldWithPath("data[].categoryId").description("카테고리 ID"),
+                                fieldWithPath("data[].studyType").description("카테고리 테이블 정보(타입)"),
+                                fieldWithPath("data[].typeId").description("연관 테이블 타입 ID"),
                                 fieldWithPath("data[].name").description("카테고리 이름"),
                                 fieldWithPath("data[].color").description("색상 코드"),
                                 fieldWithPath("data[].dayBelong").description("요일 소속값"),

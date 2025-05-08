@@ -18,6 +18,7 @@ import com.studypals.domain.studyManage.dao.DailyStudyInfoRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.entity.StudyStatus;
+import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
 import com.studypals.global.utils.TimeUtils;
@@ -75,17 +76,17 @@ class StudyStatusWorkerTest {
         // given
         Long userId = 1L;
         LocalDate today = LocalDate.of(2025, 1, 1);
-        StartStudyReq req = new StartStudyReq(100L, null, LocalTime.of(9, 30));
-        given(memberReader.get(userId)).willReturn(mockMember);
+        StartStudyReq req = new StartStudyReq(StudyType.PERSONAL, 1L, null, LocalTime.of(9, 30));
         given(timeUtils.getToday()).willReturn(today);
+        given(mockMember.getId()).willReturn(userId);
 
         // when
-        StudyStatus result = studyStatusWorker.firstStatus(userId, req);
+        StudyStatus result = studyStatusWorker.firstStatus(mockMember, req);
 
         // then
         assertThat(result.getId()).isEqualTo(userId);
         assertThat(result.getStartTime()).isEqualTo(req.startTime());
-        assertThat(result.getCategoryId()).isEqualTo(req.categoryId());
+        assertThat(result.getTypeId()).isEqualTo(req.typeId());
         assertThat(result.getTemporaryName()).isEqualTo(req.temporaryName());
         assertThat(result.isStudying()).isTrue();
     }
@@ -96,7 +97,7 @@ class StudyStatusWorkerTest {
         StudyStatus original = StudyStatus.builder()
                 .id(1L)
                 .studyTime(100L)
-                .categoryId(10L)
+                .studyType(StudyType.TEMPORARY)
                 .temporaryName("test")
                 .startTime(LocalTime.of(10, 0))
                 .studying(true)
@@ -108,7 +109,6 @@ class StudyStatusWorkerTest {
         // then
         assertThat(updated.isStudying()).isFalse();
         assertThat(updated.getStudyTime()).isEqualTo(300L);
-        assertThat(updated.getCategoryId()).isNull();
         assertThat(updated.getTemporaryName()).isNull();
         assertThat(updated.getStartTime()).isNull();
     }
@@ -116,7 +116,7 @@ class StudyStatusWorkerTest {
     @Test
     void restartStatus_success() {
         // given
-        StartStudyReq req = new StartStudyReq(null, "focus", LocalTime.of(9, 30));
+        StartStudyReq req = new StartStudyReq(StudyType.TEMPORARY, null, "focus", LocalTime.of(9, 30));
         StudyStatus current =
                 StudyStatus.builder().id(1L).studyTime(120L).studying(false).build();
 
@@ -126,7 +126,7 @@ class StudyStatusWorkerTest {
         // then
         assertThat(restarted.isStudying()).isTrue();
         assertThat(restarted.getStartTime()).isEqualTo(req.startTime());
-        assertThat(restarted.getCategoryId()).isNull();
+        assertThat(restarted.getTypeId()).isNull();
         assertThat(restarted.getTemporaryName()).isEqualTo("focus");
     }
 

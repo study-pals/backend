@@ -88,13 +88,13 @@ public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(
             HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        return fail("ERE-01", "Unsupported media type", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        return fail("ERE-01", "Unsupported media studyType", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @Override
     protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(
             HttpMediaTypeNotAcceptableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        return fail("ERE-02", "Not acceptable media type", HttpStatus.NOT_ACCEPTABLE);
+        return fail("ERE-02", "Not acceptable media studyType", HttpStatus.NOT_ACCEPTABLE);
     }
 
     @Override
@@ -145,7 +145,7 @@ public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleTypeMismatch(
             TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        return fail("ERE-10", "Parameter type mismatch", HttpStatus.BAD_REQUEST);
+        return fail("ERE-10", "Parameter studyType mismatch", HttpStatus.BAD_REQUEST);
     }
 
     // EVD - 검증 실패

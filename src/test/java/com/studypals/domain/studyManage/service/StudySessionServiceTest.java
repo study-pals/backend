@@ -14,10 +14,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyStatus;
+import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.DailyInfoWriter;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
@@ -42,6 +45,12 @@ class StudySessionServiceTest {
     private DailyInfoWriter dailyInfoWriter; // no delete
 
     @Mock
+    private MemberReader memberReader;
+
+    @Mock
+    private Member mockMember;
+
+    @Mock
     private StudyTimeMapper mapper;
 
     @Mock
@@ -54,20 +63,23 @@ class StudySessionServiceTest {
     void startStudy_success_firstCategory() {
         // given
         Long userId = 1L;
-        Long categoryId = 2L;
+        Long typeId = 2L;
         LocalTime time = LocalTime.of(10, 0);
-        StartStudyReq req = new StartStudyReq(categoryId, null, time);
+        StudyType type = StudyType.PERSONAL;
+        StartStudyReq req = new StartStudyReq(type, typeId, null, time);
 
         StudyStatus status = StudyStatus.builder()
                 .id(userId)
-                .categoryId(categoryId)
+                .studyType(type)
+                .typeId(typeId)
                 .startTime(time)
                 .studying(true)
                 .build();
-        StartStudyRes expected = new StartStudyRes(true, time, 0L, categoryId, null);
+        StartStudyRes expected = new StartStudyRes(true, time, 0L, type, typeId, null);
 
+        given(memberReader.getRef(userId)).willReturn(mockMember);
         given(studyStatusWorker.find(userId)).willReturn(Optional.empty());
-        given(studyStatusWorker.firstStatus(userId, req)).willReturn(status);
+        given(studyStatusWorker.firstStatus(mockMember, req)).willReturn(status);
         given(mapper.toDto(status)).willReturn(expected);
 
         // when
@@ -82,18 +94,20 @@ class StudySessionServiceTest {
     void startStudy_success_restart() {
         // given
         Long userId = 1L;
-        Long categoryId = 3L;
+        Long typeId = 3L;
         LocalTime time = LocalTime.of(9, 30);
-        StartStudyReq req = new StartStudyReq(categoryId, null, time);
+        StudyType type = StudyType.PERSONAL;
+        StartStudyReq req = new StartStudyReq(type, typeId, null, time);
 
         StudyStatus oldStatus = StudyStatus.builder().id(userId).studying(false).build();
         StudyStatus newStatus = StudyStatus.builder()
                 .id(userId)
-                .categoryId(categoryId)
+                .studyType(type)
+                .typeId(typeId)
                 .startTime(time)
                 .studying(true)
                 .build();
-        StartStudyRes expected = new StartStudyRes(true, time, 0L, categoryId, null);
+        StartStudyRes expected = new StartStudyRes(true, time, 0L, type, typeId, null);
 
         given(studyStatusWorker.find(userId)).willReturn(Optional.of(oldStatus));
         given(studyStatusWorker.restartStatus(oldStatus, req)).willReturn(newStatus);
@@ -114,12 +128,14 @@ class StudySessionServiceTest {
         LocalTime start = LocalTime.of(10, 0);
         LocalTime end = LocalTime.of(13, 0);
         Long duration = Duration.between(start, end).toSeconds();
+        StudyType type = StudyType.PERSONAL;
 
         StudyStatus status = StudyStatus.builder()
                 .id(userId)
+                .studyType(type)
+                .typeId(1L)
                 .startTime(start)
                 .studying(true)
-                .categoryId(1L)
                 .studyTime(300L)
                 .build();
         StudyStatus updated = StudyStatus.builder()
@@ -128,6 +144,7 @@ class StudySessionServiceTest {
                 .studyTime(300L + duration)
                 .build();
 
+        given(memberReader.getRef(userId)).willReturn(mockMember);
         given(timeUtils.getToday()).willReturn(today);
         given(studyStatusWorker.find(userId)).willReturn(Optional.of(status));
         willDoNothing().given(studyStatusWorker).validStatus(status);
@@ -138,7 +155,7 @@ class StudySessionServiceTest {
 
         // then
         assertThat(result).isEqualTo(duration);
-        then(studySessionWorker).should().upsert(userId, status, today, duration);
+        then(studySessionWorker).should().upsert(mockMember, status, today, duration);
         then(studyStatusWorker).should().saveStatus(updated);
     }
 
@@ -149,14 +166,16 @@ class StudySessionServiceTest {
         LocalTime start = LocalTime.of(23, 0);
         LocalTime end = LocalTime.of(2, 0);
 
-        long duration = Duration.between(start, LocalTime.MIDNIGHT).toSeconds()
+        long duration = Duration.between(start, LocalTime.MAX).toSeconds()
+                + 1
                 + Duration.between(LocalTime.MIN, end).toSeconds();
 
         StudyStatus status = StudyStatus.builder()
                 .id(userId)
+                .studyType(StudyType.PERSONAL)
+                .typeId(1L)
                 .startTime(start)
                 .studying(true)
-                .categoryId(1L)
                 .studyTime(100L)
                 .build();
         StudyStatus updated = StudyStatus.builder()
@@ -165,6 +184,7 @@ class StudySessionServiceTest {
                 .studyTime(100L + duration)
                 .build();
 
+        given(memberReader.getRef(userId)).willReturn(mockMember);
         given(timeUtils.getToday()).willReturn(today);
         given(studyStatusWorker.find(userId)).willReturn(Optional.of(status));
         willDoNothing().given(studyStatusWorker).validStatus(status);
@@ -173,7 +193,7 @@ class StudySessionServiceTest {
         Long result = studySessionService.endStudy(userId, end);
 
         assertThat(result).isEqualTo(duration);
-        then(studySessionWorker).should().upsert(userId, status, today, duration);
+        then(studySessionWorker).should().upsert(mockMember, status, today, duration);
         then(studyStatusWorker).should().saveStatus(updated);
     }
 }

@@ -57,6 +57,23 @@ class StudyCategoryReaderTest {
     }
 
     @Test
+    void getListByMemberAndDay_success_weeklyPlanReturn() {
+        // given
+        Long userId = 1L;
+        int dayBit = 0b0100; // 수요일만 선택된 비트
+        given(mockCategory1.getDayBelong()).willReturn(0b0110); // 화, 수 포함
+        given(mockCategory2.getDayBelong()).willReturn(0b0000000); // 주간 플랜
+
+        given(studyCategoryRepository.findByMemberId(userId)).willReturn(List.of(mockCategory1, mockCategory2));
+
+        // when
+        List<StudyCategory> result = studyCategoryReader.getListByMemberAndDay(userId, dayBit);
+
+        // then
+        assertThat(result).containsExactlyInAnyOrder(mockCategory1, mockCategory2);
+    }
+
+    @Test
     void getAndValidate_fail_notOwner() {
         // given
         Long userId = 1L;

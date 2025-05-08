@@ -11,21 +11,9 @@ import lombok.*;
 import com.studypals.domain.memberManage.entity.Member;
 
 /**
- * 공부 시간에 대한 엔티티입니다. JPA 에 의해 관리됩니다.
- * <p>
- * 다음과 같은 필드를 가지고 있습니다.
- * <pre>
- *     {@code
- * Long id;
- * Member member;
- * StudyCategory studyCategory;
- * LocalDate studiedDate;
- * Long time;
- *     }
- * </pre>
- * temporaryName 은 사용자가 category 에 포함되지 않은 내용을
- * 임시로 사용할 때 부여되는 이름입니다. 만약 category 가 null 인 경우, 해당
- * 이름을 반환합니다. 둘 중 하나의 값이 존재해야 한다는 강제성을 부여하였습니다.
+ * 공부 시간을 나타내는 JPA entity 클래스입니다.
+ * study_time 테이블과 매핑됩니다.
+ *
  * <p><b>주요 생성자:</b><br>
  * {@code Builder}  <br>
  * builder 패턴을 통해 생성합니다. <br>
@@ -40,7 +28,7 @@ import com.studypals.domain.memberManage.entity.Member;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         name = "study_time",
-        indexes = {@Index(name = "idx_member_studied_category", columnList = "member_id, studied_at, category_id")})
+        indexes = {@Index(name = "idx_member_studied", columnList = "member_id, studied_date")})
 public class StudyTime {
 
     @Id
@@ -52,14 +40,17 @@ public class StudyTime {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = true)
-    private StudyCategory category;
+    @Column(name = "study_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private StudyType studyType;
+
+    @Column(name = "type_id")
+    private Long typeId;
 
     @Column(name = "temporary_name", nullable = true, length = 255)
     private String temporaryName;
 
-    @Column(name = "studied_at", nullable = false)
+    @Column(name = "studied_date", nullable = false)
     private LocalDate studiedDate;
 
     @Column(name = "time", nullable = false)
@@ -69,8 +60,8 @@ public class StudyTime {
     @PrePersist
     @PreUpdate
     private void validateTemporaryOrCategory() {
-        if (this.temporaryName == null && this.category == null) {
-            throw new DataIntegrityViolationException("must have value temporary name or category");
+        if (this.temporaryName == null && this.typeId == null) {
+            throw new DataIntegrityViolationException("must have value temporary name or typeId");
         }
     }
 

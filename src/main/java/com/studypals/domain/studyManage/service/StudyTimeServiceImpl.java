@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import com.studypals.domain.studyManage.dto.GetDailyStudyDto;
 import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.PeriodDto;
-import com.studypals.domain.studyManage.dto.StudyList;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.worker.StudyTimeReader;
@@ -47,7 +46,6 @@ public class StudyTimeServiceImpl implements StudyTimeService {
 
     private final TimeUtils timeUtils;
     private final StudyTimeMapper studyTimeMapper;
-
     private final StudyTimeReader studyTimeReader;
 
     @Override
@@ -73,14 +71,9 @@ public class StudyTimeServiceImpl implements StudyTimeService {
                 .entrySet()
                 .stream() // entry 로 변환
                 .map(entry -> new GetDailyStudyDto(
-                        entry.getKey(), // entry 의 키는 그룹화 한 기준
-                        entry.getValue().stream() // 값은 해당 객체
-                                .map(st -> new StudyList(
-                                        st.getCategory() != null // 카테고리가 null 이면 temporaryName 을 써야 하므로
-                                                ? st.getCategory().getId()
-                                                : null,
-                                        st.getTemporaryName(),
-                                        st.getTime()))
+                        entry.getKey(),
+                        entry.getValue().stream()
+                                .map(studyTimeMapper::toStudyDto)
                                 .toList()))
                 .sorted(Comparator.comparing(GetDailyStudyDto::studiedDate)) // 공부 날짜에 따라 정렬
                 .toList();

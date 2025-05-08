@@ -23,6 +23,9 @@ import lombok.Getter;
  * LocalTime startTime;
  * Long studyTime;
  * Long expiration;
+ * StudyType studyType;
+ * Long typeId;
+ * String temporaryName;
  *     }
  * </pre>
  *
@@ -45,7 +48,9 @@ public class StudyStatus {
     @Builder.Default
     private Long studyTime = 0L;
 
-    private Long categoryId;
+    private StudyType studyType;
+
+    private Long typeId;
 
     private String temporaryName;
 

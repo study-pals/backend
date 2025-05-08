@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
@@ -55,13 +57,15 @@ public class StudySessionServiceImpl implements StudySessionService {
     private final StudySessionWorker studySessionWorker;
     private final StudyStatusWorker studyStatusWorker;
     private final DailyInfoWriter dailyInfoWriter;
+    private final MemberReader memberReader;
 
     @Override
     @Transactional
     public StartStudyRes startStudy(Long userId, StartStudyReq dto) {
 
+        Member member = memberReader.getRef(userId);
         // status 정보 가져오기 - 존재하지 않으면 최초 양식 생성
-        StudyStatus status = studyStatusWorker.find(userId).orElseGet(() -> studyStatusWorker.firstStatus(userId, dto));
+        StudyStatus status = studyStatusWorker.find(userId).orElseGet(() -> studyStatusWorker.firstStatus(member, dto));
 
         if (!status.isStudying()) {
             status = studyStatusWorker.restartStatus(status, dto);
@@ -86,8 +90,9 @@ public class StudySessionServiceImpl implements StudySessionService {
         Long durationInSec = getTimeDuration(status.getStartTime(), endTime);
 
         // 2) DB에 공부시간 및 종료 시간 upsert
-        studySessionWorker.upsert(userId, status, today, durationInSec);
-        dailyInfoWriter.updateEndtime(userId, today, endTime);
+        Member member = memberReader.getRef(userId);
+        studySessionWorker.upsert(member, status, today, durationInSec);
+        dailyInfoWriter.updateEndtime(member, today, endTime);
 
         // 3) 레디스 상태 값 리셋
         status = studyStatusWorker.resetStatus(status, durationInSec);
@@ -104,12 +109,12 @@ public class StudySessionServiceImpl implements StudySessionService {
      * @return 초 단위 공부 시간
      */
     private Long getTimeDuration(LocalTime start, LocalTime end) {
-        if (start.isAfter(end)) {
+        if (!start.isAfter(end)) {
             return Duration.between(start, end).toSeconds();
         }
 
         // startTime 이 00:00 전이고, endTime 이 이후인 경우
-        long startToMidnight = Duration.between(start, LocalTime.MIDNIGHT).toSeconds();
+        long startToMidnight = Duration.between(start, LocalTime.MAX).toSeconds() + 1L;
         long midnightToEnd = Duration.between(LocalTime.MIN, end).toSeconds();
         return startToMidnight + midnightToEnd;
     }

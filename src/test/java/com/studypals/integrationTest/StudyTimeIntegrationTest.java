@@ -50,10 +50,11 @@ public class StudyTimeIntegrationTest extends IntegrationSupport {
 
         jdbcTemplate.update(
                 """
-                INSERT INTO study_time (id, category_id, member_id, time, studied_at)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO study_time (id, study_type, type_id, member_id, time, studied_date)
+                VALUES (?, ?, ?, ?, ?, ?)
     """,
                 1L,
+                "PERSONAL",
                 1L,
                 user.getUserId(),
                 120L,
@@ -68,7 +69,7 @@ public class StudyTimeIntegrationTest extends IntegrationSupport {
         // then
         result.andExpect(status().isOk())
                 .andExpect(hasKey("code", ResponseCode.STUDY_TIME_PARTIAL.getCode()))
-                .andExpect(jsonPath("$.data[0].categoryId").value(1L))
+                .andExpect(jsonPath("$.data[0].typeId").value(1L))
                 .andExpect(jsonPath("$.data[0].name").value("자바"))
                 .andExpect(jsonPath("$.data[0].time").value(120L));
     }
@@ -98,10 +99,11 @@ public class StudyTimeIntegrationTest extends IntegrationSupport {
         // study_time (카테고리 기반)
         jdbcTemplate.update(
                 """
-                INSERT INTO study_time (id, category_id, member_id, time, studied_at)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO study_time (id, study_type, type_id, member_id, time, studied_date)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 1L,
+                "PERSONAL",
                 100L,
                 userId,
                 60L,
@@ -110,10 +112,11 @@ public class StudyTimeIntegrationTest extends IntegrationSupport {
         // study_time (임시이름 기반)
         jdbcTemplate.update(
                 """
-                INSERT INTO study_time (id, temporary_name, member_id, time, studied_at)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO study_time (id, study_type,  temporary_name, member_id, time, studied_date)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 2L,
+                "TEMPORARY",
                 "토익",
                 userId,
                 90L,

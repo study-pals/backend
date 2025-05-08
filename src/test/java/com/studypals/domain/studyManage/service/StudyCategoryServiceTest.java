@@ -20,6 +20,7 @@ import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
 import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudyCategoryWriter;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
@@ -94,7 +95,7 @@ class StudyCategoryServiceTest {
     void getUserCategory_success() {
         // given
         Long userId = 1L;
-        GetCategoryRes res = new GetCategoryRes(1L, "category", "#FFFFFF", 12, "description");
+        GetCategoryRes res = new GetCategoryRes(StudyType.PERSONAL, 1L, "category", "#FFFFFF", 12, "description");
         given(studyCategoryReader.findByMember(userId)).willReturn(List.of(mockStudyCategory));
         given(categoryMapper.toDto(mockStudyCategory)).willReturn(res);
 
@@ -131,8 +132,9 @@ class StudyCategoryServiceTest {
         StudyCategory cat2 =
                 StudyCategory.builder().dayBelong(dayBit | (1 << 4)).build();
 
-        GetCategoryRes res1 = new GetCategoryRes(1L, "category1", "#FFF", dayBit, "desc1");
-        GetCategoryRes res2 = new GetCategoryRes(2L, "category2", "#000", dayBit | (1 << 4), "desc2");
+        GetCategoryRes res1 = new GetCategoryRes(StudyType.PERSONAL, 1L, "category1", "#FFF", dayBit, "desc1");
+        GetCategoryRes res2 =
+                new GetCategoryRes(StudyType.PERSONAL, 2L, "category2", "#000", dayBit | (1 << 4), "desc2");
 
         given(studyCategoryReader.getListByMemberAndDay(userId, dayBit)).willReturn(List.of(cat1, cat2));
         given(categoryMapper.toDto(cat1)).willReturn(res1);

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -13,14 +12,11 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.memberManage.worker.MemberReader;
-import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
-import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
-import com.studypals.global.exceptions.errorCode.StudyErrorCode;
-import com.studypals.global.exceptions.exception.StudyException;
+import com.studypals.domain.studyManage.worker.strategy.StudyTimePersistenceStrategy;
+import com.studypals.domain.studyManage.worker.strategy.StudyTimePersistenceStrategyFactory;
 
 /**
  * {@link StudySessionWorker} 에 대한 테스트
@@ -35,42 +31,35 @@ class StudySessionWorkerTest {
     private StudyTimeRepository studyTimeRepository;
 
     @Mock
-    private StudyCategoryRepository studyCategoryRepository;
+    private StudyTimePersistenceStrategyFactory strategyFactory;
 
     @Mock
-    private MemberReader memberReader;
+    private StudyTimePersistenceStrategy strategy;
 
     @Mock
     private Member mockMember;
 
     @Mock
-    private StudyTime mockStudyTime;
+    private StudyStatus mockStatus;
 
     @Mock
-    private StudyCategory mockCategory;
+    private StudyTime mockStudyTime;
 
     @InjectMocks
     private StudySessionWorker studySessionWorker;
 
     @Test
-    void upsert_success_withCategory() {
+    void upsert_success_withCategory_alreadyExistStudyTime() {
         // given
         Long userId = 1L;
-        Long categoryId = 100L;
-        LocalDate today = LocalDate.now();
+        LocalDate date = LocalDate.of(2025, 3, 1);
         Long time = 300L;
-        StudyStatus status = StudyStatus.builder()
-                .id(userId)
-                .categoryId(categoryId)
-                .startTime(LocalTime.of(10, 0))
-                .build();
 
-        given(memberReader.get(userId)).willReturn(mockMember);
-        given(studyTimeRepository.findByMemberIdAndStudiedDateAndCategoryId(userId, today, categoryId))
-                .willReturn(Optional.of(mockStudyTime));
+        given(strategyFactory.resolve(mockStatus)).willReturn(strategy);
+        given(strategy.find(mockMember, mockStatus, date)).willReturn(Optional.of(mockStudyTime));
 
         // when
-        studySessionWorker.upsert(userId, status, today, time);
+        studySessionWorker.upsert(mockMember, mockStatus, date, time);
 
         // then
         then(mockStudyTime).should().addTime(time);
@@ -78,81 +67,20 @@ class StudySessionWorkerTest {
     }
 
     @Test
-    void upsert_success_withTemporaryName() {
+    void upsert_success_withCategory_firstSaveStudyTime() {
         // given
         Long userId = 1L;
-        String tempName = "temp-study";
-        LocalDate today = LocalDate.now();
-        Long time = 150L;
-        StudyStatus status =
-                StudyStatus.builder().id(userId).temporaryName(tempName).build();
+        LocalDate date = LocalDate.of(2025, 3, 1);
+        Long time = 300L;
 
-        given(memberReader.get(userId)).willReturn(mockMember);
-        given(studyTimeRepository.findByMemberIdAndStudiedDateAndTemporaryName(userId, today, tempName))
-                .willReturn(Optional.of(mockStudyTime));
+        given(strategyFactory.resolve(mockStatus)).willReturn(strategy);
+        given(strategy.find(mockMember, mockStatus, date)).willReturn(Optional.empty());
 
         // when
-        studySessionWorker.upsert(userId, status, today, time);
+        studySessionWorker.upsert(mockMember, mockStatus, date, time);
 
         // then
-        then(mockStudyTime).should().addTime(time);
+        then(strategy).should().create(mockMember, mockStatus, date, time);
         then(mockMember).should().addToken(time / 60);
-    }
-
-    @Test
-    void upsert_fail_bothCategoryAndTempNameNull() {
-        // given
-        Long userId = 1L;
-        LocalDate today = LocalDate.now();
-        Long time = 180L;
-        StudyStatus status = StudyStatus.builder().id(userId).build(); // both null
-
-        given(memberReader.get(userId)).willReturn(mockMember);
-
-        // when & then
-        assertThatThrownBy(() -> studySessionWorker.upsert(userId, status, today, time))
-                .isInstanceOf(StudyException.class)
-                .extracting("errorCode")
-                .isEqualTo(StudyErrorCode.STUDY_TIME_END_FAIL);
-    }
-
-    @Test
-    void create_WithCategory_success() {
-        // given
-        Long categoryId = 10L;
-        LocalDate today = LocalDate.now();
-        Long time = 240L;
-
-        given(studyCategoryRepository.getReferenceById(categoryId)).willReturn(mockCategory);
-
-        // when
-        studySessionWorker.createWithCategory(mockMember, categoryId, today, time);
-
-        // then
-        then(studyTimeRepository)
-                .should()
-                .save(argThat(timeEntity -> timeEntity.getCategory() == mockCategory
-                        && timeEntity.getMember() == mockMember
-                        && timeEntity.getStudiedDate().equals(today)
-                        && timeEntity.getTime().equals(time)));
-    }
-
-    @Test
-    void createWithCategoryWithTemporaryName_success() {
-        // given
-        String tempName = "free study";
-        LocalDate today = LocalDate.now();
-        Long time = 600L;
-
-        // when
-        studySessionWorker.createWithTemporaryName(mockMember, tempName, today, time);
-
-        // then
-        then(studyTimeRepository)
-                .should()
-                .save(argThat(timeEntity -> timeEntity.getTemporaryName().equals(tempName)
-                        && timeEntity.getMember() == mockMember
-                        && timeEntity.getStudiedDate().equals(today)
-                        && timeEntity.getTime().equals(time)));
     }
 }
