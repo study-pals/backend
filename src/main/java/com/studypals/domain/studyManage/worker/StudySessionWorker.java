@@ -24,11 +24,10 @@ import com.studypals.global.exceptions.exception.StudyException;
 @Worker
 @RequiredArgsConstructor
 public class StudySessionWorker {
+    private static final Long TOKEN_CALCULATE_VALUE = 60L;
 
     private final StudyTimeRepository studyTimeRepository;
     private final StudyTimePersistenceStrategyFactory strategyFactory;
-
-    private static final Long TOKEN_CALCULATE_VALUE = 60L;
 
     /**
      * studyTime 을 최신화하는 메서드. category에 대한 공부인지, temporaryName 에 대한 공부인지에 따라
