@@ -61,7 +61,7 @@ pipeline {
                         docker run -d --name study-pal-container -p 8080:8080 \\
                           --env-file ${env.ENV_FILE_PATH} \\
                           -e SPRING_PROFILES_ACTIVE=prod \\
-                          --network backend \\
+                          --network docker_backend \\
                           ${DOCKER_IMAGE_NAME}
                     """
 
