@@ -15,18 +15,13 @@ import com.studypals.global.exceptions.exception.ChatException;
 import com.studypals.global.utils.RandomUtils;
 
 /**
- * <br>package name   : com.studypals.domain.chatManage.worker
- * <br>file name      : ChatRoomWriter
- * <br>date           : 5/9/25
- * <pre>
- * <span style="color: white;">[description]</span>
+ * 채팅방에 대한 쓰기 작업을 정의해 놓은 worker 클래스
  *
- * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
+ * <p><b>빈 관리:</b><br>
+ * Worker
  *
- * } </pre>
+ * @author jack8
+ * @since 2025-05-10
  */
 @RequiredArgsConstructor
 @Worker
@@ -35,6 +30,12 @@ public class ChatRoomWriter {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
+    /**
+     * 채팅방을 생성합니다. 예외를 정의해 두었습니다.
+     * @param dto 생성할 채팅방에서 필요한 정보
+     * @return 영속화된 채팅방 엔티티
+     * @throws ChatException CHAT_ROOM_SAVE_FAIL / 채팅방 저장 실패
+     */
     public ChatRoom create(CreateChatRoomDto dto) {
         String chatRoomId = RandomUtils.createUUID();
 
@@ -48,14 +49,33 @@ public class ChatRoomWriter {
         }
     }
 
+    /**
+     * 채팅방을 생성 시, 생성자(유저)를 해당 채팅방의 admin으로써 등록합니다.
+     * @param chatRoom 참가할 채팅방
+     * @param member 참가할 멤버
+     * @throws ChatException CHAT_ROOM_JOIN_FAIL / 채팅방 참여가 실패
+     */
     public void joinAsAdmin(ChatRoom chatRoom, Member member) {
         internalJoin(chatRoom, member, ChatRoomRole.ADMIN);
     }
 
+    /**
+     * 일반 유저가 채팅방에 MEMBER 로서 참여합니다.
+     * @param chatRoom 참가할 채팅방
+     * @param member 참가할 멤버
+     * @throws ChatException CHAT_ROOM_JOIN_FAIL / 채팅방 참여가 실패
+     */
     public void join(ChatRoom chatRoom, Member member) {
         internalJoin(chatRoom, member, ChatRoomRole.MEMBER);
     }
 
+    /**
+     * 채팅방에서 떠납니다. 단, 해당 유저가 ADMIN 인 경우 해당 행위가 불가능하기에 예외를 던집니다.
+     * @param chatRoom 떠날 채팅방
+     * @param member 떠날 멤버
+     * @throws ChatException CHAT_ROOM_NOT_FOUND / 해당 member 가 속한 chatroom 을 찾을 수 없음(속해있지 않거나,id가 잘못됨)
+     * @throws ChatException CHAT_ROOM_ADMIN_LEAVE / admin 이 채팅방 탈퇴를 시도하는 경우
+     */
     public void leave(ChatRoom chatRoom, Member member) {
         ChatRoomMember chatRoomMember = chatRoomMemberRepository
                 .findByChatRoomIdAndMemberId(chatRoom.getId(), member.getId())
@@ -72,6 +92,13 @@ public class ChatRoomWriter {
         chatRoomMemberRepository.delete(chatRoomMember);
     }
 
+    /**
+     * 채팅방 참여 시의 공통된 로직을 정의합니다.
+     * @param chatRoom 채팅방
+     * @param member 멤버
+     * @param roomRole 어떤 역할로 참가할 것인지
+     * @throws ChatException CHAT_ROOM_JOIN_FAIL / 채팅방 참여가 실패
+     */
     private void internalJoin(ChatRoom chatRoom, Member member, ChatRoomRole roomRole) {
         ChatRoomMember chatRoomMember = ChatRoomMember.builder()
                 .chatRoom(chatRoom)

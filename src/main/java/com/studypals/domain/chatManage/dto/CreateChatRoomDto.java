@@ -1,17 +1,13 @@
 package com.studypals.domain.chatManage.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 /**
- * <br>package name   : com.studypals.domain.chatManage
- * <br>file name      : CreateChatRoomDto
- * <br>date           : 5/9/25
- * <pre>
- * <span style="color: white;">[description]</span>
+ * 채팅방 생성 시 사용하는 요청에 대한 dto 입니다.
+ * <p>
+ * {@code name} : NotBlank
  *
- * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
- *
- * } </pre>
+ * @author jack8
+ * @since 2025-05-10
  */
-public record CreateChatRoomDto(String name) {}
+public record CreateChatRoomDto(@NotBlank String name) {}

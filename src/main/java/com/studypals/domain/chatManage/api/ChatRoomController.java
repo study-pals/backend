@@ -16,18 +16,14 @@ import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 
 /**
- * <br>package name   : com.studypals.domain.chatManage.api
- * <br>file name      : ChatRoomController
- * <br>date           : 5/10/25
- * <pre>
- * <span style="color: white;">[description]</span>
+ * 그룹 관리에 대한 컨트롤러입니다. 담당하는 엔드포인트는 다음과 같습니다.
  *
+ * <pre>
+ *     - GET /chat/room/{chatRoomId} : 채팅방 정보 조회
  * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
  *
- * } </pre>
+ * @author jack8
+ * @since 2025-05-10
  */
 @RestController
 @RequiredArgsConstructor
