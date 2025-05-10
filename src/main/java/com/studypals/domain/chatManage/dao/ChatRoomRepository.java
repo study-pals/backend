@@ -18,4 +18,7 @@ import com.studypals.domain.chatManage.entity.ChatRoom;
  * @since 2025-05-09
  */
 @Repository
-public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {}
+public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
+
+    Boolean existsByName(String name);
+}

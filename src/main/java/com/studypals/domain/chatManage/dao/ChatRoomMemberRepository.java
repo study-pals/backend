@@ -1,6 +1,7 @@
 package com.studypals.domain.chatManage.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -25,4 +26,6 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, 
     List<ChatRoomMember> findAllByChatRoomId(String chatRoomId);
 
     List<ChatRoomMember> findAllByMemberId(Long memberId);
+
+    Optional<ChatRoomMember> findByChatRoomIdAndMemberId(String chatRoomId, Long memberId);
 }

@@ -47,4 +47,8 @@ public class ChatRoomMember {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private ChatRoomRole role = ChatRoomRole.MEMBER;
+
+    public boolean isAdmin() {
+        return ChatRoomRole.ADMIN.equals(role);
+    }
 }
