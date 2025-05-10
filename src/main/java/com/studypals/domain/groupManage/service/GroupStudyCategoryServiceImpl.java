@@ -45,6 +45,7 @@ public class GroupStudyCategoryServiceImpl implements GroupStudyCategoryService 
                         .typeId(c.getId())
                         .studyType(StudyType.GROUP)
                         .dayBelong(c.getDayBelong())
+                        .goalTime(c.getGoalTime())
                         .color(c.getColor())
                         .description(c.getDescription())
                         .build())
