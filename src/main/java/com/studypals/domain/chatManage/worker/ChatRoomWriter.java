@@ -35,19 +35,17 @@ public class ChatRoomWriter {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
-    public String create(CreateChatRoomDto dto) {
+    public ChatRoom create(CreateChatRoomDto dto) {
         String chatRoomId = RandomUtils.createUUID();
 
         ChatRoom chatRoom = ChatRoom.builder().id(chatRoomId).name(dto.name()).build();
 
         try {
-            chatRoomRepository.save(chatRoom);
+            return chatRoomRepository.save(chatRoom);
         } catch (Exception e) {
             throw new ChatException(
                     ChatErrorCode.CHAT_ROOM_SAVE_FAIL, "[ChatRoomWriter#createChatRoom]" + e.getMessage());
         }
-
-        return chatRoomId;
     }
 
     public void joinAsAdmin(ChatRoom chatRoom, Member member) {

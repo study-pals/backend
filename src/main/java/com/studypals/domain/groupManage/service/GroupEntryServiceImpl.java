@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.chatManage.worker.ChatRoomWriter;
 import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
 import com.studypals.domain.groupManage.dto.GroupEntryReq;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
@@ -53,6 +54,8 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     private final GroupEntryCodeManager entryCodeManager;
     private final GroupEntryRequestWorker entryRequestWorker;
 
+    private final ChatRoomWriter chatRoomWriter;
+
     @Override
     @Transactional(readOnly = true)
     public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
@@ -83,7 +86,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
         entryCodeManager.validateCodeBelongsToGroup(group, entryInfo.entryCode());
         Member member = memberReader.getRef(userId);
-        return groupMemberWorker.createMember(member, group).getId();
+        return internalJoinGroup(member, group);
     }
 
     @Override
@@ -94,5 +97,14 @@ public class GroupEntryServiceImpl implements GroupEntryService {
         entryCodeManager.validateCodeBelongsToGroup(group, entryInfo.entryCode());
         Member member = memberReader.getRef(userId);
         return entryRequestWorker.createRequest(member, group).getId();
+    }
+
+    // 그룹 참여 시 공통 로직을 private 으로 분리
+    private Long internalJoinGroup(Member member, Group group) {
+        Long joinId = groupMemberWorker.createMember(member, group).getId();
+
+        chatRoomWriter.join(group.getChatRoom(), member);
+
+        return joinId;
     }
 }
