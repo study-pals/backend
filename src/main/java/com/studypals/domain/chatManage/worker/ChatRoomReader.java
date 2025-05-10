@@ -34,14 +34,18 @@ public class ChatRoomReader {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
-    public ChatRoom findById(String chatRoomId) {
+    public ChatRoom getById(String chatRoomId) {
         return chatRoomRepository
                 .findById(chatRoomId)
                 .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND, "in ChatRoomReader#findById"));
     }
 
-    public List<ChatRoomMember> findMembers(ChatRoom chatRoom) {
+    public List<ChatRoomMember> findChatRoomMembers(ChatRoom chatRoom) {
         return chatRoomMemberRepository.findAllByChatRoomId(chatRoom.getId());
+    }
+
+    public List<ChatRoomMember> findChatRoomMembersWithMember(ChatRoom chatRoom) {
+        return chatRoomMemberRepository.findAllByChatRoomIdWithMember(chatRoom.getId());
     }
 
     public List<ChatRoomMember> findChatRooms(Member member) {

@@ -28,7 +28,9 @@ public enum ChatErrorCode implements ErrorCode {
     CHAT_ROOM_NOT_FOUND(ResponseCode.CHAT_ROOM_SEARCH, HttpStatus.NOT_FOUND, "can't find chatroom"),
     CHAT_ROOM_SAVE_FAIL(ResponseCode.CHAT_ROOM_CREATE, HttpStatus.INTERNAL_SERVER_ERROR, "can't save chatroom"),
     CHAT_ROOM_JOIN_FAIL(ResponseCode.CHAT_ROOM_JOIN, HttpStatus.INTERNAL_SERVER_ERROR, "can't join to chatroom"),
-    CHAT_ROOM_ADMIN_LEAVE(ResponseCode.CHAT_ROOM_LEAVE, HttpStatus.BAD_REQUEST, "admin can't leave chatRoom");
+    CHAT_ROOM_ADMIN_LEAVE(ResponseCode.CHAT_ROOM_LEAVE, HttpStatus.BAD_REQUEST, "admin can't leave chatRoom"),
+    CHAT_ROOM_PERMISSION_DENIED(
+            ResponseCode.CHAT_ROOM_SEARCH, HttpStatus.FORBIDDEN, "you have no permission to access this behavior");
 
     private final ResponseCode responseCode;
     private final HttpStatus status;
