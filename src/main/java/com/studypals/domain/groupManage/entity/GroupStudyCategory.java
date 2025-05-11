@@ -46,7 +46,7 @@ public class GroupStudyCategory {
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
-    @Column(name = "goal_time", nullable = true, columnDefinition = "INTEGER")
+    @Column(name = "goal_time", nullable = false, columnDefinition = "INTEGER")
     private Integer goalTime;
 
     @Column(name = "day_belong", nullable = false, columnDefinition = "INTEGER")
