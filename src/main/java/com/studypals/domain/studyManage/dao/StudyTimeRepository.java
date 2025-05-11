@@ -71,5 +71,5 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
             @Param("start") LocalDate start,
             @Param("end") LocalDate end,
             @Param("studyType") String studyType,
-            @Param("typeId") Set<Long> typeIds);
+            @Param("typeIds") Set<Long> typeIds);
 }

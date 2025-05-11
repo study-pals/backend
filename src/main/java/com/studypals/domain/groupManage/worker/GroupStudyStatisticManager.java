@@ -18,6 +18,7 @@ import com.studypals.global.annotations.Worker;
  */
 @Worker
 public class GroupStudyStatisticManager {
+    private static final int SECONDS_PER_MINUTE = 60;
 
     /**
      * 그룹의 공부 카테고리(루틴)마다 각 그룹원 별로 공부 누적 시간 총합을 계산합니다.
@@ -75,8 +76,9 @@ public class GroupStudyStatisticManager {
         Map<GroupMemberProfileDto, Long> memberStudiedTime =
                 totalStudy.memberTotalStudiedTimePerCategory().getOrDefault(category.getId(), Collections.emptyMap());
 
+        /* 해당 카테고리를 공부한 그룹원 중 목표 시간 이상 공부한 그룹원만 필터링 */
         List<GroupMemberProfileImageDto> succeedMembers = memberStudiedTime.entrySet().stream()
-                .filter(e -> e.getValue() >= category.getGoalTime())
+                .filter(e -> e.getValue() >= category.getGoalTime() * SECONDS_PER_MINUTE) // 그룹 목표 시간이 분 단위이므로, 초 단위로 변환
                 .map(e -> new GroupMemberProfileImageDto(
                         e.getKey().imageUrl(), e.getKey().role()))
                 .toList();
