@@ -12,6 +12,7 @@ import lombok.*;
  *     {@code
  * Long id;
  * Group group;
+ * Integer goalTime;
  * Integer dayBelong;
  * String color;
  * String description;
@@ -56,4 +57,8 @@ public class GroupStudyCategory {
 
     @Column(name = "description", nullable = true, columnDefinition = "TEXT")
     private String description;
+
+    public boolean isWeeklyRoutine() {
+        return dayBelong == 0;
+    }
 }
