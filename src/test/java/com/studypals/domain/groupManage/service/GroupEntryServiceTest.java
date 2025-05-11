@@ -15,10 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
-import com.studypals.domain.groupManage.dto.GroupEntryReq;
-import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
-import com.studypals.domain.groupManage.dto.GroupSummaryRes;
+import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.groupManage.entity.GroupMember;
@@ -113,7 +110,7 @@ public class GroupEntryServiceTest {
                 .isOpen(group.isOpen())
                 .memberCount(group.getTotalMember())
                 .profiles(profiles.stream()
-                        .map(it -> new GroupSummaryRes.GroupMemberProfileImageDto(it.imageUrl(), it.role()))
+                        .map(it -> new GroupMemberProfileImageDto(it.imageUrl(), it.role()))
                         .toList())
                 .build();
 

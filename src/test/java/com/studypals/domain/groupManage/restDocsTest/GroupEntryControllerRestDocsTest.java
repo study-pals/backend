@@ -81,9 +81,9 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
     void getGroupSummary_success() throws Exception {
         // given
         String entryCode = "A1B2C3";
-        List<GroupSummaryRes.GroupMemberProfileImageDto> profiles = List.of(
-                new GroupSummaryRes.GroupMemberProfileImageDto("imageUrl url", GroupRole.LEADER),
-                new GroupSummaryRes.GroupMemberProfileImageDto("imageUrl url", GroupRole.MEMBER));
+        List<GroupMemberProfileImageDto> profiles = List.of(
+                new GroupMemberProfileImageDto("imageUrl url", GroupRole.LEADER),
+                new GroupMemberProfileImageDto("imageUrl url", GroupRole.MEMBER));
         GroupSummaryRes groupSummaryRes = GroupSummaryRes.builder()
                 .id(1L)
                 .name("group name")
