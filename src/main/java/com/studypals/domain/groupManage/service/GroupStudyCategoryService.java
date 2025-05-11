@@ -3,11 +3,11 @@ package com.studypals.domain.groupManage.service;
 import java.util.List;
 
 import com.studypals.domain.groupManage.dto.DailySuccessRateRes;
+import com.studypals.domain.groupManage.dto.GetGroupCategoryRes;
 import com.studypals.domain.groupManage.dto.GroupWeeklyStudyConditionDto;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupStudyCategory;
 import com.studypals.domain.groupManage.entity.GroupStudyCategoryType;
-import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.GetStudyOfMemberDto;
 
 /**
@@ -29,9 +29,9 @@ public interface GroupStudyCategoryService {
      *
      * @param groupId 조회할 그룹 ID
      * @return 그룹의 카테고리 리스트
-     * @see GetCategoryRes
+     * @see GetGroupCategoryRes
      */
-    List<GetCategoryRes> getGroupCategory(Long groupId);
+    List<GetGroupCategoryRes> getGroupCategory(Long groupId);
 
     /**
      * 그룹원들의 공부 정보를 조회하기 위해, 그룹의 이번주 카테고리 정보를 조회합니다.

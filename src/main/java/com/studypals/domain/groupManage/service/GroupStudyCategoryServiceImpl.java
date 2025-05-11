@@ -17,7 +17,6 @@ import com.studypals.domain.groupManage.worker.GroupMemberReader;
 import com.studypals.domain.groupManage.worker.GroupReader;
 import com.studypals.domain.groupManage.worker.GroupStudyCategoryReader;
 import com.studypals.domain.groupManage.worker.GroupStudyStatisticManager;
-import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.GetStudyOfMemberDto;
 import com.studypals.domain.studyManage.entity.StudyType;
 
@@ -45,12 +44,12 @@ public class GroupStudyCategoryServiceImpl implements GroupStudyCategoryService 
     private final GroupStudyStatisticManager studyStatisticManager;
 
     @Override
-    public List<GetCategoryRes> getGroupCategory(Long groupId) {
+    public List<GetGroupCategoryRes> getGroupCategory(Long groupId) {
         Group group = groupReader.getById(groupId);
         List<GroupStudyCategory> categories = groupCategoryReader.getByGroup(group);
 
         return categories.stream()
-                .map(c -> GetCategoryRes.builder()
+                .map(c -> GetGroupCategoryRes.builder()
                         .name(c.getName())
                         .typeId(c.getId())
                         .studyType(StudyType.GROUP)
