@@ -76,6 +76,14 @@ public class GroupStudyStatisticManager {
         Map<GroupMemberProfileDto, Long> memberStudiedTime =
                 totalStudy.memberTotalStudiedTimePerCategory().getOrDefault(category.getId(), Collections.emptyMap());
 
+        /* 그룹원 별 목표 시간 대비 달성률 합산 */
+        double totalRatio = memberStudiedTime.values().stream()
+                .mapToDouble(aLong -> {
+                    long studyTime = Math.min(aLong, category.getGoalTime() * SECONDS_PER_MINUTE);
+                    return (double) studyTime / (category.getGoalTime() * SECONDS_PER_MINUTE) / totalMember;
+                })
+                .sum();
+
         /* 해당 카테고리를 공부한 그룹원 중 목표 시간 이상 공부한 그룹원만 필터링 */
         List<GroupMemberProfileImageDto> succeedMembers = memberStudiedTime.entrySet().stream()
                 .filter(e -> e.getValue() >= category.getGoalTime() * SECONDS_PER_MINUTE) // 그룹 목표 시간이 분 단위이므로, 초 단위로 변환
@@ -83,8 +91,6 @@ public class GroupStudyStatisticManager {
                         e.getKey().imageUrl(), e.getKey().role()))
                 .toList();
 
-        double successRate = (double) succeedMembers.size() / totalMember;
-
-        return DailySuccessRateDto.of(category, successRate, succeedMembers);
+        return DailySuccessRateDto.of(category, totalRatio, succeedMembers);
     }
 }

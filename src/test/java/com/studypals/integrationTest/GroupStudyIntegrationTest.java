@@ -59,7 +59,7 @@ public class GroupStudyIntegrationTest extends AbstractGroupIntegrationTest {
                 .andExpect(jsonPath("$.data.totalMember").value(2))
                 .andExpect(jsonPath("$.data.categories[0].categoryId").value(categoryId))
                 .andExpect(jsonPath("$.data.categories[0].goalTime").value(STUDY_TIME_GOAL_MINUTE))
-                .andExpect(jsonPath("$.data.categories[0].successRate").value(0.5))
+                .andExpect(jsonPath("$.data.categories[0].successRate").value(0.75))
                 .andExpect(jsonPath("$.data.categories[0].profiles.length()").value(1));
     }
 
