@@ -42,7 +42,7 @@ public class Group {
     private String tag;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @Column(name = "chat_room_id", nullable = false)
+    @JoinColumn(name = "chat_room_id", nullable = false)
     @Setter
     private ChatRoom chatRoom;
 

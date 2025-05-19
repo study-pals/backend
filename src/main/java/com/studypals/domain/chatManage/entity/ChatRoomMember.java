@@ -33,11 +33,11 @@ public class ChatRoomMember {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "chat_room_id")
+    @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "member_id")
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @Column(name = "last_read_message")

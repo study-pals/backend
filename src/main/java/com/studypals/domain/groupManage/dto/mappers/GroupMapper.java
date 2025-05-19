@@ -14,6 +14,7 @@ public interface GroupMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "totalMember", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
+    @Mapping(target = "chatRoom", ignore = true)
     Group toEntity(CreateGroupReq dto);
 
     GetGroupTagRes toTagDto(GroupTag entity);

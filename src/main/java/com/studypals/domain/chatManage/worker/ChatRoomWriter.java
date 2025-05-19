@@ -42,7 +42,8 @@ public class ChatRoomWriter {
         ChatRoom chatRoom = ChatRoom.builder().id(chatRoomId).name(dto.name()).build();
 
         try {
-            return chatRoomRepository.save(chatRoom);
+            chatRoomRepository.save(chatRoom);
+            return chatRoom;
         } catch (Exception e) {
             throw new ChatException(
                     ChatErrorCode.CHAT_ROOM_SAVE_FAIL, "[ChatRoomWriter#createChatRoom]" + e.getMessage());
