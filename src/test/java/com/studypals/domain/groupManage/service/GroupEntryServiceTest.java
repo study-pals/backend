@@ -4,8 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.BDDMockito.*;
 
 import java.util.List;
 
@@ -15,6 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.studypals.domain.chatManage.entity.ChatRoom;
+import com.studypals.domain.chatManage.worker.ChatRoomWriter;
 import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
 import com.studypals.domain.groupManage.dto.GroupEntryReq;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
@@ -54,7 +55,16 @@ public class GroupEntryServiceTest {
     private GroupAuthorityValidator authorityValidator;
 
     @Mock
+    private ChatRoomWriter chatRoomWriter;
+
+    @Mock
     private Member mockMember;
+
+    @Mock
+    private Group mockGroup;
+
+    @Mock
+    private ChatRoom mockChatRoom;
 
     @InjectMocks
     private GroupEntryServiceImpl groupEntryService;
@@ -133,13 +143,17 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Long joinId = 1L;
-        Group group = Group.builder().id(1L).isApprovalRequired(false).build();
-        GroupEntryReq entryInfo = new GroupEntryReq(group.getId(), "entryCode");
+        Long groupId = 1L;
+        GroupEntryReq entryInfo = new GroupEntryReq(groupId, "entryCode");
         GroupMember groupMember = GroupMember.builder().id(joinId).build();
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
-        given(groupReader.getById(entryInfo.groupId())).willReturn(group);
-        given(groupMemberWorker.createMember(mockMember, group)).willReturn(groupMember);
+        given(groupReader.getById(entryInfo.groupId())).willReturn(mockGroup);
+        given(mockGroup.isApprovalRequired()).willReturn(false);
+        given(mockGroup.getChatRoom()).willReturn(mockChatRoom);
+        given(groupMemberWorker.createMember(mockMember, mockGroup)).willReturn(groupMember);
+
+        willDoNothing().given(chatRoomWriter).join(mockChatRoom, mockMember);
 
         // when
         Long actual = groupEntryService.joinGroup(userId, entryInfo);

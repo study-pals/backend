@@ -41,8 +41,8 @@ public class Group {
     @Column(name = "tag", nullable = false)
     private String tag;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "chat_room_id", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "chat_room_id", nullable = true)
     @Setter
     private ChatRoom chatRoom;
 

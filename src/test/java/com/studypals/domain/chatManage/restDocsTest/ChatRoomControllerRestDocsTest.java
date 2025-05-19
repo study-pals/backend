@@ -7,6 +7,8 @@ import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,7 +46,6 @@ public class ChatRoomControllerRestDocsTest extends RestDocsSupport {
     void getChatRoomInfo_success() throws Exception {
         // given
         String chatRoomId = "chatroom";
-        Long userId = 1L;
         ChatRoomInfoRes responseData = ChatRoomInfoRes.builder()
                 .id(chatRoomId)
                 .name("chatRoom")
@@ -78,6 +79,7 @@ public class ChatRoomControllerRestDocsTest extends RestDocsSupport {
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
+                        pathParameters(parameterWithName("chatRoomId").description("조회할 채팅방 ID")),
                         responseFields(
                                 fieldWithPath("code").description("응답 코드"),
                                 fieldWithPath("status").description("응답 상태"),

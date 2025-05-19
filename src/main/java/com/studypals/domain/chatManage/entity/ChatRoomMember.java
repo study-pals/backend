@@ -25,6 +25,12 @@ import com.studypals.domain.memberManage.entity.Member;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
+@Table(
+        name = "chat_room_member",
+        indexes = {
+            @Index(name = "idx_member", columnList = "member_id"),
+            @Index(name = "idx_chat_room", columnList = "chat_room_id")
+        })
 public class ChatRoomMember {
 
     @Id
