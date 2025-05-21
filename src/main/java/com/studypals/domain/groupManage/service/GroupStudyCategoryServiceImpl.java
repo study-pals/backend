@@ -64,11 +64,12 @@ public class GroupStudyCategoryServiceImpl implements GroupStudyCategoryService 
     @Override
     public GroupWeeklyStudyConditionDto getGroupWeeklyStudyCondition(Long groupId) {
         Group group = groupReader.getById(groupId);
-        Map<Boolean, List<GroupStudyCategory>> partitioned = groupCategoryReader.getByGroup(group).stream()
-                .collect(Collectors.partitioningBy(GroupStudyCategory::isWeeklyRoutine));
+        Map<GroupStudyCategoryType, List<GroupStudyCategory>> partitioned =
+                groupCategoryReader.getByGroup(group).stream()
+                        .collect(Collectors.groupingBy(GroupStudyCategory::getType));
 
-        List<GroupStudyCategory> weekly = partitioned.get(true);
-        List<GroupStudyCategory> daily = partitioned.get(false);
+        List<GroupStudyCategory> weekly = partitioned.get(GroupStudyCategoryType.WEEKLY);
+        List<GroupStudyCategory> daily = partitioned.get(GroupStudyCategoryType.DAILY);
 
         /* 일주일 단위로 검색하기 위한 기간 계산. 한 주의 시작은 일요일 */
         LocalDate today = LocalDate.now();

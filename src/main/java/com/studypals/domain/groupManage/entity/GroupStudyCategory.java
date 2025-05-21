@@ -49,6 +49,10 @@ public class GroupStudyCategory {
     @Column(name = "goal_time", nullable = false, columnDefinition = "INTEGER")
     private Integer goalTime;
 
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private GroupStudyCategoryType type;
+
     @Column(name = "day_belong", nullable = false, columnDefinition = "INTEGER")
     private Integer dayBelong;
 
@@ -57,8 +61,4 @@ public class GroupStudyCategory {
 
     @Column(name = "description", nullable = true, columnDefinition = "TEXT")
     private String description;
-
-    public boolean isWeeklyRoutine() {
-        return dayBelong == 0;
-    }
 }
