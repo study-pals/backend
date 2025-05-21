@@ -13,10 +13,10 @@ import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupStudyCategory;
 import com.studypals.domain.groupManage.entity.GroupStudyCategoryType;
+import com.studypals.domain.groupManage.util.GroupStudyStatisticCalculator;
 import com.studypals.domain.groupManage.worker.GroupMemberReader;
 import com.studypals.domain.groupManage.worker.GroupReader;
 import com.studypals.domain.groupManage.worker.GroupStudyCategoryReader;
-import com.studypals.domain.groupManage.worker.GroupStudyStatisticManager;
 import com.studypals.domain.studyManage.dto.GetStudyOfMemberDto;
 import com.studypals.domain.studyManage.entity.StudyType;
 
@@ -41,7 +41,6 @@ public class GroupStudyCategoryServiceImpl implements GroupStudyCategoryService 
     private final GroupReader groupReader;
     private final GroupMemberReader groupMemberReader;
     private final GroupStudyCategoryReader groupCategoryReader;
-    private final GroupStudyStatisticManager studyStatisticManager;
 
     @Override
     public List<GetGroupCategoryRes> getGroupCategory(Long groupId) {
@@ -91,9 +90,9 @@ public class GroupStudyCategoryServiceImpl implements GroupStudyCategoryService 
     public DailySuccessRateRes getGroupDailyGoal(
             Group group, List<GroupStudyCategory> categories, List<GetStudyOfMemberDto> studies) {
         List<GroupMemberProfileDto> members = groupMemberReader.getTopNMemberProfiles(group, group.getTotalMember());
-        GroupTotalStudyDto groupTotalStudy = studyStatisticManager.sumTotalTimeOfCategory(members, studies);
+        GroupTotalStudyDto groupTotalStudy = GroupStudyStatisticCalculator.sumTotalTimeOfCategory(members, studies);
         List<DailySuccessRateDto> successRates =
-                studyStatisticManager.getDailySuccessRate(group, groupTotalStudy, categories);
+                GroupStudyStatisticCalculator.getDailySuccessRate(group, groupTotalStudy, categories);
 
         return new DailySuccessRateRes(group.getTotalMember(), successRates);
     }
