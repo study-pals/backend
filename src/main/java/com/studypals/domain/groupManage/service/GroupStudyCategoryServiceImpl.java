@@ -68,8 +68,10 @@ public class GroupStudyCategoryServiceImpl implements GroupStudyCategoryService 
                 groupCategoryReader.getByGroup(group).stream()
                         .collect(Collectors.groupingBy(GroupStudyCategory::getType));
 
-        List<GroupStudyCategory> weekly = partitioned.get(GroupStudyCategoryType.WEEKLY);
-        List<GroupStudyCategory> daily = partitioned.get(GroupStudyCategoryType.DAILY);
+        List<GroupStudyCategory> weekly =
+                partitioned.getOrDefault(GroupStudyCategoryType.WEEKLY, Collections.emptyList());
+        List<GroupStudyCategory> daily =
+                partitioned.getOrDefault(GroupStudyCategoryType.DAILY, Collections.emptyList());
 
         /* 일주일 단위로 검색하기 위한 기간 계산. 한 주의 시작은 일요일 */
         LocalDate today = LocalDate.now();
