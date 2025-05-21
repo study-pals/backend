@@ -61,7 +61,19 @@ public enum ResponseCode {
     CHAT_ROOM_UPDATE("C01-03"),
     CHAT_ROOM_JOIN("C01-04"),
     CHAT_ROOM_LEAVE("C01-05"),
-    CHAT_ROOM_ROLE("C01-06");
+    CHAT_ROOM_ROLE("C01-06"),
+
+    // C02 - 단순 채팅
+    CHAT_CONNECT("C02-01"),
+    CHAT_AUTH("C02-02"),
+    CHAT_PUB("C02-03"),
+    CHAT_SUB("C02-04"),
+    CHAT_DISSUB("C02-05"),
+    CHAT_DISCONNECT("C02-06"),
+
+    // C03 - 채팅을 통한 텍스트 외 전송
+    CHAT_IMAGE("C03-01"),
+    CHAT_FILE("C03-02");
 
     private final String code;
 
