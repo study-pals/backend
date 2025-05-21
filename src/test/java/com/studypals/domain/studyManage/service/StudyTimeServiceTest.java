@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.then;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,9 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.studyManage.dto.GetDailyStudyDto;
-import com.studypals.domain.studyManage.dto.GetStudyDto;
-import com.studypals.domain.studyManage.dto.PeriodDto;
+import com.studypals.domain.studyManage.dto.*;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.entity.StudyType;
@@ -150,5 +149,23 @@ class StudyTimeServiceTest {
                 .extracting(GetDailyStudyDto::studyList)
                 .asInstanceOf(LIST)
                 .hasSize(2);
+    }
+
+    @Test
+    void getStudyListOfGroup_success() {
+        // given
+        LocalDate date = LocalDate.of(2025, 5, 21);
+        GroupTypeDto groupTypeDto = new GroupTypeDto(new PeriodDto(date, date), StudyType.GROUP, Set.of(1L));
+
+        List<StudyTime> studyTimes =
+                List.of(make("time1", date, 100L), make("time2", date, 200L), make("time3", date, 300L));
+
+        given(studyTimeReader.getListByGroup(groupTypeDto)).willReturn(studyTimes);
+
+        // when
+        List<GetStudyOfMemberDto> actual = studyTimeService.getStudyListOfGroup(groupTypeDto);
+
+        // then
+        assertThat(actual).hasSize(3);
     }
 }
