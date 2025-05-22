@@ -41,7 +41,7 @@ public class Group {
     @Column(name = "tag", nullable = false)
     private String tag;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id", nullable = true)
     @Setter
     private ChatRoom chatRoom;

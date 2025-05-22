@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dto.ChatRoomInfoRes;
+import com.studypals.domain.chatManage.dto.mapper.ChatRoomMapper;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.entity.ChatRoomMember;
 import com.studypals.domain.chatManage.worker.ChatRoomReader;
@@ -31,6 +32,7 @@ import com.studypals.global.exceptions.exception.ChatException;
 public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final ChatRoomReader chatRoomReader;
+    private final ChatRoomMapper chatRoomMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -50,15 +52,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return ChatRoomInfoRes.builder()
                 .id(chatRoomId)
                 .name(chatRoom.getName())
-                .userInfos(members.stream().map(this::toDto).toList())
-                .build();
-    }
-
-    private ChatRoomInfoRes.UserInfo toDto(ChatRoomMember entity) {
-        return ChatRoomInfoRes.UserInfo.builder()
-                .userId(entity.getMember().getId())
-                .role(entity.getRole())
-                .imageUrl(entity.getMember().getImageUrl())
+                .userInfos(members.stream().map(chatRoomMapper::toDto).toList())
                 .build();
     }
 }

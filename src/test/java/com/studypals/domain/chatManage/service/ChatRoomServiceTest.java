@@ -1,6 +1,7 @@
 package com.studypals.domain.chatManage.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 import java.util.List;
@@ -12,8 +13,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.chatManage.dto.ChatRoomInfoRes;
+import com.studypals.domain.chatManage.dto.mapper.ChatRoomMapper;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.entity.ChatRoomMember;
+import com.studypals.domain.chatManage.entity.ChatRoomRole;
 import com.studypals.domain.chatManage.worker.ChatRoomReader;
 import com.studypals.domain.memberManage.entity.Member;
 
@@ -28,6 +31,9 @@ class ChatRoomServiceTest {
 
     @Mock
     private ChatRoomReader chatRoomReader;
+
+    @Mock
+    private ChatRoomMapper chatRoomMapper;
 
     @Mock
     private Member mockMember;
@@ -51,9 +57,10 @@ class ChatRoomServiceTest {
         String chatRoomId = "chat";
         given(chatRoomReader.getById(chatRoomId)).willReturn(mockChatRoom);
         given(chatRoomReader.findChatRoomMembersWithMember(mockChatRoom)).willReturn(List.of(mockCrm1, mockCrm2));
+        given(chatRoomMapper.toDto(any()))
+                .willReturn(new ChatRoomInfoRes.UserInfo(userId, ChatRoomRole.MEMBER, "image"));
 
         given(mockCrm1.getMember()).willReturn(mockMember);
-        given(mockCrm2.getMember()).willReturn(mockMember);
         given(mockMember.getId()).willReturn(userId);
 
         // when

@@ -67,7 +67,7 @@ public class ChatRoomReader {
      * @param member 검색할 멤버 엔티티
      * @return chatRoomMember 엔티티 리스트
      */
-    public List<ChatRoomMember> findChatRooms(Member member) {
+    public List<ChatRoomMember> findChatRoomMembers(Member member) {
         return chatRoomMemberRepository.findAllByMemberId(member.getId());
     }
 }

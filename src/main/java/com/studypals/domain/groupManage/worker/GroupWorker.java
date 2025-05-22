@@ -39,7 +39,6 @@ public class GroupWorker {
         try {
             groupRepository.save(group);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             throw new GroupException(GroupErrorCode.GROUP_CREATE_FAIL);
         }
 
