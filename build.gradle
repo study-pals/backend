@@ -71,6 +71,9 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 
+    //mongoDB
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+
 
 
     compileOnly 'org.projectlombok:lombok'

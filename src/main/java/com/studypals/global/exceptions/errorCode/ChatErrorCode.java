@@ -34,7 +34,9 @@ public enum ChatErrorCode implements ErrorCode {
 
     CHAT_SEND_FAIL(ResponseCode.CHAT_PUB, null, "can't send chat"),
     CHAT_AUTH_FAIL(ResponseCode.CHAT_AUTH, null, "auth fail"),
-    CHAT_SUB_FAIL(ResponseCode.CHAT_SUB, null, "subscribe fail");
+    CHAT_SUB_FAIL(ResponseCode.CHAT_SUB, null, "subscribe fail"),
+
+    CHAT_LAST_READ_FAIL(ResponseCode.CHAT_READ, null, "can't find last read message id");
 
     private final ResponseCode responseCode;
     private final HttpStatus status;

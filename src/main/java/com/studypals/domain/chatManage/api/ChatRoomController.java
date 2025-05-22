@@ -36,7 +36,6 @@ public class ChatRoomController {
     public ResponseEntity<Response<ChatRoomInfoRes>> getChatRoomInfo(
             @PathVariable("chatRoomId") String chatRoomId, @AuthenticationPrincipal Long userId) {
         ChatRoomInfoRes chatRoomInfo = chatRoomService.getChatRoomInfo(userId, chatRoomId);
-
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.CHAT_ROOM_SEARCH, chatRoomInfo, chatRoomId));
     }
 }

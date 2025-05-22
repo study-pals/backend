@@ -1,15 +1,21 @@
 package com.studypals.global.redis;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.studypals.domain.chatManage.dao.ChatReadStatusRepository;
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
 import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
@@ -30,7 +36,8 @@ import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
         basePackageClasses = {
             RefreshTokenRedisRepository.class,
             StudyStatusRedisRepository.class,
-            GroupEntryCodeRedisRepository.class
+            GroupEntryCodeRedisRepository.class,
+            ChatReadStatusRepository.class
         })
 public class RedisConfig {
 
@@ -51,6 +58,13 @@ public class RedisConfig {
         template.setConnectionFactory(redisConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setHashValueSerializer(new StringRedisSerializer());
         return template;
+    }
+
+    @Bean
+    public RedisScript<List> readCursorScript() {
+        Resource scriptSource = new ClassPathResource("luaScript/read_chat_cursor.lua");
+        return RedisScript.of(scriptSource, List.class);
     }
 }

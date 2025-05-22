@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -36,6 +37,18 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, 
     WHERE crm.chatRoom.id = :chatRoomId
     """)
     List<ChatRoomMember> findAllByChatRoomIdWithMember(@Param("chatRoomId") String chatRoomId);
+
+    @Modifying
+    @Query(
+            value =
+                    """
+    UPDATE chat_room_member crm
+    SET crm.last_read_message = :messageId
+    WHERE crm.chat_room_id = :roomId AND crm.member_id = :memberId
+    """,
+            nativeQuery = true)
+    void updateLastReadMessage(
+            @Param("roomId") String roomId, @Param("memberId") Long memberId, @Param("messageId") String messageId);
 
     List<ChatRoomMember> findAllByMemberId(Long memberId);
 

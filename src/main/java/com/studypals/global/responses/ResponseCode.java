@@ -70,6 +70,7 @@ public enum ResponseCode {
     CHAT_SUB("C02-04"),
     CHAT_DISSUB("C02-05"),
     CHAT_DISCONNECT("C02-06"),
+    CHAT_READ("C02-07"),
 
     // C03 - 채팅을 통한 텍스트 외 전송
     CHAT_IMAGE("C03-01"),

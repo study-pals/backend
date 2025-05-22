@@ -1,6 +1,7 @@
 package com.studypals.global.websocket;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -14,6 +15,7 @@ import org.springframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
+import com.studypals.domain.chatManage.entity.ChatRoomMember;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.ChatException;
 import com.studypals.global.security.jwt.JwtToken;
@@ -51,6 +53,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     private final JwtUtils jwtUtils;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final SessionRepository sessionRepository;
+    private final StompSessionEventHandler stompSessionEventHandler;
 
     /**
      * 클라이언트로부터 STOMP 요청이 들어오게 되면, 해당 메서드가 실행됩니다.
@@ -60,12 +63,14 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
      */
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
+        System.out.println("pre");
 
         // 들어온 message 는 raw 한 websocket 메시지이므로 StompHeaderAccessor를 통해 감싸줍니다.
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         // 만약 연결 요청 시
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+            System.out.println("conn");
             handleConnect(accessor);
         } else if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) { // 구독 요청 시
             handleSubscribe(accessor);
@@ -79,7 +84,11 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+            stompSessionEventHandler.updateLastReadMessage(accessor.getSessionId());
             sessionRepository.clear(accessor.getSessionId());
+        } else if (StompCommand.UNSUBSCRIBE.equals(accessor.getCommand())) {
+            sessionRepository.updateRoom(accessor.getSessionId(), null);
+            stompSessionEventHandler.updateLastReadMessage(accessor.getSessionId());
         }
     }
 
@@ -122,13 +131,17 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
                 .map(SessionInfo::userId) // userId 반환
                 .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_SUB_FAIL, "can't find sesison"));
 
+        Optional<ChatRoomMember> chatRoomMember = chatRoomMemberRepository.findByChatRoomIdAndMemberId(roomId, userId);
         // 권한 체크 - 해당 유저가 해당 채팅방에 속하여 있는지
-        if (!chatRoomMemberRepository.existsByChatRoomIdAndMemberId(roomId, userId)) {
+        if (chatRoomMember.isEmpty()) {
             throw new ChatException(ChatErrorCode.CHAT_SUB_FAIL, "user not in chat room");
         }
 
         // 세션-방 매핑 갱신
         sessionRepository.updateRoom(sessionId, roomId);
+
+        stompSessionEventHandler.publishEnterMessage(
+                roomId, userId, chatRoomMember.get().getLastReadMessage());
     }
 
     /**
@@ -140,12 +153,12 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     private Message<?> handleSend(Message<?> message, StompHeaderAccessor accessor) {
 
         // 세션 정보에서 roomId 를 추출
-        String roomId = sessionRepository
+        SessionInfo sessionInfo = sessionRepository
                 .findBySessionId(accessor.getSessionId())
-                .map(SessionInfo::roomId)
                 .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_SUB_FAIL, "can't find sesison"));
 
-        accessor.setHeader("roomId", roomId);
+        accessor.setHeader("roomId", sessionInfo.roomId());
+        accessor.setHeader("userId", sessionInfo.userId());
         return MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());
     }
 
