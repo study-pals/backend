@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupStudyCategory;
-import com.studypals.domain.studyManage.dto.GetStudyOfMemberDto;
+import com.studypals.domain.studyManage.entity.StudyTime;
 
 /**
  * 그룹의 공부 시간을 조합하고 통계 결과를 계산하는 유틸성 클래스입니다.
@@ -25,23 +25,21 @@ public class GroupStudyStatisticCalculator {
      * 그룹의 공부 카테고리(루틴)마다 각 그룹원 별로 공부 누적 시간 총합을 계산합니다.
      *
      * @param members 그룹의 전체 그룹원의 프로필 DTO {@link GroupMemberProfileDto}
-     * @param studies 그룹원의 공부 정보에 대한 DTO {@link GetStudyOfMemberDto}
+     * @param studies 그룹원의 공부 정보 엔티티 {@link StudyTime}
      * @return 그룹 카테고리마다 그룹원 별 공부 시간 총합 DTO {@link GroupTotalStudyDto}
      */
     public static GroupTotalStudyDto sumTotalTimeOfCategory(
-            List<GroupMemberProfileDto> members, List<GetStudyOfMemberDto> studies) {
+            List<GroupMemberProfileDto> members, List<StudyTime> studies) {
         Map<Long, GroupMemberProfileDto> memberMap =
                 members.stream().collect(Collectors.toMap(GroupMemberProfileDto::id, Function.identity()));
 
         Map<Long, Map<GroupMemberProfileDto, Long>> totalStudyMap = new HashMap<>();
 
-        for (GetStudyOfMemberDto study : studies) {
-            Long categoryId = study.study().typeId();
-            GroupMemberProfileDto member = memberMap.get(study.member().getId());
+        for (StudyTime study : studies) {
+            Long categoryId = study.getTypeId();
+            GroupMemberProfileDto member = memberMap.get(study.getMember().getId());
 
-            totalStudyMap
-                    .computeIfAbsent(categoryId, k -> new HashMap<>())
-                    .merge(member, study.study().time(), Long::sum);
+            totalStudyMap.computeIfAbsent(categoryId, k -> new HashMap<>()).merge(member, study.getTime(), Long::sum);
         }
 
         return new GroupTotalStudyDto(totalStudyMap);

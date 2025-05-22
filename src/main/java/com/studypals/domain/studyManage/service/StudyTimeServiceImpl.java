@@ -76,15 +76,4 @@ public class StudyTimeServiceImpl implements StudyTimeService {
                 .sorted(Comparator.comparing(GetDailyStudyDto::studiedDate)) // 공부 날짜에 따라 정렬
                 .toList();
     }
-
-    @Override
-    public List<GetStudyOfMemberDto> getStudyListOfGroup(GroupTypeDto groupType) {
-        List<StudyTime> summaries = studyTimeReader.getListByGroup(groupType);
-
-        return summaries.stream()
-                .map(s -> new GetStudyOfMemberDto(
-                        s.getMember(),
-                        new GetStudyDto(s.getStudyType(), s.getTypeId(), s.getTemporaryName(), s.getTime())))
-                .toList();
-    }
 }
