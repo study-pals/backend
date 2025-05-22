@@ -17,9 +17,7 @@ import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.entity.GroupStudyCategory;
 import com.studypals.domain.groupManage.entity.GroupStudyCategoryType;
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.studyManage.dto.GetStudyDto;
-import com.studypals.domain.studyManage.dto.GetStudyOfMemberDto;
-import com.studypals.domain.studyManage.entity.StudyType;
+import com.studypals.domain.studyManage.entity.StudyTime;
 
 /**
  * {@link GroupStudyStatisticCalculator} 에 대한 unit test 입니다.
@@ -47,14 +45,30 @@ public class GroupStudyStatisticCalculatorTest {
                         member3.getId(), member3.getNickname(), member3.getImageUrl(), GroupRole.MEMBER));
 
         Long categoryId = 1L;
-        List<GetStudyOfMemberDto> study = List.of(
-                new GetStudyOfMemberDto(member1, new GetStudyDto(StudyType.GROUP, categoryId, null, 60 * 60 * 3L)),
-                new GetStudyOfMemberDto(member1, new GetStudyDto(StudyType.GROUP, categoryId, null, 60 * 60 * 4L)),
-                new GetStudyOfMemberDto(member2, new GetStudyDto(StudyType.GROUP, categoryId, null, 60 * 60 * 2L)),
-                new GetStudyOfMemberDto(member3, new GetStudyDto(StudyType.GROUP, categoryId, null, 60 * 60 * 5L)));
+        List<StudyTime> studyTimes = List.of(
+                StudyTime.builder()
+                        .member(member1)
+                        .typeId(categoryId)
+                        .time(60 * 60 * 3L)
+                        .build(),
+                StudyTime.builder()
+                        .member(member1)
+                        .typeId(categoryId)
+                        .time(60 * 60 * 4L)
+                        .build(),
+                StudyTime.builder()
+                        .member(member2)
+                        .typeId(categoryId)
+                        .time(60 * 60 * 2L)
+                        .build(),
+                StudyTime.builder()
+                        .member(member3)
+                        .typeId(categoryId)
+                        .time(60 * 60 * 5L)
+                        .build());
 
         // when
-        GroupTotalStudyDto groupStudy = GroupStudyStatisticCalculator.sumTotalTimeOfCategory(members, study);
+        GroupTotalStudyDto groupStudy = GroupStudyStatisticCalculator.sumTotalTimeOfCategory(members, studyTimes);
 
         // that
         Map<GroupMemberProfileDto, Long> memberStudy =

@@ -17,23 +17,23 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.studypals.domain.groupManage.api.GroupStudyFacadeController;
+import com.studypals.domain.groupManage.api.GroupStudyController;
 import com.studypals.domain.groupManage.dto.DailySuccessRateDto;
 import com.studypals.domain.groupManage.dto.DailySuccessRateRes;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
 import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.entity.GroupStudyCategoryType;
-import com.studypals.domain.groupManage.facade.GroupStudyFacade;
+import com.studypals.domain.groupManage.service.GroupStudyCategoryService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 import com.studypals.testModules.testSupport.RestDocsSupport;
 
-@WebMvcTest(GroupStudyFacadeController.class)
-public class GroupStudyFacadeControllerRestDocsTest extends RestDocsSupport {
+@WebMvcTest(GroupStudyController.class)
+public class GroupStudyControllerRestDocsTest extends RestDocsSupport {
 
     @MockitoBean
-    private GroupStudyFacade groupStudyFacade;
+    private GroupStudyCategoryService groupStudyCategoryService;
 
     @Test
     @WithMockUser
@@ -64,7 +64,7 @@ public class GroupStudyFacadeControllerRestDocsTest extends RestDocsSupport {
         Response<DailySuccessRateRes> expected =
                 CommonResponse.success(ResponseCode.GROUP_DAILY_GOAL, dailySuccessRateRes);
 
-        given(groupStudyFacade.getGroupDailyGoal(groupId)).willReturn(dailySuccessRateRes);
+        given(groupStudyCategoryService.getGroupDailyGoal(groupId)).willReturn(dailySuccessRateRes);
 
         // when
         ResultActions result = mockMvc.perform(get("/groups/" + groupId + "/routines/daily-goal"));

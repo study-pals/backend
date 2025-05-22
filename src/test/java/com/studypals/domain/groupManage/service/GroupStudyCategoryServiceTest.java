@@ -3,7 +3,9 @@ package com.studypals.domain.groupManage.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,10 +21,13 @@ import com.studypals.domain.groupManage.entity.GroupStudyCategoryType;
 import com.studypals.domain.groupManage.worker.GroupMemberReader;
 import com.studypals.domain.groupManage.worker.GroupReader;
 import com.studypals.domain.groupManage.worker.GroupStudyCategoryReader;
+import com.studypals.domain.groupManage.worker.strategy.GroupCategoryStrategyFactory;
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.studyManage.dto.GetStudyDto;
-import com.studypals.domain.studyManage.dto.GetStudyOfMemberDto;
+import com.studypals.domain.studyManage.dto.GroupTypeDto;
+import com.studypals.domain.studyManage.dto.PeriodDto;
+import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.entity.StudyType;
+import com.studypals.domain.studyManage.worker.StudyTimeReader;
 
 /**
  * {@link GroupStudyCategoryService} 에 대한 unit test 입니다.
@@ -41,6 +46,12 @@ public class GroupStudyCategoryServiceTest {
 
     @Mock
     private GroupStudyCategoryReader groupStudyCategoryReader;
+
+    @Mock
+    private StudyTimeReader studyTimeReader;
+
+    @Mock
+    private GroupCategoryStrategyFactory categoryStrategyFactory;
 
     @Mock
     private Group mockGroup;
@@ -80,24 +91,9 @@ public class GroupStudyCategoryServiceTest {
     }
 
     @Test
-    void getGroupWeeklyStudyCondition_success() {
-        // given
-        Long groupId = 1L;
-
-        given(groupReader.getById(groupId)).willReturn(mockGroup);
-        given(groupStudyCategoryReader.getByGroup(mockGroup)).willReturn(getGroupCategory());
-
-        // when
-        GroupWeeklyStudyConditionDto actual = groupStudyCategoryService.getGroupWeeklyStudyCondition(groupId);
-
-        // then
-        assertThat(actual.getDailyType().ids().size()).isEqualTo(1);
-        assertThat(actual.getWeeklyType().ids().size()).isEqualTo(1);
-    }
-
-    @Test
     void getGroupDailyGoal_success() {
         // given
+        Long groupId = 1L;
         Group group = Group.builder().id(1L).totalMember(3).build();
         List<GroupStudyCategory> categories = getGroupCategory();
         Member member1 =
@@ -115,17 +111,41 @@ public class GroupStudyCategoryServiceTest {
                         member3.getId(), member3.getNickname(), member3.getImageUrl(), GroupRole.MEMBER));
 
         Long categoryId = 1L;
-        List<GetStudyOfMemberDto> study = List.of(
-                new GetStudyOfMemberDto(member1, new GetStudyDto(StudyType.GROUP, categoryId, null, 60 * 60 * 3L)),
-                new GetStudyOfMemberDto(member1, new GetStudyDto(StudyType.GROUP, categoryId, null, 60 * 60 * 4L)),
-                new GetStudyOfMemberDto(member2, new GetStudyDto(StudyType.GROUP, categoryId, null, 60 * 60 * 2L)),
-                new GetStudyOfMemberDto(member3, new GetStudyDto(StudyType.GROUP, categoryId, null, 60 * 60 * 5L)));
+        List<StudyTime> studyTimes = List.of(
+                StudyTime.builder()
+                        .member(member1)
+                        .typeId(categoryId)
+                        .time(60 * 60 * 3L)
+                        .build(),
+                StudyTime.builder()
+                        .member(member1)
+                        .typeId(categoryId)
+                        .time(60 * 60 * 4L)
+                        .build(),
+                StudyTime.builder()
+                        .member(member2)
+                        .typeId(categoryId)
+                        .time(60 * 60 * 2L)
+                        .build(),
+                StudyTime.builder()
+                        .member(member3)
+                        .typeId(categoryId)
+                        .time(60 * 60 * 5L)
+                        .build());
 
+        GroupTypeDto groupType =
+                new GroupTypeDto(new PeriodDto(LocalDate.now(), LocalDate.now()), StudyType.GROUP, Set.of(categoryId));
+
+        given(groupReader.getById(groupId)).willReturn(group);
+        given(groupStudyCategoryReader.getByGroup(group)).willReturn(categories);
         given(groupMemberReader.getTopNMemberProfiles(group, group.getTotalMember()))
                 .willReturn(members);
+        given(categoryStrategyFactory.getDailyTypeDto(categories)).willReturn(groupType);
+        given(categoryStrategyFactory.getWeeklyTypeDto(categories)).willReturn(groupType);
+        given(studyTimeReader.getListByGroup(groupType)).willReturn(studyTimes);
 
         // when
-        DailySuccessRateRes response = groupStudyCategoryService.getGroupDailyGoal(group, categories, study);
+        DailySuccessRateRes response = groupStudyCategoryService.getGroupDailyGoal(group.getId());
 
         // then
         assertThat(response.totalMember()).isEqualTo(group.getTotalMember());

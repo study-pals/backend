@@ -17,16 +17,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import com.studypals.domain.groupManage.api.GroupStudyController;
 import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.global.responses.ResponseCode;
 
 /**
- * {@link com.studypals.domain.groupManage.api.GroupStudyFacadeController} 에 대한 통합 테스트 {@link
+ * {@link GroupStudyController} 에 대한 통합 테스트 {@link
  * AbstractGroupIntegrationTest} 를 사용하였다.
  *
  * @author s0o0bn
- * @see com.studypals.domain.groupManage.api.GroupStudyFacadeController
+ * @see GroupStudyController
  * @see AbstractGroupIntegrationTest
  * @since 2025-05-11
  */
