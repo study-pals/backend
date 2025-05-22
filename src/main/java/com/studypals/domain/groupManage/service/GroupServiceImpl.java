@@ -7,6 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.chatManage.dto.CreateChatRoomDto;
+import com.studypals.domain.chatManage.entity.ChatRoom;
+import com.studypals.domain.chatManage.worker.ChatRoomWriter;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
@@ -38,6 +41,9 @@ public class GroupServiceImpl implements GroupService {
     private final GroupMemberWorker groupMemberWorker;
     private final GroupMapper groupMapper;
 
+    // chat room worker class
+    private final ChatRoomWriter chatRoomWriter;
+
     @Override
     public List<GetGroupTagRes> getGroupTags() {
         return groupReader.getGroupTags().stream().map(groupMapper::toTagDto).toList();
@@ -46,9 +52,17 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional
     public Long createGroup(Long userId, CreateGroupReq dto) {
+        // 그룹 생성
         Group group = groupWorker.create(dto);
         Member member = memberReader.getRef(userId);
         groupMemberWorker.createLeader(member, group);
+
+        // 채팅방 생성
+        CreateChatRoomDto createChatRoomDto = new CreateChatRoomDto(dto.name());
+        ChatRoom chatRoom = chatRoomWriter.create(createChatRoomDto);
+        chatRoomWriter.joinAsAdmin(chatRoom, member);
+        group.setChatRoom(chatRoom);
+
         return group.getId();
     }
 }

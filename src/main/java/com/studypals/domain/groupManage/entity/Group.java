@@ -9,6 +9,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.*;
 
+import com.studypals.domain.chatManage.entity.ChatRoom;
+
 /**
  * Group 에 대한 엔티티입니다.
  *
@@ -38,6 +40,11 @@ public class Group {
 
     @Column(name = "tag", nullable = false)
     private String tag;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_room_id", nullable = true)
+    @Setter
+    private ChatRoom chatRoom;
 
     @Builder.Default
     @Column(name = "max_member", nullable = false, columnDefinition = "INTEGER DEFAULT 100")

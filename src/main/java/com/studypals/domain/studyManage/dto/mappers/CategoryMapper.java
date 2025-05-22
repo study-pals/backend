@@ -30,5 +30,6 @@ public interface CategoryMapper {
     StudyCategory toEntity(CreateCategoryReq req, Member member);
 
     @Mapping(source = "id", target = "typeId")
+    @Mapping(target = "studyType", constant = "PERSONAL")
     GetCategoryRes toDto(StudyCategory entity);
 }

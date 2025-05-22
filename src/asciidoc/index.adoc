@@ -11,6 +11,7 @@
 * link:api/member.html[👤 Member API (U01)]
 * link:api/group.html[👥 Group API (U02)]
 * link:api/study.html[📘 Study API (U03)]
+* link:api/chat.html[💬 Chat API (C01)]
 
 
 [[overview]]
