@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-import com.google.common.collect.Streams;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupStudyCategory;
@@ -14,10 +13,8 @@ import com.studypals.domain.groupManage.util.GroupStudyStatisticCalculator;
 import com.studypals.domain.groupManage.worker.GroupMemberReader;
 import com.studypals.domain.groupManage.worker.GroupReader;
 import com.studypals.domain.groupManage.worker.GroupStudyCategoryReader;
-import com.studypals.domain.groupManage.worker.strategy.GroupCategoryStrategyFactory;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.entity.StudyType;
-import com.studypals.domain.studyManage.worker.StudyTimeReader;
 
 /**
  * group study category service 의 구현 클래스입니다.
@@ -40,9 +37,6 @@ public class GroupStudyCategoryServiceImpl implements GroupStudyCategoryService 
     private final GroupReader groupReader;
     private final GroupMemberReader groupMemberReader;
     private final GroupStudyCategoryReader groupCategoryReader;
-    private final StudyTimeReader studyTimeReader;
-
-    private final GroupCategoryStrategyFactory categoryStrategyFactory;
 
     @Override
     public List<GetGroupCategoryRes> getGroupCategory(Long groupId) {
@@ -68,19 +62,11 @@ public class GroupStudyCategoryServiceImpl implements GroupStudyCategoryService 
         List<GroupStudyCategory> categories = groupCategoryReader.getByGroup(group);
         List<GroupMemberProfileDto> members = groupMemberReader.getTopNMemberProfiles(group, group.getTotalMember());
 
-        List<StudyTime> groupStudy = getGroupStudyTime(categories);
+        List<StudyTime> groupStudy = groupCategoryReader.getStudyTimeOfCategory(categories);
         GroupTotalStudyDto groupTotalStudy = GroupStudyStatisticCalculator.sumTotalTimeOfCategory(members, groupStudy);
         List<DailySuccessRateDto> successRates =
                 GroupStudyStatisticCalculator.getDailySuccessRate(group, groupTotalStudy, categories);
 
         return new DailySuccessRateRes(group.getTotalMember(), successRates);
-    }
-
-    private List<StudyTime> getGroupStudyTime(List<GroupStudyCategory> categories) {
-        List<StudyTime> dailyStudy =
-                studyTimeReader.getListByGroup(categoryStrategyFactory.getDailyTypeDto(categories));
-        List<StudyTime> weeklyStudy =
-                studyTimeReader.getListByGroup(categoryStrategyFactory.getWeeklyTypeDto(categories));
-        return Streams.concat(dailyStudy.stream(), weeklyStudy.stream()).toList();
     }
 }
