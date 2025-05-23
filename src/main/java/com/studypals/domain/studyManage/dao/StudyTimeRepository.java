@@ -3,6 +3,7 @@ package com.studypals.domain.studyManage.dao;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -56,4 +57,19 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
             @Param("memberId") Long memberId,
             @Param("studiedDate") LocalDate studiedDate,
             @Param("temporaryName") String temporaryName);
+
+    @Query(
+            value =
+                    """
+        SELECT * FROM study_time
+        WHERE studied_Date BETWEEN :start AND :end
+        AND study_type = :studyType
+        AND type_id IN :typeIds
+    """,
+            nativeQuery = true)
+    List<StudyTime> findByStudyTypeBetween(
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end,
+            @Param("studyType") String studyType,
+            @Param("typeIds") Set<Long> typeIds);
 }

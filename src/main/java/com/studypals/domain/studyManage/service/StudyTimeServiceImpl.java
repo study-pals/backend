@@ -10,9 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.studyManage.dto.GetDailyStudyDto;
-import com.studypals.domain.studyManage.dto.GetStudyDto;
-import com.studypals.domain.studyManage.dto.PeriodDto;
+import com.studypals.domain.studyManage.dto.*;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.worker.StudyTimeReader;

@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +13,10 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
+import com.studypals.domain.studyManage.dto.GroupTypeDto;
+import com.studypals.domain.studyManage.dto.PeriodDto;
 import com.studypals.domain.studyManage.entity.StudyTime;
+import com.studypals.domain.studyManage.entity.StudyType;
 
 @ExtendWith(MockitoExtension.class)
 class StudyTimeReaderTest {
@@ -51,5 +55,26 @@ class StudyTimeReaderTest {
 
         // then
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getListByGroup_success() {
+        // given
+        GroupTypeDto groupTypeDto =
+                new GroupTypeDto(new PeriodDto(LocalDate.now(), LocalDate.now()), StudyType.GROUP, Set.of(1L));
+        StudyTime mockTime = mock(StudyTime.class);
+        given(studyTimeRepository.findByStudyTypeBetween(
+                        groupTypeDto.period().start(),
+                        groupTypeDto.period().end(),
+                        groupTypeDto.type().name(),
+                        groupTypeDto.ids()))
+                .willReturn(List.of(mockTime));
+
+        // when
+        List<StudyTime> result = studyTimeReader.getListByGroup(groupTypeDto);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isEqualTo(mockTime);
     }
 }
