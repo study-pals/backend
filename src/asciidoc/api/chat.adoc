@@ -1,0 +1,57 @@
+= 💬 Chat API
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+
+== 🏠 채팅방 응답코드(C01)
+
+|===
+| 기능 코드 | 설명
+
+| 00 | 채팅방 검색
+| 01 | 채팅방 생성
+| 02 | 채팅방 삭제
+| 03 | 채팅방 정보 갱신
+| 04 | 채팅방 참여
+| 05 | 채팅방 탈퇴
+| 06 | 채팅방 권한
+|===
+
+== 💬 채팅 응답코드(C02)
+
+|===
+| 기능 코드 | 설명
+
+
+|===
+
+== ✨ API 문서
+
+===  채팅방 API
+''''
+==== 1. 채팅방 정보 조회
+
+*Description* +
+
+'''
+
+특정 채팅방에 대한 정보를 path parameter로 받아 조회, 반한합니다.
+
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_success/path-parameters.adoc[]
+include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_success/http-request.adoc[]
+
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_success/response-fields.adoc[]
+include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_success/http-response.adoc[]

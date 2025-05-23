@@ -2,7 +2,9 @@ package com.studypals.domain.groupManage.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
 
 import java.util.List;
 
@@ -12,6 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.studypals.domain.chatManage.entity.ChatRoom;
+import com.studypals.domain.chatManage.worker.ChatRoomWriter;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
@@ -50,6 +54,9 @@ public class GroupServiceTest {
     private GroupMapper groupMapper;
 
     @Mock
+    private ChatRoomWriter chatRoomWriter;
+
+    @Mock
     private Member mockMember;
 
     @Mock
@@ -57,6 +64,9 @@ public class GroupServiceTest {
 
     @Mock
     private GroupTag mockGroupTag;
+
+    @Mock
+    private ChatRoom mockChatRoom;
 
     @InjectMocks
     private GroupServiceImpl groupService;
@@ -84,6 +94,8 @@ public class GroupServiceTest {
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupWorker.create(req)).willReturn(mockGroup);
+        given(chatRoomWriter.create(any())).willReturn(mockChatRoom);
+        willDoNothing().given(chatRoomWriter).joinAsAdmin(mockChatRoom, mockMember);
 
         // when
         Long actual = groupService.createGroup(userId, req);
