@@ -41,7 +41,7 @@ public class GroupDailyCategoryStrategyTest {
         GroupStudyCategoryType type = GroupStudyCategoryType.DAILY;
 
         // when
-        GroupTypeDto dailyType = dailyCategoryStrategy.getGroupStudyTimeType(categories, type);
+        GroupTypeDto dailyType = dailyCategoryStrategy.getGroupStudyTimeType(categories);
 
         // then
         assertThat(dailyType.ids()).hasSize(3);

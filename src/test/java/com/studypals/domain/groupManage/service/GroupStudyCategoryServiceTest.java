@@ -3,9 +3,7 @@ package com.studypals.domain.groupManage.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,13 +19,9 @@ import com.studypals.domain.groupManage.entity.GroupStudyCategoryType;
 import com.studypals.domain.groupManage.worker.GroupMemberReader;
 import com.studypals.domain.groupManage.worker.GroupReader;
 import com.studypals.domain.groupManage.worker.GroupStudyCategoryReader;
-import com.studypals.domain.groupManage.worker.strategy.GroupCategoryStrategyFactory;
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.studyManage.dto.GroupTypeDto;
-import com.studypals.domain.studyManage.dto.PeriodDto;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.entity.StudyType;
-import com.studypals.domain.studyManage.worker.StudyTimeReader;
 
 /**
  * {@link GroupStudyCategoryService} 에 대한 unit test 입니다.
@@ -46,12 +40,6 @@ public class GroupStudyCategoryServiceTest {
 
     @Mock
     private GroupStudyCategoryReader groupStudyCategoryReader;
-
-    @Mock
-    private StudyTimeReader studyTimeReader;
-
-    @Mock
-    private GroupCategoryStrategyFactory categoryStrategyFactory;
 
     @Mock
     private Group mockGroup;
@@ -133,16 +121,11 @@ public class GroupStudyCategoryServiceTest {
                         .time(60 * 60 * 5L)
                         .build());
 
-        GroupTypeDto groupType =
-                new GroupTypeDto(new PeriodDto(LocalDate.now(), LocalDate.now()), StudyType.GROUP, Set.of(categoryId));
-
         given(groupReader.getById(groupId)).willReturn(group);
         given(groupStudyCategoryReader.getByGroup(group)).willReturn(categories);
         given(groupMemberReader.getTopNMemberProfiles(group, group.getTotalMember()))
                 .willReturn(members);
-        given(categoryStrategyFactory.getDailyTypeDto(categories)).willReturn(groupType);
-        given(categoryStrategyFactory.getWeeklyTypeDto(categories)).willReturn(groupType);
-        given(studyTimeReader.getListByGroup(groupType)).willReturn(studyTimes);
+        given(groupStudyCategoryReader.getStudyTimeOfCategory(categories)).willReturn(studyTimes);
 
         // when
         DailySuccessRateRes response = groupStudyCategoryService.getGroupDailyGoal(group.getId());
