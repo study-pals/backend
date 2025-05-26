@@ -7,12 +7,12 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
 import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
+import com.studypals.global.redis.redisHashRepository.annotations.EnableRedisHashRepositories;
 
 /**
  * redis에 대한 config 입니다.
@@ -32,6 +32,7 @@ import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
             StudyStatusRedisRepository.class,
             GroupEntryCodeRedisRepository.class
         })
+@EnableRedisHashRepositories(basePackageClasses = {})
 public class RedisConfig {
 
     @Value("${spring.data.redis.host}")
@@ -48,9 +49,13 @@ public class RedisConfig {
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
+        StringRedisSerializer str = new StringRedisSerializer();
         template.setConnectionFactory(redisConnectionFactory());
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setKeySerializer(str);
+        template.setValueSerializer(str);
+
+        template.setHashKeySerializer(str);
+        template.setHashValueSerializer(str);
         return template;
     }
 }
