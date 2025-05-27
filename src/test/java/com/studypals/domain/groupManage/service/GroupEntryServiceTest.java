@@ -43,6 +43,9 @@ public class GroupEntryServiceTest {
     private GroupEntryCodeManager entryCodeManager;
 
     @Mock
+    private GroupEntryRequestReader entryRequestReader;
+
+    @Mock
     private GroupEntryRequestWriter entryRequestWriter;
 
     @Mock
@@ -62,6 +65,9 @@ public class GroupEntryServiceTest {
 
     @Mock
     private ChatRoom mockChatRoom;
+
+    @Mock
+    private GroupEntryRequest mockEntryRequest;
 
     @InjectMocks
     private GroupEntryServiceImpl groupEntryService;
@@ -293,5 +299,42 @@ public class GroupEntryServiceTest {
         assertThatThrownBy(() -> groupEntryService.requestParticipant(userId, entryInfo))
                 .extracting("errorCode")
                 .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
+    }
+
+    @Test
+    void approveEntryRequest_success() {
+        // given
+        Long userId = 1L;
+        ApproveEntryReq req = new ApproveEntryReq(1L, 1L);
+
+        Long groupMemberId = 1L;
+
+        given(entryRequestReader.getById(req.requestId())).willReturn(mockEntryRequest);
+        given(mockEntryRequest.getMember()).willReturn(mockMember);
+        given(mockEntryRequest.getGroup()).willReturn(mockGroup);
+        given(groupMemberWriter.createMember(mockMember, mockGroup))
+                .willReturn(GroupMember.builder().id(groupMemberId).build());
+
+        // when
+        Long actual = groupEntryService.approveEntryRequest(userId, req);
+
+        // then
+        assertThat(actual).isEqualTo(groupMemberId);
+    }
+
+    @Test
+    void approveEntryRequest_fail_invalidAuthority() {
+        // given
+        Long userId = 1L;
+        ApproveEntryReq req = new ApproveEntryReq(1L, 1L);
+
+        willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
+                .given(authorityValidator)
+                .validate(userId, req.groupId());
+
+        // when & then
+        assertThatThrownBy(() -> groupEntryService.approveEntryRequest(userId, req))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_FORBIDDEN);
     }
 }

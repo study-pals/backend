@@ -1,6 +1,7 @@
 package com.studypals.domain.groupManage.restDocsTest;
 
 import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -179,5 +180,34 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
                                         .description("그룹 초대 코드")
                                         .attributes(constraints("문자열 길이 6"))),
                         responseHeaders(headerWithName("Location").description("추가된 그룹 가입 요청 id"))));
+    }
+
+    @Test
+    @WithMockUser
+    void approveEntryRequest_success() throws Exception {
+        // given
+        Long userId = 1L;
+        Long memberId = 1L;
+        ApproveEntryReq req = new ApproveEntryReq(1L, 1L);
+
+        given(groupEntryService.approveEntryRequest(userId, req)).willReturn(memberId);
+
+        // when
+        ResultActions result = mockMvc.perform(post("/groups/approve")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)));
+
+        // then
+        result.andExpect(status().isCreated())
+                .andExpect(header().string("Location", matchesPattern("/groups/\\d+/members/\\d+")))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        requestFields(
+                                fieldWithPath("groupId").description("그룹 ID").attributes(constraints("not null")),
+                                fieldWithPath("requestId")
+                                        .description("그룹 가입 요청 ID")
+                                        .attributes(constraints("not null"))),
+                        responseHeaders(headerWithName("Location").description("가입된 그룹원 id"))));
     }
 }
