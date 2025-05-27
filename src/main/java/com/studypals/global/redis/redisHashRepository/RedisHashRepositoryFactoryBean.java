@@ -6,37 +6,43 @@ import org.springframework.data.repository.core.support.RepositoryFactoryBeanSup
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 
 /**
- * 코드에 대한 전체적인 역할을 적습니다.
- * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
+ * {@link RedisHashRepository}의 구현체 생성을 Spring Data에 위임하기 위한 FactoryBean 클래스입니다.
  *
- * <p><b>상속 정보:</b><br>
- * 상속 정보를 적습니다.
+ * <p>Spring Data Repository 확장 시 필요한 {@link RepositoryFactoryBeanSupport}를 상속하며,
+ * 내부적으로 {@link RedisHashRepositoryFactory}를 생성하여 Redis 전용 Repository 프록시를 제공합니다.
  *
- * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br>
- * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
+ * <p>이 클래스는 {@link RedisHashRepositoriesRegistrar}에 의해 BeanDefinition으로 등록되며,
+ * 주입된 Repository 인터페이스에 대한 프록시 구현체를 생성합니다.
  *
- * <p><b>빈 관리:</b><br>
- * 필요 시 빈 관리에 대한 내용을 적습니다.
- *
- * <p><b>외부 모듈:</b><br>
- * 필요 시 외부 모듈에 대한 내용을 적습니다.
+ * @param <S>  도메인 타입
+ * @param <ID> ID 타입
+ * @param <T>  Repository 인터페이스 타입
  *
  * @author jack8
- * @see
- * @since 2025-05-26
+ * @since 2025-05-25
  */
 public class RedisHashRepositoryFactoryBean<S, ID, T extends Repository<S, ID>>
         extends RepositoryFactoryBeanSupport<T, S, ID> {
 
+    /** Redis 연동용 RedisTemplate (String 기반 직렬화 전제) */
     private final RedisTemplate<String, String> template;
 
+    /**
+     * 생성자
+     *
+     * @param repositoryInterface Repository 인터페이스 타입
+     * @param template RedisTemplate 인스턴스
+     */
     public RedisHashRepositoryFactoryBean(Class<T> repositoryInterface, RedisTemplate<String, String> template) {
         super(repositoryInterface);
         this.template = template;
     }
 
+    /**
+     * 실제 리포지토리 프록시 객체를 생성할 팩토리 구현체를 반환합니다.
+     *
+     * @return {@link RedisHashRepositoryFactory} 인스턴스
+     */
     @Override
     protected RepositoryFactorySupport createRepositoryFactory() {
         return new RedisHashRepositoryFactory(template);

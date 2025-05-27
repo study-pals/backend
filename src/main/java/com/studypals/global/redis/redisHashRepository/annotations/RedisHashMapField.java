@@ -6,25 +6,33 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 코드에 대한 전체적인 역할을 적습니다.
- * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
+ * Redis Hash 구조에서 필드 전체를 Map 형식으로 직렬화하기 위한 필드에 사용하는 어노테이션입니다.
  *
- * <p><b>상속 정보:</b><br>
- * 상속 정보를 적습니다.
+ * <p>이 어노테이션이 붙은 필드는 {@link java.util.Map} 타입이어야 하며,
+ * Redis에 저장될 때는 map의 각 key-value 쌍이 해시 내부의 필드로 저장됩니다.
  *
- * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br>
- * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
+ * <p>예를 들어 다음과 같은 엔티티가 있을 때:
+ * <pre>{@code
+ * @RedisHashEntity
+ * public class Example {
+ *     @RedisId
+ *     private String id;
  *
- * <p><b>빈 관리:</b><br>
- * 필요 시 빈 관리에 대한 내용을 적습니다.
+ *     @RedisHashMapField
+ *     private Map<Long, String> userMessages;
+ * }
+ * }</pre>
+ * 위 객체가 저장되면 Redis에서는 다음과 같이 구성됩니다:
+ * <pre>
+ * Key: "example:id123"
+ * Field: "1234" -> "안녕"
+ * Field: "5678" -> "잘 가"
+ * </pre>
  *
- * <p><b>외부 모듈:</b><br>
- * 필요 시 외부 모듈에 대한 내용을 적습니다.
+ * <p>이 어노테이션은 엔티티당 한 필드에만 사용할 수 있으며,
+ * 다른 일반 필드들과 함께 저장됩니다.
  *
  * @author jack8
- * @see
  * @since 2025-05-25
  */
 @Retention(RetentionPolicy.RUNTIME)

@@ -9,11 +9,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import com.studypals.domain.chatManage.dao.TestHashRepository;
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
 import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
-import com.studypals.global.redis.redisHashRepository.annotations.EnableRedisHashRepositories;
 
 /**
  * redis에 대한 config 입니다.
@@ -33,7 +31,6 @@ import com.studypals.global.redis.redisHashRepository.annotations.EnableRedisHas
             StudyStatusRedisRepository.class,
             GroupEntryCodeRedisRepository.class
         })
-@EnableRedisHashRepositories(basePackageClasses = {TestHashRepository.class})
 public class RedisConfig {
 
     @Value("${spring.data.redis.host}")

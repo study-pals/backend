@@ -17,35 +17,42 @@ import com.studypals.global.redis.redisHashRepository.annotations.RedisHashMapFi
 import com.studypals.global.redis.redisHashRepository.annotations.RedisId;
 
 /**
- * 코드에 대한 전체적인 역할을 적습니다.
- * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
+ * {@code @RedisHashEntity} 어노테이션이 붙은 클래스의 메타데이터를 분석하고 캐싱하는 리더 클래스입니다.
  *
- * <p><b>상속 정보:</b><br>
- * 상속 정보를 적습니다.
+ * <p>엔티티 클래스의 ID 필드, 일반 필드, Map 필드, TTL 설정 등을 분석하여 {@link EntityMeta} 객체로 변환합니다.
+ * 변환된 메타데이터는 내부 캐시를 통해 재사용되므로 성능 손실 없이 반복 호출이 가능합니다.
  *
- * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br>
- * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
- *
- * <p><b>빈 관리:</b><br>
- * 필요 시 빈 관리에 대한 내용을 적습니다.
- *
- * <p><b>외부 모듈:</b><br>
- * 필요 시 외부 모듈에 대한 내용을 적습니다.
+ * <p><b>동작 원리:</b><br>
+ * - 클래스 리플렉션으로 필드를 분류하고 {@link MethodHandle} 기반 접근자를 생성합니다.<br>
+ * - ID 필드는 Redis의 키로, 일반 필드는 "f:fieldName"으로 저장되며, Map 필드는 그대로 Redis Hash에 저장됩니다.<br>
+ * - 유효성 검사 및 어노테이션 유무 검사를 통해 올바른 구조의 엔티티만 등록됩니다.
  *
  * @author jack8
- * @see
  * @since 2025-05-25
  */
 public final class RedisEntityMetadataReader {
 
+    /**
+     * Entity 클래스에 대한 메타데이터 캐시.
+     * 한 번 분석된 클래스는 이후 재사용됩니다.
+     */
     private static final Map<Class<?>, EntityMeta> CACHE = new ConcurrentHashMap<>();
 
+    /**
+     * 주어진 엔티티 클래스에 대한 {@link EntityMeta} 정보를 반환합니다.
+     * 캐시가 존재하면 재사용하고, 없으면 새로 분석합니다.
+     *
+     * @param type 분석 대상 엔티티 클래스
+     * @return 메타데이터 객체
+     */
     public static EntityMeta get(Class<?> type) {
         return CACHE.computeIfAbsent(type, RedisEntityMetadataReader::scan);
     }
 
+    /**
+     * 엔티티 클래스를 분석하여 {@link EntityMeta}를 생성합니다.
+     * 어노테이션, 필드, TTL, 접근자 등을 구성합니다.
+     */
     private static EntityMeta scan(Class<?> type) {
 
         RedisHashEntity rh = type.getAnnotation(RedisHashEntity.class);
@@ -134,13 +141,10 @@ public final class RedisEntityMetadataReader {
         }
     }
 
-    private static List<Field> concat(List<Field> a, List<Field> b) {
-        List<Field> all = new ArrayList<>(a.size() + b.size());
-        all.addAll(a);
-        all.addAll(b);
-        return all;
-    }
-
+    /**
+     * Redis 직렬화 대상이 될 수 있는 필드 타입인지 검사합니다.
+     * 현재는 String, 숫자형, char 만 지원합니다.
+     */
     private static boolean isAllowedType(Class<?> t) {
         return t == String.class
                 || t == int.class
