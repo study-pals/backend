@@ -84,4 +84,11 @@ public class GroupEntryController {
         return ResponseEntity.created(URI.create(String.format("/groups/%d/members/%d", req.groupId(), joinId)))
                 .build();
     }
+
+    @DeleteMapping("/entry-requests/{requestId}")
+    public ResponseEntity<Void> refuseEntryRequest(@AuthenticationPrincipal Long userId, @PathVariable Long requestId) {
+        groupEntryService.refuseEntryRequest(userId, requestId);
+
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -103,6 +103,14 @@ public class GroupEntryServiceImpl implements GroupEntryService {
         return internalJoinGroup(request.getMember(), request.getGroup());
     }
 
+    @Override
+    @Transactional
+    public void refuseEntryRequest(Long userId, Long requestId) {
+        GroupEntryRequest request = entryRequestReader.getById(requestId);
+        authorityValidator.validate(userId, request.getGroup().getId());
+        entryRequestWriter.closeRequest(request);
+    }
+
     // 그룹 참여 시 공통 로직을 private 으로 분리
     private Long internalJoinGroup(Member member, Group group) {
         Long joinId = groupMemberWriter.createMember(member, group).getId();
