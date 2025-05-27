@@ -44,4 +44,8 @@ public class GroupEntryRequestWorker {
 
         return entryRequest;
     }
+
+    public void closeRequest(GroupEntryRequest request) {
+        entryRequestRepository.delete(request);
+    }
 }

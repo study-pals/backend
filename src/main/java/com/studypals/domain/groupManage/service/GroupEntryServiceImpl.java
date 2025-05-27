@@ -8,17 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.worker.ChatRoomWriter;
-import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
-import com.studypals.domain.groupManage.dto.GroupEntryReq;
-import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
-import com.studypals.domain.groupManage.dto.GroupSummaryRes;
+import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.entity.Group;
-import com.studypals.domain.groupManage.worker.GroupAuthorityValidator;
-import com.studypals.domain.groupManage.worker.GroupEntryCodeManager;
-import com.studypals.domain.groupManage.worker.GroupEntryRequestWorker;
-import com.studypals.domain.groupManage.worker.GroupMemberReader;
-import com.studypals.domain.groupManage.worker.GroupMemberWorker;
-import com.studypals.domain.groupManage.worker.GroupReader;
+import com.studypals.domain.groupManage.entity.GroupEntryRequest;
+import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
@@ -52,6 +45,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
     private final GroupAuthorityValidator authorityValidator;
     private final GroupEntryCodeManager entryCodeManager;
+    private final GroupEntryRequestReader entryRequestReader;
     private final GroupEntryRequestWorker entryRequestWorker;
 
     private final ChatRoomWriter chatRoomWriter;
@@ -97,6 +91,16 @@ public class GroupEntryServiceImpl implements GroupEntryService {
         entryCodeManager.validateCodeBelongsToGroup(group, entryInfo.entryCode());
         Member member = memberReader.getRef(userId);
         return entryRequestWorker.createRequest(member, group).getId();
+    }
+
+    @Override
+    @Transactional
+    public Long approveEntryRequest(Long userId, ApproveEntryReq req) {
+        authorityValidator.validate(userId, req.groupId());
+        GroupEntryRequest request = entryRequestReader.getById(req.requestId());
+        entryRequestWorker.closeRequest(request);
+
+        return internalJoinGroup(request.getMember(), request.getGroup());
     }
 
     // 그룹 참여 시 공통 로직을 private 으로 분리

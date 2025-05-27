@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.groupManage.dto.ApproveEntryReq;
 import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
 import com.studypals.domain.groupManage.dto.GroupEntryReq;
 import com.studypals.domain.groupManage.dto.GroupSummaryRes;
@@ -27,6 +28,7 @@ import com.studypals.global.responses.ResponseCode;
  *     - GET /groups/summary : 그룹 대표 정보 조회
  *     - POST /groups/join : 공개 그룹에 가입
  *     - POST /groups/request-entry : 비공개 그룹 가입 요청
+ *     - POST /groups/approve : 그룹 가입 요청 승인
  * </pre>
  *
  * @author s0o0bn
@@ -71,6 +73,15 @@ public class GroupEntryController {
         Long requestId = groupEntryService.requestParticipant(userId, req);
 
         return ResponseEntity.created(URI.create(String.format("/groups/%d/requests/%d", req.groupId(), requestId)))
+                .build();
+    }
+
+    @PostMapping("/approve")
+    public ResponseEntity<Void> approveEntryRequest(
+            @AuthenticationPrincipal Long userId, @RequestBody ApproveEntryReq req) {
+        Long joinId = groupEntryService.approveEntryRequest(userId, req);
+
+        return ResponseEntity.created(URI.create(String.format("/groups/%d/members/%d", req.groupId(), joinId)))
                 .build();
     }
 }
