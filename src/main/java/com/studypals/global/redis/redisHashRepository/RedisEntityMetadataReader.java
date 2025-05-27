@@ -49,8 +49,7 @@ public final class RedisEntityMetadataReader {
     private static EntityMeta scan(Class<?> type) {
 
         RedisHashEntity rh = type.getAnnotation(RedisHashEntity.class);
-
-        if (!type.isAnnotationPresent(RedisHashEntity.class)) {
+        if (rh == null) {
             throw new IllegalArgumentException(type + " missing @RedisHashEntity");
         }
 
@@ -98,9 +97,8 @@ public final class RedisEntityMetadataReader {
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
 
-        MethodHandle idGetter, idSetter;
-
         try {
+            MethodHandle idGetter, idSetter;
             idField.setAccessible(true);
             idGetter = lookup.unreflectGetter(idField);
             idSetter = lookup.unreflectSetter(idField);

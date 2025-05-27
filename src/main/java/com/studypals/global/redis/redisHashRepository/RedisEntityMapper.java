@@ -63,11 +63,10 @@ public final class RedisEntityMapper {
 
     // hash -> entity
     @SuppressWarnings("unchecked")
-    public static <T> T fromHash(Map<Object, Object> hash, EntityMeta m) {
+    public static <T> T fromHash(String idKey, Map<Object, Object> hash, EntityMeta m) {
         try {
             T obj = (T) m.type().getDeclaredConstructor().newInstance();
-            Object idVal = hash.get(m.idField().getName());
-            m.idSetter().invoke(obj, convert(idVal, m.idField().getType()));
+            m.idSetter().invoke(obj, convert(idKey, m.idField().getType()));
 
             for (Field f : m.valueFields()) {
                 String redisKey = FIELD_PREFIX + f.getName();

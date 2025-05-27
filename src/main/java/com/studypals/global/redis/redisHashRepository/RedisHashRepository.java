@@ -1,5 +1,11 @@
 package com.studypals.global.redis.redisHashRepository;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.data.repository.Repository;
+
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
  * <p>
@@ -22,12 +28,20 @@ package com.studypals.global.redis.redisHashRepository;
  * @see
  * @since 2025-05-25
  */
-public interface RedisHashRepository<E, K> {
+public interface RedisHashRepository<E, ID> extends Repository<E, ID> {
     void save(E entity);
 
-    E findById(K id);
+    Optional<E> findById(ID id);
 
-    void delete(K id);
+    void delete(ID id);
 
-    boolean existById(K id);
+    boolean existById(ID id);
+
+    Iterable<E> findAllById(Iterable<ID> ids);
+
+    Map<String, String> findHashFieldsById(ID hashKey, List<String> fieldKey);
+
+    void saveMapById(ID hashKey, Map<String, String> map);
+
+    void deleteMapById(ID hashKey, List<String> fieldKey);
 }

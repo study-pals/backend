@@ -1,9 +1,9 @@
 package com.studypals.global.redis.redisHashRepository;
 
-import java.lang.reflect.ParameterizedType;
-
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.core.support.RepositoryFactoryBeanSupport;
+import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
@@ -27,35 +27,18 @@ import org.springframework.data.redis.core.RedisTemplate;
  * @see
  * @since 2025-05-26
  */
-public class RedisHashRepositoryFactoryBean<T> implements FactoryBean<T> {
+public class RedisHashRepositoryFactoryBean<S, ID, T extends Repository<S, ID>>
+        extends RepositoryFactoryBeanSupport<T, S, ID> {
 
-    private final Class<T> repoIntf;
     private final RedisTemplate<String, String> template;
-    private T proxy; // ← ByteBuddy 구현 인스턴스
 
-    public RedisHashRepositoryFactoryBean(Class<T> repoIntf, RedisTemplate<String, String> template) {
-        this.repoIntf = repoIntf;
+    public RedisHashRepositoryFactoryBean(Class<T> repositoryInterface, RedisTemplate<String, String> template) {
+        super(repositoryInterface);
         this.template = template;
     }
 
     @Override
-    public T getObject() {
-        if (proxy == null) init();
-        return proxy;
-    }
-
-    @Override
-    public Class<?> getObjectType() {
-        return repoIntf;
-    }
-
-    private void init() {
-        // 제네릭 파라미터 추출
-        ParameterizedType g = (ParameterizedType) repoIntf.getGenericInterfaces()[0];
-        Class<?> entityType = (Class<?>) g.getActualTypeArguments()[0];
-        Class<?> idType = (Class<?>) g.getActualTypeArguments()[1];
-
-        DynamicRepositoryBuilder builder = new DynamicRepositoryBuilder(template);
-        proxy = builder.build(entityType, idType, repoIntf, RedisEntityMetadataReader.get(entityType));
+    protected RepositoryFactorySupport createRepositoryFactory() {
+        return new RedisHashRepositoryFactory(template);
     }
 }
