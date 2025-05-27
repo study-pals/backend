@@ -119,7 +119,7 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
         entryCodeRedisRepository.save(groupEntryCode);
 
         // when
-        ResultActions result = mockMvc.perform(post("/groups/request-entry")
+        ResultActions result = mockMvc.perform(post("/groups/entry-requests")
                 .header("Authorization", "Bearer " + user.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
@@ -140,7 +140,7 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
         AcceptEntryReq req = new AcceptEntryReq(group.groupId(), requestId);
 
         // when
-        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post("/groups/accept-request")
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post("/groups/entry-requests/accept")
                 .header("Authorization", "Bearer " + user.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));

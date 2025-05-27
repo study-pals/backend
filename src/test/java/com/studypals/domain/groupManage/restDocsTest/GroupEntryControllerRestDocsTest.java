@@ -164,7 +164,7 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
         given(groupEntryService.requestParticipant(any(), eq(req))).willReturn(requestId);
 
         // when
-        ResultActions result = mockMvc.perform(post("/groups/request-entry")
+        ResultActions result = mockMvc.perform(post("/groups/entry-requests")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 
@@ -193,7 +193,7 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
         given(groupEntryService.acceptEntryRequest(userId, req)).willReturn(memberId);
 
         // when
-        ResultActions result = mockMvc.perform(post("/groups/accept-request")
+        ResultActions result = mockMvc.perform(post("/groups/entry-requests/accept")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 

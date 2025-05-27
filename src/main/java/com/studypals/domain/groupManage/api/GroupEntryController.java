@@ -27,8 +27,8 @@ import com.studypals.global.responses.ResponseCode;
  *     - POST /groups/{groupId}/entry-code : 그룹 초대 코드 생성
  *     - GET /groups/summary : 그룹 대표 정보 조회
  *     - POST /groups/join : 공개 그룹에 가입
- *     - POST /groups/request-entry : 비공개 그룹 가입 요청
- *     - POST /groups/accept : 그룹 가입 요청 승인
+ *     - POST /groups/entry-requests : 비공개 그룹 가입 요청
+ *     - POST /groups/entry-requests/accept : 그룹 가입 요청 승인
  * </pre>
  *
  * @author s0o0bn
@@ -67,7 +67,7 @@ public class GroupEntryController {
                 .build();
     }
 
-    @PostMapping("/request-entry")
+    @PostMapping("/entry-requests")
     public ResponseEntity<Void> requestGroupParticipant(
             @AuthenticationPrincipal Long userId, @Valid @RequestBody GroupEntryReq req) {
         Long requestId = groupEntryService.requestParticipant(userId, req);
@@ -76,7 +76,7 @@ public class GroupEntryController {
                 .build();
     }
 
-    @PostMapping("/accept-request")
+    @PostMapping("/entry-requests/accept")
     public ResponseEntity<Void> acceptEntryRequest(
             @AuthenticationPrincipal Long userId, @RequestBody AcceptEntryReq req) {
         Long joinId = groupEntryService.acceptEntryRequest(userId, req);
