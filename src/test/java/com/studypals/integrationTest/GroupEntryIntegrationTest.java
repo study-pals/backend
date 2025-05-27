@@ -150,6 +150,23 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
                 .andExpect(header().string("Location", matchesPattern("/groups/\\d+/members/\\d+")));
     }
 
+    @Test
+    @WithMockUser
+    void refuseEntryRequest_success() throws Exception {
+        // given
+        CreateUserVar user = createUser("leader", "leader");
+        CreateUserVar member = createUser("member", "member");
+        CreateGroupVar group = createGroup(user.getUserId(), "group", "tag");
+        long requestId = createRequest(member.getUserId(), group.groupId());
+
+        // when
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/groups/entry-requests/" + requestId)
+                .header("Authorization", "Bearer " + user.getAccessToken()));
+
+        // then
+        result.andExpect(status().isNoContent());
+    }
+
     private long createRequest(Long userId, Long groupId) {
         String sql =
                 """

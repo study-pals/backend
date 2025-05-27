@@ -1,7 +1,6 @@
 package com.studypals.domain.groupManage.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.*;
@@ -334,6 +333,40 @@ public class GroupEntryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.acceptEntryRequest(userId, req))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_FORBIDDEN);
+    }
+
+    @Test
+    void refuseEntryRequest_success() {
+        // given
+        Long userId = 1L;
+        Long requestId = 1L;
+
+        given(entryRequestReader.getById(requestId)).willReturn(mockEntryRequest);
+        given(mockEntryRequest.getGroup()).willReturn(mockGroup);
+        given(mockGroup.getId()).willReturn(1L);
+
+        // when & then
+        assertThatNoException().isThrownBy(() -> groupEntryService.refuseEntryRequest(userId, requestId));
+    }
+
+    @Test
+    void refuseEntryRequest_fail_invalidAuthority() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        Long requestId = 1L;
+
+        given(entryRequestReader.getById(requestId)).willReturn(mockEntryRequest);
+        given(mockEntryRequest.getGroup()).willReturn(mockGroup);
+        given(mockGroup.getId()).willReturn(groupId);
+        willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
+                .given(authorityValidator)
+                .validate(userId, groupId);
+
+        // when & then
+        assertThatThrownBy(() -> groupEntryService.refuseEntryRequest(userId, requestId))
                 .extracting("errorCode")
                 .isEqualTo(GroupErrorCode.GROUP_FORBIDDEN);
     }
