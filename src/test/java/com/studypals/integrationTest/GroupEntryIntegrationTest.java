@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
-import com.studypals.domain.groupManage.dto.ApproveEntryReq;
+import com.studypals.domain.groupManage.dto.AcceptEntryReq;
 import com.studypals.domain.groupManage.dto.GroupEntryReq;
 import com.studypals.domain.groupManage.entity.GroupEntryCode;
 import com.studypals.global.responses.ResponseCode;
@@ -137,10 +137,10 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
         CreateUserVar member = createUser("member", "member");
         CreateGroupVar group = createGroup(user.getUserId(), "group", "tag");
         long requestId = createRequest(member.getUserId(), group.groupId());
-        ApproveEntryReq req = new ApproveEntryReq(group.groupId(), requestId);
+        AcceptEntryReq req = new AcceptEntryReq(group.groupId(), requestId);
 
         // when
-        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post("/groups/approve")
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post("/groups/accept-request")
                 .header("Authorization", "Bearer " + user.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));

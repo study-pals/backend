@@ -95,7 +95,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
     @Override
     @Transactional
-    public Long approveEntryRequest(Long userId, ApproveEntryReq req) {
+    public Long acceptEntryRequest(Long userId, AcceptEntryReq req) {
         authorityValidator.validate(userId, req.groupId());
         GroupEntryRequest request = entryRequestReader.getById(req.requestId());
         entryRequestWriter.closeRequest(request);

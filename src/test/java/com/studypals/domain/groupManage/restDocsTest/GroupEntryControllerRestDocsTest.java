@@ -184,16 +184,16 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
 
     @Test
     @WithMockUser
-    void approveEntryRequest_success() throws Exception {
+    void acceptEntryRequest_success() throws Exception {
         // given
         Long userId = 1L;
         Long memberId = 1L;
-        ApproveEntryReq req = new ApproveEntryReq(1L, 1L);
+        AcceptEntryReq req = new AcceptEntryReq(1L, 1L);
 
-        given(groupEntryService.approveEntryRequest(userId, req)).willReturn(memberId);
+        given(groupEntryService.acceptEntryRequest(userId, req)).willReturn(memberId);
 
         // when
-        ResultActions result = mockMvc.perform(post("/groups/approve")
+        ResultActions result = mockMvc.perform(post("/groups/accept-request")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 

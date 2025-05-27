@@ -302,10 +302,10 @@ public class GroupEntryServiceTest {
     }
 
     @Test
-    void approveEntryRequest_success() {
+    void acceptEntryRequest_success() {
         // given
         Long userId = 1L;
-        ApproveEntryReq req = new ApproveEntryReq(1L, 1L);
+        AcceptEntryReq req = new AcceptEntryReq(1L, 1L);
 
         Long groupMemberId = 1L;
 
@@ -316,24 +316,24 @@ public class GroupEntryServiceTest {
                 .willReturn(GroupMember.builder().id(groupMemberId).build());
 
         // when
-        Long actual = groupEntryService.approveEntryRequest(userId, req);
+        Long actual = groupEntryService.acceptEntryRequest(userId, req);
 
         // then
         assertThat(actual).isEqualTo(groupMemberId);
     }
 
     @Test
-    void approveEntryRequest_fail_invalidAuthority() {
+    void acceptEntryRequest_fail_invalidAuthority() {
         // given
         Long userId = 1L;
-        ApproveEntryReq req = new ApproveEntryReq(1L, 1L);
+        AcceptEntryReq req = new AcceptEntryReq(1L, 1L);
 
         willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
                 .given(authorityValidator)
                 .validate(userId, req.groupId());
 
         // when & then
-        assertThatThrownBy(() -> groupEntryService.approveEntryRequest(userId, req))
+        assertThatThrownBy(() -> groupEntryService.acceptEntryRequest(userId, req))
                 .extracting("errorCode")
                 .isEqualTo(GroupErrorCode.GROUP_FORBIDDEN);
     }
