@@ -36,9 +36,9 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
     private final MemberReader memberReader;
-    private final GroupWorker groupWorker;
+    private final GroupWriter groupWriter;
     private final GroupReader groupReader;
-    private final GroupMemberWorker groupMemberWorker;
+    private final GroupMemberWriter groupMemberWriter;
     private final GroupMapper groupMapper;
 
     // chat room worker class
@@ -53,9 +53,9 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public Long createGroup(Long userId, CreateGroupReq dto) {
         // 그룹 생성
-        Group group = groupWorker.create(dto);
+        Group group = groupWriter.create(dto);
         Member member = memberReader.getRef(userId);
-        groupMemberWorker.createLeader(member, group);
+        groupMemberWriter.createLeader(member, group);
 
         // 채팅방 생성
         CreateChatRoomDto createChatRoomDto = new CreateChatRoomDto(dto.name());

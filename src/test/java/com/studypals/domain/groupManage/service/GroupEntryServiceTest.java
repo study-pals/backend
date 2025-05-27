@@ -37,13 +37,13 @@ public class GroupEntryServiceTest {
     private GroupReader groupReader;
 
     @Mock
-    private GroupMemberWorker groupMemberWorker;
+    private GroupMemberWriter groupMemberWriter;
 
     @Mock
     private GroupEntryCodeManager entryCodeManager;
 
     @Mock
-    private GroupEntryRequestWorker entryRequestWorker;
+    private GroupEntryRequestWriter entryRequestWriter;
 
     @Mock
     private GroupMemberReader groupMemberReader;
@@ -148,7 +148,7 @@ public class GroupEntryServiceTest {
         given(groupReader.getById(entryInfo.groupId())).willReturn(mockGroup);
         given(mockGroup.isApprovalRequired()).willReturn(false);
         given(mockGroup.getChatRoom()).willReturn(mockChatRoom);
-        given(groupMemberWorker.createMember(mockMember, mockGroup)).willReturn(groupMember);
+        given(groupMemberWriter.createMember(mockMember, mockGroup)).willReturn(groupMember);
 
         willDoNothing().given(chatRoomWriter).join(mockChatRoom, mockMember);
 
@@ -216,7 +216,7 @@ public class GroupEntryServiceTest {
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
-                .given(groupMemberWorker)
+                .given(groupMemberWriter)
                 .createMember(mockMember, group);
 
         // when & then
@@ -240,7 +240,7 @@ public class GroupEntryServiceTest {
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         given(memberReader.getRef(userId)).willReturn(mockMember);
-        given(entryRequestWorker.createRequest(mockMember, group)).willReturn(entryRequest);
+        given(entryRequestWriter.createRequest(mockMember, group)).willReturn(entryRequest);
 
         // when
         Long actual = groupEntryService.requestParticipant(userId, entryInfo);
@@ -263,7 +263,7 @@ public class GroupEntryServiceTest {
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
-                .given(entryRequestWorker)
+                .given(entryRequestWriter)
                 .validateNewRequestAvailable(group);
 
         // when & then

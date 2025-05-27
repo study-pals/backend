@@ -40,13 +40,13 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
     private final MemberReader memberReader;
     private final GroupReader groupReader;
-    private final GroupMemberWorker groupMemberWorker;
+    private final GroupMemberWriter groupMemberWriter;
     private final GroupMemberReader groupMemberReader;
 
     private final GroupAuthorityValidator authorityValidator;
     private final GroupEntryCodeManager entryCodeManager;
     private final GroupEntryRequestReader entryRequestReader;
-    private final GroupEntryRequestWorker entryRequestWorker;
+    private final GroupEntryRequestWriter entryRequestWriter;
 
     private final ChatRoomWriter chatRoomWriter;
 
@@ -87,10 +87,10 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Transactional
     public Long requestParticipant(Long userId, GroupEntryReq entryInfo) {
         Group group = groupReader.getById(entryInfo.groupId());
-        entryRequestWorker.validateNewRequestAvailable(group);
+        entryRequestWriter.validateNewRequestAvailable(group);
         entryCodeManager.validateCodeBelongsToGroup(group, entryInfo.entryCode());
         Member member = memberReader.getRef(userId);
-        return entryRequestWorker.createRequest(member, group).getId();
+        return entryRequestWriter.createRequest(member, group).getId();
     }
 
     @Override
@@ -98,14 +98,14 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     public Long approveEntryRequest(Long userId, ApproveEntryReq req) {
         authorityValidator.validate(userId, req.groupId());
         GroupEntryRequest request = entryRequestReader.getById(req.requestId());
-        entryRequestWorker.closeRequest(request);
+        entryRequestWriter.closeRequest(request);
 
         return internalJoinGroup(request.getMember(), request.getGroup());
     }
 
     // 그룹 참여 시 공통 로직을 private 으로 분리
     private Long internalJoinGroup(Member member, Group group) {
-        Long joinId = groupMemberWorker.createMember(member, group).getId();
+        Long joinId = groupMemberWriter.createMember(member, group).getId();
 
         chatRoomWriter.join(group.getChatRoom(), member);
 

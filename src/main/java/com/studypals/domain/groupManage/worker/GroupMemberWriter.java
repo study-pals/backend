@@ -27,7 +27,7 @@ import com.studypals.global.exceptions.exception.GroupException;
  */
 @Worker
 @RequiredArgsConstructor
-public class GroupMemberWorker {
+public class GroupMemberWriter {
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberMapper groupMemberMapper;
