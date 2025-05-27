@@ -29,6 +29,7 @@ import com.studypals.global.responses.ResponseCode;
  *     - POST /groups/join : 공개 그룹에 가입
  *     - POST /groups/entry-requests : 비공개 그룹 가입 요청
  *     - POST /groups/entry-requests/accept : 그룹 가입 요청 승인
+ *     - DELETE /groups/entry-requests/{requestId} : 그룹 가입 요청 거절
  * </pre>
  *
  * @author s0o0bn
