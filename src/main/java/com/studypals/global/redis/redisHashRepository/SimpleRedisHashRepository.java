@@ -66,7 +66,7 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
     @Override
     public void save(E entity) {
         try {
-            String key = meta.idGetter().invoke(entity).toString();
+            String key = meta.keyPrefix() + meta.idGetter().invoke(entity).toString();
             if (Boolean.TRUE.equals(tpl.hasKey(key))) {
                 throw new DuplicateKeyException("key duplicated");
             }
@@ -84,7 +84,9 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
      */
     @Override
     public Optional<E> findById(ID id) {
-        Map<Object, Object> raw = tpl.opsForHash().entries(id.toString());
+        String keyPrefix = meta.keyPrefix();
+        String key = keyPrefix + id.toString();
+        Map<Object, Object> raw = tpl.opsForHash().entries(key);
         if (raw == null || raw.isEmpty()) return Optional.empty();
 
         @SuppressWarnings("unchecked")
@@ -97,7 +99,8 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
      */
     @Override
     public void delete(ID id) {
-        tpl.delete(id.toString());
+        String key = meta.keyPrefix() + id.toString();
+        tpl.delete(key);
     }
 
     /**
@@ -125,9 +128,10 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
      */
     @Override
     public Map<String, String> findHashFieldsById(ID hashKey, List<String> fieldKey) {
+        String keyPrefix = meta.keyPrefix();
         @SuppressWarnings("unchecked")
-        List<Object> flat =
-                (List<Object>) tpl.execute(HGET_MULTI_SCRIPT, List.of(hashKey.toString()), fieldKey.toArray());
+        List<Object> flat = (List<Object>)
+                tpl.execute(HGET_MULTI_SCRIPT, List.of(keyPrefix + hashKey.toString()), fieldKey.toArray());
         Map<String, String> map = new LinkedHashMap<>();
         if (flat != null) {
             for (int i = 0; i < flat.size(); i += 2) {
@@ -143,7 +147,8 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
      */
     @Override
     public void saveMapById(ID hashKey, Map<String, String> map) {
-        tpl.opsForHash().putAll(hashKey.toString(), map);
+        String keyPrefix = meta.keyPrefix();
+        tpl.opsForHash().putAll(keyPrefix + hashKey.toString(), map);
         if (meta.ttlValue() > 0) {
             tpl.expire(
                     hashKey.toString(),
@@ -156,6 +161,7 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
      */
     @Override
     public void deleteMapById(ID hashKey, List<String> fieldKey) {
-        tpl.opsForHash().delete(hashKey.toString(), fieldKey.toArray());
+        String keyPrefix = meta.keyPrefix();
+        tpl.opsForHash().delete(keyPrefix + hashKey.toString(), fieldKey.toArray());
     }
 }

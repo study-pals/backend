@@ -1,5 +1,6 @@
 package com.studypals.global.redis.redisHashRepository;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.support.RepositoryFactoryBeanSupport;
@@ -33,7 +34,8 @@ public class RedisHashRepositoryFactoryBean<S, ID, T extends Repository<S, ID>>
      * @param repositoryInterface Repository 인터페이스 타입
      * @param template RedisTemplate 인스턴스
      */
-    public RedisHashRepositoryFactoryBean(Class<T> repositoryInterface, RedisTemplate<String, String> template) {
+    public RedisHashRepositoryFactoryBean(
+            Class<T> repositoryInterface, RedisTemplate<String, String> template, EntityMeta entityMeta) {
         super(repositoryInterface);
         this.template = template;
     }
@@ -43,6 +45,7 @@ public class RedisHashRepositoryFactoryBean<S, ID, T extends Repository<S, ID>>
      *
      * @return {@link RedisHashRepositoryFactory} 인스턴스
      */
+    @NotNull
     @Override
     protected RepositoryFactorySupport createRepositoryFactory() {
         return new RedisHashRepositoryFactory(template);

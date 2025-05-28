@@ -2,6 +2,7 @@ package com.studypals.global.redis.redisHashRepository;
 
 import java.util.Optional;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.RepositoryInformation;
@@ -25,6 +26,8 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
 
     /** Redis 연동을 위한 RedisTemplate */
     private final RedisTemplate<String, String> tpl;
+
+    private EntityMeta entityMeta;
 
     /**
      * 생성자
@@ -52,9 +55,10 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
      * @param <ID> ID 타입
      * @return EntityInformation 객체
      */
+    @NotNull
     @Override
-    public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
-        EntityMeta entityMeta = RedisEntityMetadataReader.get(domainClass);
+    public <T, ID> EntityInformation<T, ID> getEntityInformation(@NotNull Class<T> domainClass) {
+        entityMeta = RedisEntityMetadataReader.get(domainClass);
         return new RedisHashEntityInformation<>(domainClass, entityMeta);
     }
 
@@ -64,6 +68,7 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
      * @param metadata 리포지토리 정보 (도메인 타입 등 포함)
      * @return 실제 동작을 수행할 구현체 인스턴스
      */
+    @NotNull
     @Override
     protected Object getTargetRepository(RepositoryInformation metadata) {
         Class<?> entityType = metadata.getDomainType();
@@ -75,9 +80,10 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
      * 쿼리 메서드 커스텀 전략 등록.
      * {@link com.studypals.global.redis.redisHashRepository.annotations.LuaQuery} 어노테이션이 붙은 Repository 메서드를 지원합니다.
      */
+    @NotNull
     @Override
     protected Optional<QueryLookupStrategy> getQueryLookupStrategy(
-            QueryLookupStrategy.Key key, ValueExpressionDelegate valueExpressionDelegate) {
-        return Optional.of((method, md, proj, named) -> new RedisLuaQuery(tpl, method, md, proj));
+            @NotNull QueryLookupStrategy.Key key, @NotNull ValueExpressionDelegate valueExpressionDelegate) {
+        return Optional.of((method, md, proj, named) -> new RedisLuaQuery(tpl, method, md, proj, entityMeta));
     }
 }

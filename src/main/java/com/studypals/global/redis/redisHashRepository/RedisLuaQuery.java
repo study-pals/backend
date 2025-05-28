@@ -37,6 +37,9 @@ public class RedisLuaQuery implements RepositoryQuery {
     /** Spring Data가 제공하는 쿼리 메타데이터 객체 */
     private final QueryMethod queryMethod;
 
+    /** 엔티티 데이터에 대한 메타데이터 객체 */
+    private final EntityMeta entityMeta;
+
     /**
      * 생성자 - 어노테이션 정보 기반으로 Lua 스크립트 및 반환 타입을 초기화합니다.
      *
@@ -49,12 +52,14 @@ public class RedisLuaQuery implements RepositoryQuery {
             RedisTemplate<String, String> template,
             Method method,
             RepositoryMetadata metadata,
-            ProjectionFactory factory) {
+            ProjectionFactory factory,
+            EntityMeta entityMeta) {
 
         this.template = template;
         this.queryMethod = new QueryMethod(method, metadata, factory);
         LuaQuery ann = method.getAnnotation(LuaQuery.class);
         this.script = new DefaultRedisScript<>(ann.value(), ann.resultType());
+        this.entityMeta = entityMeta;
     }
 
     /**
