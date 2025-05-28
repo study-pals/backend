@@ -42,8 +42,9 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
      * 리포지토리 구현체로 사용할 클래스 지정
      * 이 클래스는 실제 동작을 수행하는 concrete 클래스입니다.
      */
+    @NotNull
     @Override
-    protected Class<?> getRepositoryBaseClass(RepositoryMetadata metadata) {
+    protected Class<?> getRepositoryBaseClass(@NotNull RepositoryMetadata metadata) {
         return SimpleRedisHashRepository.class;
     }
 

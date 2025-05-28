@@ -3,7 +3,6 @@ package com.studypals.global.redis.redisHashRepository;
 import java.time.Duration;
 import java.util.*;
 
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
@@ -67,9 +66,6 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
     public void save(E entity) {
         try {
             String key = meta.keyPrefix() + meta.idGetter().invoke(entity).toString();
-            if (Boolean.TRUE.equals(tpl.hasKey(key))) {
-                throw new DuplicateKeyException("key duplicated");
-            }
             Map<String, String> map = RedisEntityMapper.toHash(entity, meta);
             tpl.opsForHash().putAll(key, map);
             if (meta.ttlValue() > 0)

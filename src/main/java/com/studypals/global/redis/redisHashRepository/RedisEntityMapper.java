@@ -79,6 +79,10 @@ public final class RedisEntityMapper {
     public static <T> T fromHash(String idKey, Map<Object, Object> hash, EntityMeta m) {
         try {
             T obj = (T) m.type().getDeclaredConstructor().newInstance();
+            if (!idKey.startsWith(m.keyPrefix())) {
+                throw new IllegalArgumentException("not invalid entity type");
+            }
+            idKey = idKey.substring(m.keyPrefix().length());
             // ID 주입
             m.idSetter().invoke(obj, convert(idKey, m.idField().getType()));
 
