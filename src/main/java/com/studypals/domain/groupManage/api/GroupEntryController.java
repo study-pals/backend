@@ -79,7 +79,7 @@ public class GroupEntryController {
 
     @PostMapping("/entry-requests/accept")
     public ResponseEntity<Void> acceptEntryRequest(
-            @AuthenticationPrincipal Long userId, @RequestBody AcceptEntryReq req) {
+            @AuthenticationPrincipal Long userId, @Valid @RequestBody AcceptEntryReq req) {
         Long joinId = groupEntryService.acceptEntryRequest(userId, req);
 
         return ResponseEntity.created(URI.create(String.format("/groups/%d/members/%d", req.groupId(), joinId)))
