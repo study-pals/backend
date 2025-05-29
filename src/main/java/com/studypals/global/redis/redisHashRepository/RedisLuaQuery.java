@@ -71,9 +71,10 @@ public class RedisLuaQuery implements RepositoryQuery {
      */
     @Override
     public Object execute(Object[] args) {
+        String keyPefix = entityMeta.keyPrefix();
         String hashKey = (String) args[0];
         List<?> fieldKeys = (List<?>) args[1];
-        return template.execute(script, List.of(hashKey), fieldKeys.toArray());
+        return template.execute(script, List.of(keyPefix + hashKey), fieldKeys.toArray());
     }
 
     /**

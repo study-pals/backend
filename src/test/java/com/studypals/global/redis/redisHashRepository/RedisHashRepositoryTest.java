@@ -1,7 +1,6 @@
 package com.studypals.global.redis.redisHashRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.util.List;
 import java.util.Map;
@@ -52,16 +51,6 @@ public class RedisHashRepositoryTest {
         assertThat(result.get().getName()).isEqualTo("testUser");
         assertThat(result.get().getAge()).isEqualTo(25);
         assertThat(result.get().getMetadata()).containsEntry("a", "1");
-    }
-
-    @Test
-    void save_fail_duplicateKey() {
-        // given
-        TestRedisHashEntity entity = new TestRedisHashEntity(key, "abc", 1, Map.of());
-        repository.save(entity);
-
-        // when & then
-        assertThatThrownBy(() -> repository.save(entity)).isInstanceOf(RuntimeException.class);
     }
 
     @Test

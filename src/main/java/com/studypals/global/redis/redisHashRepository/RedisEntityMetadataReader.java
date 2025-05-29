@@ -65,6 +65,7 @@ public final class RedisEntityMetadataReader {
                 ? Character.toLowerCase(type.getSimpleName().charAt(0))
                         + type.getSimpleName().substring(1)
                 : rh.value();
+        keyPrefix = keyPrefix + ":";
 
         // TTL setting
         Expires expires = type.getAnnotation(Expires.class);

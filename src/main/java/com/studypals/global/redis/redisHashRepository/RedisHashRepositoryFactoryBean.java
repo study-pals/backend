@@ -34,8 +34,7 @@ public class RedisHashRepositoryFactoryBean<S, ID, T extends Repository<S, ID>>
      * @param repositoryInterface Repository 인터페이스 타입
      * @param template RedisTemplate 인스턴스
      */
-    public RedisHashRepositoryFactoryBean(
-            Class<T> repositoryInterface, RedisTemplate<String, String> template, EntityMeta entityMeta) {
+    public RedisHashRepositoryFactoryBean(Class<T> repositoryInterface, RedisTemplate<String, String> template) {
         super(repositoryInterface);
         this.template = template;
     }

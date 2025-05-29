@@ -27,8 +27,6 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
     /** Redis 연동을 위한 RedisTemplate */
     private final RedisTemplate<String, String> tpl;
 
-    private EntityMeta entityMeta;
-
     /**
      * 생성자
      *
@@ -59,7 +57,7 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
     @NotNull
     @Override
     public <T, ID> EntityInformation<T, ID> getEntityInformation(@NotNull Class<T> domainClass) {
-        entityMeta = RedisEntityMetadataReader.get(domainClass);
+        EntityMeta entityMeta = RedisEntityMetadataReader.get(domainClass);
         return new RedisHashEntityInformation<>(domainClass, entityMeta);
     }
 
@@ -85,6 +83,9 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
     @Override
     protected Optional<QueryLookupStrategy> getQueryLookupStrategy(
             @NotNull QueryLookupStrategy.Key key, @NotNull ValueExpressionDelegate valueExpressionDelegate) {
-        return Optional.of((method, md, proj, named) -> new RedisLuaQuery(tpl, method, md, proj, entityMeta));
+        return Optional.of((method, md, proj, named) -> {
+            EntityMeta entityMeta = RedisEntityMetadataReader.get(md.getDomainType());
+            return new RedisLuaQuery(tpl, method, md, proj, entityMeta);
+        });
     }
 }

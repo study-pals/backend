@@ -33,6 +33,5 @@ import com.studypals.global.redis.redisHashRepository.RedisEntityMetadataReader;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RedisHashEntity {
 
-    @Deprecated
     String value() default "";
 }

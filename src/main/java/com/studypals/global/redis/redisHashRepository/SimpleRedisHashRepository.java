@@ -86,7 +86,7 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
         if (raw == null || raw.isEmpty()) return Optional.empty();
 
         @SuppressWarnings("unchecked")
-        E entity = (E) RedisEntityMapper.fromHash(id.toString(), raw, meta);
+        E entity = (E) RedisEntityMapper.fromHash(key, raw, meta);
         return Optional.of(entity);
     }
 
@@ -104,7 +104,8 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
      */
     @Override
     public boolean existById(ID id) {
-        return Boolean.TRUE.equals(tpl.hasKey(id.toString()));
+        String keyPrefix = meta.keyPrefix();
+        return Boolean.TRUE.equals(tpl.hasKey(keyPrefix + id.toString()));
     }
 
     /**
