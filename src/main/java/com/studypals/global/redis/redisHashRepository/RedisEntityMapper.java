@@ -80,7 +80,6 @@ public final class RedisEntityMapper {
         try {
             T obj = (T) m.type().getDeclaredConstructor().newInstance();
             if (!idKey.startsWith(m.keyPrefix())) {
-                System.out.println("key is" + idKey);
                 throw new IllegalArgumentException("not invalid entity type");
             }
             idKey = idKey.substring(m.keyPrefix().length());
