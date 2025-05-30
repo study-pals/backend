@@ -7,6 +7,8 @@ import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
@@ -67,7 +69,7 @@ public class GroupStudyControllerRestDocsTest extends RestDocsSupport {
         given(groupStudyCategoryService.getGroupDailyGoal(groupId)).willReturn(dailySuccessRateRes);
 
         // when
-        ResultActions result = mockMvc.perform(get("/groups/" + groupId + "/routines/daily-goal"));
+        ResultActions result = mockMvc.perform(get("/groups/{groupId}/routines/daily-goal", groupId));
 
         // then
         result.andExpect(status().isOk())
@@ -75,6 +77,9 @@ public class GroupStudyControllerRestDocsTest extends RestDocsSupport {
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
+                        pathParameters(parameterWithName("groupId")
+                                .description("조회할 그룹 ID")
+                                .attributes(constraints("not null"))),
                         responseFields(
                                 fieldWithPath("data.totalMember").description("총 그룹원 수"),
                                 fieldWithPath("data.categories[].categoryId").description("그룹 카테고리 ID"),

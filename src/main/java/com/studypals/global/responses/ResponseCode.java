@@ -38,6 +38,7 @@ public enum ResponseCode {
     GROUP_SUMMARY("U02-12"),
     GROUP_DAILY_GOAL("U02-13"),
     GROUP_CATEGORY("U02-14"),
+    GROUP_ENTRY_REQUEST("U02-15"),
 
     // U03 - User Study & Time
     STUDY_TIME_ALL("U03-00"),

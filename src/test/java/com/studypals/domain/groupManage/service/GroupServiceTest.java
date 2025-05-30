@@ -42,13 +42,13 @@ public class GroupServiceTest {
     private MemberReader memberReader;
 
     @Mock
-    private GroupWorker groupWorker;
+    private GroupWriter groupWriter;
 
     @Mock
     private GroupReader groupReader;
 
     @Mock
-    private GroupMemberWorker groupMemberWorker;
+    private GroupMemberWriter groupMemberWriter;
 
     @Mock
     private GroupMapper groupMapper;
@@ -93,7 +93,7 @@ public class GroupServiceTest {
         CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
-        given(groupWorker.create(req)).willReturn(mockGroup);
+        given(groupWriter.create(req)).willReturn(mockGroup);
         given(chatRoomWriter.create(any())).willReturn(mockChatRoom);
         willDoNothing().given(chatRoomWriter).joinAsAdmin(mockChatRoom, mockMember);
 
@@ -111,7 +111,7 @@ public class GroupServiceTest {
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
         CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
-        given(groupWorker.create(req)).willThrow(new GroupException(errorCode));
+        given(groupWriter.create(req)).willThrow(new GroupException(errorCode));
 
         // when & then
         assertThatThrownBy(() -> groupService.createGroup(userId, req))
@@ -128,8 +128,8 @@ public class GroupServiceTest {
         CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
-        given(groupWorker.create(req)).willReturn(mockGroup);
-        given(groupMemberWorker.createLeader(mockMember, mockGroup)).willThrow(new GroupException(errorCode));
+        given(groupWriter.create(req)).willReturn(mockGroup);
+        given(groupMemberWriter.createLeader(mockMember, mockGroup)).willThrow(new GroupException(errorCode));
 
         // when & then
         assertThatThrownBy(() -> groupService.createGroup(userId, req))

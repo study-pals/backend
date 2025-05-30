@@ -8,17 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.worker.ChatRoomWriter;
-import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
-import com.studypals.domain.groupManage.dto.GroupEntryReq;
-import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
-import com.studypals.domain.groupManage.dto.GroupSummaryRes;
+import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.entity.Group;
-import com.studypals.domain.groupManage.worker.GroupAuthorityValidator;
-import com.studypals.domain.groupManage.worker.GroupEntryCodeManager;
-import com.studypals.domain.groupManage.worker.GroupEntryRequestWorker;
-import com.studypals.domain.groupManage.worker.GroupMemberReader;
-import com.studypals.domain.groupManage.worker.GroupMemberWorker;
-import com.studypals.domain.groupManage.worker.GroupReader;
+import com.studypals.domain.groupManage.entity.GroupEntryRequest;
+import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
@@ -47,12 +40,13 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
     private final MemberReader memberReader;
     private final GroupReader groupReader;
-    private final GroupMemberWorker groupMemberWorker;
+    private final GroupMemberWriter groupMemberWriter;
     private final GroupMemberReader groupMemberReader;
 
     private final GroupAuthorityValidator authorityValidator;
     private final GroupEntryCodeManager entryCodeManager;
-    private final GroupEntryRequestWorker entryRequestWorker;
+    private final GroupEntryRequestReader entryRequestReader;
+    private final GroupEntryRequestWriter entryRequestWriter;
 
     private final ChatRoomWriter chatRoomWriter;
 
@@ -93,15 +87,33 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Transactional
     public Long requestParticipant(Long userId, GroupEntryReq entryInfo) {
         Group group = groupReader.getById(entryInfo.groupId());
-        entryRequestWorker.validateNewRequestAvailable(group);
+        entryRequestWriter.validateNewRequestAvailable(group);
         entryCodeManager.validateCodeBelongsToGroup(group, entryInfo.entryCode());
         Member member = memberReader.getRef(userId);
-        return entryRequestWorker.createRequest(member, group).getId();
+        return entryRequestWriter.createRequest(member, group).getId();
+    }
+
+    @Override
+    @Transactional
+    public Long acceptEntryRequest(Long userId, AcceptEntryReq req) {
+        authorityValidator.validate(userId, req.groupId());
+        GroupEntryRequest request = entryRequestReader.getById(req.requestId());
+        entryRequestWriter.closeRequest(request);
+
+        return internalJoinGroup(request.getMember(), request.getGroup());
+    }
+
+    @Override
+    @Transactional
+    public void refuseEntryRequest(Long userId, Long requestId) {
+        GroupEntryRequest request = entryRequestReader.getById(requestId);
+        authorityValidator.validate(userId, request.getGroup().getId());
+        entryRequestWriter.closeRequest(request);
     }
 
     // 그룹 참여 시 공통 로직을 private 으로 분리
     private Long internalJoinGroup(Member member, Group group) {
-        Long joinId = groupMemberWorker.createMember(member, group).getId();
+        Long joinId = groupMemberWriter.createMember(member, group).getId();
 
         chatRoomWriter.join(group.getChatRoom(), member);
 

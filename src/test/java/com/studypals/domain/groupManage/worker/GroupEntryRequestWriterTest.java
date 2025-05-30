@@ -19,16 +19,16 @@ import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
 /**
- * {@link GroupEntryRequestWorker} 에 대한 단위 테스트입니다.
+ * {@link GroupEntryRequestWriter} 에 대한 단위 테스트입니다.
  *
  * <p>성공 케이스와 예외 케이스에 대한 테스트입니다.
  *
  * @author s0o0bn
- * @see GroupEntryRequestWorker
+ * @see GroupEntryRequestWriter
  * @since 2025-04-25
  */
 @ExtendWith(MockitoExtension.class)
-public class GroupEntryRequestWorkerTest {
+public class GroupEntryRequestWriterTest {
 
     @Mock
     private GroupEntryRequestRepository entryRequestRepository;
@@ -46,7 +46,7 @@ public class GroupEntryRequestWorkerTest {
     private GroupEntryRequest mockGroupEntryRequest;
 
     @InjectMocks
-    private GroupEntryRequestWorker entryRequestWorker;
+    private GroupEntryRequestWriter entryRequestWriter;
 
     @Test
     void createRequest_success() {
@@ -56,7 +56,7 @@ public class GroupEntryRequestWorkerTest {
         given(entryRequestMapper.toEntity(mockMember, mockGroup)).willReturn(mockGroupEntryRequest);
 
         // when
-        GroupEntryRequest actual = entryRequestWorker.createRequest(mockMember, mockGroup);
+        GroupEntryRequest actual = entryRequestWriter.createRequest(mockMember, mockGroup);
 
         // then
         assertThat(actual).isEqualTo(mockGroupEntryRequest);
@@ -72,7 +72,7 @@ public class GroupEntryRequestWorkerTest {
                 .willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL));
 
         // when & then
-        assertThatThrownBy(() -> entryRequestWorker.createRequest(mockMember, mockGroup))
+        assertThatThrownBy(() -> entryRequestWriter.createRequest(mockMember, mockGroup))
                 .extracting("errorCode")
                 .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
     }

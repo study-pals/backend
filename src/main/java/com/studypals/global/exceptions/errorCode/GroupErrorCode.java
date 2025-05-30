@@ -41,7 +41,10 @@ public enum GroupErrorCode implements ErrorCode {
     GROUP_MEMBER_NOT_FOUND(ResponseCode.GROUP_MEMBER_LIST, HttpStatus.NOT_FOUND, "can't find member in group"),
     GROUP_MEMBER_CREATE_FAIL(
             ResponseCode.GROUP_CREATE, HttpStatus.BAD_REQUEST, "failed to createWithCategory group member"),
-    GROUP_CATEGORY_NOT_FOUND(ResponseCode.GROUP_CATEGORY, HttpStatus.BAD_REQUEST, "can't find group category");
+    GROUP_CATEGORY_NOT_FOUND(ResponseCode.GROUP_CATEGORY, HttpStatus.BAD_REQUEST, "can't find group category"),
+
+    GROUP_ENTRY_REQUEST_NOT_FOUND(
+            ResponseCode.GROUP_ENTRY_REQUEST, HttpStatus.NOT_FOUND, "can't find group entry request");
 
     private final ResponseCode responseCode;
     private final HttpStatus status;

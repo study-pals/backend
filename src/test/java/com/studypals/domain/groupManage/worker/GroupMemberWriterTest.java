@@ -21,16 +21,16 @@ import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
 /**
- * {@link GroupMemberWorker} 에 대한 단위 테스트입니다.
+ * {@link GroupMemberWriter} 에 대한 단위 테스트입니다.
  *
  * <p>성공 케이스와 예외 케이스에 대한 테스트입니다.
  *
  * @author s0o0bn
- * @see GroupMemberWorker
+ * @see GroupMemberWriter
  * @since 2025-04-15
  */
 @ExtendWith(MockitoExtension.class)
-public class GroupMemberWorkerTest {
+public class GroupMemberWriterTest {
 
     @Mock
     private GroupRepository groupRepository;
@@ -51,7 +51,7 @@ public class GroupMemberWorkerTest {
     private GroupMember mockGroupMember;
 
     @InjectMocks
-    private GroupMemberWorker groupMemberWorker;
+    private GroupMemberWriter groupMemberWriter;
 
     @Test
     void createLeader_success() {
@@ -62,7 +62,7 @@ public class GroupMemberWorkerTest {
         given(groupMemberMapper.toEntity(mockMember, mockGroup, role)).willReturn(mockGroupMember);
 
         // when
-        GroupMember actual = groupMemberWorker.createLeader(mockMember, mockGroup);
+        GroupMember actual = groupMemberWriter.createLeader(mockMember, mockGroup);
 
         // then
         assertThat(actual).isEqualTo(mockGroupMember);
@@ -79,7 +79,7 @@ public class GroupMemberWorkerTest {
         given(groupMemberRepository.save(mockGroupMember)).willThrow(new GroupException(errorCode));
 
         // when & then
-        assertThatThrownBy(() -> groupMemberWorker.createLeader(mockMember, mockGroup))
+        assertThatThrownBy(() -> groupMemberWriter.createLeader(mockMember, mockGroup))
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
@@ -97,7 +97,7 @@ public class GroupMemberWorkerTest {
         given(groupMemberMapper.toEntity(mockMember, mockGroup, role)).willReturn(mockGroupMember);
 
         // when
-        GroupMember actual = groupMemberWorker.createMember(mockMember, mockGroup);
+        GroupMember actual = groupMemberWriter.createMember(mockMember, mockGroup);
 
         // then
         assertThat(actual).isEqualTo(mockGroupMember);
@@ -117,7 +117,7 @@ public class GroupMemberWorkerTest {
         given(groupMemberRepository.save(mockGroupMember)).willThrow(new GroupException(errorCode));
 
         // when & then
-        assertThatThrownBy(() -> groupMemberWorker.createMember(mockMember, mockGroup))
+        assertThatThrownBy(() -> groupMemberWriter.createMember(mockMember, mockGroup))
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
@@ -134,7 +134,7 @@ public class GroupMemberWorkerTest {
         given(groupRepository.increaseGroupMember(groupId)).willReturn(0);
 
         // when & then
-        assertThatThrownBy(() -> groupMemberWorker.createMember(mockMember, mockGroup))
+        assertThatThrownBy(() -> groupMemberWriter.createMember(mockMember, mockGroup))
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);

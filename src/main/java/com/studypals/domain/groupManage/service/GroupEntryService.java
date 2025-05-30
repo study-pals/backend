@@ -1,5 +1,6 @@
 package com.studypals.domain.groupManage.service;
 
+import com.studypals.domain.groupManage.dto.AcceptEntryReq;
 import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
 import com.studypals.domain.groupManage.dto.GroupEntryReq;
 import com.studypals.domain.groupManage.dto.GroupSummaryRes;
@@ -55,4 +56,23 @@ public interface GroupEntryService {
      * @return {@link com.studypals.domain.groupManage.entity.GroupEntryRequest} ID
      */
     Long requestParticipant(Long userId, GroupEntryReq entryInfo);
+
+    /**
+     * 그룹장이 그룹에 들어온 가입 요청을 승인합니다.
+     * 요청한 사용자가 그룹장이 아닐 경우 권한 없음 예외가 발생합니다.
+     *
+     * @param userId 사용자 ID
+     * @param req 승인할 가입 요청 정보 {@link AcceptEntryReq}
+     * @return {@link com.studypals.domain.groupManage.entity.GroupMember} ID
+     */
+    Long acceptEntryRequest(Long userId, AcceptEntryReq req);
+
+    /**
+     * 그룹장이 그룹에 들어온 가입 요청을 거절합니다.
+     * 요청한 사용자가 그룹장이 아닐 경우 권한 없음 예외가 발생합니다.
+     *
+     * @param userId 사용자 ID
+     * @param requestId 거절할 가입 요청 ID
+     */
+    void refuseEntryRequest(Long userId, Long requestId);
 }
