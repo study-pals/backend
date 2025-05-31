@@ -95,7 +95,7 @@ public class GroupEntryServiceTest {
         Long groupId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_FORBIDDEN;
 
-        willThrow(new GroupException(errorCode)).given(authorityValidator).validate(userId, groupId);
+        willThrow(new GroupException(errorCode)).given(authorityValidator).validateLeaderAuthority(userId, groupId);
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.generateEntryCode(userId, groupId))
@@ -329,7 +329,7 @@ public class GroupEntryServiceTest {
 
         willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
                 .given(authorityValidator)
-                .validate(userId, req.groupId());
+                .validateLeaderAuthority(userId, req.groupId());
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.acceptEntryRequest(userId, req))
@@ -363,7 +363,7 @@ public class GroupEntryServiceTest {
         given(mockGroup.getId()).willReturn(groupId);
         willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
                 .given(authorityValidator)
-                .validate(userId, groupId);
+                .validateLeaderAuthority(userId, groupId);
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.refuseEntryRequest(userId, requestId))

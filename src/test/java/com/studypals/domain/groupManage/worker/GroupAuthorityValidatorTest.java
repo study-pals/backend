@@ -39,7 +39,7 @@ public class GroupAuthorityValidatorTest {
     private GroupAuthorityValidator groupAuthorityValidator;
 
     @Test
-    void validate_success() {
+    void validate_LeaderAuthority_success() {
         // given
         Long userId = 1L;
         Long groupId = 1L;
@@ -48,11 +48,12 @@ public class GroupAuthorityValidatorTest {
         given(groupMemberRepository.findByMemberIdAndGroupId(userId, groupId)).willReturn(Optional.of(mockGroupMember));
 
         // when & then
-        assertThatCode(() -> groupAuthorityValidator.validate(userId, groupId)).doesNotThrowAnyException();
+        assertThatCode(() -> groupAuthorityValidator.validateLeaderAuthority(userId, groupId))
+                .doesNotThrowAnyException();
     }
 
     @Test
-    void validate_fail_memberNotFound() {
+    void validate_LeaderAuthority_fail_memberNotFound() {
         // given
         Long userId = 1L;
         Long groupId = 1L;
@@ -61,14 +62,14 @@ public class GroupAuthorityValidatorTest {
         given(groupMemberRepository.findByMemberIdAndGroupId(userId, groupId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> groupAuthorityValidator.validate(userId, groupId))
+        assertThatThrownBy(() -> groupAuthorityValidator.validateLeaderAuthority(userId, groupId))
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
     }
 
     @Test
-    void validate_fail_notAuthorized() {
+    void validate_LeaderAuthority_fail_notAuthorized() {
         // given
         Long userId = 1L;
         Long groupId = 1L;
@@ -78,7 +79,7 @@ public class GroupAuthorityValidatorTest {
         given(groupMemberRepository.findByMemberIdAndGroupId(userId, groupId)).willReturn(Optional.of(mockGroupMember));
 
         // when & then
-        assertThatThrownBy(() -> groupAuthorityValidator.validate(userId, groupId))
+        assertThatThrownBy(() -> groupAuthorityValidator.validateLeaderAuthority(userId, groupId))
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);

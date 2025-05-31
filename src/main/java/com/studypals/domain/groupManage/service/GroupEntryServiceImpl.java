@@ -53,7 +53,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Override
     @Transactional(readOnly = true)
     public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
-        authorityValidator.validate(userId, groupId);
+        authorityValidator.validateLeaderAuthority(userId, groupId);
         String entryCode = entryCodeManager.generate(groupId);
 
         return new GroupEntryCodeRes(groupId, entryCode);
@@ -96,7 +96,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Override
     @Transactional
     public Long acceptEntryRequest(Long userId, AcceptEntryReq req) {
-        authorityValidator.validate(userId, req.groupId());
+        authorityValidator.validateLeaderAuthority(userId, req.groupId());
         GroupEntryRequest request = entryRequestReader.getById(req.requestId());
         entryRequestWriter.closeRequest(request);
 
@@ -107,7 +107,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Transactional
     public void refuseEntryRequest(Long userId, Long requestId) {
         GroupEntryRequest request = entryRequestReader.getById(requestId);
-        authorityValidator.validate(userId, request.getGroup().getId());
+        authorityValidator.validateLeaderAuthority(userId, request.getGroup().getId());
         entryRequestWriter.closeRequest(request);
     }
 
