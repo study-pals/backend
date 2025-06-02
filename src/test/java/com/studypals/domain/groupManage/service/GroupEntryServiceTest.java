@@ -304,35 +304,42 @@ public class GroupEntryServiceTest {
     void acceptEntryRequest_success() {
         // given
         Long userId = 1L;
-        AcceptEntryReq req = new AcceptEntryReq(1L, 1L);
+        Long groupId = 1L;
+        Long requestId = 1L;
 
         Long groupMemberId = 1L;
+        AcceptEntryRes expected = new AcceptEntryRes(groupId, groupMemberId);
 
-        given(entryRequestReader.getById(req.requestId())).willReturn(mockEntryRequest);
+        given(entryRequestReader.getById(requestId)).willReturn(mockEntryRequest);
         given(mockEntryRequest.getMember()).willReturn(mockMember);
         given(mockEntryRequest.getGroup()).willReturn(mockGroup);
+        given(mockGroup.getId()).willReturn(groupId);
         given(groupMemberWriter.createMember(mockMember, mockGroup))
                 .willReturn(GroupMember.builder().id(groupMemberId).build());
 
         // when
-        Long actual = groupEntryService.acceptEntryRequest(userId, req);
+        AcceptEntryRes actual = groupEntryService.acceptEntryRequest(userId, requestId);
 
         // then
-        assertThat(actual).isEqualTo(groupMemberId);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     void acceptEntryRequest_fail_invalidAuthority() {
         // given
         Long userId = 1L;
-        AcceptEntryReq req = new AcceptEntryReq(1L, 1L);
+        Long groupId = 1L;
+        Long requestId = 1L;
 
+        given(entryRequestReader.getById(requestId)).willReturn(mockEntryRequest);
+        given(mockEntryRequest.getGroup()).willReturn(mockGroup);
+        given(mockGroup.getId()).willReturn(groupId);
         willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
                 .given(authorityValidator)
-                .validateLeaderAuthority(userId, req.groupId());
+                .validateLeaderAuthority(userId, groupId);
 
         // when & then
-        assertThatThrownBy(() -> groupEntryService.acceptEntryRequest(userId, req))
+        assertThatThrownBy(() -> groupEntryService.acceptEntryRequest(userId, requestId))
                 .extracting("errorCode")
                 .isEqualTo(GroupErrorCode.GROUP_FORBIDDEN);
     }

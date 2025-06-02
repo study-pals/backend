@@ -187,16 +187,13 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void acceptEntryRequest_success() throws Exception {
         // given
-        Long userId = 1L;
-        Long memberId = 1L;
-        AcceptEntryReq req = new AcceptEntryReq(1L, 1L);
+        Long requestId = 1L;
+        AcceptEntryRes res = new AcceptEntryRes(1L, 1L);
 
-        given(groupEntryService.acceptEntryRequest(userId, req)).willReturn(memberId);
+        given(groupEntryService.acceptEntryRequest(any(), eq(requestId))).willReturn(res);
 
         // when
-        ResultActions result = mockMvc.perform(post("/groups/entry-requests/accept")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)));
+        ResultActions result = mockMvc.perform(post("/groups/entry-requests/{requestId}/accept", requestId));
 
         // then
         result.andExpect(status().isCreated())
@@ -204,11 +201,9 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
-                        requestFields(
-                                fieldWithPath("groupId").description("그룹 ID").attributes(constraints("not null")),
-                                fieldWithPath("requestId")
-                                        .description("그룹 가입 요청 ID")
-                                        .attributes(constraints("not null"))),
+                        pathParameters(parameterWithName("requestId")
+                                .description("승인할 요청 ID")
+                                .attributes(constraints("not null"))),
                         responseHeaders(headerWithName("Location").description("가입된 그룹원 id"))));
     }
 
