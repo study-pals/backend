@@ -108,9 +108,10 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Override
     @Transactional
     public void refuseEntryRequest(Long userId, Long requestId) {
-        GroupEntryRequest request = entryRequestReader.getById(requestId);
-        authorityValidator.validateLeaderAuthority(userId, request.getGroup().getId());
-        entryRequestWriter.closeRequest(request);
+        GroupEntryRequest entryRequest = entryRequestReader.getById(requestId);
+        authorityValidator.validateLeaderAuthority(
+                userId, entryRequest.getGroup().getId());
+        entryRequestWriter.closeRequest(entryRequest);
     }
 
     // 그룹 참여 시 공통 로직을 private 으로 분리
