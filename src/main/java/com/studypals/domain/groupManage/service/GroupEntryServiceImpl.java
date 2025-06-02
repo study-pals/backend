@@ -95,12 +95,14 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
     @Override
     @Transactional
-    public Long acceptEntryRequest(Long userId, AcceptEntryReq req) {
-        authorityValidator.validateLeaderAuthority(userId, req.groupId());
-        GroupEntryRequest request = entryRequestReader.getById(req.requestId());
-        entryRequestWriter.closeRequest(request);
+    public AcceptEntryRes acceptEntryRequest(Long userId, Long requestId) {
+        GroupEntryRequest entryRequest = entryRequestReader.getById(requestId);
+        authorityValidator.validateLeaderAuthority(
+                userId, entryRequest.getGroup().getId());
+        entryRequestWriter.closeRequest(entryRequest);
 
-        return internalJoinGroup(request.getMember(), request.getGroup());
+        Long memberId = internalJoinGroup(entryRequest.getMember(), entryRequest.getGroup());
+        return new AcceptEntryRes(entryRequest.getGroup().getId(), memberId);
     }
 
     @Override
