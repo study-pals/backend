@@ -13,6 +13,13 @@ import com.studypals.global.request.Cursor;
 import com.studypals.global.request.SortOrder;
 import com.studypals.global.request.SortType;
 
+/**
+ * 웹 요청으로 부터 {@link CursorDefault} 어노테이션이 등록된 API 메서드 파라미터를 매핑해 전달하는 resolver 입니다.
+ *
+ * @see HandlerMethodArgumentResolver
+ * @author s0o0bn
+ * @since 2025-06-05
+ */
 public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
     private static final String CURSOR_PARAM = "cursor";
     private static final String SIZE_PARAM = "size";
@@ -37,11 +44,26 @@ public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
         return new Cursor(cursor, size, sort);
     }
 
+    /**
+     * 메서드에서 {@code CursorDefault} 어노테이션이 등록된 파라미터를 등록합니다.
+     * 존재하지 않으면, 예외가 발생합니다.
+     *
+     * @param parameter {@link MethodParameter}
+     * @return {@link CursorDefault}
+     */
     private CursorDefault getCursorDefault(MethodParameter parameter) {
         return Optional.ofNullable(parameter.getParameterAnnotation(CursorDefault.class))
                 .orElseThrow(() -> new IllegalArgumentException("@CursorDefault annotation is required"));
     }
 
+    /**
+     * Http 요청 파라미터에서 {@code cursor} 에 해당하는 값을 파싱합니다.
+     * 없으면, 디폴트 값을 반환합니다.
+     *
+     * @param webRequest 현재 웹 요청 {@link NativeWebRequest}
+     * @param cursorDefault 디폴트 값을 갖고 있는 {@code CursorDefault} annotation
+     * @return 페이징 시 조회 시작 기준이 될 커서 값
+     */
     private long getCursor(NativeWebRequest webRequest, CursorDefault cursorDefault) {
         try {
             String cursorParam = Optional.ofNullable(webRequest.getParameter(CURSOR_PARAM))
@@ -52,6 +74,14 @@ public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
         }
     }
 
+    /**
+     * Http 요청 파라미터에서 {@code size} 에 해당하는 값을 파싱합니다.
+     * 없으면, 디폴트 값을 반환합니다.
+     *
+     * @param webRequest 현재 웹 요청 {@link NativeWebRequest}
+     * @param cursorDefault 디폴트 값을 갖고 있는 {@code CursorDefault} annotation
+     * @return 조회할 데이터 크기
+     */
     private int getSize(NativeWebRequest webRequest, CursorDefault cursorDefault) {
         try {
             String sizeParam = Optional.ofNullable(webRequest.getParameter(SIZE_PARAM))
@@ -62,6 +92,14 @@ public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
         }
     }
 
+    /**
+     * Http 요청 파라미터에서 {@code sort} 에 해당하는 값을 파싱합니다.
+     * 없으면, 디폴트 값을 반환합니다.
+     *
+     * @param webRequest 현재 웹 요청 {@link NativeWebRequest}
+     * @param cursorDefault 디폴트 값을 갖고 있는 {@code CursorDefault} annotation
+     * @return {@link SortOrder}
+     */
     private SortOrder getSort(NativeWebRequest webRequest, CursorDefault cursorDefault) {
         String sortParam =
                 Optional.ofNullable(webRequest.getParameter(SORT_PARAM)).orElse(cursorDefault.sort());

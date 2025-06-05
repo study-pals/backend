@@ -10,6 +10,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.studypals.global.resolver.CursorDefaultResolver;
 
+/**
+ * Controller {@link com.studypals.global.annotations.CursorDefault} 파라미터에 대한
+ * {@code ArgumentResolver}를 등록하는 config
+ *
+ * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+ * @see CursorDefaultResolver
+ * @author s0o0bn
+ * @since 2025-06-05
+ */
 @Configuration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class ArgumentResolverConfig implements WebMvcConfigurer {

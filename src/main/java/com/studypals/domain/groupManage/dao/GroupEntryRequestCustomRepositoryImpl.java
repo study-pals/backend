@@ -15,6 +15,21 @@ import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.global.dao.AbstractPagingRepository;
 import com.studypals.global.request.Cursor;
 
+/**
+ * group entry request custom repository 의 구현 클래스입니다.
+ *
+ * <p>group entry request 관련 커스텀 쿼리를 구현합니다.
+ *
+ * <p><b>상속 정보:</b><br>
+ * {@link GroupEntryRequestCustomRepository} 의 구현 클래스입니다.
+ *
+ * <p><b>빈 관리:</b><br>
+ * Repository
+ *
+ * @author s0o0bn
+ * @see GroupEntryRequestCustomRepository
+ * @since 2025-06-05
+ */
 @RequiredArgsConstructor
 public class GroupEntryRequestCustomRepositoryImpl extends AbstractPagingRepository<GroupEntryRequest>
         implements GroupEntryRequestCustomRepository {

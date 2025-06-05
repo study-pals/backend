@@ -9,6 +9,14 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.studypals.global.request.SortOrder;
 
+/**
+ * 페이징 관련 custom repository 의 공통 메서드를 정의한 추상 클래스입니다.
+ *
+ * @param <T> 엔티티 타입
+ *
+ * @author s0o0bn
+ * @since 2025-06-05
+ */
 public abstract class AbstractPagingRepository<T> {
     protected OrderSpecifier<?> getOrderSpecifier(Class<T> entityClass, String entityName, SortOrder sortOrder) {
         String field = sortOrder.field();

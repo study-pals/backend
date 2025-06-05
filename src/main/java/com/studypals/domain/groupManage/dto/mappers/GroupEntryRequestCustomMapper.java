@@ -11,7 +11,21 @@ import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.memberManage.dto.MemberProfileDto;
 import com.studypals.domain.memberManage.entity.Member;
 
+/**
+ * mapstruct 가 아닌 별도의 DTO 매핑 로직을 담당하는 유틸성 클래스입니다.
+ * {@code GroupEntryRequest} 관련 DTO 커스텀 매핑 로직을 포함합니다.
+ *
+ * @author s0o0bn
+ * @since 2025-06-05
+ */
 public class GroupEntryRequestCustomMapper {
+
+    /**
+     *
+     * @param requests
+     * @param members
+     * @return
+     */
     public static List<GroupEntryRequestDto> map(List<GroupEntryRequest> requests, List<Member> members) {
         Map<Long, Member> memberMap = members.stream().collect(Collectors.toMap(Member::getId, Function.identity()));
 
