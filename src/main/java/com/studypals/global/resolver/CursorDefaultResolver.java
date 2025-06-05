@@ -10,6 +10,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.studypals.global.annotations.CursorDefault;
 import com.studypals.global.request.Cursor;
+import com.studypals.global.request.SortOrder;
+import com.studypals.global.request.SortType;
 
 public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
     private static final String CURSOR_PARAM = "cursor";
@@ -31,7 +33,7 @@ public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
         CursorDefault annotation = getCursorDefault(parameter);
         long cursor = getCursor(webRequest, annotation);
         int size = getSize(webRequest, annotation);
-        String sort = getSort(webRequest, annotation);
+        SortOrder sort = getSort(webRequest, annotation);
         return new Cursor(cursor, size, sort);
     }
 
@@ -60,11 +62,11 @@ public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
         }
     }
 
-    private String getSort(NativeWebRequest webRequest, CursorDefault cursorDefault) {
-        try {
-            return Optional.ofNullable(webRequest.getParameter(SORT_PARAM)).orElse(cursorDefault.sort());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid cursor parameter", e);
-        }
+    private SortOrder getSort(NativeWebRequest webRequest, CursorDefault cursorDefault) {
+        String sortParam =
+                Optional.ofNullable(webRequest.getParameter(SORT_PARAM)).orElse(cursorDefault.sort());
+        SortType type = SortTypeResolver.resolve(sortParam)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid sort parameter"));
+        return new SortOrder(type.getField(), type.getDirection());
     }
 }
