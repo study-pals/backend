@@ -28,9 +28,10 @@ public class GroupAuthorityValidator {
     public void validateLeaderAuthority(Long memberId, Long groupId) {
         GroupMember member = groupMemberRepository
                 .findByMemberIdAndGroupId(memberId, groupId)
-                .orElseThrow(() -> new GroupException(
-                        GroupErrorCode.GROUP_MEMBER_NOT_FOUND,
-                        String.format("member %d not found in group %d", memberId, groupId)));
+                .orElseThrow(() -> {
+                    String message = String.format("member %d not found in group %d", memberId, groupId);
+                    return new GroupException(GroupErrorCode.GROUP_MEMBER_NOT_FOUND, message);
+                });
         if (!member.isLeader()) {
             throw new GroupException(GroupErrorCode.GROUP_FORBIDDEN);
         }
