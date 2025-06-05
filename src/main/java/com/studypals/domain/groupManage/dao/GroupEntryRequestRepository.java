@@ -18,4 +18,5 @@ import com.studypals.domain.groupManage.entity.GroupEntryRequest;
  * @since 2025-04-25
  */
 @Repository
-public interface GroupEntryRequestRepository extends JpaRepository<GroupEntryRequest, Long> {}
+public interface GroupEntryRequestRepository
+        extends JpaRepository<GroupEntryRequest, Long>, GroupEntryRequestCustomRepository {}

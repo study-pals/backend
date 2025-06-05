@@ -1,9 +1,8 @@
 package com.studypals.domain.groupManage.service;
 
-import com.studypals.domain.groupManage.dto.AcceptEntryRes;
-import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
-import com.studypals.domain.groupManage.dto.GroupEntryReq;
-import com.studypals.domain.groupManage.dto.GroupSummaryRes;
+import com.studypals.domain.groupManage.dto.*;
+import com.studypals.global.request.Cursor;
+import com.studypals.global.responses.CursorResponse;
 
 /**
  * GroupEntryService 의 인터페이스입니다. 메서드를 정의합니다.
@@ -56,6 +55,18 @@ public interface GroupEntryService {
      * @return {@link com.studypals.domain.groupManage.entity.GroupEntryRequest} ID
      */
     Long requestParticipant(Long userId, GroupEntryReq entryInfo);
+
+    /**
+     * 그룹장이 그룹에 들어온 가입 요청 목록을 조회합니다.
+     * 요청 ID를 기반으로 하는 커서를 통해 페이징하여 조회합니다.
+     * 요청한 사용자가 그룹장이 아닐 경우 권한 없음 예외가 발생합니다.
+     *
+     * @param userId 사용자 ID
+     * @param groupId 조회할 그룹 ID
+     * @param cursor 조회할 {@link Cursor} 조건
+     * @return {@link GroupEntryRequestDto}의 {@link CursorResponse}
+     */
+    CursorResponse<GroupEntryRequestDto> getEntryRequests(Long userId, Long groupId, Cursor cursor);
 
     /**
      * 그룹장이 그룹에 들어온 가입 요청을 승인합니다.
