@@ -32,7 +32,7 @@ public class GroupWeeklyCategoryStrategy extends AbstractGroupCategoryStrategy {
     public GroupTypeDto getGroupStudyTimeType(List<GroupStudyCategory> categories) {
         categories = super.filterCategoryByType(categories, GroupStudyCategoryType.WEEKLY);
         LocalDate today = LocalDate.now();
-        int dayDiff = today.getDayOfWeek().getValue() % DayOfWeek.SUNDAY.ordinal();
+        int dayDiff = today.getDayOfWeek().getValue() % DayOfWeek.SUNDAY.getValue();
 
         return new GroupTypeDto(
                 new PeriodDto(today.minusDays(dayDiff), today),
