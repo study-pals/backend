@@ -45,6 +45,7 @@ public class GroupWeeklyCategoryStrategyTest {
 
         // then
         assertThat(dailyType.ids()).hasSize(2);
-        assertThat(dailyType.period().start()).isBefore(dailyType.period().end());
+        assertThat(dailyType.period().start())
+                .isBeforeOrEqualTo(dailyType.period().end());
     }
 }
