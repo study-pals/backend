@@ -7,10 +7,17 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.Objects;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
@@ -111,7 +118,7 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
         entryCodeRedisRepository.save(groupEntryCode);
 
         // when
-        ResultActions result = mockMvc.perform(post("/groups/request-entry")
+        ResultActions result = mockMvc.perform(post("/groups/entry-requests")
                 .header("Authorization", "Bearer " + user.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
@@ -119,5 +126,63 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
         // then
         result.andExpect(status().isCreated())
                 .andExpect(header().string("Location", matchesPattern("/groups/\\d+/requests/\\d+")));
+    }
+
+    @Test
+    @WithMockUser
+    void approveEntryRequest_success() throws Exception {
+        // given
+        CreateUserVar user = createUser("leader", "leader");
+        CreateUserVar member = createUser("member", "member");
+        CreateGroupVar group = createGroup(user.getUserId(), "group", "tag");
+        long requestId = createRequest(member.getUserId(), group.groupId());
+
+        // when
+        ResultActions result =
+                mockMvc.perform(MockMvcRequestBuilders.post("/groups/entry-requests/{requestId}/accept", requestId)
+                        .header("Authorization", "Bearer " + user.getAccessToken()));
+
+        // then
+        result.andExpect(status().isCreated())
+                .andExpect(header().string("Location", matchesPattern("/groups/\\d+/members/\\d+")));
+    }
+
+    @Test
+    @WithMockUser
+    void refuseEntryRequest_success() throws Exception {
+        // given
+        CreateUserVar user = createUser("leader", "leader");
+        CreateUserVar member = createUser("member", "member");
+        CreateGroupVar group = createGroup(user.getUserId(), "group", "tag");
+        long requestId = createRequest(member.getUserId(), group.groupId());
+
+        // when
+        ResultActions result =
+                mockMvc.perform(MockMvcRequestBuilders.delete("/groups/entry-requests/{requestId}", requestId)
+                        .header("Authorization", "Bearer " + user.getAccessToken()));
+
+        // then
+        result.andExpect(status().isNoContent());
+    }
+
+    private long createRequest(Long userId, Long groupId) {
+        String sql =
+                """
+                INSERT INTO group_entry_request(member_id, group_id, created_at)
+                VALUES(?, ?, ?)
+                """;
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(
+                con -> {
+                    PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                    ps.setLong(1, userId);
+                    ps.setLong(2, groupId);
+                    ps.setString(3, LocalDate.now().toString());
+                    return ps;
+                },
+                keyHolder);
+
+        return Objects.requireNonNull(keyHolder.getKey()).longValue();
     }
 }

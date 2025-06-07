@@ -19,16 +19,16 @@ import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
 /**
- * {@link GroupWorker} 에 대한 단위 테스트입니다.
+ * {@link GroupWriter} 에 대한 단위 테스트입니다.
  *
  * <p>성공 케이스와 예외 케이스에 대한 테스트입니다.
  *
  * @author s0o0bn
- * @see GroupWorker
+ * @see GroupWriter
  * @since 2025-04-15
  */
 @ExtendWith(MockitoExtension.class)
-public class GroupWorkerTest {
+public class GroupWriterTest {
 
     @Mock
     private GroupRepository groupRepository;
@@ -43,7 +43,7 @@ public class GroupWorkerTest {
     private Group mockGroup;
 
     @InjectMocks
-    private GroupWorker groupWorker;
+    private GroupWriter groupWriter;
 
     @Test
     void create_success() {
@@ -54,7 +54,7 @@ public class GroupWorkerTest {
         given(groupTagRepository.existsById(req.tag())).willReturn(true);
 
         // when
-        Group actual = groupWorker.create(req);
+        Group actual = groupWriter.create(req);
 
         // then
         assertThat(actual).isEqualTo(mockGroup);
@@ -70,7 +70,7 @@ public class GroupWorkerTest {
         given(groupTagRepository.existsById(req.tag())).willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> groupWorker.create(req))
+        assertThatThrownBy(() -> groupWriter.create(req))
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
@@ -87,7 +87,7 @@ public class GroupWorkerTest {
         given(groupRepository.save(mockGroup)).willThrow(new GroupException(errorCode));
 
         // when & then
-        assertThatThrownBy(() -> groupWorker.create(req))
+        assertThatThrownBy(() -> groupWriter.create(req))
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);

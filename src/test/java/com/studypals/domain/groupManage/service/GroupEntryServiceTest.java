@@ -1,7 +1,6 @@
 package com.studypals.domain.groupManage.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.*;
@@ -37,13 +36,16 @@ public class GroupEntryServiceTest {
     private GroupReader groupReader;
 
     @Mock
-    private GroupMemberWorker groupMemberWorker;
+    private GroupMemberWriter groupMemberWriter;
 
     @Mock
     private GroupEntryCodeManager entryCodeManager;
 
     @Mock
-    private GroupEntryRequestWorker entryRequestWorker;
+    private GroupEntryRequestReader entryRequestReader;
+
+    @Mock
+    private GroupEntryRequestWriter entryRequestWriter;
 
     @Mock
     private GroupMemberReader groupMemberReader;
@@ -62,6 +64,9 @@ public class GroupEntryServiceTest {
 
     @Mock
     private ChatRoom mockChatRoom;
+
+    @Mock
+    private GroupEntryRequest mockEntryRequest;
 
     @InjectMocks
     private GroupEntryServiceImpl groupEntryService;
@@ -90,7 +95,7 @@ public class GroupEntryServiceTest {
         Long groupId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_FORBIDDEN;
 
-        willThrow(new GroupException(errorCode)).given(authorityValidator).validate(userId, groupId);
+        willThrow(new GroupException(errorCode)).given(authorityValidator).validateLeaderAuthority(userId, groupId);
 
         // when & then
         assertThatThrownBy(() -> groupEntryService.generateEntryCode(userId, groupId))
@@ -148,7 +153,7 @@ public class GroupEntryServiceTest {
         given(groupReader.getById(entryInfo.groupId())).willReturn(mockGroup);
         given(mockGroup.isApprovalRequired()).willReturn(false);
         given(mockGroup.getChatRoom()).willReturn(mockChatRoom);
-        given(groupMemberWorker.createMember(mockMember, mockGroup)).willReturn(groupMember);
+        given(groupMemberWriter.createMember(mockMember, mockGroup)).willReturn(groupMember);
 
         willDoNothing().given(chatRoomWriter).join(mockChatRoom, mockMember);
 
@@ -216,7 +221,7 @@ public class GroupEntryServiceTest {
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
-                .given(groupMemberWorker)
+                .given(groupMemberWriter)
                 .createMember(mockMember, group);
 
         // when & then
@@ -240,7 +245,7 @@ public class GroupEntryServiceTest {
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         given(memberReader.getRef(userId)).willReturn(mockMember);
-        given(entryRequestWorker.createRequest(mockMember, group)).willReturn(entryRequest);
+        given(entryRequestWriter.createRequest(mockMember, group)).willReturn(entryRequest);
 
         // when
         Long actual = groupEntryService.requestParticipant(userId, entryInfo);
@@ -263,7 +268,7 @@ public class GroupEntryServiceTest {
 
         given(groupReader.getById(entryInfo.groupId())).willReturn(group);
         willThrow(new GroupException(GroupErrorCode.GROUP_JOIN_FAIL))
-                .given(entryRequestWorker)
+                .given(entryRequestWriter)
                 .validateNewRequestAvailable(group);
 
         // when & then
@@ -293,5 +298,83 @@ public class GroupEntryServiceTest {
         assertThatThrownBy(() -> groupEntryService.requestParticipant(userId, entryInfo))
                 .extracting("errorCode")
                 .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
+    }
+
+    @Test
+    void acceptEntryRequest_success() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        Long requestId = 1L;
+
+        Long groupMemberId = 1L;
+        AcceptEntryRes expected = new AcceptEntryRes(groupId, groupMemberId);
+
+        given(entryRequestReader.getById(requestId)).willReturn(mockEntryRequest);
+        given(mockEntryRequest.getMember()).willReturn(mockMember);
+        given(mockEntryRequest.getGroup()).willReturn(mockGroup);
+        given(mockGroup.getId()).willReturn(groupId);
+        given(groupMemberWriter.createMember(mockMember, mockGroup))
+                .willReturn(GroupMember.builder().id(groupMemberId).build());
+
+        // when
+        AcceptEntryRes actual = groupEntryService.acceptEntryRequest(userId, requestId);
+
+        // then
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void acceptEntryRequest_fail_invalidAuthority() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        Long requestId = 1L;
+
+        given(entryRequestReader.getById(requestId)).willReturn(mockEntryRequest);
+        given(mockEntryRequest.getGroup()).willReturn(mockGroup);
+        given(mockGroup.getId()).willReturn(groupId);
+        willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
+                .given(authorityValidator)
+                .validateLeaderAuthority(userId, groupId);
+
+        // when & then
+        assertThatThrownBy(() -> groupEntryService.acceptEntryRequest(userId, requestId))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_FORBIDDEN);
+    }
+
+    @Test
+    void refuseEntryRequest_success() {
+        // given
+        Long userId = 1L;
+        Long requestId = 1L;
+
+        given(entryRequestReader.getById(requestId)).willReturn(mockEntryRequest);
+        given(mockEntryRequest.getGroup()).willReturn(mockGroup);
+        given(mockGroup.getId()).willReturn(1L);
+
+        // when & then
+        assertThatNoException().isThrownBy(() -> groupEntryService.refuseEntryRequest(userId, requestId));
+    }
+
+    @Test
+    void refuseEntryRequest_fail_invalidAuthority() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        Long requestId = 1L;
+
+        given(entryRequestReader.getById(requestId)).willReturn(mockEntryRequest);
+        given(mockEntryRequest.getGroup()).willReturn(mockGroup);
+        given(mockGroup.getId()).willReturn(groupId);
+        willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
+                .given(authorityValidator)
+                .validateLeaderAuthority(userId, groupId);
+
+        // when & then
+        assertThatThrownBy(() -> groupEntryService.refuseEntryRequest(userId, requestId))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_FORBIDDEN);
     }
 }

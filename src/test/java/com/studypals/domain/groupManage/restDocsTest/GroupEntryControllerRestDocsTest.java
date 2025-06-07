@@ -1,6 +1,7 @@
 package com.studypals.domain.groupManage.restDocsTest;
 
 import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -8,11 +9,9 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -59,7 +58,7 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
         given(groupEntryService.generateEntryCode(any(), any())).willReturn(entryCodeRes);
 
         // when
-        ResultActions result = mockMvc.perform(post("/groups/" + groupId + "/entry-code"));
+        ResultActions result = mockMvc.perform(post("/groups/{groupId}/entry-code", groupId));
 
         // then
         result.andExpect(status().isCreated())
@@ -68,6 +67,9 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
+                        pathParameters(parameterWithName("groupId")
+                                .description("코드 생성할 그룹 ID")
+                                .attributes(constraints("not null"))),
                         responseFields(
                                 fieldWithPath("data.groupId").description("그룹 ID"),
                                 fieldWithPath("data.code").description("그룹 초대 코드 | 6자리의 대문자 알파벳, 숫자 조합"),
@@ -163,7 +165,7 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
         given(groupEntryService.requestParticipant(any(), eq(req))).willReturn(requestId);
 
         // when
-        ResultActions result = mockMvc.perform(post("/groups/request-entry")
+        ResultActions result = mockMvc.perform(post("/groups/entry-requests")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 
@@ -179,5 +181,48 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
                                         .description("그룹 초대 코드")
                                         .attributes(constraints("문자열 길이 6"))),
                         responseHeaders(headerWithName("Location").description("추가된 그룹 가입 요청 id"))));
+    }
+
+    @Test
+    @WithMockUser
+    void acceptEntryRequest_success() throws Exception {
+        // given
+        Long requestId = 1L;
+        AcceptEntryRes res = new AcceptEntryRes(1L, 1L);
+
+        given(groupEntryService.acceptEntryRequest(any(), eq(requestId))).willReturn(res);
+
+        // when
+        ResultActions result = mockMvc.perform(post("/groups/entry-requests/{requestId}/accept", requestId));
+
+        // then
+        result.andExpect(status().isCreated())
+                .andExpect(header().string("Location", matchesPattern("/groups/\\d+/members/\\d+")))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        pathParameters(parameterWithName("requestId")
+                                .description("승인할 요청 ID")
+                                .attributes(constraints("not null"))),
+                        responseHeaders(headerWithName("Location").description("가입된 그룹원 id"))));
+    }
+
+    @Test
+    @WithMockUser
+    void refuseEntryRequest_success() throws Exception {
+        // given
+        Long requestId = 1L;
+
+        // when
+        ResultActions result = mockMvc.perform(delete("/groups/entry-requests/{requestId}", requestId));
+
+        // then
+        result.andExpect(status().isNoContent())
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        pathParameters(parameterWithName("requestId")
+                                .description("거절할 요청 ID")
+                                .attributes(constraints("not null")))));
     }
 }

@@ -25,7 +25,7 @@ import com.studypals.global.exceptions.exception.GroupException;
  */
 @Worker
 @RequiredArgsConstructor
-public class GroupEntryRequestWorker {
+public class GroupEntryRequestWriter {
     private final GroupEntryRequestRepository entryRequestRepository;
     private final GroupEntryRequestMapper mapper;
 
@@ -43,5 +43,9 @@ public class GroupEntryRequestWorker {
         entryRequestRepository.save(entryRequest);
 
         return entryRequest;
+    }
+
+    public void closeRequest(GroupEntryRequest request) {
+        entryRequestRepository.delete(request);
     }
 }
