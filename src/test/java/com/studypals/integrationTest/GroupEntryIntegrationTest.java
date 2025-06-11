@@ -128,6 +128,32 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
     }
 
     @Test
+    @DisplayName("GET /groups/:groupId/entry-requests")
+    void getEntryRequests_success() throws Exception {
+        // given
+        CreateUserVar leader = createUser("leader", "leader");
+        CreateUserVar member1 = createUser("member1", "member1");
+        CreateUserVar member2 = createUser("member2", "member2");
+        CreateGroupVar group = createGroup(leader.getUserId(), "group", "tag");
+        long request1 = createRequest(member1.getUserId(), group.groupId());
+        long request2 = createRequest(member2.getUserId(), group.groupId());
+
+        // when
+        ResultActions result = mockMvc.perform(get("/groups/{groupId}/entry-requests", group.groupId())
+                .header("Authorization", "Bearer " + leader.getAccessToken()));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content.length()").value(2))
+                .andExpect(jsonPath("$.data.content[0].requestId").value(request1))
+                .andExpect(jsonPath("$.data.content[0].member.id").value(member1.getUserId()))
+                .andExpect(jsonPath("$.data.content[1].requestId").value(request2))
+                .andExpect(jsonPath("$.data.content[1].member.id").value(member2.getUserId()))
+                .andExpect(jsonPath("$.data.next").value(request2))
+                .andExpect(jsonPath("$.data.hasNext").value(false));
+    }
+
+    @Test
     @DisplayName("POST /groups/entry-requests/:requestId/accept")
     void approveEntryRequest_success() throws Exception {
         // given

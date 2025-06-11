@@ -3,6 +3,7 @@ package com.studypals.domain.memberManage.worker;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -94,5 +95,35 @@ class MemberReaderTest {
 
         // then
         assertThat(result).isEqualTo(mockMember);
+    }
+
+    @Test
+    void getByIds_success() {
+        // given
+        Member member1 = Member.builder().id(1L).build();
+        Member member2 = Member.builder().id(2L).build();
+        List<Long> ids = List.of(1L, 2L);
+
+        given(memberRepository.findAllById(ids)).willReturn(List.of(member1, member2));
+
+        // when
+        List<Member> actual = memberReader.get(ids);
+
+        // then
+        assertThat(actual).hasSize(2);
+    }
+
+    @Test
+    void getByIds_success_empty() {
+        // given
+        List<Long> ids = List.of(1L, 2L);
+
+        given(memberRepository.findAllById(ids)).willReturn(List.of());
+
+        // when
+        List<Member> actual = memberReader.get(ids);
+
+        // then
+        assertThat(actual).isEmpty();
     }
 }
