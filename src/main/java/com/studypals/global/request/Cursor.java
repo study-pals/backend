@@ -10,4 +10,9 @@ package com.studypals.global.request;
  * @author s0o0bn
  * @since 2025-06-05
  */
-public record Cursor(long cursor, int size, SortOrder sort) {}
+public record Cursor(long cursor, int size, SortOrder sort) {
+
+    public boolean isFirstPage() {
+        return cursor == 0;
+    }
+}

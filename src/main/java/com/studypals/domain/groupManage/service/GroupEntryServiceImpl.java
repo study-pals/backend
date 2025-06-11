@@ -98,14 +98,21 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     }
 
     @Override
+    @Transactional
     public CursorResponse<GroupEntryRequestDto> getEntryRequests(Long userId, Long groupId, Cursor cursor) {
         authorityValidator.validateLeaderAuthority(userId, groupId);
+
+        if (cursor.isFirstPage()) {
+            entryRequestWriter.closeRequestOutdated(groupId);
+        }
+
         Slice<GroupEntryRequest> entryRequests = entryRequestReader.getByGroup(groupId, cursor);
         List<Member> requestedMembers = memberReader.get(entryRequests.getContent().stream()
                 .map(r -> r.getMember().getId())
                 .toList());
         List<GroupEntryRequestDto> content =
                 GroupEntryRequestCustomMapper.map(entryRequests.getContent(), requestedMembers);
+
         return new CursorResponse<>(content, content.get(content.size() - 1).requestId(), entryRequests.hasNext());
     }
 
