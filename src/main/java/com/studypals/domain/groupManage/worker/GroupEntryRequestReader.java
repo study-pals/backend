@@ -5,6 +5,7 @@ import org.springframework.data.domain.Slice;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupEntryRequestRepository;
+import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
@@ -34,7 +35,7 @@ public class GroupEntryRequestReader {
                 .orElseThrow(() -> new GroupException(GroupErrorCode.GROUP_ENTRY_REQUEST_NOT_FOUND));
     }
 
-    public Slice<GroupEntryRequest> getByGroup(Long groupId, Cursor cursor) {
-        return entryRequestRepository.findByGroupIdAndSortBy(groupId, cursor);
+    public Slice<GroupEntryRequest> getByGroup(Group group, Cursor cursor) {
+        return entryRequestRepository.findByGroupIdAndSortBy(group.getId(), cursor);
     }
 }

@@ -82,11 +82,12 @@ public class GroupEntryRequestReaderTest {
         SortType sort = CommonSortType.NEW;
         Cursor cursor = new Cursor(0, 10, new SortOrder(sort.getField(), sort.getDirection()));
 
+        given(mockGroup.getId()).willReturn(groupId);
         given(entryRequestRepository.findByGroupIdAndSortBy(groupId, cursor))
                 .willReturn(new SliceImpl<>(requests, PageRequest.of(0, requests.size()), false));
 
         // when
-        Slice<GroupEntryRequest> slice = entryRequestReader.getByGroup(groupId, cursor);
+        Slice<GroupEntryRequest> slice = entryRequestReader.getByGroup(mockGroup, cursor);
 
         // then
         assertThat(slice.getContent()).hasSameSizeAs(requests);
@@ -99,10 +100,11 @@ public class GroupEntryRequestReaderTest {
         SortType sort = CommonSortType.NEW;
         Cursor cursor = new Cursor(0, 10, new SortOrder(sort.getField(), sort.getDirection()));
 
+        given(mockGroup.getId()).willReturn(groupId);
         given(entryRequestRepository.findByGroupIdAndSortBy(groupId, cursor)).willReturn(new SliceImpl<>(List.of()));
 
         // when
-        Slice<GroupEntryRequest> slice = entryRequestReader.getByGroup(groupId, cursor);
+        Slice<GroupEntryRequest> slice = entryRequestReader.getByGroup(mockGroup, cursor);
 
         // then
         assertThat(slice.getContent()).isEmpty();

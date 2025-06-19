@@ -51,8 +51,8 @@ public class GroupEntryRequestWriter {
         entryRequestRepository.delete(request);
     }
 
-    public void closeRequestOutdated(Long groupId) {
+    public void closeRequestOutdated(Group group) {
         LocalDate before = LocalDate.now().minusDays(7);
-        entryRequestRepository.deleteByGroupIdAndCreatedDateBefore(groupId, before);
+        entryRequestRepository.deleteByGroupIdAndCreatedDateBefore(group.getId(), before);
     }
 }

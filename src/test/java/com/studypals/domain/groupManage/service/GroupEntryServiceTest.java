@@ -325,7 +325,8 @@ public class GroupEntryServiceTest {
 
         List<GroupEntryRequest> requests = List.of(request1, request2);
         Slice<GroupEntryRequest> slice = new SliceImpl<>(requests, PageRequest.of(0, 2), true);
-        given(entryRequestReader.getByGroup(groupId, cursor)).willReturn(slice);
+        given(groupReader.getById(groupId)).willReturn(mockGroup);
+        given(entryRequestReader.getByGroup(mockGroup, cursor)).willReturn(slice);
         given(memberReader.get(List.of(1L, 2L))).willReturn(List.of(member1, member2));
 
         // when
