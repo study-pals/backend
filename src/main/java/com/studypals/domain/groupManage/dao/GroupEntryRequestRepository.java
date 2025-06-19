@@ -1,6 +1,9 @@
 package com.studypals.domain.groupManage.dao;
 
+import java.time.LocalDate;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
@@ -18,4 +21,9 @@ import com.studypals.domain.groupManage.entity.GroupEntryRequest;
  * @since 2025-04-25
  */
 @Repository
-public interface GroupEntryRequestRepository extends JpaRepository<GroupEntryRequest, Long> {}
+public interface GroupEntryRequestRepository
+        extends JpaRepository<GroupEntryRequest, Long>, GroupEntryRequestCustomRepository {
+
+    @Modifying
+    long deleteByGroupIdAndCreatedDateBefore(Long groupId, LocalDate before);
+}

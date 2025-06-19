@@ -15,6 +15,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,10 @@ import com.studypals.domain.groupManage.api.GroupEntryController;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.service.GroupEntryService;
+import com.studypals.domain.memberManage.dto.MemberProfileDto;
+import com.studypals.global.request.Cursor;
 import com.studypals.global.responses.CommonResponse;
+import com.studypals.global.responses.CursorResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 import com.studypals.testModules.testSupport.RestDocsSupport;
@@ -181,6 +185,48 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
                                         .description("그룹 초대 코드")
                                         .attributes(constraints("문자열 길이 6"))),
                         responseHeaders(headerWithName("Location").description("추가된 그룹 가입 요청 id"))));
+    }
+
+    @Test
+    @WithMockUser
+    void getEntryRequests_success() throws Exception {
+        // given
+        Long groupId = 1L;
+        List<GroupEntryRequestDto> content = List.of(
+                new GroupEntryRequestDto(1L, new MemberProfileDto(2L, "member2", "image2"), LocalDate.of(2025, 6, 11)),
+                new GroupEntryRequestDto(2L, new MemberProfileDto(3L, "member3", "image3"), LocalDate.of(2025, 6, 5)));
+        CursorResponse<GroupEntryRequestDto> res =
+                new CursorResponse<>(content, content.get(content.size() - 1).requestId(), false);
+
+        given(groupEntryService.getEntryRequests(any(), eq(groupId), any(Cursor.class)))
+                .willReturn(res);
+
+        // when
+        ResultActions result = mockMvc.perform(get("/groups/{groupId}/entry-requests", groupId)
+                .queryParam("cursor", "0")
+                .queryParam("size", "10")
+                .queryParam("sort", "NEW"));
+
+        // then
+        result.andExpect(status().isOk())
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        queryParameters(
+                                parameterWithName("cursor").description("조회 기준 데이터 ID default 0, 이후 요청은 이전 응답의 next 값"),
+                                parameterWithName("size").description("조회할 데이터 수 default 10"),
+                                parameterWithName("sort").description("조회 시 정렬 기준 default NEW | NEW, OLD")),
+                        responseFields(
+                                fieldWithPath("data.content[].requestId").description("가입 요청 ID"),
+                                fieldWithPath("data.content[].member.id").description("요청한 사용자 ID"),
+                                fieldWithPath("data.content[].member.nickname").description("요청한 사용자 닉네임"),
+                                fieldWithPath("data.content[].member.imageUrl").description("요청한 사용자 프로필 이미지 URL"),
+                                fieldWithPath("data.content[].requestedDate").description("가입 요청 날짜"),
+                                fieldWithPath("data.next").description("다음 조회할 ID, 해당 값이 다음 페이지 요청의 cursor가 됨"),
+                                fieldWithPath("data.hasNext").description("데이터가 더 존재하는지, 마지막 페이지의 경우 false"),
+                                fieldWithPath("code").description("응답 코드"),
+                                fieldWithPath("status").description("응답 상태"),
+                                fieldWithPath("message").description("응답 메시지"))));
     }
 
     @Test

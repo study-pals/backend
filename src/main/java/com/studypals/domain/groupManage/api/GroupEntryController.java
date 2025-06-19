@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.dto.AcceptEntryRes;
-import com.studypals.domain.groupManage.dto.GroupEntryCodeRes;
-import com.studypals.domain.groupManage.dto.GroupEntryReq;
-import com.studypals.domain.groupManage.dto.GroupSummaryRes;
+import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.service.GroupEntryService;
+import com.studypals.global.annotations.CursorDefault;
+import com.studypals.global.request.Cursor;
 import com.studypals.global.responses.CommonResponse;
+import com.studypals.global.responses.CursorResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 
@@ -28,6 +28,7 @@ import com.studypals.global.responses.ResponseCode;
  *     - GET /groups/summary : 그룹 대표 정보 조회
  *     - POST /groups/join : 공개 그룹에 가입
  *     - POST /groups/entry-requests : 비공개 그룹 가입 요청
+ *     - GET /groups/{groupId}/entry-requests : 그룹 가입 요청 목록 조회
  *     - POST /groups/entry-requests/{requestId}/accept : 그룹 가입 요청 승인
  *     - DELETE /groups/entry-requests/{requestId} : 그룹 가입 요청 거절
  * </pre>
@@ -75,6 +76,13 @@ public class GroupEntryController {
 
         return ResponseEntity.created(URI.create(String.format("/groups/%d/requests/%d", req.groupId(), requestId)))
                 .build();
+    }
+
+    @GetMapping("/{groupId}/entry-requests")
+    public ResponseEntity<Response<CursorResponse<GroupEntryRequestDto>>> getEntryRequests(
+            @AuthenticationPrincipal Long userId, @PathVariable Long groupId, @CursorDefault Cursor cursor) {
+        CursorResponse<GroupEntryRequestDto> response = groupEntryService.getEntryRequests(userId, groupId, cursor);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_ENTRY_REQUEST_LIST, response));
     }
 
     @PostMapping("/entry-requests/{requestId}/accept")

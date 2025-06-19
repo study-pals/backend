@@ -1,5 +1,7 @@
 package com.studypals.domain.memberManage.worker;
 
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.memberManage.dao.MemberRepository;
@@ -39,5 +41,9 @@ public class MemberReader {
 
     public Member getRef(Long userId) {
         return memberRepository.getReferenceById(userId);
+    }
+
+    public List<Member> get(List<Long> userIds) {
+        return memberRepository.findAllById(userIds);
     }
 }

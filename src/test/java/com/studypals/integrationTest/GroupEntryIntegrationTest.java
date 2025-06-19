@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -85,7 +84,7 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
     }
 
     @Test
-    @WithMockUser
+    @DisplayName("POST /groups/join")
     void joinGroup_success() throws Exception {
         // given
         CreateGroupVar group = createGroup(createUser().getUserId(), "group", "tag", false);
@@ -107,7 +106,7 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
     }
 
     @Test
-    @WithMockUser
+    @DisplayName("POST /groups/entry-requests")
     void requestParticipant_success() throws Exception {
         // given
         CreateUserVar user = createUser();
@@ -129,7 +128,33 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
     }
 
     @Test
-    @WithMockUser
+    @DisplayName("GET /groups/:groupId/entry-requests")
+    void getEntryRequests_success() throws Exception {
+        // given
+        CreateUserVar leader = createUser("leader", "leader");
+        CreateUserVar member1 = createUser("member1", "member1");
+        CreateUserVar member2 = createUser("member2", "member2");
+        CreateGroupVar group = createGroup(leader.getUserId(), "group", "tag");
+        long request1 = createRequest(member1.getUserId(), group.groupId());
+        long request2 = createRequest(member2.getUserId(), group.groupId());
+
+        // when
+        ResultActions result = mockMvc.perform(get("/groups/{groupId}/entry-requests", group.groupId())
+                .header("Authorization", "Bearer " + leader.getAccessToken()));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content.length()").value(2))
+                .andExpect(jsonPath("$.data.content[0].requestId").value(request1))
+                .andExpect(jsonPath("$.data.content[0].member.id").value(member1.getUserId()))
+                .andExpect(jsonPath("$.data.content[1].requestId").value(request2))
+                .andExpect(jsonPath("$.data.content[1].member.id").value(member2.getUserId()))
+                .andExpect(jsonPath("$.data.next").value(request2))
+                .andExpect(jsonPath("$.data.hasNext").value(false));
+    }
+
+    @Test
+    @DisplayName("POST /groups/entry-requests/:requestId/accept")
     void approveEntryRequest_success() throws Exception {
         // given
         CreateUserVar user = createUser("leader", "leader");
@@ -148,7 +173,7 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
     }
 
     @Test
-    @WithMockUser
+    @DisplayName("DELETE /groups/entry-requests/:requestId")
     void refuseEntryRequest_success() throws Exception {
         // given
         CreateUserVar user = createUser("leader", "leader");

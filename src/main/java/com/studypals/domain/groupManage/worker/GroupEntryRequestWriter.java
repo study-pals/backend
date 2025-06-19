@@ -1,5 +1,7 @@
 package com.studypals.domain.groupManage.worker;
 
+import java.time.LocalDate;
+
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupEntryRequestRepository;
@@ -47,5 +49,10 @@ public class GroupEntryRequestWriter {
 
     public void closeRequest(GroupEntryRequest request) {
         entryRequestRepository.delete(request);
+    }
+
+    public void closeRequestOutdated(Group group) {
+        LocalDate before = LocalDate.now().minusDays(7);
+        entryRequestRepository.deleteByGroupIdAndCreatedDateBefore(group.getId(), before);
     }
 }
