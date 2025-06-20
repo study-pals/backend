@@ -15,7 +15,6 @@ import com.studypals.domain.chatManage.dto.OutgoingMessage;
 @Mapper(componentModel = "spring")
 public interface ChatMessageMapper {
 
-    @Mapping(target = "room", ignore = true)
     @Mapping(target = "senderId", source = "senderId")
     @Mapping(target = "time", source = "time")
     OutgoingMessage toOutMessage(IncomingMessage message, Long senderId, String time);
