@@ -62,7 +62,10 @@ public enum ResponseCode {
     CHAT_ROOM_UPDATE("C01-03"),
     CHAT_ROOM_JOIN("C01-04"),
     CHAT_ROOM_LEAVE("C01-05"),
-    CHAT_ROOM_ROLE("C01-06");
+    CHAT_ROOM_ROLE("C01-06"),
+
+    CHAT_SEND("C02-00"),
+    CHAT_SUBSCRIBE("C02-01");
 
     private final String code;
 
