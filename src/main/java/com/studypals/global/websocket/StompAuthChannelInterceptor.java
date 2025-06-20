@@ -2,7 +2,6 @@ package com.studypals.global.websocket;
 
 import java.security.Principal;
 
-import org.springframework.core.env.PropertyResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -43,7 +42,6 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
     private static final String ACCESS_HEADER = "Authorization";
-    private final PropertyResolver propertyResolver;
 
     /**
      * 메시지가 controller 로 바인딩 되기 전 과정을 수행합니다. 보통 {@code CONNECT, SUBSCRIBE, SEND} 에 대한
