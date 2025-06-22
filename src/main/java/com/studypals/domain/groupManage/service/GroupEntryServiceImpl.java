@@ -103,6 +103,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
         authorityValidator.validateLeaderAuthority(userId, groupId);
         Group group = groupReader.getById(groupId);
 
+        // TODO batch job 으로 일괄 삭제 처리
         if (cursor.isFirstPage()) {
             entryRequestWriter.closeRequestOutdated(group);
         }

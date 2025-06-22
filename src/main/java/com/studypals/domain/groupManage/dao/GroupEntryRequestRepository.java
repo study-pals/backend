@@ -28,8 +28,6 @@ public interface GroupEntryRequestRepository
 
     @Modifying
     @Transactional
-    @Query(
-            value = "DELETE FROM group_entry_request WHERE group_id = :groupId AND created_at < :before",
-            nativeQuery = true)
+    @Query("DELETE FROM GroupEntryRequest g WHERE g.group.id = :groupId AND g.createdDate < :before")
     void deleteByGroupIdAndCreatedDateBefore(Long groupId, LocalDate before);
 }

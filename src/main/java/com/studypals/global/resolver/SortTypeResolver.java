@@ -14,13 +14,15 @@ import com.studypals.global.request.SortType;
  * @since 2025-06-05
  */
 public class SortTypeResolver {
-    private final List<Class<? extends SortType>> sortTypeClasses; // = List.of(CommonSortType.class);
+    private final List<Class<? extends SortType>> sortTypeClasses;
 
     public SortTypeResolver(List<Class<? extends SortType>> sortTypeClasses) {
         this.sortTypeClasses = sortTypeClasses;
     }
 
     public Optional<SortType> resolve(String sort) {
+        if (sort == null) return Optional.empty();
+
         return sortTypeClasses.stream()
                 .flatMap(clazz -> Arrays.stream(clazz.getEnumConstants()))
                 .map(capture -> (SortType) capture)
