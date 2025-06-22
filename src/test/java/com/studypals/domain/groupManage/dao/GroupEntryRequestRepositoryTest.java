@@ -58,7 +58,7 @@ public class GroupEntryRequestRepositoryTest extends DataJpaSupport {
 
         // when
         Cursor cursor = new Cursor(0, 10, CommonSortType.NEW);
-        Slice<GroupEntryRequest> actual = entryRequestRepository.findByGroupIdAndSortBy(group.getId(), cursor);
+        Slice<GroupEntryRequest> actual = entryRequestRepository.findAllByGroupIdWithPagination(group.getId(), cursor);
 
         // then
         assertThat(actual.getContent()).containsExactlyElementsOf(expected.getContent());

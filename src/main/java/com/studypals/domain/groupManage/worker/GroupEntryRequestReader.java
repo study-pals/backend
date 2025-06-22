@@ -36,6 +36,6 @@ public class GroupEntryRequestReader {
     }
 
     public Slice<GroupEntryRequest> getByGroup(Group group, Cursor cursor) {
-        return entryRequestRepository.findByGroupIdAndSortBy(group.getId(), cursor);
+        return entryRequestRepository.findAllByGroupIdWithPagination(group.getId(), cursor);
     }
 }

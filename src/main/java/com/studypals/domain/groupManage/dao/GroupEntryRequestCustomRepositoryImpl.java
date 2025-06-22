@@ -36,7 +36,7 @@ public class GroupEntryRequestCustomRepositoryImpl extends AbstractPagingReposit
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Slice<GroupEntryRequest> findByGroupIdAndSortBy(Long groupId, Cursor cursor) {
+    public Slice<GroupEntryRequest> findAllByGroupIdWithPagination(Long groupId, Cursor cursor) {
         List<GroupEntryRequest> results = queryFactory
                 .selectFrom(groupEntryRequest)
                 .where(groupEntryRequest.group.id.eq(groupId).and(groupEntryRequest.id.gt(cursor.cursor())))

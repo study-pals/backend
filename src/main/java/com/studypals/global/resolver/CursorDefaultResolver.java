@@ -24,6 +24,12 @@ public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
     private static final String SIZE_PARAM = "size";
     private static final String SORT_PARAM = "sort";
 
+    private final SortTypeResolver sortTypeResolver;
+
+    public CursorDefaultResolver(SortTypeResolver sortTypeResolver) {
+        this.sortTypeResolver = sortTypeResolver;
+    }
+
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterType() == Cursor.class && parameter.hasParameterAnnotation(CursorDefault.class);
@@ -102,7 +108,8 @@ public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
     private SortType getSort(NativeWebRequest webRequest, CursorDefault cursorDefault) {
         String sortParam =
                 Optional.ofNullable(webRequest.getParameter(SORT_PARAM)).orElse(cursorDefault.sort());
-        return SortTypeResolver.resolve(sortParam)
+        return sortTypeResolver
+                .resolve(sortParam)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid sort parameter"));
     }
 }

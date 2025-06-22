@@ -26,5 +26,5 @@ public interface GroupEntryRequestCustomRepository {
      * @param cursor {@link Cursor}
      * @return {@code GroupEntryRequest} 리스트를 포함한 {@link Slice}
      */
-    Slice<GroupEntryRequest> findByGroupIdAndSortBy(Long groupId, Cursor cursor);
+    Slice<GroupEntryRequest> findAllByGroupIdWithPagination(Long groupId, Cursor cursor);
 }

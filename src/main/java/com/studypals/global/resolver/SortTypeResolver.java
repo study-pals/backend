@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import com.studypals.global.request.CommonSortType;
 import com.studypals.global.request.SortType;
 
 /**
@@ -15,13 +14,17 @@ import com.studypals.global.request.SortType;
  * @since 2025-06-05
  */
 public class SortTypeResolver {
-    private static final List<Class<? extends SortType>> SORT_CLASSES = List.of(CommonSortType.class);
+    private final List<Class<? extends SortType>> sortTypeClasses; // = List.of(CommonSortType.class);
 
-    public static Optional<SortType> resolve(String sort) {
-        return SORT_CLASSES.stream()
+    public SortTypeResolver(List<Class<? extends SortType>> sortTypeClasses) {
+        this.sortTypeClasses = sortTypeClasses;
+    }
+
+    public Optional<SortType> resolve(String sort) {
+        return sortTypeClasses.stream()
                 .flatMap(clazz -> Arrays.stream(clazz.getEnumConstants()))
-                .map(e -> (SortType) e)
-                .filter(e -> e.name().equalsIgnoreCase(sort))
+                .map(capture -> (SortType) capture)
+                .filter(type -> type.name().equalsIgnoreCase(sort))
                 .findFirst();
     }
 }

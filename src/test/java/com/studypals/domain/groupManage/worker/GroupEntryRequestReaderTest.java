@@ -80,7 +80,7 @@ public class GroupEntryRequestReaderTest {
         Cursor cursor = new Cursor(0, 10, CommonSortType.NEW);
 
         given(mockGroup.getId()).willReturn(groupId);
-        given(entryRequestRepository.findByGroupIdAndSortBy(groupId, cursor))
+        given(entryRequestRepository.findAllByGroupIdWithPagination(groupId, cursor))
                 .willReturn(new SliceImpl<>(requests, PageRequest.of(0, requests.size()), false));
 
         // when
@@ -97,7 +97,8 @@ public class GroupEntryRequestReaderTest {
         Cursor cursor = new Cursor(0, 10, CommonSortType.NEW);
 
         given(mockGroup.getId()).willReturn(groupId);
-        given(entryRequestRepository.findByGroupIdAndSortBy(groupId, cursor)).willReturn(new SliceImpl<>(List.of()));
+        given(entryRequestRepository.findAllByGroupIdWithPagination(groupId, cursor))
+                .willReturn(new SliceImpl<>(List.of()));
 
         // when
         Slice<GroupEntryRequest> slice = entryRequestReader.getByGroup(mockGroup, cursor);

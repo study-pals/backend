@@ -4,7 +4,9 @@ import java.time.LocalDate;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 
@@ -25,5 +27,9 @@ public interface GroupEntryRequestRepository
         extends JpaRepository<GroupEntryRequest, Long>, GroupEntryRequestCustomRepository {
 
     @Modifying
-    long deleteByGroupIdAndCreatedDateBefore(Long groupId, LocalDate before);
+    @Transactional
+    @Query(
+            value = "DELETE FROM group_entry_request WHERE group_id = :groupId AND created_at < :before",
+            nativeQuery = true)
+    void deleteByGroupIdAndCreatedDateBefore(Long groupId, LocalDate before);
 }
