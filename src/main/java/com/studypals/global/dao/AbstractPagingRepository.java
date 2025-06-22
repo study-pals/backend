@@ -7,7 +7,7 @@ import org.springframework.data.domain.Sort;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.PathBuilder;
-import com.studypals.global.request.SortOrder;
+import com.studypals.global.request.SortType;
 
 /**
  * 페이징 관련 custom repository 의 공통 메서드를 정의한 추상 클래스입니다.
@@ -18,9 +18,9 @@ import com.studypals.global.request.SortOrder;
  * @since 2025-06-05
  */
 public abstract class AbstractPagingRepository<T> {
-    protected OrderSpecifier<?> getOrderSpecifier(Class<T> entityClass, String entityName, SortOrder sortOrder) {
-        String field = sortOrder.field();
-        Sort.Direction direction = sortOrder.direction();
+    protected OrderSpecifier<?> getOrderSpecifier(Class<T> entityClass, String entityName, SortType sortType) {
+        String field = sortType.getField();
+        Sort.Direction direction = sortType.getDirection();
 
         PathBuilder<T> path = new PathBuilder<>(entityClass, entityName);
         Order order = direction == Sort.Direction.ASC ? Order.ASC : Order.DESC;

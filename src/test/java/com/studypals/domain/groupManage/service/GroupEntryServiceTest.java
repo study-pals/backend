@@ -30,8 +30,6 @@ import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 import com.studypals.global.request.CommonSortType;
 import com.studypals.global.request.Cursor;
-import com.studypals.global.request.SortOrder;
-import com.studypals.global.request.SortType;
 import com.studypals.global.responses.CursorResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -313,8 +311,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Long groupId = 10L;
-        SortType sort = CommonSortType.NEW;
-        Cursor cursor = new Cursor(0, 10, new SortOrder(sort.getField(), sort.getDirection()));
+        Cursor cursor = new Cursor(0, 10, CommonSortType.NEW);
 
         Member member1 = Member.builder().id(1L).build();
         Member member2 = Member.builder().id(2L).build();
@@ -343,8 +340,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Long groupId = 1L;
-        SortType sort = CommonSortType.NEW;
-        Cursor cursor = new Cursor(0, 10, new SortOrder(sort.getField(), sort.getDirection()));
+        Cursor cursor = new Cursor(0, 10, CommonSortType.NEW);
 
         willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
                 .given(authorityValidator)

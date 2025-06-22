@@ -16,8 +16,6 @@ import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.request.CommonSortType;
 import com.studypals.global.request.Cursor;
-import com.studypals.global.request.SortOrder;
-import com.studypals.global.request.SortType;
 import com.studypals.testModules.testSupport.DataJpaSupport;
 
 @DisplayName("GroupEntryRequest_Querydsl_test")
@@ -59,8 +57,7 @@ public class GroupEntryRequestRepositoryTest extends DataJpaSupport {
         Slice<GroupEntryRequest> expected = new SliceImpl<>(List.of(request1, request2));
 
         // when
-        SortType sort = CommonSortType.NEW;
-        Cursor cursor = new Cursor(0, 10, new SortOrder(sort.getField(), sort.getDirection()));
+        Cursor cursor = new Cursor(0, 10, CommonSortType.NEW);
         Slice<GroupEntryRequest> actual = entryRequestRepository.findByGroupIdAndSortBy(group.getId(), cursor);
 
         // then

@@ -5,12 +5,12 @@ package com.studypals.global.request;
  *
  * @param cursor 조회 시작 커서
  * @param size 조회할 데이터 수
- * @param sort 정렬 조건 {@link SortOrder}
+ * @param sort 정렬 조건 {@link SortType}
  *
  * @author s0o0bn
  * @since 2025-06-05
  */
-public record Cursor(long cursor, int size, SortOrder sort) {
+public record Cursor(long cursor, int size, SortType sort) {
 
     public boolean isFirstPage() {
         return cursor == 0;

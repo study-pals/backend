@@ -10,7 +10,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.studypals.global.annotations.CursorDefault;
 import com.studypals.global.request.Cursor;
-import com.studypals.global.request.SortOrder;
 import com.studypals.global.request.SortType;
 
 /**
@@ -40,7 +39,7 @@ public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
         CursorDefault annotation = getCursorDefault(parameter);
         long cursor = getCursor(webRequest, annotation);
         int size = getSize(webRequest, annotation);
-        SortOrder sort = getSort(webRequest, annotation);
+        SortType sort = getSort(webRequest, annotation);
         return new Cursor(cursor, size, sort);
     }
 
@@ -98,13 +97,12 @@ public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
      *
      * @param webRequest 현재 웹 요청 {@link NativeWebRequest}
      * @param cursorDefault 디폴트 값을 갖고 있는 {@code CursorDefault} annotation
-     * @return {@link SortOrder}
+     * @return {@link SortType}
      */
-    private SortOrder getSort(NativeWebRequest webRequest, CursorDefault cursorDefault) {
+    private SortType getSort(NativeWebRequest webRequest, CursorDefault cursorDefault) {
         String sortParam =
                 Optional.ofNullable(webRequest.getParameter(SORT_PARAM)).orElse(cursorDefault.sort());
-        SortType type = SortTypeResolver.resolve(sortParam)
+        return SortTypeResolver.resolve(sortParam)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid sort parameter"));
-        return new SortOrder(type.getField(), type.getDirection());
     }
 }

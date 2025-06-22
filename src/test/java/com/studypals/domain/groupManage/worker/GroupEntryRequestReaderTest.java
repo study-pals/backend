@@ -22,8 +22,6 @@ import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.request.CommonSortType;
 import com.studypals.global.request.Cursor;
-import com.studypals.global.request.SortOrder;
-import com.studypals.global.request.SortType;
 
 @ExtendWith(MockitoExtension.class)
 public class GroupEntryRequestReaderTest {
@@ -79,8 +77,7 @@ public class GroupEntryRequestReaderTest {
         List<GroupEntryRequest> requests = List.of(request1, request2, request3);
 
         Long groupId = 1L;
-        SortType sort = CommonSortType.NEW;
-        Cursor cursor = new Cursor(0, 10, new SortOrder(sort.getField(), sort.getDirection()));
+        Cursor cursor = new Cursor(0, 10, CommonSortType.NEW);
 
         given(mockGroup.getId()).willReturn(groupId);
         given(entryRequestRepository.findByGroupIdAndSortBy(groupId, cursor))
@@ -97,8 +94,7 @@ public class GroupEntryRequestReaderTest {
     @Test
     void getByGroup_success_empty() {
         Long groupId = 1L;
-        SortType sort = CommonSortType.NEW;
-        Cursor cursor = new Cursor(0, 10, new SortOrder(sort.getField(), sort.getDirection()));
+        Cursor cursor = new Cursor(0, 10, CommonSortType.NEW);
 
         given(mockGroup.getId()).willReturn(groupId);
         given(entryRequestRepository.findByGroupIdAndSortBy(groupId, cursor)).willReturn(new SliceImpl<>(List.of()));
