@@ -10,10 +10,13 @@ import org.springframework.data.domain.SliceImpl;
 
 import lombok.RequiredArgsConstructor;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.global.dao.AbstractPagingRepository;
+import com.studypals.global.request.CommonSortType;
 import com.studypals.global.request.Cursor;
+import com.studypals.global.request.SortType;
 
 /**
  * group entry request custom repository 의 구현 클래스입니다.
@@ -40,7 +43,7 @@ public class GroupEntryRequestCustomRepositoryImpl extends AbstractPagingReposit
         List<GroupEntryRequest> results = queryFactory
                 .selectFrom(groupEntryRequest)
                 .where(groupEntryRequest.group.id.eq(groupId).and(groupEntryRequest.id.gt(cursor.cursor())))
-                .orderBy(getOrderSpecifier(GroupEntryRequest.class, "groupEntryRequest", cursor.sort()))
+                .orderBy(getOrderSpecifier(cursor.sort()))
                 .limit(cursor.size() + 1)
                 .fetch();
 
@@ -50,5 +53,13 @@ public class GroupEntryRequestCustomRepositoryImpl extends AbstractPagingReposit
         }
 
         return new SliceImpl<>(results, PageRequest.of(0, cursor.size()), hasNext);
+    }
+
+    private OrderSpecifier<?> getOrderSpecifier(SortType sort) {
+        if (sort == CommonSortType.NEW || sort == CommonSortType.OLD)
+            return new OrderSpecifier<>(getOrder(sort.getDirection()), groupEntryRequest.createdDate);
+        else
+            throw new IllegalArgumentException(
+                    "[GroupEntryRequestCustomRepositoryImpl#getOrderSpecifier] not supported sort type");
     }
 }
