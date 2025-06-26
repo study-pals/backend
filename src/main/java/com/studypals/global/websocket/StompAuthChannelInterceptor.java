@@ -1,6 +1,7 @@
 package com.studypals.global.websocket;
 
 import java.security.Principal;
+import java.util.Map;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -20,6 +21,8 @@ import com.studypals.global.exceptions.exception.BaseException;
 import com.studypals.global.exceptions.exception.ChatException;
 import com.studypals.global.security.jwt.JwtToken;
 import com.studypals.global.security.jwt.JwtUtils;
+import com.studypals.global.websocket.subscibeManage.UserSubscirbeInfo;
+import com.studypals.global.websocket.subscibeManage.UserSubscribeInfoRepository;
 
 /**
  * websocket 기반의 통신에서, STOMP 프로토콜 위에서 작동한다 할 때, controller 로 바인딩 되기 전
@@ -40,13 +43,13 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
     private final JwtUtils jwtUtils;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
+    private final UserSubscribeInfoRepository userSubscribeInfoRepository;
 
     private static final String ACCESS_HEADER = "Authorization";
 
     /**
      * 메시지가 controller 로 바인딩 되기 전 과정을 수행합니다. 보통 {@code CONNECT, SUBSCRIBE, SEND} 에 대한
      * intercept 가 가능합니다.
-     *
      * Principal 을 사용하여 각 세션에 따른 사용자 정보를 저장하고, controller 에서 이를 받을 수 있도록 합니다.
      *
      * @param message 실제로 받는 메시지
@@ -110,6 +113,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
         // url 로 부터 구독하고자 하는 방의 id 를 추출
         String roomId = extractRoomIdFromDestination(destination);
+        String sessionId = accessor.getSessionId();
 
         Principal principal = accessor.getUser();
         if (!(principal instanceof StompPrincipal stompPrincipal)) {
@@ -123,6 +127,18 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
             throw new ChatException(
                     ChatErrorCode.CHAT_SUBSCRIBE_FAIL,
                     "[StompAuthChannelInterceptor#handleSubscribe] user not in this room");
+        }
+
+        if (userSubscribeInfoRepository.existById(sessionId)) {
+            userSubscribeInfoRepository.saveMapById(sessionId, Map.of(roomId, "17"));
+        } else {
+            UserSubscirbeInfo userSubscirbeInfo = UserSubscirbeInfo.builder()
+                    .sessionId(sessionId)
+                    .userId(userId)
+                    .roomList(Map.of(roomId, 17))
+                    .build();
+
+            userSubscribeInfoRepository.save(userSubscirbeInfo);
         }
     }
 

@@ -31,4 +31,13 @@ public interface ChatService {
      * @param message 읽음 메시지, message 에는 자신이 마지막으로 읽은 메시지의 id
      */
     void readMessage(Long userId, IncomingMessage message);
+
+    /**
+     * 사용자가 메시지를 보낼 때, 해당 채팅방에 메시지를 송신할 권한이 있는지 확인합니다. 다-클라이언트 상황을 고려하여
+     * userId 기반이 아닌, sessionId 기반으로 겁증을 진행합니다. 해당 값은 interceptor 에서 설정되며 {@link com.studypals.global.websocket.subscibeManage.UserSubscribeInfoRepository}
+     * 에서 관리됩니다.
+     * @param sessionId 사용자가 접속한 sessionId
+     * @param roomId 사용자가 메시지를 보내고자 할 roomId
+     */
+    void sendDestinationValidate(String sessionId, String roomId);
 }

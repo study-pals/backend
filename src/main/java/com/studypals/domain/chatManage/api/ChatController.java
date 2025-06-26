@@ -2,6 +2,7 @@ package com.studypals.domain.chatManage.api;
 
 import java.security.Principal;
 
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,9 +28,12 @@ public class ChatController {
     private final ChatService chatService;
 
     @MessageMapping("/send/message")
-    public void sendMessage(@Payload IncomingMessage message, Principal principal) {
+    public void sendMessage(
+            @Header("simpSessionId") String sessionId, @Payload IncomingMessage message, Principal principal) {
         Long userId = Long.parseLong(principal.getName());
         chatService.sendMessage(userId, message);
+
+        chatService.sendDestinationValidate(sessionId, message.getRoom());
     }
 
     @MessageMapping("/read/message")
