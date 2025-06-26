@@ -12,14 +12,17 @@ import java.security.Principal;
  * @since 2025-06-19
  */
 public class StompPrincipal implements Principal {
-    private final String name;
+    private final String userId;
 
     public StompPrincipal(Long userId) {
-        this.name = userId.toString();
+        if (userId == null) {
+            throw new IllegalArgumentException("userId cannot be null");
+        }
+        this.userId = userId.toString();
     }
 
     @Override
     public String getName() {
-        return name;
+        return userId;
     }
 }

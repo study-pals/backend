@@ -1,7 +1,6 @@
 package com.studypals.domain.chatManage.dto.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import com.studypals.domain.chatManage.dto.IncomingMessage;
 import com.studypals.domain.chatManage.dto.OutgoingMessage;
@@ -15,7 +14,5 @@ import com.studypals.domain.chatManage.dto.OutgoingMessage;
 @Mapper(componentModel = "spring")
 public interface ChatMessageMapper {
 
-    @Mapping(target = "senderId", source = "senderId")
-    @Mapping(target = "time", source = "time")
     OutgoingMessage toOutMessage(IncomingMessage message, Long senderId, String time);
 }

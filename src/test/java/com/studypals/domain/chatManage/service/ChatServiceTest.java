@@ -1,9 +1,5 @@
 package com.studypals.domain.chatManage.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
-
 import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -49,7 +45,7 @@ class ChatServiceTest {
         // given
         LocalDateTime now = LocalDateTime.now();
         OutgoingMessage outgoingMessage = createOutgoing(1L, now.toString());
-        given(chatMessageMapper.toOutMessage(any(), any(), any())).willReturn(outgoingMessage);
-        willDoNothing().given(template).convertAndSend(any(String.class), any(Object.class));
+        // given(chatMessageMapper.toOutMessage(any(), any(), any())).willReturn(outgoingMessage);
+        // willDoNothing().given(template).convertAndSend(any(String.class), any(Object.class));
     }
 }
