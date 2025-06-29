@@ -29,7 +29,7 @@ import com.studypals.global.redis.redisHashRepository.annotations.RedisId;
 @NoArgsConstructor
 @Builder
 @Getter
-public class UserSubscirbeInfo {
+public class UserSubscribeInfo {
     @RedisId
     private String sessionId;
 

@@ -31,9 +31,8 @@ public class ChatController {
     public void sendMessage(
             @Header("simpSessionId") String sessionId, @Payload IncomingMessage message, Principal principal) {
         Long userId = Long.parseLong(principal.getName());
-        chatService.sendMessage(userId, message);
-
         chatService.sendDestinationValidate(sessionId, message.getRoom());
+        chatService.sendMessage(userId, message);
     }
 
     @MessageMapping("/read/message")

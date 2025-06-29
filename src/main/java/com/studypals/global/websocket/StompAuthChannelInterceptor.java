@@ -2,6 +2,7 @@ package com.studypals.global.websocket;
 
 import java.security.Principal;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -21,7 +22,7 @@ import com.studypals.global.exceptions.exception.BaseException;
 import com.studypals.global.exceptions.exception.ChatException;
 import com.studypals.global.security.jwt.JwtToken;
 import com.studypals.global.security.jwt.JwtUtils;
-import com.studypals.global.websocket.subscibeManage.UserSubscirbeInfo;
+import com.studypals.global.websocket.subscibeManage.UserSubscribeInfo;
 import com.studypals.global.websocket.subscibeManage.UserSubscribeInfoRepository;
 
 /**
@@ -115,6 +116,9 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         String roomId = extractRoomIdFromDestination(destination);
         String sessionId = accessor.getSessionId();
 
+        // 방 문자열 구조가 UUID 인지
+        validateRoomId(roomId);
+
         Principal principal = accessor.getUser();
         if (!(principal instanceof StompPrincipal stompPrincipal)) {
             throw new ChatException(
@@ -132,13 +136,13 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         if (userSubscribeInfoRepository.existById(sessionId)) {
             userSubscribeInfoRepository.saveMapById(sessionId, Map.of(roomId, "17"));
         } else {
-            UserSubscirbeInfo userSubscirbeInfo = UserSubscirbeInfo.builder()
+            UserSubscribeInfo userSubscribeInfo = UserSubscribeInfo.builder()
                     .sessionId(sessionId)
                     .userId(userId)
                     .roomList(Map.of(roomId, 17))
                     .build();
 
-            userSubscribeInfoRepository.save(userSubscirbeInfo);
+            userSubscribeInfoRepository.save(userSubscribeInfo);
         }
     }
 
@@ -150,5 +154,15 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         throw new ChatException(
                 ChatErrorCode.CHAT_SUBSCRIBE_FAIL,
                 "[StompAuthChannelInterceptor#handleSubscribe] destination format invalid");
+    }
+
+    private void validateRoomId(String roomId) {
+        try {
+            UUID.fromString(roomId);
+        } catch (IllegalArgumentException e) {
+            throw new ChatException(
+                    ChatErrorCode.CHAT_SUBSCRIBE_FAIL,
+                    "[StompAuthChannelInterceptor#validateRoomId] room id is not UUID");
+        }
     }
 }

@@ -14,7 +14,7 @@ import com.studypals.domain.chatManage.dto.OutgoingMessage;
 import com.studypals.domain.chatManage.dto.mapper.ChatMessageMapper;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.ChatException;
-import com.studypals.global.websocket.subscibeManage.UserSubscirbeInfo;
+import com.studypals.global.websocket.subscibeManage.UserSubscribeInfo;
 import com.studypals.global.websocket.subscibeManage.UserSubscribeInfoRepository;
 
 /**
@@ -54,8 +54,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void sendDestinationValidate(String sessionId, String roomId) {
-
-        Optional<UserSubscirbeInfo> info = userSubscribeInfoRepository.findById(sessionId);
+        Optional<UserSubscribeInfo> info = userSubscribeInfoRepository.findById(sessionId);
 
         if (info.isEmpty()) {
             throw new ChatException(
@@ -65,7 +64,7 @@ public class ChatServiceImpl implements ChatService {
 
         Map<String, Integer> subList = info.get().getRoomList();
 
-        if (!subList.containsKey(sessionId)) {
+        if (!subList.containsKey(roomId)) {
             throw new ChatException(
                     ChatErrorCode.CHAT_SEND_FAIL,
                     "[ChatService#sendDestinationValdiate] try to send, but not subscribe channel");

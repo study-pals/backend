@@ -38,6 +38,7 @@ public interface ChatService {
      * 에서 관리됩니다.
      * @param sessionId 사용자가 접속한 sessionId
      * @param roomId 사용자가 메시지를 보내고자 할 roomId
+     * @throws com.studypals.global.exceptions.exception.ChatException 검증 실패 시 예외 반환
      */
     void sendDestinationValidate(String sessionId, String roomId);
 }
