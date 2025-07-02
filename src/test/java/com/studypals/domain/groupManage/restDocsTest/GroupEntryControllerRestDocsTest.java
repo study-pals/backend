@@ -195,8 +195,8 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
         List<GroupEntryRequestDto> content = List.of(
                 new GroupEntryRequestDto(1L, new MemberProfileDto(2L, "member2", "image2"), LocalDate.of(2025, 6, 11)),
                 new GroupEntryRequestDto(2L, new MemberProfileDto(3L, "member3", "image3"), LocalDate.of(2025, 6, 5)));
-        CursorResponse<GroupEntryRequestDto> res =
-                new CursorResponse<>(content, content.get(content.size() - 1).requestId(), false);
+        CursorResponse.Content<GroupEntryRequestDto> res = new CursorResponse.Content<>(
+                content, content.get(content.size() - 1).requestId(), false);
 
         given(groupEntryService.getEntryRequests(any(), eq(groupId), any(Cursor.class)))
                 .willReturn(res);

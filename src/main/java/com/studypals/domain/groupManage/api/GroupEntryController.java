@@ -79,10 +79,11 @@ public class GroupEntryController {
     }
 
     @GetMapping("/{groupId}/entry-requests")
-    public ResponseEntity<Response<CursorResponse<GroupEntryRequestDto>>> getEntryRequests(
+    public ResponseEntity<CursorResponse<GroupEntryRequestDto>> getEntryRequests(
             @AuthenticationPrincipal Long userId, @PathVariable Long groupId, @CursorDefault Cursor cursor) {
-        CursorResponse<GroupEntryRequestDto> response = groupEntryService.getEntryRequests(userId, groupId, cursor);
-        return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_ENTRY_REQUEST_LIST, response));
+        CursorResponse.Content<GroupEntryRequestDto> response =
+                groupEntryService.getEntryRequests(userId, groupId, cursor);
+        return ResponseEntity.ok(CursorResponse.success(ResponseCode.GROUP_ENTRY_REQUEST_LIST, response));
     }
 
     @PostMapping("/entry-requests/{requestId}/accept")

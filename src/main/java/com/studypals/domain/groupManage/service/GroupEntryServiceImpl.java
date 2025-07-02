@@ -99,7 +99,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
     @Override
     @Transactional
-    public CursorResponse<GroupEntryRequestDto> getEntryRequests(Long userId, Long groupId, Cursor cursor) {
+    public CursorResponse.Content<GroupEntryRequestDto> getEntryRequests(Long userId, Long groupId, Cursor cursor) {
         authorityValidator.validateLeaderAuthority(userId, groupId);
         Group group = groupReader.getById(groupId);
 
@@ -115,7 +115,8 @@ public class GroupEntryServiceImpl implements GroupEntryService {
         List<GroupEntryRequestDto> content =
                 GroupEntryRequestCustomMapper.map(entryRequests.getContent(), requestedMembers);
 
-        return new CursorResponse<>(content, content.get(content.size() - 1).requestId(), entryRequests.hasNext());
+        return new CursorResponse.Content<>(
+                content, content.get(content.size() - 1).requestId(), entryRequests.hasNext());
     }
 
     @Override

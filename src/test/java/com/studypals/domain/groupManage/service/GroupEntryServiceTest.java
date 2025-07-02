@@ -28,8 +28,8 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
-import com.studypals.global.request.CommonSortType;
 import com.studypals.global.request.Cursor;
+import com.studypals.global.request.DateSortType;
 import com.studypals.global.responses.CursorResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -311,7 +311,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Long groupId = 10L;
-        Cursor cursor = new Cursor(0, 10, CommonSortType.NEW);
+        Cursor cursor = new Cursor(0, 10, DateSortType.NEW);
 
         Member member1 = Member.builder().id(1L).build();
         Member member2 = Member.builder().id(2L).build();
@@ -327,7 +327,8 @@ public class GroupEntryServiceTest {
         given(memberReader.get(List.of(1L, 2L))).willReturn(List.of(member1, member2));
 
         // when
-        CursorResponse<GroupEntryRequestDto> result = groupEntryService.getEntryRequests(userId, groupId, cursor);
+        CursorResponse.Content<GroupEntryRequestDto> result =
+                groupEntryService.getEntryRequests(userId, groupId, cursor);
 
         // then
         assertThat(result.content()).hasSize(2);
@@ -340,7 +341,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Long groupId = 1L;
-        Cursor cursor = new Cursor(0, 10, CommonSortType.NEW);
+        Cursor cursor = new Cursor(0, 10, DateSortType.NEW);
 
         willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
                 .given(authorityValidator)

@@ -14,8 +14,8 @@ import org.springframework.data.domain.SliceImpl;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.global.request.CommonSortType;
 import com.studypals.global.request.Cursor;
+import com.studypals.global.request.DateSortType;
 import com.studypals.testModules.testSupport.DataJpaSupport;
 
 @DisplayName("GroupEntryRequest_Querydsl_test")
@@ -57,7 +57,7 @@ public class GroupEntryRequestRepositoryTest extends DataJpaSupport {
         Slice<GroupEntryRequest> expected = new SliceImpl<>(List.of(request1, request2));
 
         // when
-        Cursor cursor = new Cursor(0, 10, CommonSortType.NEW);
+        Cursor cursor = new Cursor(0, 10, DateSortType.NEW);
         Slice<GroupEntryRequest> actual = entryRequestRepository.findAllByGroupIdWithPagination(group.getId(), cursor);
 
         // then

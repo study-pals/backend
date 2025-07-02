@@ -28,14 +28,14 @@ public class CommonResponse<T> implements Response<T> {
     private final T data;
     private final String message;
 
-    private CommonResponse(ResponseCode code, String status, T data, String message) {
+    protected CommonResponse(ResponseCode code, String status, T data, String message) {
         this.code = code.getCode();
         this.status = status;
         this.data = data;
         this.message = message;
     }
 
-    private CommonResponse(String code, String status, T data, String message) {
+    protected CommonResponse(String code, String status, T data, String message) {
         this.code = code;
         this.status = status;
         this.data = data;

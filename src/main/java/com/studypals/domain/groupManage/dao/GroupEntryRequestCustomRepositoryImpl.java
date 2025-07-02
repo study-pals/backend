@@ -14,8 +14,8 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.global.dao.AbstractPagingRepository;
-import com.studypals.global.request.CommonSortType;
 import com.studypals.global.request.Cursor;
+import com.studypals.global.request.DateSortType;
 import com.studypals.global.request.SortType;
 
 /**
@@ -56,7 +56,7 @@ public class GroupEntryRequestCustomRepositoryImpl extends AbstractPagingReposit
     }
 
     private OrderSpecifier<?> getOrderSpecifier(SortType sort) {
-        if (sort == CommonSortType.NEW || sort == CommonSortType.OLD)
+        if (sort instanceof DateSortType)
             return new OrderSpecifier<>(getOrder(sort.getDirection()), groupEntryRequest.createdDate);
         else
             throw new IllegalArgumentException(

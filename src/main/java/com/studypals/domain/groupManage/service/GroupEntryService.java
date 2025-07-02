@@ -69,7 +69,7 @@ public interface GroupEntryService {
      * @param cursor 조회할 {@link Cursor} 조건
      * @return {@link GroupEntryRequestDto}의 {@link CursorResponse}
      */
-    CursorResponse<GroupEntryRequestDto> getEntryRequests(Long userId, Long groupId, Cursor cursor);
+    CursorResponse.Content<GroupEntryRequestDto> getEntryRequests(Long userId, Long groupId, Cursor cursor);
 
     /**
      * 그룹장이 그룹에 들어온 가입 요청을 승인합니다.
