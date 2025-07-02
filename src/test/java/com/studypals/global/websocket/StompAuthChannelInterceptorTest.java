@@ -53,7 +53,7 @@ class StompAuthChannelInterceptorTest extends WebsocketStompSupport {
         // when
         connectSession();
         subscribe("/sub/chat/room/" + room1, String.class);
-
+        Thread.sleep(500);
         // then
         verify(userSubscribeInfoRepository, never()).saveMapById(any(), any());
 
