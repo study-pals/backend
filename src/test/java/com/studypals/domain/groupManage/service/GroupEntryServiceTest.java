@@ -12,6 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.worker.ChatRoomWriter;
@@ -25,6 +28,9 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
+import com.studypals.global.request.Cursor;
+import com.studypals.global.request.DateSortType;
+import com.studypals.global.responses.CursorResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class GroupEntryServiceTest {
@@ -298,6 +304,53 @@ public class GroupEntryServiceTest {
         assertThatThrownBy(() -> groupEntryService.requestParticipant(userId, entryInfo))
                 .extracting("errorCode")
                 .isEqualTo(GroupErrorCode.GROUP_JOIN_FAIL);
+    }
+
+    @Test
+    void getEntryRequests_success() {
+        // given
+        Long userId = 1L;
+        Long groupId = 10L;
+        Cursor cursor = new Cursor(0, 10, DateSortType.NEW);
+
+        Member member1 = Member.builder().id(1L).build();
+        Member member2 = Member.builder().id(2L).build();
+        GroupEntryRequest request1 =
+                GroupEntryRequest.builder().id(1L).member(member1).build();
+        GroupEntryRequest request2 =
+                GroupEntryRequest.builder().id(2L).member(member2).build();
+
+        List<GroupEntryRequest> requests = List.of(request1, request2);
+        Slice<GroupEntryRequest> slice = new SliceImpl<>(requests, PageRequest.of(0, 2), true);
+        given(groupReader.getById(groupId)).willReturn(mockGroup);
+        given(entryRequestReader.getByGroup(mockGroup, cursor)).willReturn(slice);
+        given(memberReader.get(List.of(1L, 2L))).willReturn(List.of(member1, member2));
+
+        // when
+        CursorResponse.Content<GroupEntryRequestDto> result =
+                groupEntryService.getEntryRequests(userId, groupId, cursor);
+
+        // then
+        assertThat(result.content()).hasSize(2);
+        assertThat(result.next()).isEqualTo(2L);
+        assertThat(result.hasNext()).isTrue();
+    }
+
+    @Test
+    void getEntryRequests_fail_invalidAuthority() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        Cursor cursor = new Cursor(0, 10, DateSortType.NEW);
+
+        willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
+                .given(authorityValidator)
+                .validateLeaderAuthority(userId, groupId);
+
+        // when & then
+        assertThatThrownBy(() -> groupEntryService.getEntryRequests(userId, groupId, cursor))
+                .extracting("errorCode")
+                .isEqualTo(GroupErrorCode.GROUP_FORBIDDEN);
     }
 
     @Test

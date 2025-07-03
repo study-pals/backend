@@ -1,12 +1,16 @@
 package com.studypals.domain.groupManage.worker;
 
+import org.springframework.data.domain.Slice;
+
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupEntryRequestRepository;
+import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
+import com.studypals.global.request.Cursor;
 
 /**
  * group entry request 도메인의 조회 Worker 클래스입니다.
@@ -29,5 +33,9 @@ public class GroupEntryRequestReader {
         return entryRequestRepository
                 .findById(requestId)
                 .orElseThrow(() -> new GroupException(GroupErrorCode.GROUP_ENTRY_REQUEST_NOT_FOUND));
+    }
+
+    public Slice<GroupEntryRequest> getByGroup(Group group, Cursor cursor) {
+        return entryRequestRepository.findAllByGroupIdWithPagination(group.getId(), cursor);
     }
 }

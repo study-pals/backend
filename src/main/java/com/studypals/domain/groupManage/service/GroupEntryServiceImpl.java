@@ -2,6 +2,7 @@ package com.studypals.domain.groupManage.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.worker.ChatRoomWriter;
 import com.studypals.domain.groupManage.dto.*;
+import com.studypals.domain.groupManage.dto.mappers.GroupEntryRequestCustomMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.groupManage.worker.*;
@@ -16,6 +18,8 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
+import com.studypals.global.request.Cursor;
+import com.studypals.global.responses.CursorResponse;
 
 /**
  * group entry service 의 구현 클래스입니다.
@@ -91,6 +95,28 @@ public class GroupEntryServiceImpl implements GroupEntryService {
         entryCodeManager.validateCodeBelongsToGroup(group, entryInfo.entryCode());
         Member member = memberReader.getRef(userId);
         return entryRequestWriter.createRequest(member, group).getId();
+    }
+
+    @Override
+    @Transactional
+    public CursorResponse.Content<GroupEntryRequestDto> getEntryRequests(Long userId, Long groupId, Cursor cursor) {
+        authorityValidator.validateLeaderAuthority(userId, groupId);
+        Group group = groupReader.getById(groupId);
+
+        // TODO batch job 으로 일괄 삭제 처리
+        if (cursor.isFirstPage()) {
+            entryRequestWriter.closeRequestOutdated(group);
+        }
+
+        Slice<GroupEntryRequest> entryRequests = entryRequestReader.getByGroup(group, cursor);
+        List<Member> requestedMembers = memberReader.get(entryRequests.getContent().stream()
+                .map(r -> r.getMember().getId())
+                .toList());
+        List<GroupEntryRequestDto> content =
+                GroupEntryRequestCustomMapper.map(entryRequests.getContent(), requestedMembers);
+
+        return new CursorResponse.Content<>(
+                content, content.get(content.size() - 1).requestId(), entryRequests.hasNext());
     }
 
     @Override
