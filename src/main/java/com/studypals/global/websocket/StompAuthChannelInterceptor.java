@@ -1,8 +1,10 @@
 package com.studypals.global.websocket;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -48,6 +50,8 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
     private static final String ACCESS_HEADER = "Authorization";
 
+    private AtomicInteger connectCnt = new AtomicInteger(0);
+
     /**
      * 메시지가 controller 로 바인딩 되기 전 과정을 수행합니다. 보통 {@code CONNECT, SUBSCRIBE, SEND} 에 대한
      * intercept 가 가능합니다.
@@ -68,6 +72,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
             switch (accessor.getCommand()) {
                 case CONNECT -> handleConnect(accessor);
                 case SUBSCRIBE -> handleSubscribe(accessor);
+                case UNSUBSCRIBE -> handleUnsubscribe(accessor);
             }
         } catch (BaseException e) {
             return null;
@@ -101,6 +106,11 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
         StompPrincipal principal = new StompPrincipal(userId);
         accessor.setUser(principal);
+
+        synchronized (System.out) {
+            System.out.println(
+                    "[CONNECT] session : " + accessor.getSessionId() + " / cnt : " + connectCnt.incrementAndGet());
+        }
     }
 
     private void handleSubscribe(StompHeaderAccessor accessor) {
@@ -115,6 +125,8 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         // url 로 부터 구독하고자 하는 방의 id 를 추출
         String roomId = extractRoomIdFromDestination(destination);
         String sessionId = accessor.getSessionId();
+
+        if (roomId.equals("hello")) return;
 
         // 방 문자열 구조가 UUID 인지
         validateRoomId(roomId);
@@ -144,6 +156,12 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
             userSubscribeInfoRepository.save(userSubscribeInfo);
         }
+    }
+
+    private void handleUnsubscribe(StompHeaderAccessor accessor) {
+        String roomId = extractRoomIdFromDestination(accessor.getDestination());
+        String sessionId = accessor.getSessionId();
+        userSubscribeInfoRepository.deleteMapById(sessionId, List.of(roomId));
     }
 
     private String extractRoomIdFromDestination(String destination) {

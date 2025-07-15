@@ -1,21 +1,21 @@
 package com.studypals.domain.chatManage.service;
 
 import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.studypals.domain.chatManage.dto.IncomingMessage;
 import com.studypals.domain.chatManage.dto.OutgoingMessage;
 import com.studypals.domain.chatManage.dto.mapper.ChatMessageMapper;
+import com.studypals.domain.chatManage.worker.ChatMessagePipeline;
+import com.studypals.domain.chatManage.worker.ChatSendValidator;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.ChatException;
-import com.studypals.global.websocket.subscibeManage.UserSubscribeInfo;
-import com.studypals.global.websocket.subscibeManage.UserSubscribeInfoRepository;
+import com.studypals.global.utils.IdGenerator;
 
 /**
  * <p><b>상속 정보:</b><br>
@@ -30,21 +30,40 @@ import com.studypals.global.websocket.subscibeManage.UserSubscribeInfoRepository
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatServiceImpl implements ChatService {
 
     private final SimpMessageSendingOperations template;
     private final ChatMessageMapper chatMessageMapper;
-
-    private final UserSubscribeInfoRepository userSubscribeInfoRepository;
+    private final IdGenerator idGenerator;
+    private final ChatMessagePipeline chatMessagePipeline;
+    private final ChatSendValidator chatSendValidator;
 
     private static final String DESTINATION_PREFIX = "/sub/chat/room/";
+    private static final int TYPE_NUMBER = 1;
 
     @Override
     public void sendMessage(Long userId, IncomingMessage message) {
         LocalDateTime now = LocalDateTime.now();
         OutgoingMessage outgoingMessage = chatMessageMapper.toOutMessage(message, userId, now.toString());
 
-        template.convertAndSend(DESTINATION_PREFIX + message.getRoom(), outgoingMessage);
+        idGenerator
+                .requestId(TYPE_NUMBER, outgoingMessage.getType().getSubtype())
+                .thenApply(id -> {
+                    String idHex = Long.toHexString(id);
+                    outgoingMessage.setId(idHex);
+
+                    // 메시지 전송
+                    template.convertAndSend(DESTINATION_PREFIX + message.getRoom(), outgoingMessage);
+
+                    // 메시지 저장용 엔티티 변환
+                    return chatMessageMapper.toEntity(message, idHex, userId);
+                })
+                .thenAccept(chatMessagePipeline::publish)
+                .exceptionally(ex -> {
+                    log.error("[ChatService#sendMessage] chat message proccess occur exception", ex);
+                    return null;
+                });
     }
 
     @Override
@@ -54,23 +73,11 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void sendDestinationValidate(String sessionId, String roomId) {
-        Optional<UserSubscribeInfo> info = userSubscribeInfoRepository.findById(sessionId);
-
-        if (info.isEmpty()) {
+        try {
+            chatSendValidator.checkIfSessionSubscribe(sessionId, roomId);
+        } catch (IllegalArgumentException e) {
             throw new ChatException(
-                    ChatErrorCode.CHAT_SEND_FAIL,
-                    "[ChatService#sendDestinationValdiate] try to send, but session un-register");
-        }
-
-        Map<String, Integer> subList = info.get().getRoomList();
-
-        if (!subList.containsKey(roomId)) {
-            throw new ChatException(
-                    ChatErrorCode.CHAT_SEND_FAIL,
-                    "[ChatService#sendDestinationValdiate] try to send, but not subscribe channel");
-        } else {
-            Integer value = subList.get(sessionId);
-            // 해당 값을 사용해 권한 검증 가능. - 일단 비워둠
+                    ChatErrorCode.CHAT_SEND_FAIL, "[ChatService#sendDestinationValidate] " + e.getMessage());
         }
     }
 }

@@ -71,7 +71,7 @@ class StompAuthChannelInterceptorTest extends WebsocketStompSupport {
         // given
         Long userId = 1L;
         IncomingMessage message = new IncomingMessage(ChatType.TEXT, "payload message", room1);
-        OutgoingMessage outMessage = new OutgoingMessage(ChatType.TEXT, "payload message", userId, "time");
+        OutgoingMessage outMessage = new OutgoingMessage(null, ChatType.TEXT, "payload message", userId, "time");
         verifyToken(userId, true);
         verifyRoom(room1, userId, true);
         given(userSubscribeInfoRepository.existById(any())).willReturn(true);
