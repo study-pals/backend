@@ -67,9 +67,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void readMessage(Long userId, IncomingMessage message) {
-        // can't implement now //
-    }
+    public void readMessage(Long userId, IncomingMessage message) {}
 
     @Override
     public void sendDestinationValidate(String sessionId, String roomId) {

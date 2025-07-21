@@ -55,7 +55,7 @@ class StompAuthChannelInterceptorTest extends WebsocketStompSupport {
         subscribe("/sub/chat/room/" + room1, String.class);
         Thread.sleep(500);
         // then
-        verify(userSubscribeInfoRepository, never()).saveMapById(any(), any());
+        verify(userSubscribeInfoRepository, never()).saveMapById(any());
 
         ArgumentCaptor<UserSubscribeInfo> captor = ArgumentCaptor.forClass(UserSubscribeInfo.class);
 

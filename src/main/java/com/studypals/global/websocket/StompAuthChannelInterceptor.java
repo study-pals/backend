@@ -1,7 +1,6 @@
 package com.studypals.global.websocket;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,7 +49,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
     private static final String ACCESS_HEADER = "Authorization";
 
-    private AtomicInteger connectCnt = new AtomicInteger(0);
+    private final AtomicInteger connectCnt = new AtomicInteger(0);
 
     /**
      * 메시지가 controller 로 바인딩 되기 전 과정을 수행합니다. 보통 {@code CONNECT, SUBSCRIBE, SEND} 에 대한
@@ -127,6 +126,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         String sessionId = accessor.getSessionId();
 
         if (roomId.equals("hello")) return;
+        if (sessionId == null) return;
 
         // 방 문자열 구조가 UUID 인지
         validateRoomId(roomId);
@@ -146,7 +146,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         }
 
         if (userSubscribeInfoRepository.existById(sessionId)) {
-            userSubscribeInfoRepository.saveMapById(sessionId, Map.of(roomId, "17"));
+            userSubscribeInfoRepository.saveMapById(Map.of(sessionId, Map.of(roomId, "17")));
         } else {
             UserSubscribeInfo userSubscribeInfo = UserSubscribeInfo.builder()
                     .sessionId(sessionId)
@@ -161,7 +161,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     private void handleUnsubscribe(StompHeaderAccessor accessor) {
         String roomId = extractRoomIdFromDestination(accessor.getDestination());
         String sessionId = accessor.getSessionId();
-        userSubscribeInfoRepository.deleteMapById(sessionId, List.of(roomId));
+        userSubscribeInfoRepository.deleteMapById(sessionId, roomId);
     }
 
     private String extractRoomIdFromDestination(String destination) {

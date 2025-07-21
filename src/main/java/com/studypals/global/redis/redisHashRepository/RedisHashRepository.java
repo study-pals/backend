@@ -1,8 +1,6 @@
 package com.studypals.global.redis.redisHashRepository;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.data.repository.Repository;
 
@@ -33,6 +31,12 @@ public interface RedisHashRepository<E, ID> extends Repository<E, ID> {
     void save(E entity);
 
     /**
+     * 파이프라인 구성을 통해 여러 엔티티를 한번에 처리합니다.
+     * @param entities 저장할 객체 들
+     */
+    void saveAll(Collection<E> entities);
+
+    /**
      * 해시 키에 해당하는 Redis 객체를 조회합니다.
      *
      * @param id Redis Hash 키
@@ -47,6 +51,7 @@ public interface RedisHashRepository<E, ID> extends Repository<E, ID> {
      */
     void delete(ID id);
 
+    void deleteAll(Collection<ID> ids);
     /**
      * 해당 키를 가진 Redis Hash가 존재하는지 확인합니다.
      *
@@ -64,8 +69,7 @@ public interface RedisHashRepository<E, ID> extends Repository<E, ID> {
     Iterable<E> findAllById(Iterable<ID> ids);
 
     /**
-     * 특정 Redis Hash 키에 대해, 내부 필드 중 일부 키를 기반으로 값을 조회합니다.
-     *
+     * 특정 키에 대해, 내부 필드 중 일부 키를 기반으로 값을 조회합니다.
      * @param hashKey Redis 해시 키
      * @param fieldKey 해시 내부 필드 키 목록
      * @return 필드 키-값 쌍의 Map
@@ -73,19 +77,46 @@ public interface RedisHashRepository<E, ID> extends Repository<E, ID> {
     Map<String, String> findHashFieldsById(ID hashKey, List<String> fieldKey);
 
     /**
+     * 여러 redis hash 키에 대해, 내부 필드 중 일부 키를 기반으로 값을 조회합니다.
+     * @param fieldKey {@code Map<ID, List<String>> fieldKey}
+     * @return 각 key 와, 그에 따른 내부 필드의 key-value 쌍
+     */
+    Map<ID, Map<String, String>> findHashFieldsById(Map<ID, List<String>> fieldKey);
+    /**
+     * 여러 해시에 필드 키-값을 추가하거나 덮어씁니다.
+     * 이 작업은 {@code @RedisHashMapField}와 연결된 필드에만 영향을 줍니다.
+     *
+     * @param data 여러 key - 저장하고자 하는 key-value 쌍
+     */
+    void saveMapById(Map<ID, Map<String, String>> data);
+
+    /**
      * 특정 Redis 해시에 필드 키-값을 추가하거나 덮어씁니다.
      * 이 작업은 {@code @RedisHashMapField}와 연결된 필드에만 영향을 줍니다.
      *
-     * @param hashKey Redis 해시 키
-     * @param map 필드 키-값 쌍
+     * @param id 저장 하고자 하는 key 값
+     * @param data 저장 하고자 하는 내부 필드 map
      */
-    void saveMapById(ID hashKey, Map<String, String> map);
+    void saveMapById(ID id, Map<String, String> data);
 
     /**
      * Redis 해시에서 특정 필드 키들을 삭제합니다.
      *
-     * @param hashKey 대상 해시 키
      * @param fieldKey 삭제할 필드 키 목록
      */
-    void deleteMapById(ID hashKey, List<String> fieldKey);
+    void deleteMapById(Map<ID, Set<String>> fieldKey);
+
+    /**
+     * Redis 해시에서 특정 필드 키들을 삭제합니다.
+     *
+     * @param fieldKey 삭제할 필드 키 목록
+     */
+    void deleteMapById(ID hashKey, Set<String> fieldKey);
+
+    /**
+     * Redis 해시에서 특정 필드 키를 삭제합니다.
+     *
+     * @param fieldKey 삭제할 필드 키
+     */
+    void deleteMapById(ID hashKey, String fieldKey);
 }
