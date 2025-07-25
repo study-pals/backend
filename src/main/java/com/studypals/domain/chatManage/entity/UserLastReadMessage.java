@@ -1,6 +1,9 @@
 package com.studypals.domain.chatManage.entity;
 
+import java.util.Map;
+
 import com.studypals.global.redis.redisHashRepository.annotations.RedisHashEntity;
+import com.studypals.global.redis.redisHashRepository.annotations.RedisHashMapField;
 import com.studypals.global.redis.redisHashRepository.annotations.RedisId;
 
 /**
@@ -30,4 +33,13 @@ public class UserLastReadMessage {
 
     @RedisId
     private String roomId;
+
+    // last message id
+    private String lameId;
+
+    // last message context
+    private String lameCon;
+
+    @RedisHashMapField
+    private Map<Long, String> lastMessage;
 }
