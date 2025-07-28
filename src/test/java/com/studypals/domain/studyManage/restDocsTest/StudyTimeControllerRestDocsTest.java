@@ -19,6 +19,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
@@ -53,19 +54,20 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                         .name("자바")
                         .color("#FFCC00")
                         .description("자바 공부")
-                        .time(120L)
+                        .time(1200L)
+                        .goal(120L)
                         .build(),
                 GetStudyRes.builder()
                         .studyType(StudyType.TEMPORARY)
                         .color(null)
                         .description(null)
                         .name("백준 공부")
-                        .time(500L)
+                        .time(5000L)
                         .build(),
                 GetStudyRes.builder()
                         .studyType(StudyType.TEMPORARY)
                         .name("임시 카테고리")
-                        .time(60L)
+                        .time(600L)
                         .build());
 
         Response<List<GetStudyRes>> expected =
@@ -105,7 +107,11 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data[].description")
                                         .description("카테고리 설명")
                                         .optional(),
-                                fieldWithPath("data[].time").description("공부 시간 (분 단위)"))));
+                                fieldWithPath("data[].time").description("공부 시간 (초 단위)"),
+                                fieldWithPath("data[].goal")
+                                        .type(JsonFieldType.NUMBER)
+                                        .description("공부 목표 (분 단위) / 임시 토픽 -> null")
+                                        .optional())));
     }
 
     @Test
@@ -168,6 +174,6 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data[].studies[].temporaryName")
                                         .description("임시 카테고리 이름 (없으면 null)")
                                         .optional(),
-                                fieldWithPath("data[].studies[].time").description("해당 항목 공부 시간 (분)"))));
+                                fieldWithPath("data[].studies[].time").description("해당 항목 공부 시간 (초 단위)"))));
     }
 }

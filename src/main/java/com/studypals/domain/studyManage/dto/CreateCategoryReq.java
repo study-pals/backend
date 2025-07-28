@@ -17,4 +17,8 @@ import jakarta.validation.constraints.NotBlank;
  * @since 2025-04-11
  */
 public record CreateCategoryReq(
-        @NotBlank String name, @NotBlank String color, @Min(0) @Max(127) Integer dayBelong, String description) {}
+        @NotBlank String name,
+        Long goal,
+        @NotBlank String color,
+        @Min(0) @Max(127) Integer dayBelong,
+        String description) {}

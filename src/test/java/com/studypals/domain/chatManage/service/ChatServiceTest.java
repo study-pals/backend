@@ -37,7 +37,7 @@ class ChatServiceTest {
     }
 
     private OutgoingMessage createOutgoing(Long userId, String time) {
-        return new OutgoingMessage(ChatType.TEXT, "text message", userId, time);
+        return new OutgoingMessage(null, ChatType.TEXT, "text message", userId, time);
     }
 
     @Test

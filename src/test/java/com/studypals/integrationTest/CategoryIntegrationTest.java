@@ -32,7 +32,7 @@ public class CategoryIntegrationTest extends IntegrationSupport {
     void create_success() throws Exception {
         // given
         CreateUserVar user = createUser();
-        CreateCategoryReq req = new CreateCategoryReq("알고리즘", "#112233", 7, "문제풀이");
+        CreateCategoryReq req = new CreateCategoryReq("알고리즘", 1200L, "#112233", 7, "문제풀이");
 
         // when
         ResultActions result = mockMvc.perform(post("/categories")
@@ -43,7 +43,6 @@ public class CategoryIntegrationTest extends IntegrationSupport {
         // then
         result.andExpect(status().isCreated())
                 .andExpect(header().string("Location", matchesPattern("/categories/\\d+")));
-        ;
     }
 
     @Test

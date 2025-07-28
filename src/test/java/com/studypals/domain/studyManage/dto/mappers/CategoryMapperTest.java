@@ -24,7 +24,7 @@ class CategoryMapperTest {
     @DisplayName("CreateCategoryReq + Member → StudyCategory 매핑 성공")
     void toEntity_success() {
         // given
-        CreateCategoryReq req = new CreateCategoryReq("알고리즘", "#FFEEAA", 12, "설명입니다.");
+        CreateCategoryReq req = new CreateCategoryReq("알고리즘", 1200L, "#FFEEAA", 12, "설명입니다.");
         Member member = Member.builder().id(1L).build();
 
         // when

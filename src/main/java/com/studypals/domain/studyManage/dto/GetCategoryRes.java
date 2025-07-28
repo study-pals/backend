@@ -12,4 +12,10 @@ import com.studypals.domain.studyManage.entity.StudyType;
  */
 @Builder
 public record GetCategoryRes(
-        StudyType studyType, Long typeId, String name, String color, Integer dayBelong, String description) {}
+        StudyType studyType,
+        Long typeId,
+        String name,
+        Long goal,
+        String color,
+        Integer dayBelong,
+        String description) {}

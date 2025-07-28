@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -121,10 +122,10 @@ public class RedisHashRepositoryTest {
     @Test
     void saveMapById_success_addsOrOverwrites() {
         // given & when
-        repository.saveMapById(key, Map.of("fieldA", "val1"));
+        repository.saveMapById(Map.of(key, Map.of("fieldA", "val1")));
         Map<String, String> r1 = repository.findHashFieldsById(key, List.of("fieldA"));
 
-        repository.saveMapById(key, Map.of("fieldA", "val2", "fieldB", "new"));
+        repository.saveMapById(Map.of(key, Map.of("fieldA", "val2", "fieldB", "new")));
         Map<String, String> r2 = repository.findHashFieldsById(key, List.of("fieldA", "fieldB"));
 
         // then
@@ -135,10 +136,10 @@ public class RedisHashRepositoryTest {
     @Test
     void deleteMapById_success_removesSpecifiedOnly() {
         // given
-        repository.saveMapById(key, Map.of("k1", "v1", "k2", "v2", "k3", "v3"));
+        repository.saveMapById(Map.of(key, Map.of("k1", "v1", "k2", "v2", "k3", "v3")));
 
         // when
-        repository.deleteMapById(key, List.of("k2", "k3"));
+        repository.deleteMapById(key, Set.of("k2", "k3"));
         Map<String, String> remain = repository.findHashFieldsById(key, List.of("k1", "k2", "k3"));
 
         // then
@@ -151,7 +152,7 @@ public class RedisHashRepositoryTest {
         String missingKey = "missing-key";
 
         // when
-        repository.deleteMapById(missingKey, List.of("some", "fields"));
+        repository.deleteMapById(Map.of(missingKey, Set.of("some", "fields")));
 
         // then: no exception
     }

@@ -55,7 +55,7 @@ class StompAuthChannelInterceptorTest extends WebsocketStompSupport {
         subscribe("/sub/chat/room/" + room1, String.class);
         Thread.sleep(500);
         // then
-        verify(userSubscribeInfoRepository, never()).saveMapById(any(), any());
+        verify(userSubscribeInfoRepository, never()).saveMapById(any());
 
         ArgumentCaptor<UserSubscribeInfo> captor = ArgumentCaptor.forClass(UserSubscribeInfo.class);
 
@@ -71,7 +71,7 @@ class StompAuthChannelInterceptorTest extends WebsocketStompSupport {
         // given
         Long userId = 1L;
         IncomingMessage message = new IncomingMessage(ChatType.TEXT, "payload message", room1);
-        OutgoingMessage outMessage = new OutgoingMessage(ChatType.TEXT, "payload message", userId, "time");
+        OutgoingMessage outMessage = new OutgoingMessage(null, ChatType.TEXT, "payload message", userId, "time");
         verifyToken(userId, true);
         verifyRoom(room1, userId, true);
         given(userSubscribeInfoRepository.existById(any())).willReturn(true);

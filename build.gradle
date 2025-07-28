@@ -52,9 +52,17 @@ dependencies {
     // redis
     implementation 'org.springframework.session:spring-session-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+
+    //cafeine
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
 
     // minio
-    implementation("io.minio:minio:8.5.17")
+    implementation 'io.minio:minio:8.5.17'
+
+    //mongoDB
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 
     // spring security
     implementation 'org.springframework.boot:spring-boot-starter-security'
