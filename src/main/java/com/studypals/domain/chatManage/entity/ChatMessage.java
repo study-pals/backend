@@ -4,10 +4,9 @@ import jakarta.persistence.Id;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import com.studypals.domain.chatManage.dto.ChatType;
 
 /**
  * 채팅 메시지를 저장하는 mongoDB 엔티티입니다. 채팅방, 송신 유저, 내용이 담깁니다.
@@ -30,7 +29,20 @@ public class ChatMessage {
     @Id
     private String id;
 
+    private ChatType type;
     private String room;
     private Long sender;
     private String message;
+
+    @RequiredArgsConstructor
+    @Getter
+    public enum FieldName {
+        ID("id"),
+        TYPE("type"),
+        ROOM("room"),
+        SENDER("sender"),
+        MESSAGE("message");
+
+        private final String name;
+    }
 }

@@ -1,18 +1,11 @@
 package com.studypals.domain.chatManage.worker;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import jakarta.annotation.PostConstruct;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dao.UserLastReadMessageRepository;
-import com.studypals.domain.chatManage.entity.UserLastReadMessage;
 import com.studypals.global.annotations.Worker;
 
 /**
@@ -49,33 +42,18 @@ public class ChatStateUpdater {
 
     private record UpdateReq(String roomId, Long userId, String chatId) {}
 
-    private record PairKey<K1, K2> (K1 key1, K2 key2) {}
-
+    private record PairKey<K1, K2>(K1 key1, K2 key2) {}
 
     private final UserLastReadMessageRepository userLastReadMessageRepository;
 
     private final BlockingQueue<UpdateReq> queue = new LinkedBlockingQueue<>();
 
-
-    private final ScheduledExecutorService scheduler =
-            new ScheduledThreadPoolExecutor(
-                    THREAD_POOL_SIZE,
-                    r -> {
-                        Thread t = new Thread(r, "chat-state-updater-" + COUNTER.getAndIncrement());
-                        t.setDaemon(true);
-                        return t;
-                    },
-                    new ThreadPoolExecutor.CallerRunsPolicy()
-            );
-
-    @PostConstruct
-    void init() {
-        scheduler.scheduleAtFixedRate(this::flushS)
-    }
-
-    void flush() {
-
-        List<UpdateDt>
-
-    }
+    private final ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(
+            THREAD_POOL_SIZE,
+            r -> {
+                Thread t = new Thread(r, "chat-state-updater-" + COUNTER.getAndIncrement());
+                t.setDaemon(true);
+                return t;
+            },
+            new ThreadPoolExecutor.CallerRunsPolicy());
 }
