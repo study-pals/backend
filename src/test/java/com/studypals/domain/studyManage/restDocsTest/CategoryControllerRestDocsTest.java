@@ -44,7 +44,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void create_success() throws Exception {
         // given
-        CreateCategoryReq req = new CreateCategoryReq("알고리즘", "#FF5733", 10, "매일 10문제");
+        CreateCategoryReq req = new CreateCategoryReq("알고리즘", 1200L, "#FF5733", 10, "매일 10문제");
 
         given(studyCategoryService.createCategory(any(), any())).willReturn(1L);
 
@@ -61,6 +61,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                         httpResponse(),
                         requestFields(
                                 fieldWithPath("name").description("카테고리 이름").attributes(constraints("not blank")),
+                                fieldWithPath("goal").description("목표 시간"),
                                 fieldWithPath("color")
                                         .description("카테고리 색상 HEX")
                                         .attributes(constraints("not blank")),
@@ -140,8 +141,8 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
     void read_success() throws Exception {
         // given
         List<GetCategoryRes> list = List.of(
-                new GetCategoryRes(StudyType.PERSONAL, 1L, "백준", "#FFAA00", 12, "Spring 공부"),
-                new GetCategoryRes(StudyType.PERSONAL, 2L, "알고리즘", "#00CCFF", 14, "문제풀이"));
+                new GetCategoryRes(StudyType.PERSONAL, 1L, "백준", 1200L, "#FFAA00", 12, "Spring 공부"),
+                new GetCategoryRes(StudyType.PERSONAL, 2L, "알고리즘", 1200L, "#00CCFF", 14, "문제풀이"));
         Response<List<GetCategoryRes>> expected = CommonResponse.success(ResponseCode.STUDY_CATEGORY_LIST, list);
 
         given(studyCategoryService.getUserCategory(any())).willReturn(list);
@@ -159,6 +160,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data[].studyType").description("카테고리 테이블 정보(타입)"),
                                 fieldWithPath("data[].typeId").description("연관 테이블 타입 ID"),
                                 fieldWithPath("data[].name").description("카테고리 이름"),
+                                fieldWithPath("data[].goal").description("카테고리 목표 시간"),
                                 fieldWithPath("data[].color").description("색상 코드"),
                                 fieldWithPath("data[].dayBelong").description("요일 소속값"),
                                 fieldWithPath("data[].description").description("설명"),

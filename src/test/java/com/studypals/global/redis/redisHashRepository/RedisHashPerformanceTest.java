@@ -43,7 +43,7 @@ import com.studypals.testModules.testComponent.TestRedisHashRepository;
 @EnableRedisHashRepositories(basePackageClasses = TestRedisHashRepository.class)
 public class RedisHashPerformanceTest {
 
-    private static final boolean RUN_PERFORMANCE_TESTS = true;
+    private static final boolean RUN_PERFORMANCE_TESTS = false;
 
     @Autowired
     private TestRedisHashRepository testRedisHashRepository;

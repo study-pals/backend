@@ -61,7 +61,7 @@ class StudyCategoryServiceTest {
         // given
         Long userId = 1L;
         Long savedCategoryId = 2L;
-        CreateCategoryReq req = new CreateCategoryReq("name", "#FFFFFF", 12, "description");
+        CreateCategoryReq req = new CreateCategoryReq("name", 1200L, "#FFFFFF", 12, "description");
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(categoryMapper.toEntity(req, mockMember)).willReturn(mockStudyCategory);
@@ -79,7 +79,7 @@ class StudyCategoryServiceTest {
         // given
         Long userId = 1L;
         StudyErrorCode errorCode = StudyErrorCode.STUDY_CATEGORY_ADD_FAIL;
-        CreateCategoryReq req = new CreateCategoryReq("name", "#FFFFFF", 12, "description");
+        CreateCategoryReq req = new CreateCategoryReq("name", 1200L, "#FFFFFF", 12, "description");
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(categoryMapper.toEntity(req, mockMember)).willReturn(mockStudyCategory);
         willThrow(new StudyException(errorCode)).given(studyCategoryWriter).save(mockStudyCategory);
@@ -95,7 +95,8 @@ class StudyCategoryServiceTest {
     void getUserCategory_success() {
         // given
         Long userId = 1L;
-        GetCategoryRes res = new GetCategoryRes(StudyType.PERSONAL, 1L, "category", "#FFFFFF", 12, "description");
+        GetCategoryRes res =
+                new GetCategoryRes(StudyType.PERSONAL, 1L, "category", 1200L, "#FFFFFF", 12, "description");
         given(studyCategoryReader.findByMember(userId)).willReturn(List.of(mockStudyCategory));
         given(categoryMapper.toDto(mockStudyCategory)).willReturn(res);
 
@@ -132,9 +133,9 @@ class StudyCategoryServiceTest {
         StudyCategory cat2 =
                 StudyCategory.builder().dayBelong(dayBit | (1 << 4)).build();
 
-        GetCategoryRes res1 = new GetCategoryRes(StudyType.PERSONAL, 1L, "category1", "#FFF", dayBit, "desc1");
+        GetCategoryRes res1 = new GetCategoryRes(StudyType.PERSONAL, 1L, "category1", 1200L, "#FFF", dayBit, "desc1");
         GetCategoryRes res2 =
-                new GetCategoryRes(StudyType.PERSONAL, 2L, "category2", "#000", dayBit | (1 << 4), "desc2");
+                new GetCategoryRes(StudyType.PERSONAL, 2L, "category2", 1200L, "#000", dayBit | (1 << 4), "desc2");
 
         given(studyCategoryReader.getListByMemberAndDay(userId, dayBit)).willReturn(List.of(cat1, cat2));
         given(categoryMapper.toDto(cat1)).willReturn(res1);
