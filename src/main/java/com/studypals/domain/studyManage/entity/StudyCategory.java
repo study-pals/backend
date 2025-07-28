@@ -48,6 +48,9 @@ public class StudyCategory {
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
+    @Column(name = "goal")
+    private Long goal;
+
     @Column(name = "day_belong", nullable = false, columnDefinition = "INTEGER")
     private Integer dayBelong;
 

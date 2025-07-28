@@ -264,7 +264,7 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
                 HashOperations<String, String, String> hashOps = operations.opsForHash();
 
                 for (Map.Entry<ID, Set<String>> id : fieldKey.entrySet()) {
-                    String key = id + keyPrefix;
+                    String key = keyPrefix + id.getKey();
                     hashOps.delete(key, id.getValue().toArray());
                 }
                 return null;

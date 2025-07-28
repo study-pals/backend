@@ -47,6 +47,7 @@ public abstract class AbstractCategoryBasedStrategy implements StudyRenderStrate
                         .color(c.color())
                         .description(c.description())
                         .time(timeMap.getOrDefault(c.typeId(), 0L))
+                        .goal(c.goal())
                         .build())
                 .toList();
     }
