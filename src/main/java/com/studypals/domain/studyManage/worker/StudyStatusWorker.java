@@ -85,6 +85,7 @@ public class StudyStatusWorker {
                 .startTime(null)
                 .studyType(null)
                 .typeId(null)
+                .goal(null)
                 .name(null)
                 .build();
     }
