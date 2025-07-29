@@ -8,6 +8,7 @@ package com.studypals.domain.studyManage.entity;
  * PERSONAL: 개인이 직접 설정한 공부 카테고리(토픽) - study_category table과의 연관
  * GROUP: 그룹이 설정한 공부 카테고리(토픽)
  * TEMPORARY: 임시-단 한번의 공부를 위한 카테고리 이름
+ * REMOVED: 삭제된 카테고리 항목
  * </pre>
  * @author jack8
  * @since 2025-05-05
@@ -15,5 +16,6 @@ package com.studypals.domain.studyManage.entity;
 public enum StudyType {
     PERSONAL,
     GROUP,
-    TEMPORARY
+    TEMPORARY,
+    REMOVED
 }

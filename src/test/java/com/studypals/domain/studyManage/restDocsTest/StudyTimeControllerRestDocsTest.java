@@ -171,8 +171,8 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data[].studies[].typeId")
                                         .description("해당 타입의 ID (없으면 null)")
                                         .optional(),
-                                fieldWithPath("data[].studies[].temporaryName")
-                                        .description("임시 카테고리 이름 (없으면 null)")
+                                fieldWithPath("data[].studies[].name")
+                                        .description("카테고리 이름 (임시/영구)")
                                         .optional(),
                                 fieldWithPath("data[].studies[].time").description("해당 항목 공부 시간 (초 단위)"))));
     }

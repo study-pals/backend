@@ -40,7 +40,7 @@ public class TemporarStudyRenderStrategy implements StudyRenderStrategy {
         return studies.stream()
                 .map(s -> GetStudyRes.builder()
                         .studyType(getType())
-                        .name(s.temporaryName())
+                        .name(s.name())
                         .time(s.time())
                         .build())
                 .toList();

@@ -87,7 +87,7 @@ class StudyStatusWorkerTest {
         assertThat(result.getId()).isEqualTo(userId);
         assertThat(result.getStartTime()).isEqualTo(req.startTime());
         assertThat(result.getTypeId()).isEqualTo(req.typeId());
-        assertThat(result.getTemporaryName()).isEqualTo(req.temporaryName());
+        assertThat(result.getName()).isEqualTo(req.temporaryName());
         assertThat(result.isStudying()).isTrue();
     }
 
@@ -98,7 +98,7 @@ class StudyStatusWorkerTest {
                 .id(1L)
                 .studyTime(100L)
                 .studyType(StudyType.TEMPORARY)
-                .temporaryName("test")
+                .name("test")
                 .startTime(LocalTime.of(10, 0))
                 .studying(true)
                 .build();
@@ -109,7 +109,7 @@ class StudyStatusWorkerTest {
         // then
         assertThat(updated.isStudying()).isFalse();
         assertThat(updated.getStudyTime()).isEqualTo(300L);
-        assertThat(updated.getTemporaryName()).isNull();
+        assertThat(updated.getName()).isNull();
         assertThat(updated.getStartTime()).isNull();
     }
 
@@ -127,7 +127,7 @@ class StudyStatusWorkerTest {
         assertThat(restarted.isStudying()).isTrue();
         assertThat(restarted.getStartTime()).isEqualTo(req.startTime());
         assertThat(restarted.getTypeId()).isNull();
-        assertThat(restarted.getTemporaryName()).isEqualTo("focus");
+        assertThat(restarted.getName()).isEqualTo("focus");
     }
 
     @Test

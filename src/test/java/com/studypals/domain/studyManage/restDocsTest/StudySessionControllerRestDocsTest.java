@@ -70,7 +70,7 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("typeId")
                                         .description("연관된 테이블의 레코드 ID")
                                         .attributes(constraints("temporaryName과 상호 베타적")),
-                                fieldWithPath("temporaryName")
+                                fieldWithPath("name")
                                         .description("임시 카테고리 이름")
                                         .attributes(constraints("categoryId 와 상호 베타적")),
                                 fieldWithPath("startTime").description("공부 시작 시간 - HH:mm 형식")),
@@ -83,7 +83,7 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data.studyTime").description("현재까지 누적 공부 시간"),
                                 fieldWithPath("data.studyType").description("공부 유형 타입"),
                                 fieldWithPath("data.typeId").description("공부 유형 타입 ID"),
-                                fieldWithPath("data.temporaryName").description("임시 카테고리 이름"))));
+                                fieldWithPath("data.name").description("카테고리 이름(임시/영구)"))));
     }
 
     @Test

@@ -43,7 +43,7 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
     private StudyTime make(Member member, String temporaryName, LocalDate date, Long time) {
         return StudyTime.builder()
                 .studyType(StudyType.TEMPORARY)
-                .temporaryName(temporaryName)
+                .name(temporaryName)
                 .member(member)
                 .studiedDate(date)
                 .time(time)
@@ -94,7 +94,7 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
         // then
         assertThat(results)
                 .hasSize(3)
-                .extracting(StudyTime::getTemporaryName)
+                .extracting(StudyTime::getName)
                 .containsExactlyInAnyOrder("temp1", "temp2", "temp3");
     }
 
@@ -173,6 +173,6 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
         em.clear();
 
         // when
-        Optional<StudyTime> result = studyTimeRepository.findByTemporaryName(member.getId(), march, name);
+        Optional<StudyTime> result = studyTimeRepository.findByName(member.getId(), march, name);
     }
 }

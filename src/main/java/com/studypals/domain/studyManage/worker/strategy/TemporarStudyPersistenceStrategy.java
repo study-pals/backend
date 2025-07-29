@@ -35,12 +35,12 @@ public class TemporarStudyPersistenceStrategy implements StudyTimePersistenceStr
 
     @Override
     public boolean supports(StudyStatus status) {
-        return status.getStudyType() == getType() && status.getTemporaryName() != null;
+        return status.getStudyType() == getType() && status.getName() != null;
     }
 
     @Override
     public Optional<StudyTime> find(Member member, StudyStatus status, LocalDate studiedDate) {
-        return studyTimeRepository.findByTemporaryName(member.getId(), studiedDate, status.getTemporaryName());
+        return studyTimeRepository.findByName(member.getId(), studiedDate, status.getName());
     }
 
     @Override
@@ -48,7 +48,7 @@ public class TemporarStudyPersistenceStrategy implements StudyTimePersistenceStr
         return StudyTime.builder()
                 .member(member)
                 .studyType(getType())
-                .temporaryName(status.getTemporaryName())
+                .name(status.getName())
                 .studiedDate(studiedDate)
                 .time(time)
                 .build();

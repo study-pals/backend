@@ -30,7 +30,7 @@ public class StudySessionWorker {
     private final StudyTimePersistenceStrategyFactory strategyFactory;
 
     /**
-     * studyTime 을 최신화하는 메서드. category에 대한 공부인지, temporaryName 에 대한 공부인지에 따라
+     * studyTime 을 최신화합니다. 전략 패턴에 따라 공부 타입을 분류합니다.
      * 갈린다.
      * @param status redis 에 저장된 사용자 상태
      * @param studiedDate 언제 공부했는지에 대한 날짜(today)

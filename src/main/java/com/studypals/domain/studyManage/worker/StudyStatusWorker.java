@@ -69,7 +69,7 @@ public class StudyStatusWorker {
                 .startTime(dto.startTime())
                 .studyType(dto.studyType())
                 .typeId(dto.typeId())
-                .temporaryName(dto.temporaryName())
+                .name(dto.temporaryName())
                 .build();
     }
 
@@ -85,7 +85,7 @@ public class StudyStatusWorker {
                 .startTime(null)
                 .studyType(null)
                 .typeId(null)
-                .temporaryName(null)
+                .name(null)
                 .build();
     }
 
@@ -100,7 +100,7 @@ public class StudyStatusWorker {
                 .startTime(dto.startTime())
                 .studyType(dto.studyType())
                 .typeId(dto.typeId())
-                .temporaryName(dto.temporaryName())
+                .name(dto.temporaryName())
                 .build();
     }
 
@@ -132,7 +132,7 @@ public class StudyStatusWorker {
                 .startTime(null)
                 .studyType(null)
                 .typeId(null)
-                .temporaryName(null)
+                .name(null)
                 .build();
 
         saveStatus(updated);

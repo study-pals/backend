@@ -50,13 +50,11 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
         SELECT * FROM study_time
         WHERE member_id = :memberId
         AND studied_date = :studiedDate
-        AND temporary_name = :temporaryName
+        AND  name = :name
     """,
             nativeQuery = true)
-    Optional<StudyTime> findByTemporaryName(
-            @Param("memberId") Long memberId,
-            @Param("studiedDate") LocalDate studiedDate,
-            @Param("temporaryName") String temporaryName);
+    Optional<StudyTime> findByName(
+            @Param("memberId") Long memberId, @Param("studiedDate") LocalDate studiedDate, @Param("name") String name);
 
     @Query(
             value =

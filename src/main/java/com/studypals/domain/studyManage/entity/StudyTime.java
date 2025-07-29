@@ -4,8 +4,6 @@ import java.time.LocalDate;
 
 import jakarta.persistence.*;
 
-import org.springframework.dao.DataIntegrityViolationException;
-
 import lombok.*;
 
 import com.studypals.domain.memberManage.entity.Member;
@@ -47,8 +45,8 @@ public class StudyTime {
     @Column(name = "type_id")
     private Long typeId;
 
-    @Column(name = "temporary_name", nullable = true, length = 255)
-    private String temporaryName;
+    @Column(name = "name", nullable = true, length = 255)
+    private String name;
 
     @Column(name = "studied_date", nullable = false)
     private LocalDate studiedDate;
@@ -57,13 +55,8 @@ public class StudyTime {
     @Builder.Default
     private Long time = 0L;
 
-    @PrePersist
-    @PreUpdate
-    private void validateTemporaryOrCategory() {
-        if (this.temporaryName == null && this.typeId == null) {
-            throw new DataIntegrityViolationException("must have value temporary name or typeId");
-        }
-    }
+    @Column(name = "goal", nullable = true)
+    private Integer goal;
 
     public void addTime(Long time) {
         this.time += time;

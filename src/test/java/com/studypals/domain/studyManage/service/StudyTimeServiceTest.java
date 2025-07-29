@@ -47,7 +47,7 @@ class StudyTimeServiceTest {
 
     private StudyTime make(String name, LocalDate studiedDate, Long time) {
         return StudyTime.builder()
-                .temporaryName(name)
+                .name(name)
                 .studiedDate(studiedDate)
                 .time(time)
                 .build();
