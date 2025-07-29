@@ -21,5 +21,7 @@ public interface DailyStudyInfoRepository extends JpaRepository<DailyStudyInfo, 
 
     Optional<DailyStudyInfo> findByMemberIdAndStudiedDate(Long userId, LocalDate studiedDate);
 
+    boolean existsByMemberIdAndStudiedDate(Long memberId, LocalDate studiedDate);
+
     List<DailyStudyInfo> findAllByMemberIdAndStudiedDateBetween(Long userId, LocalDate start, LocalDate end);
 }

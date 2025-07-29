@@ -44,59 +44,30 @@ public class StudyStatusWorker {
         return studyStatusRedisRepository.findById(id);
     }
 
+    public Optional<StudyStatus> findAndDelete(Long id) {
+        Optional<StudyStatus> result = studyStatusRedisRepository.findById(id);
+        result.ifPresent(x -> studyStatusRedisRepository.deleteById(id));
+        return result;
+    }
+
     /**
      * 처음 공부 시작 시 객체를 생성합니다. 추가로, DailyStudyInfo를 생성하고 추가합니다.
      * @param dto 공부 데이터
      * @return 만들어진 객체
      */
-    public StudyStatus firstStatus(Member member, StartStudyReq dto) {
+    public StudyStatus startStatus(Member member, StartStudyReq dto) {
 
-        DailyStudyInfo summary = DailyStudyInfo.builder()
-                .member(member)
-                .studiedDate(timeUtils.getToday())
-                .startTime(dto.startTime())
-                .build();
-
-        try {
+        if (!dailyStudyInfoRepository.existsByMemberIdAndStudiedDate(member.getId(), timeUtils.getToday())) {
+            DailyStudyInfo summary = DailyStudyInfo.builder()
+                    .member(member)
+                    .studiedDate(timeUtils.getToday())
+                    .startTime(dto.startTime())
+                    .build();
             dailyStudyInfoRepository.save(summary);
-        } catch (Exception e) {
-            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL, "fail to create daily study info");
         }
 
         return StudyStatus.builder()
                 .id(member.getId())
-                .studying(true)
-                .startTime(dto.startTime())
-                .studyType(dto.studyType())
-                .typeId(dto.typeId())
-                .name(dto.temporaryName())
-                .build();
-    }
-
-    /**
-     * 공부 종료 후, 해당 메서드를 통해 사용자가 공부 중이 아님을 표시한다.
-     * @param status 기존에 존재하던 사용자의 공부 상태
-     * @param studiedTimeToAdd 사용자가 추가로 공부한 시간
-     */
-    public StudyStatus resetStatus(StudyStatus status, Long studiedTimeToAdd) {
-        return status.update()
-                .studyTime(status.getStudyTime() + studiedTimeToAdd)
-                .studying(false)
-                .startTime(null)
-                .studyType(null)
-                .typeId(null)
-                .goal(null)
-                .name(null)
-                .build();
-    }
-
-    /**
-     * 기존에 공부한 흔적이 redis에 있는 경우, 이를 업데이트하는 status 생성
-     * @param status 기존에 존재하던 사용자의 공부 상태
-     * @param dto 재시작하는 공부 정보
-     */
-    public StudyStatus restartStatus(StudyStatus status, StartStudyReq dto) {
-        return status.update()
                 .studying(true)
                 .startTime(dto.startTime())
                 .studyType(dto.studyType())

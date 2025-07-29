@@ -70,31 +70,30 @@ public class StudySessionServiceImpl implements StudySessionService {
     public StartStudyRes startStudy(Long userId, StartStudyReq dto) {
 
         Member member = memberReader.getRef(userId);
-        // status 정보 가져오기 - 존재하지 않으면 최초 양식 생성
-        StudyStatus status = studyStatusWorker.find(userId).orElseGet(() -> studyStatusWorker.firstStatus(member, dto));
+        Optional<StudyStatus> status = studyStatusWorker.find(userId);
 
-        if (!status.isStudying()) {
-            status = studyStatusWorker.restartStatus(status, dto);
-        }
+        if (status.isPresent() && status.get().isStudying()) return mapper.toDto(status.get());
 
-        StudyTimePersistenceStrategy strategy = studyTimeFactory.resolve(status);
+        StudyStatus startStatus = studyStatusWorker.startStatus(member, dto);
+
+        StudyTimePersistenceStrategy strategy = studyTimeFactory.resolve(startStatus);
         try {
-            Optional<? extends StudyCategory> category = strategy.getCategoryInfo(member, status.getTypeId());
+            Optional<? extends StudyCategory> category = strategy.getCategoryInfo(member, startStatus.getTypeId());
 
             if (category.isPresent()) {
-                status = status.update()
+                startStatus = startStatus
+                        .update()
                         .goal(category.get().getGoal())
                         .name(category.get().getName())
                         .build();
             }
-
         } catch (IllegalArgumentException e) {
             throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL, e.getMessage());
         }
 
-        studyStatusWorker.saveStatus(status);
+        studyStatusWorker.saveStatus(startStatus);
 
-        return mapper.toDto(status);
+        return mapper.toDto(startStatus);
     }
 
     @Override
@@ -102,7 +101,7 @@ public class StudySessionServiceImpl implements StudySessionService {
     public Long endStudy(Long userId, LocalTime endTime) {
         LocalDate today = timeUtils.getToday();
         StudyStatus status = studyStatusWorker
-                .find(userId)
+                .findAndDelete(userId)
                 .orElseThrow(() -> new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL));
 
         studyStatusWorker.validStatus(status); // 받아온 status 가 정상인지 확인
@@ -114,10 +113,6 @@ public class StudySessionServiceImpl implements StudySessionService {
         Member member = memberReader.getRef(userId);
         studySessionWorker.upsert(member, status, today, durationInSec);
         dailyInfoWriter.updateEndtime(member, today, endTime);
-
-        // 3) 레디스 상태 값 리셋
-        status = studyStatusWorker.resetStatus(status, durationInSec);
-        studyStatusWorker.saveStatus(status);
 
         return durationInSec;
     }

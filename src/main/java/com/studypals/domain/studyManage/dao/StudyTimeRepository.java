@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.studypals.domain.studyManage.entity.StudyTime;
 
@@ -33,11 +32,11 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
     @Query(
             value =
                     """
-        SELECT * FROM study_time
-        WHERE member_id = :memberId
-        AND studied_Date = :studiedDate
-        AND study_type = :studyType
-        AND type_id = :typeId
+        SELECT * FROM study_time st
+        WHERE st.member_id = :memberId
+        AND st.studied_date = :studiedDate
+        AND st.study_type = :studyType
+        AND st.type_id = :typeId
     """,
             nativeQuery = true)
     Optional<StudyTime> findByStudyType(
@@ -49,10 +48,10 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
     @Query(
             value =
                     """
-        SELECT * FROM study_time
-        WHERE member_id = :memberId
-        AND studied_date = :studiedDate
-        AND  name = :name
+        SELECT * FROM study_time st
+        WHERE st.member_id = :memberId
+        AND st.studied_date = :studiedDate
+        AND st.name = :name
     """,
             nativeQuery = true)
     Optional<StudyTime> findByName(
@@ -61,10 +60,10 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
     @Query(
             value =
                     """
-        SELECT * FROM study_time
-        WHERE studied_Date BETWEEN :start AND :end
-        AND study_type = :studyType
-        AND type_id IN :typeIds
+        SELECT * FROM study_time st
+        WHERE st.studied_date BETWEEN :start AND :end
+        AND st.study_type = :studyType
+        AND st.type_id IN :typeIds
     """,
             nativeQuery = true)
     List<StudyTime> findByStudyTypeBetween(
@@ -73,7 +72,6 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
             @Param("studyType") String studyType,
             @Param("typeIds") Set<Long> typeIds);
 
-    @Transactional
     @Modifying
     @Query(
             value =

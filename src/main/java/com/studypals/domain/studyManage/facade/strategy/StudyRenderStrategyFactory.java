@@ -55,7 +55,7 @@ public class StudyRenderStrategyFactory {
                                     .findFirst()
                                     .orElseThrow(() -> new StudyException(
                                             StudyErrorCode.STUDY_TIME_NOT_FOUND,
-                                            "maybe, StudyType value invalid so can't find strategy object"));
+                                            "maybe, StudyType value invalid so can't findAndDelete strategy object"));
                             // 위에서 찾은 type에 대해 studies에서 이를 찾고 리스트로 변환
                             List<GetStudyDto> filtered = studies.stream()
                                     .filter(d -> d.studyType() == type)

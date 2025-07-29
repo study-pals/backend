@@ -99,7 +99,7 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     public void deleteCategory(Long userId, Long categoryId) {
 
         PersonalStudyCategory category = studyCategoryReader.getAndValidate(userId, categoryId);
-        Optional<StudyStatus> status = studyStatusWorker.find(userId);
+        Optional<StudyStatus> status = studyStatusWorker.findAndDelete(userId);
 
         if (status.isPresent() && status.get().getId().equals(categoryId)) {
             throw new StudyException(
