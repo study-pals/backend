@@ -1,9 +1,18 @@
 package com.studypals.domain.studyManage.worker.strategy;
 
+import java.time.LocalDate;
+
 import org.springframework.stereotype.Component;
 
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
+import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.entity.StudyStatus;
+import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.entity.StudyType;
+import com.studypals.global.exceptions.errorCode.StudyErrorCode;
+import com.studypals.global.exceptions.exception.StudyException;
 
 /**
  * StudyType이 PERSONAL 인 레코드에 대해, 검색/생성 및 전략 패턴에서의 호환성 여부를 정의합니다.
@@ -18,12 +27,34 @@ import com.studypals.domain.studyManage.entity.StudyType;
 @Component
 public class PersonalStudyPersistenceStrategy extends AbstractStudyPersistenceStrategy {
 
-    public PersonalStudyPersistenceStrategy(StudyTimeRepository studyTimeRepository) {
+    private final StudyCategoryRepository studyCategoryRepository;
+
+    public PersonalStudyPersistenceStrategy(
+            StudyTimeRepository studyTimeRepository, StudyCategoryRepository studyCategoryRepository) {
         super(studyTimeRepository);
+        this.studyCategoryRepository = studyCategoryRepository;
     }
 
     @Override
     public StudyType getType() {
         return StudyType.PERSONAL;
+    }
+
+    @Override
+    public StudyTime create(Member member, StudyStatus status, LocalDate studiedDate, Long time) {
+        StudyCategory category = studyCategoryRepository
+                .findById(status.getTypeId())
+                .orElseThrow(() -> new StudyException(
+                        StudyErrorCode.STUDY_CATEGORY_NOT_FOUND,
+                        "[PersonalStudyPersistenceStrategy#create] unknown category id saved in status"));
+        return StudyTime.builder()
+                .member(member)
+                .studyType(getType())
+                .typeId(status.getTypeId())
+                .studiedDate(studiedDate)
+                .time(time)
+                .name(category.getName())
+                .goal(category.getGoal())
+                .build();
     }
 }

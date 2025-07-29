@@ -6,9 +6,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.studypals.domain.studyManage.entity.StudyTime;
 
@@ -70,4 +72,19 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
             @Param("end") LocalDate end,
             @Param("studyType") String studyType,
             @Param("typeIds") Set<Long> typeIds);
+
+    @Transactional
+    @Modifying
+    @Query(
+            value =
+                    """
+        UPDATE study_time st
+        SET st.study_type = 'REMOVED',
+            st.type_id = NULL
+        WHERE st.member_id = :memberId
+        AND st.type_id = :categoryId
+        AND st.study_type = 'PERSONAL'
+""",
+            nativeQuery = true)
+    void markStudyTimeAsRemoved(@Param("memberId") Long memberId, @Param("categoryId") Long categoryId);
 }

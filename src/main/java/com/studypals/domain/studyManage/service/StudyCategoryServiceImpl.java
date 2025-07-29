@@ -2,6 +2,7 @@ package com.studypals.domain.studyManage.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +16,13 @@ import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
 import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudyCategoryWriter;
+import com.studypals.domain.studyManage.worker.StudyStatusWorker;
+import com.studypals.domain.studyManage.worker.StudyTimeWriter;
+import com.studypals.global.exceptions.errorCode.StudyErrorCode;
+import com.studypals.global.exceptions.exception.StudyException;
 
 /**
  * StudyCategory 에 대한 service implement class 입니다.
@@ -41,6 +47,8 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     private final MemberReader memberReader;
     private final StudyCategoryWriter studyCategoryWriter;
     private final StudyCategoryReader studyCategoryReader;
+    private final StudyStatusWorker studyStatusWorker;
+    private final StudyTimeWriter studyTimeWriter;
     private final CategoryMapper categoryMapper;
 
     /*tested*/
@@ -91,6 +99,15 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     public void deleteCategory(Long userId, Long categoryId) {
 
         StudyCategory category = studyCategoryReader.getAndValidate(userId, categoryId);
+        Optional<StudyStatus> status = studyStatusWorker.find(userId);
+
+        if (status.isPresent() && status.get().getId().equals(categoryId)) {
+            throw new StudyException(
+                    StudyErrorCode.STUDY_CATEGORY_DELETE_FAIL_PENDING_STUDY,
+                    "[StudyCategoryServiceImpl#deleteCategory] try to delete pending study category");
+        }
+
+        studyTimeWriter.changeStudyTimeToRemoved(userId, categoryId);
 
         studyCategoryWriter.delete(category);
     }

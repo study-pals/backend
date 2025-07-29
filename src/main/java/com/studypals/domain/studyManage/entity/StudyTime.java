@@ -56,7 +56,7 @@ public class StudyTime {
     private Long time = 0L;
 
     @Column(name = "goal", nullable = true)
-    private Integer goal;
+    private Long goal;
 
     public void addTime(Long time) {
         this.time += time;

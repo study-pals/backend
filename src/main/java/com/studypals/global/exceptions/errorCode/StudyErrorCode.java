@@ -36,6 +36,8 @@ public enum StudyErrorCode implements ErrorCode {
     STUDY_CATEGORY_ADD_FAIL(ResponseCode.STUDY_CATEGORY_ADD, HttpStatus.BAD_REQUEST, "failed to add study category"),
     STUDY_CATEGORY_DELETE_FAIL(
             ResponseCode.STUDY_CATEGORY_DELETE, HttpStatus.BAD_REQUEST, "failed to delete study category"),
+    STUDY_CATEGORY_DELETE_FAIL_PENDING_STUDY(
+            ResponseCode.STUDY_CATEGORY_DELETE, HttpStatus.BAD_REQUEST, "can't delete pending study category"),
     STUDY_CATEGORY_UPDATE_FAIL(
             ResponseCode.STUDY_CATEGORY_UPDATE, HttpStatus.BAD_REQUEST, "failed to update study category");
 
