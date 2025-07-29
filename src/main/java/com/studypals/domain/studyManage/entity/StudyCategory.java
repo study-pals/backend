@@ -1,73 +1,55 @@
 package com.studypals.domain.studyManage.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
 
-import lombok.*;
-
-import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
- * 공부 카테고리에 대한 엔티티입니다. JPA 에 의해 관리됩니다.
+ * 코드에 대한 전체적인 역할을 적습니다.
  * <p>
- * 다음과 같은 필드를 가지고 있습니다.
- * <pre>
- *     {@code
- * Long id;
- * Member member;
- * Integer dayBelong;
- * String color;
- * String description;
- *     }
- * </pre>
+ * 코드에 대한 작동 원리 등을 적습니다.
+ *
+ * <p><b>상속 정보:</b><br>
+ * 상속 정보를 적습니다.
  *
  * <p><b>주요 생성자:</b><br>
- * {@code Builder}  <br>
- * builder 패턴을 통해 생성합니다. <br>
+ * {@code ExampleClass(String example)}  <br>
+ * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
+ *
+ * <p><b>빈 관리:</b><br>
+ * 필요 시 빈 관리에 대한 내용을 적습니다.
+ *
+ * <p><b>외부 모듈:</b><br>
+ * 필요 시 외부 모듈에 대한 내용을 적습니다.
  *
  * @author jack8
- * @since 2025-04-10
+ * @see
+ * @since 2025-07-29
  */
-@Entity
-@Builder
-@Getter
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "study_category")
-public class StudyCategory {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false, unique = true)
-    private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+@MappedSuperclass
+@Getter
+public abstract class StudyCategory {
 
     @Column(name = "name", nullable = false, length = 255)
-    private String name;
+    protected String name;
 
     @Column(name = "goal")
-    private Long goal;
+    protected Long goal;
 
     @Column(name = "day_belong", nullable = false, columnDefinition = "INTEGER")
-    private Integer dayBelong;
+    protected Integer dayBelong;
 
     @Column(name = "color", nullable = true, length = 9)
-    private String color;
+    protected String color;
 
     @Column(name = "description", nullable = true, columnDefinition = "TEXT")
-    private String description;
-
-    public void updateCategory(UpdateCategoryReq dto) {
-        this.name = dto.name();
-        this.dayBelong = dto.dayBelong();
-        this.color = dto.color();
-        this.description = dto.description();
-    }
-
-    public boolean isOwner(Long memberId) {
-        return this.member.getId().equals(memberId);
-    }
+    protected String description;
 }

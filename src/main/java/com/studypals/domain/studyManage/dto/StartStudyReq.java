@@ -3,6 +3,7 @@ package com.studypals.domain.studyManage.dto;
 import java.time.LocalTime;
 
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.studypals.domain.studyManage.entity.StudyType;
@@ -13,7 +14,8 @@ import com.studypals.domain.studyManage.entity.StudyType;
  * @author jack8
  * @since 2025-04-13
  */
-public record StartStudyReq(StudyType studyType, Long typeId, String temporaryName, LocalTime startTime) {
+public record StartStudyReq(
+        @NotNull StudyType studyType, Long typeId, String temporaryName, @NotNull LocalTime startTime) {
     @AssertTrue(message = "typeId 와 temporaryName 중 하나만 존재해야 합니다.")
     @JsonIgnore
     public boolean isValidExclusive() {

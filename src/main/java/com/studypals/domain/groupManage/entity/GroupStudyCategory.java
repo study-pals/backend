@@ -3,6 +3,9 @@ package com.studypals.domain.groupManage.entity;
 import jakarta.persistence.*;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+import com.studypals.domain.studyManage.entity.StudyCategory;
 
 /**
  * 그룹의 공부 카테고리에 대한 엔티티입니다. JPA 에 의해 관리됩니다.
@@ -27,12 +30,12 @@ import lombok.*;
  * @since 2025-05-08
  */
 @Entity
-@Builder
+@SuperBuilder
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "group_study_category")
-public class GroupStudyCategory {
+public class GroupStudyCategory extends StudyCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,22 +46,7 @@ public class GroupStudyCategory {
     @JoinColumn(name = "group_id")
     private Group group;
 
-    @Column(name = "name", nullable = false, length = 255)
-    private String name;
-
-    @Column(name = "goal_time", nullable = false, columnDefinition = "INTEGER")
-    private Integer goalTime;
-
     @Enumerated(value = EnumType.STRING)
     @Column(name = "type", nullable = false)
     private GroupStudyCategoryType type;
-
-    @Column(name = "day_belong", nullable = false, columnDefinition = "INTEGER")
-    private Integer dayBelong;
-
-    @Column(name = "color", nullable = true, length = 9)
-    private String color;
-
-    @Column(name = "description", nullable = true, columnDefinition = "TEXT")
-    private String description;
 }

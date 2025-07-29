@@ -19,7 +19,7 @@ import com.studypals.domain.studyManage.dto.CreateCategoryReq;
 import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
 import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
-import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudyCategoryWriter;
@@ -33,7 +33,7 @@ import com.studypals.global.exceptions.exception.StudyException;
  * @since 2025-04-12
  */
 @ExtendWith(MockitoExtension.class)
-class StudyCategoryServiceTest {
+class PersonalStudyCategoryServiceTest {
 
     @Mock
     private MemberReader memberReader;
@@ -51,7 +51,7 @@ class StudyCategoryServiceTest {
     private Member mockMember;
 
     @Mock
-    private StudyCategory mockStudyCategory;
+    private PersonalStudyCategory mockPersonalStudyCategory;
 
     @InjectMocks
     private StudyCategoryServiceImpl studyCategoryService;
@@ -64,8 +64,9 @@ class StudyCategoryServiceTest {
         CreateCategoryReq req = new CreateCategoryReq("name", 1200L, "#FFFFFF", 12, "description");
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
-        given(categoryMapper.toEntity(req, mockMember)).willReturn(mockStudyCategory);
-        given(mockStudyCategory.getId()).willReturn(savedCategoryId); // 실제로는 save 후 넣어지지만, mock unit test 이므로...
+        given(categoryMapper.toEntity(req, mockMember)).willReturn(mockPersonalStudyCategory);
+        given(mockPersonalStudyCategory.getId())
+                .willReturn(savedCategoryId); // 실제로는 save 후 넣어지지만, mock unit test 이므로...
 
         // when
         Long value = studyCategoryService.createCategory(userId, req);
@@ -81,8 +82,8 @@ class StudyCategoryServiceTest {
         StudyErrorCode errorCode = StudyErrorCode.STUDY_CATEGORY_ADD_FAIL;
         CreateCategoryReq req = new CreateCategoryReq("name", 1200L, "#FFFFFF", 12, "description");
         given(memberReader.getRef(userId)).willReturn(mockMember);
-        given(categoryMapper.toEntity(req, mockMember)).willReturn(mockStudyCategory);
-        willThrow(new StudyException(errorCode)).given(studyCategoryWriter).save(mockStudyCategory);
+        given(categoryMapper.toEntity(req, mockMember)).willReturn(mockPersonalStudyCategory);
+        willThrow(new StudyException(errorCode)).given(studyCategoryWriter).save(mockPersonalStudyCategory);
 
         // when & then
         assertThatThrownBy(() -> studyCategoryService.createCategory(userId, req))
@@ -97,8 +98,8 @@ class StudyCategoryServiceTest {
         Long userId = 1L;
         GetCategoryRes res =
                 new GetCategoryRes(StudyType.PERSONAL, 1L, "category", 1200L, "#FFFFFF", 12, "description");
-        given(studyCategoryReader.findByMember(userId)).willReturn(List.of(mockStudyCategory));
-        given(categoryMapper.toDto(mockStudyCategory)).willReturn(res);
+        given(studyCategoryReader.findByMember(userId)).willReturn(List.of(mockPersonalStudyCategory));
+        given(categoryMapper.toDto(mockPersonalStudyCategory)).willReturn(res);
 
         // when
         List<GetCategoryRes> value = studyCategoryService.getUserCategory(userId);
@@ -129,9 +130,10 @@ class StudyCategoryServiceTest {
         LocalDate wednesday = LocalDate.of(2025, 4, 16); // 수요일
         int dayBit = 1 << 2; // 수요일 = 1 << 2
 
-        StudyCategory cat1 = StudyCategory.builder().dayBelong(dayBit).build();
-        StudyCategory cat2 =
-                StudyCategory.builder().dayBelong(dayBit | (1 << 4)).build();
+        PersonalStudyCategory cat1 =
+                PersonalStudyCategory.builder().dayBelong(dayBit).build();
+        PersonalStudyCategory cat2 =
+                PersonalStudyCategory.builder().dayBelong(dayBit | (1 << 4)).build();
 
         GetCategoryRes res1 = new GetCategoryRes(StudyType.PERSONAL, 1L, "category1", 1200L, "#FFF", dayBit, "desc1");
         GetCategoryRes res2 =
@@ -172,14 +174,14 @@ class StudyCategoryServiceTest {
         Long categoryId = 1L;
         UpdateCategoryReq req = new UpdateCategoryReq(categoryId, "new category", "#FFFFFF", 12, "new description");
 
-        given(studyCategoryReader.getAndValidate(userId, categoryId)).willReturn(mockStudyCategory);
-        given(mockStudyCategory.getId()).willReturn(categoryId);
+        given(studyCategoryReader.getAndValidate(userId, categoryId)).willReturn(mockPersonalStudyCategory);
+        given(mockPersonalStudyCategory.getId()).willReturn(categoryId);
 
         // when
         Long updatedCategoryId = studyCategoryService.updateCategory(userId, req);
 
         // then
         assertThat(updatedCategoryId).isEqualTo(categoryId);
-        then(mockStudyCategory).should().updateCategory(req);
+        then(mockPersonalStudyCategory).should().updateCategory(req);
     }
 }

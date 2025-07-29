@@ -1,18 +1,14 @@
 package com.studypals.domain.studyManage.worker.strategy;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
+import com.studypals.domain.studyManage.dao.PersonalStudyCategoryRepository;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
-import com.studypals.domain.studyManage.entity.StudyCategory;
-import com.studypals.domain.studyManage.entity.StudyStatus;
-import com.studypals.domain.studyManage.entity.StudyTime;
-import com.studypals.domain.studyManage.entity.StudyType;
-import com.studypals.global.exceptions.errorCode.StudyErrorCode;
-import com.studypals.global.exceptions.exception.StudyException;
+import com.studypals.domain.studyManage.entity.*;
 
 /**
  * StudyType이 PERSONAL 인 레코드에 대해, 검색/생성 및 전략 패턴에서의 호환성 여부를 정의합니다.
@@ -27,12 +23,12 @@ import com.studypals.global.exceptions.exception.StudyException;
 @Component
 public class PersonalStudyPersistenceStrategy extends AbstractStudyPersistenceStrategy {
 
-    private final StudyCategoryRepository studyCategoryRepository;
+    private final PersonalStudyCategoryRepository personalStudyCategoryRepository;
 
     public PersonalStudyPersistenceStrategy(
-            StudyTimeRepository studyTimeRepository, StudyCategoryRepository studyCategoryRepository) {
+            StudyTimeRepository studyTimeRepository, PersonalStudyCategoryRepository personalStudyCategoryRepository) {
         super(studyTimeRepository);
-        this.studyCategoryRepository = studyCategoryRepository;
+        this.personalStudyCategoryRepository = personalStudyCategoryRepository;
     }
 
     @Override
@@ -42,19 +38,29 @@ public class PersonalStudyPersistenceStrategy extends AbstractStudyPersistenceSt
 
     @Override
     public StudyTime create(Member member, StudyStatus status, LocalDate studiedDate, Long time) {
-        StudyCategory category = studyCategoryRepository
-                .findById(status.getTypeId())
-                .orElseThrow(() -> new StudyException(
-                        StudyErrorCode.STUDY_CATEGORY_NOT_FOUND,
-                        "[PersonalStudyPersistenceStrategy#create] unknown category id saved in status"));
         return StudyTime.builder()
                 .member(member)
                 .studyType(getType())
                 .typeId(status.getTypeId())
                 .studiedDate(studiedDate)
                 .time(time)
-                .name(category.getName())
-                .goal(category.getGoal())
+                .name(status.getName())
+                .goal(status.getGoal())
                 .build();
+    }
+
+    @Override
+    public Optional<PersonalStudyCategory> getCategoryInfo(Member member, Long typeId) {
+        Long userId = member.getId();
+        Optional<PersonalStudyCategory> optionalCategory = personalStudyCategoryRepository.findById(typeId);
+        if (optionalCategory.isEmpty()) {
+            throw new IllegalArgumentException("[PersonalStudyPersistenceStrategy#getCategoryInfo] unknown category");
+        }
+        if (!optionalCategory.get().isOwner(userId)) {
+            throw new IllegalArgumentException(
+                    "[PersonalStudyPersistenceStrategy#getCategoryInfo] is not owner of category");
+        }
+
+        return optionalCategory;
     }
 }

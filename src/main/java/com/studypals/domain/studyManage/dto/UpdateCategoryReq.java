@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
+
 /**
  * 카테고리를 갱신 위한 요청 데이터 입니다.
  * <pre>
@@ -13,7 +15,7 @@ import jakarta.validation.constraints.NotNull;
  * </pre>
  *
  * @author jack8
- * @see com.studypals.domain.studyManage.entity.StudyCategory StudyCategory
+ * @see PersonalStudyCategory PersonalStudyCategory
  * @since 2025-04-12
  */
 public record UpdateCategoryReq(

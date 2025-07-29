@@ -12,7 +12,7 @@ import org.mapstruct.factory.Mappers;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
-import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
 
@@ -52,8 +52,8 @@ class StudyTimeMapperTest {
     @DisplayName("StudyTime → GetStudyDto 매핑 성공")
     void toDto_success_studyTimeToGetStudyDto() {
         // given
-        StudyCategory category =
-                StudyCategory.builder().id(7L).name("algorithm").build();
+        PersonalStudyCategory category =
+                PersonalStudyCategory.builder().id(7L).name("algorithm").build();
 
         StudyTime studyTime = StudyTime.builder()
                 .id(1L)

@@ -13,8 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
-import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.dao.PersonalStudyCategoryRepository;
+import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
 
@@ -25,16 +25,16 @@ import com.studypals.global.exceptions.exception.StudyException;
  * @since 2025-04-17
  */
 @ExtendWith(MockitoExtension.class)
-class StudyCategoryReaderTest {
+class PersonalStudyCategoryReaderTest {
 
     @Mock
-    private StudyCategoryRepository studyCategoryRepository;
+    private PersonalStudyCategoryRepository personalStudyCategoryRepository;
 
     @Mock
-    private StudyCategory mockCategory1;
+    private PersonalStudyCategory mockCategory1;
 
     @Mock
-    private StudyCategory mockCategory2;
+    private PersonalStudyCategory mockCategory2;
 
     @InjectMocks
     private StudyCategoryReader studyCategoryReader;
@@ -47,10 +47,10 @@ class StudyCategoryReaderTest {
         given(mockCategory1.getDayBelong()).willReturn(0b0110); // 화, 수 포함
         given(mockCategory2.getDayBelong()).willReturn(0b0001); // 월
 
-        given(studyCategoryRepository.findByMemberId(userId)).willReturn(List.of(mockCategory1, mockCategory2));
+        given(personalStudyCategoryRepository.findByMemberId(userId)).willReturn(List.of(mockCategory1, mockCategory2));
 
         // when
-        List<StudyCategory> result = studyCategoryReader.getListByMemberAndDay(userId, dayBit);
+        List<PersonalStudyCategory> result = studyCategoryReader.getListByMemberAndDay(userId, dayBit);
 
         // then
         assertThat(result).containsExactly(mockCategory1);
@@ -64,10 +64,10 @@ class StudyCategoryReaderTest {
         given(mockCategory1.getDayBelong()).willReturn(0b0110); // 화, 수 포함
         given(mockCategory2.getDayBelong()).willReturn(0b0000000); // 주간 플랜
 
-        given(studyCategoryRepository.findByMemberId(userId)).willReturn(List.of(mockCategory1, mockCategory2));
+        given(personalStudyCategoryRepository.findByMemberId(userId)).willReturn(List.of(mockCategory1, mockCategory2));
 
         // when
-        List<StudyCategory> result = studyCategoryReader.getListByMemberAndDay(userId, dayBit);
+        List<PersonalStudyCategory> result = studyCategoryReader.getListByMemberAndDay(userId, dayBit);
 
         // then
         assertThat(result).containsExactlyInAnyOrder(mockCategory1, mockCategory2);
@@ -78,7 +78,7 @@ class StudyCategoryReaderTest {
         // given
         Long userId = 1L;
         Long categoryId = 10L;
-        given(studyCategoryRepository.findById(categoryId)).willReturn(Optional.of(mockCategory1));
+        given(personalStudyCategoryRepository.findById(categoryId)).willReturn(Optional.of(mockCategory1));
         given(mockCategory1.isOwner(userId)).willReturn(false);
 
         // when & then

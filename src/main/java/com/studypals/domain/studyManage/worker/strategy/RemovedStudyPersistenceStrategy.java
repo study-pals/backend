@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
+import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.entity.StudyType;
@@ -46,5 +47,10 @@ public class RemovedStudyPersistenceStrategy implements StudyTimePersistenceStra
     @Override
     public StudyTime create(Member member, StudyStatus status, LocalDate studiedDate, Long time) {
         throw new IllegalArgumentException("cannot create removed category");
+    }
+
+    @Override
+    public Optional<StudyCategory> getCategoryInfo(Member member, Long typeId) {
+        return Optional.empty();
     }
 }

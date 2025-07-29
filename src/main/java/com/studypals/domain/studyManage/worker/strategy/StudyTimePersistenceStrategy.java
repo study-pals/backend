@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.entity.StudyType;
@@ -54,4 +55,6 @@ public interface StudyTimePersistenceStrategy {
      * @return 생성된 StudyTime 비영속 엔티티
      */
     StudyTime create(Member member, StudyStatus status, LocalDate studiedDate, Long time);
+
+    Optional<? extends StudyCategory> getCategoryInfo(Member member, Long typeId);
 }

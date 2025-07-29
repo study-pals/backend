@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @Disabled("DAO 단순 호출 테스트 - 테스트 생략")
 @ExtendWith(MockitoExtension.class)
-class StudyCategoryWriterTest {
+class PersonalStudyCategoryWriterTest {
 
     // may not need test becuase method is just simple dao method.
 

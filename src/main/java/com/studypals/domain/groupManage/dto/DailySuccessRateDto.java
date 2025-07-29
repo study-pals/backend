@@ -21,7 +21,7 @@ public record DailySuccessRateDto(
         Long categoryId,
         String name,
         String type,
-        int goalTime,
+        long goalTime,
         double successRate,
         List<GroupMemberProfileImageDto> profiles) {
     public static DailySuccessRateDto of(
@@ -30,7 +30,7 @@ public record DailySuccessRateDto(
                 category.getId(),
                 category.getName(),
                 category.getType().name(),
-                category.getGoalTime(),
+                category.getGoal(),
                 successRate,
                 profiles);
     }

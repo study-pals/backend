@@ -6,10 +6,10 @@ import org.mapstruct.Mapping;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
 import com.studypals.domain.studyManage.dto.GetCategoryRes;
-import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
 
 /**
- * StudyCategory 에 대한 mapping 클래스입니다.
+ * PersonalStudyCategory 에 대한 mapping 클래스입니다.
  * <p>
  * MapStruct을 통하여 자동으로 구현체가 생성됩니다.
  *
@@ -27,9 +27,9 @@ public interface CategoryMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "member", source = "member")
-    StudyCategory toEntity(CreateCategoryReq req, Member member);
+    PersonalStudyCategory toEntity(CreateCategoryReq req, Member member);
 
     @Mapping(source = "id", target = "typeId")
     @Mapping(target = "studyType", constant = "PERSONAL")
-    GetCategoryRes toDto(StudyCategory entity);
+    GetCategoryRes toDto(PersonalStudyCategory entity);
 }

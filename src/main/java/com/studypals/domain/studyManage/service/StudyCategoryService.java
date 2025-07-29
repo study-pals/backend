@@ -10,7 +10,7 @@ import com.studypals.global.exceptions.exception.AuthException;
 import com.studypals.global.exceptions.exception.StudyException;
 
 /**
- * StudyCategory 에 대한 인터페이스.
+ * PersonalStudyCategory 에 대한 인터페이스.
  * 일부 메서드 주석이 포함된다.
  *
  * @author jack8
@@ -29,7 +29,7 @@ public interface StudyCategoryService {
     Long createCategory(Long userId, CreateCategoryReq dto);
 
     /**
-     * userId 를 통하여, 해당 유저가 보유한 StudyCategory 리스트를 반환하는 메서드.
+     * userId 를 통하여, 해당 유저가 보유한 PersonalStudyCategory 리스트를 반환하는 메서드.
      * @param userId 검색하고자 하는 유저의 id
      * @return 카테고리 리스트. 만약 없으면 빈 리스트가 반환된다.
      */

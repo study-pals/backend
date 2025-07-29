@@ -54,6 +54,8 @@ public class StudyStatus {
 
     private String name;
 
+    private Long goal;
+
     @TimeToLive(unit = TimeUnit.DAYS)
     @Builder.Default
     private Long expiration = 1L;

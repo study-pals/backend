@@ -30,7 +30,7 @@ import com.studypals.domain.studyManage.entity.StudyType;
  * @since 2025-05-21
  */
 @ExtendWith(MockitoExtension.class)
-public class GroupStudyCategoryServiceTest {
+public class GroupPersonalStudyCategoryServiceTest {
 
     @Mock
     private GroupReader groupReader;
@@ -55,7 +55,7 @@ public class GroupStudyCategoryServiceTest {
                 .id(1L)
                 .name("category")
                 .type(GroupStudyCategoryType.WEEKLY)
-                .goalTime(120)
+                .goal(120L)
                 .group(mockGroup)
                 .build();
         List<GetGroupCategoryRes> response = List.of(GetGroupCategoryRes.builder()
@@ -63,7 +63,7 @@ public class GroupStudyCategoryServiceTest {
                 .typeId(category.getId())
                 .studyType(StudyType.GROUP)
                 .dayBelong(category.getDayBelong())
-                .goalTime(category.getGoalTime())
+                .goalTime(category.getGoal())
                 .color(category.getColor())
                 .description(category.getDescription())
                 .build());
@@ -140,14 +140,14 @@ public class GroupStudyCategoryServiceTest {
                 .id(1L)
                 .name("weekly")
                 .type(GroupStudyCategoryType.WEEKLY)
-                .goalTime(3600)
+                .goal(3600L)
                 .group(mockGroup)
                 .build();
         GroupStudyCategory daily = GroupStudyCategory.builder()
                 .id(2L)
                 .name("daily")
                 .type(GroupStudyCategoryType.DAILY)
-                .goalTime(120)
+                .goal(120L)
                 .group(mockGroup)
                 .build();
 

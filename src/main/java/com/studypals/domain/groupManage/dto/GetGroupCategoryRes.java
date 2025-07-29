@@ -16,6 +16,6 @@ public record GetGroupCategoryRes(
         Long typeId,
         String name,
         String color,
-        Integer goalTime,
+        Long goalTime,
         Integer dayBelong,
         String description) {}

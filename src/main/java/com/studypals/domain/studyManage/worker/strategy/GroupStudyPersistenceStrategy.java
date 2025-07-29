@@ -1,7 +1,12 @@
 package com.studypals.domain.studyManage.worker.strategy;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
+import com.studypals.domain.groupManage.dao.GroupStudyCategoryRepository;
+import com.studypals.domain.groupManage.entity.GroupStudyCategory;
+import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
 import com.studypals.domain.studyManage.entity.StudyType;
 
@@ -18,12 +23,27 @@ import com.studypals.domain.studyManage.entity.StudyType;
 @Component
 public class GroupStudyPersistenceStrategy extends AbstractStudyPersistenceStrategy {
 
-    public GroupStudyPersistenceStrategy(StudyTimeRepository studyTimeRepository) {
+    private final GroupStudyCategoryRepository groupStudyCategoryRepository;
+
+    public GroupStudyPersistenceStrategy(
+            StudyTimeRepository studyTimeRepository, GroupStudyCategoryRepository groupStudyCategoryRepository) {
         super(studyTimeRepository);
+        this.groupStudyCategoryRepository = groupStudyCategoryRepository;
     }
 
     @Override
     public StudyType getType() {
         return StudyType.GROUP;
+    }
+
+    @Override
+    public Optional<GroupStudyCategory> getCategoryInfo(Member member, Long typeId) {
+        Optional<GroupStudyCategory> optionalCategory = groupStudyCategoryRepository.findById(typeId);
+
+        if (optionalCategory.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "[GroupStudyPersistenceStrategy#getCategoryInfo] unknown group category");
+        }
+        return optionalCategory;
     }
 }

@@ -8,7 +8,7 @@ import org.mapstruct.factory.Mappers;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
-import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
 
 /**
  * {@link CategoryMapper} 에 대한 테스트
@@ -21,14 +21,14 @@ class CategoryMapperTest {
     private final CategoryMapper mapper = Mappers.getMapper(CategoryMapper.class);
 
     @Test
-    @DisplayName("CreateCategoryReq + Member → StudyCategory 매핑 성공")
+    @DisplayName("CreateCategoryReq + Member → PersonalStudyCategory 매핑 성공")
     void toEntity_success() {
         // given
         CreateCategoryReq req = new CreateCategoryReq("알고리즘", 1200L, "#FFEEAA", 12, "설명입니다.");
         Member member = Member.builder().id(1L).build();
 
         // when
-        StudyCategory entity = mapper.toEntity(req, member);
+        PersonalStudyCategory entity = mapper.toEntity(req, member);
 
         // then
         assertThat(entity.getId()).isNull(); // ignore 설정
@@ -40,11 +40,11 @@ class CategoryMapperTest {
     }
 
     //    @Test
-    //    @DisplayName("StudyCategory → GetCategoryRes 매핑 성공")
+    //    @DisplayName("PersonalStudyCategory → GetCategoryRes 매핑 성공")
     //    void toDto_success() {
     //        // given
     //        Member member = Member.builder().id(2L).build();
-    //        StudyCategory entity = StudyCategory.builder()
+    //        PersonalStudyCategory entity = PersonalStudyCategory.builder()
     //                .id(10L)
     //                .name("CS")
     //                .color("#CCCCCC")

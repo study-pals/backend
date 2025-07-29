@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
 import com.studypals.testModules.testSupport.DataJpaSupport;
 
 /**
@@ -20,13 +20,13 @@ import com.studypals.testModules.testSupport.DataJpaSupport;
  * @since 2025-04-10
  */
 @DisplayName("StudyCategory_JPA_test")
-class StudyCategoryRepositoryTest extends DataJpaSupport {
+class PersonalPersonalStudyCategoryRepositoryTest extends DataJpaSupport {
 
     @Autowired
     private TestEntityManager em;
 
     @Autowired
-    private StudyCategoryRepository studyCategoryRepository;
+    private PersonalStudyCategoryRepository personalStudyCategoryRepository;
 
     private Member insertMember() {
         return em.persist(Member.builder()
@@ -36,8 +36,8 @@ class StudyCategoryRepositoryTest extends DataJpaSupport {
                 .build());
     }
 
-    private StudyCategory make(Member member, String name) {
-        return StudyCategory.builder()
+    private PersonalStudyCategory make(Member member, String name) {
+        return PersonalStudyCategory.builder()
                 .name(name)
                 .member(member)
                 .color("color")
@@ -50,18 +50,19 @@ class StudyCategoryRepositoryTest extends DataJpaSupport {
     public void findByMemberId_success() {
         // given
         Member member = insertMember();
-        List<StudyCategory> categories = IntStream.range(1, 10)
+        List<PersonalStudyCategory> categories = IntStream.range(1, 10)
                 .mapToObj(i -> make(member, "category " + i))
                 .toList();
         List<String> expectedName =
-                categories.stream().map(StudyCategory::getName).toList();
-        studyCategoryRepository.saveAll(categories);
+                categories.stream().map(PersonalStudyCategory::getName).toList();
+        personalStudyCategoryRepository.saveAll(categories);
 
         // when
-        List<StudyCategory> finded = studyCategoryRepository.findByMemberId(member.getId());
+        List<PersonalStudyCategory> finded = personalStudyCategoryRepository.findByMemberId(member.getId());
 
         // then
-        List<String> actualName = finded.stream().map(StudyCategory::getName).toList();
+        List<String> actualName =
+                finded.stream().map(PersonalStudyCategory::getName).toList();
         assertThat(actualName).containsExactlyInAnyOrderElementsOf(expectedName);
     }
 
@@ -72,11 +73,13 @@ class StudyCategoryRepositoryTest extends DataJpaSupport {
         IntStream.range(1, 10).mapToObj(i -> make(member, "category " + i)).forEach(category -> em.persist(category));
 
         // when
-        studyCategoryRepository.deleteByMemberId(member.getId());
+        personalStudyCategoryRepository.deleteByMemberId(member.getId());
 
         // then
         assertThat(em.getEntityManager()
-                        .createQuery("SELECT c FROM StudyCategory c WHERE c.member.id = :memberId", StudyCategory.class)
+                        .createQuery(
+                                "SELECT c FROM PersonalStudyCategory c WHERE c.member.id = :memberId",
+                                PersonalStudyCategory.class)
                         .setParameter("memberId", member.getId())
                         .getResultList())
                 .isEmpty();

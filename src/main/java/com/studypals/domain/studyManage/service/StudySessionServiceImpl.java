@@ -3,6 +3,7 @@ package com.studypals.domain.studyManage.service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,10 +15,13 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
+import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.worker.DailyInfoWriter;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
+import com.studypals.domain.studyManage.worker.strategy.StudyTimePersistenceStrategy;
+import com.studypals.domain.studyManage.worker.strategy.StudyTimePersistenceStrategyFactory;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
 import com.studypals.global.utils.TimeUtils;
@@ -59,6 +63,8 @@ public class StudySessionServiceImpl implements StudySessionService {
     private final DailyInfoWriter dailyInfoWriter;
     private final MemberReader memberReader;
 
+    private final StudyTimePersistenceStrategyFactory studyTimeFactory;
+
     @Override
     @Transactional
     public StartStudyRes startStudy(Long userId, StartStudyReq dto) {
@@ -69,6 +75,21 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         if (!status.isStudying()) {
             status = studyStatusWorker.restartStatus(status, dto);
+        }
+
+        StudyTimePersistenceStrategy strategy = studyTimeFactory.resolve(status);
+        try {
+            Optional<? extends StudyCategory> category = strategy.getCategoryInfo(member, status.getTypeId());
+
+            if (category.isPresent()) {
+                status = status.update()
+                        .goal(category.get().getGoal())
+                        .name(category.get().getName())
+                        .build();
+            }
+
+        } catch (IllegalArgumentException e) {
+            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL, e.getMessage());
         }
 
         studyStatusWorker.saveStatus(status);

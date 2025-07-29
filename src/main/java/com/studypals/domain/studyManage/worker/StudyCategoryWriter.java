@@ -2,8 +2,8 @@ package com.studypals.domain.studyManage.worker;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
-import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.dao.PersonalStudyCategoryRepository;
+import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
@@ -21,15 +21,15 @@ import com.studypals.global.exceptions.exception.StudyException;
 @RequiredArgsConstructor
 public class StudyCategoryWriter {
 
-    private final StudyCategoryRepository studyCategoryRepository;
+    private final PersonalStudyCategoryRepository personalStudyCategoryRepository;
 
     /**
      * 카테고리를 저장하고, 안되면 적절한 예외를 생성합니다.
      * @param category 저장하고자 하는 카테고리
      */
-    public void save(StudyCategory category) {
+    public void save(PersonalStudyCategory category) {
         try {
-            studyCategoryRepository.save(category);
+            personalStudyCategoryRepository.save(category);
         } catch (Exception e) {
             throw new StudyException(StudyErrorCode.STUDY_CATEGORY_ADD_FAIL);
         }
@@ -39,9 +39,9 @@ public class StudyCategoryWriter {
      * 특정 카테고리를 삭제
      * @param category 삭제하고자 할, id 가 포함된 영속성 엔티티
      */
-    public void delete(StudyCategory category) {
+    public void delete(PersonalStudyCategory category) {
 
-        studyCategoryRepository.delete(category);
+        personalStudyCategoryRepository.delete(category);
     }
 
     /**
@@ -50,6 +50,6 @@ public class StudyCategoryWriter {
      */
     public void deleteAll(Long userId) {
 
-        studyCategoryRepository.deleteByMemberId(userId);
+        personalStudyCategoryRepository.deleteByMemberId(userId);
     }
 }

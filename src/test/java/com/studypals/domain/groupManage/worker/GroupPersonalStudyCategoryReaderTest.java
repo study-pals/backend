@@ -33,7 +33,7 @@ import com.studypals.domain.studyManage.worker.StudyTimeReader;
  * @since 2025-05-21
  */
 @ExtendWith(MockitoExtension.class)
-public class GroupStudyCategoryReaderTest {
+public class GroupPersonalStudyCategoryReaderTest {
 
     @Mock
     private GroupStudyCategoryRepository groupStudyCategoryRepository;
