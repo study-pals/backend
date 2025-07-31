@@ -18,7 +18,8 @@ import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 
 /**
- * 공부 시간 데이터 전반에 대한 컨트롤러입니다. 담당하는 엔드포인트는 다음과 같습니다.
+ * 공부 시간 데이터 전반에 대한 컨트롤러입니다. 특정 날짜 혹은 기간 동안의 공부 시간을 조회할 수 있습니다. <br>
+ * 담당하는 엔드포인트는 다음과 같습니다.
  * <pre>
  *     - GET /studies/stat        : 해당 날짜의 카테고리 및 공부 시간 반환(쿼리 파라미터, date)
  *     - GET /studies/stat          : 특정 기간 간 통계를 받아옵니다(쿼리 파라미터, start/end)
@@ -40,6 +41,7 @@ public class StudyTimeController {
 
         List<GetStudyRes> response = studyTimeFacade.getStudyTimeByDate(userId, date);
 
+        // 공부 시간이 존재하지 않는 카테고리에 대한 정보 또한 반환합니다.
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_TIME_PARTIAL, response, "data of date"));
     }
 
@@ -49,6 +51,7 @@ public class StudyTimeController {
         PeriodDto periodDto = new PeriodDto(start, end);
         List<GetDailyStudyRes> response = studyTimeFacade.getDailyStudyTimeByPeriod(userId, periodDto);
 
+        // 공부 시간이 존재하지 않는 카테고리에 대한 정보는 반환하지 않습니다.
         return ResponseEntity.ok(
                 CommonResponse.success(ResponseCode.STUDY_TIME_ALL, response, "data of study time by period"));
     }

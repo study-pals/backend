@@ -75,11 +75,11 @@ class StudySessionServiceTest {
                 .startTime(time)
                 .studying(true)
                 .build();
-        StartStudyRes expected = new StartStudyRes(true, time, 0L, type, typeId, null);
+        StartStudyRes expected = new StartStudyRes(true, time, 0L, type, typeId, null, null);
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
-        given(studyStatusWorker.find(userId)).willReturn(Optional.empty());
-        given(studyStatusWorker.firstStatus(mockMember, req)).willReturn(status);
+        given(studyStatusWorker.findAndDelete(userId)).willReturn(Optional.empty());
+        given(studyStatusWorker.startStatus(mockMember, req)).willReturn(status);
         given(mapper.toDto(status)).willReturn(expected);
 
         // when
@@ -109,7 +109,7 @@ class StudySessionServiceTest {
                 .build();
         StartStudyRes expected = new StartStudyRes(true, time, 0L, type, typeId, null);
 
-        given(studyStatusWorker.find(userId)).willReturn(Optional.of(oldStatus));
+        given(studyStatusWorker.findAndDelete(userId)).willReturn(Optional.of(oldStatus));
         given(studyStatusWorker.restartStatus(oldStatus, req)).willReturn(newStatus);
         given(mapper.toDto(newStatus)).willReturn(expected);
         // when
@@ -146,7 +146,7 @@ class StudySessionServiceTest {
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(timeUtils.getToday()).willReturn(today);
-        given(studyStatusWorker.find(userId)).willReturn(Optional.of(status));
+        given(studyStatusWorker.findAndDelete(userId)).willReturn(Optional.of(status));
         willDoNothing().given(studyStatusWorker).validStatus(status);
         given(studyStatusWorker.resetStatus(status, duration)).willReturn(updated);
 
@@ -186,7 +186,7 @@ class StudySessionServiceTest {
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(timeUtils.getToday()).willReturn(today);
-        given(studyStatusWorker.find(userId)).willReturn(Optional.of(status));
+        given(studyStatusWorker.findAndDelete(userId)).willReturn(Optional.of(status));
         willDoNothing().given(studyStatusWorker).validStatus(status);
         given(studyStatusWorker.resetStatus(status, duration)).willReturn(updated);
 

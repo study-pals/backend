@@ -45,34 +45,34 @@ class StudyStatusWorkerTest {
     private StudyStatusWorker studyStatusWorker;
 
     @Test
-    void find_success() {
+    void find_AndDelete_success() {
         // given
         Long userId = 1L;
         StudyStatus status = StudyStatus.builder().id(userId).studyTime(120L).build();
         given(studyStatusRedisRepository.findById(userId)).willReturn(Optional.of(status));
 
         // when
-        Optional<StudyStatus> result = studyStatusWorker.find(userId);
+        Optional<StudyStatus> result = studyStatusWorker.findAndDelete(userId);
 
         // then
         assertThat(result).isPresent().contains(status);
     }
 
     @Test
-    void find_success_notExist() {
+    void find_AndDelete_success_notExist() {
         // given
         Long userId = 1L;
         given(studyStatusRedisRepository.findById(userId)).willReturn(Optional.empty());
 
         // when
-        Optional<StudyStatus> result = studyStatusWorker.find(userId);
+        Optional<StudyStatus> result = studyStatusWorker.findAndDelete(userId);
 
         // then
         assertThat(result).isEmpty();
     }
 
     @Test
-    void firstStatus_success() {
+    void startStatus_success() {
         // given
         Long userId = 1L;
         LocalDate today = LocalDate.of(2025, 1, 1);
@@ -81,7 +81,7 @@ class StudyStatusWorkerTest {
         given(mockMember.getId()).willReturn(userId);
 
         // when
-        StudyStatus result = studyStatusWorker.firstStatus(mockMember, req);
+        StudyStatus result = studyStatusWorker.startStatus(mockMember, req);
 
         // then
         assertThat(result.getId()).isEqualTo(userId);
@@ -89,28 +89,6 @@ class StudyStatusWorkerTest {
         assertThat(result.getTypeId()).isEqualTo(req.typeId());
         assertThat(result.getName()).isEqualTo(req.temporaryName());
         assertThat(result.isStudying()).isTrue();
-    }
-
-    @Test
-    void resetStatus_success() {
-        // given
-        StudyStatus original = StudyStatus.builder()
-                .id(1L)
-                .studyTime(100L)
-                .studyType(StudyType.TEMPORARY)
-                .name("test")
-                .startTime(LocalTime.of(10, 0))
-                .studying(true)
-                .build();
-
-        // when
-        StudyStatus updated = studyStatusWorker.resetStatus(original, 200L);
-
-        // then
-        assertThat(updated.isStudying()).isFalse();
-        assertThat(updated.getStudyTime()).isEqualTo(300L);
-        assertThat(updated.getName()).isNull();
-        assertThat(updated.getStartTime()).isNull();
     }
 
     @Test
