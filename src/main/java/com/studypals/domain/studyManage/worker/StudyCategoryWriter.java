@@ -1,55 +1,101 @@
 package com.studypals.domain.studyManage.worker;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.studyManage.dao.PersonalStudyCategoryRepository;
-import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
+import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
+import com.studypals.domain.studyManage.entity.DateType;
+import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.global.annotations.Worker;
-import com.studypals.global.exceptions.errorCode.StudyErrorCode;
-import com.studypals.global.exceptions.exception.StudyException;
+import com.studypals.global.utils.ImageUtils;
 
 /**
- * 공부 category 의 쓰기에 대한 로직을 수행합니다.
+ * 코드에 대한 전체적인 역할을 적습니다.
+ * <p>
+ * 코드에 대한 작동 원리 등을 적습니다.
+ *
+ * <p><b>상속 정보:</b><br>
+ * 상속 정보를 적습니다.
+ *
+ * <p><b>주요 생성자:</b><br>
+ * {@code ExampleClass(String example)}  <br>
+ * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
  *
  * <p><b>빈 관리:</b><br>
- * worker
+ * 필요 시 빈 관리에 대한 내용을 적습니다.
+ *
+ * <p><b>외부 모듈:</b><br>
+ * 필요 시 외부 모듈에 대한 내용을 적습니다.
  *
  * @author jack8
- * @since 2025-04-15
+ * @see
+ * @since 2025-08-01
  */
 @Worker
 @RequiredArgsConstructor
 public class StudyCategoryWriter {
 
-    private final PersonalStudyCategoryRepository personalStudyCategoryRepository;
+    private final StudyCategoryRepository studyCategoryRepository;
 
-    /**
-     * 카테고리를 저장하고, 안되면 적절한 예외를 생성합니다.
-     * @param category 저장하고자 하는 카테고리
-     */
-    public void save(PersonalStudyCategory category) {
-        try {
-            personalStudyCategoryRepository.save(category);
-        } catch (Exception e) {
-            throw new StudyException(StudyErrorCode.STUDY_CATEGORY_ADD_FAIL);
+    public void save(StudyCategory studyCategory) {
+        studyCategoryRepository.save(studyCategory);
+    }
+
+    public Updater update(StudyCategory studyCategory) {
+        return new Updater(studyCategory);
+    }
+
+    public void delete(StudyCategory studyCategory) {
+        studyCategoryRepository.delete(studyCategory);
+    }
+
+    @AllArgsConstructor
+    public static class Updater {
+        private final StudyCategory target;
+
+        public Updater name(String name) {
+            if (name == null) return this;
+
+            target.setName(name);
+            return this;
         }
-    }
 
-    /**
-     * 특정 카테고리를 삭제
-     * @param category 삭제하고자 할, id 가 포함된 영속성 엔티티
-     */
-    public void delete(PersonalStudyCategory category) {
+        public Updater dateType(DateType dateType) {
+            if (dateType == null) return this;
 
-        personalStudyCategoryRepository.delete(category);
-    }
+            target.setDateType(dateType);
+            return this;
+        }
 
-    /**
-     * 특정 유저의 카테고리를 전부 초기화
-     * @param userId 삭제하고자 할 user의 아이디
-     */
-    public void deleteAll(Long userId) {
+        public Updater goal(Long goal) {
+            if (goal == null) target.setGoal(-1L);
+            else target.setGoal(goal);
 
-        personalStudyCategoryRepository.deleteByMemberId(userId);
+            return this;
+        }
+
+        public Updater dayBelong(Integer dayBelong) {
+            if (dayBelong == null || dayBelong < -1) return this;
+            target.setDayBelong(dayBelong);
+            return this;
+        }
+
+        public Updater color(String color) {
+            if (color == null) target.setColor(ImageUtils.randomHexColor());
+            else target.setColor(color);
+
+            return this;
+        }
+
+        public Updater description(String description) {
+            if (description == null) target.setDescription("no content");
+            else target.setDescription(description);
+
+            return this;
+        }
+
+        public StudyCategory build() {
+            return target;
+        }
     }
 }

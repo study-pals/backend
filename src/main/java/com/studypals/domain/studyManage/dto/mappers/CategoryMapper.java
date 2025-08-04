@@ -3,10 +3,11 @@ package com.studypals.domain.studyManage.dto.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.studyManage.dto.CreateCategoryDto;
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
 import com.studypals.domain.studyManage.dto.GetCategoryRes;
-import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
+import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.entity.StudyType;
 
 /**
  * PersonalStudyCategory 에 대한 mapping 클래스입니다.
@@ -25,11 +26,13 @@ import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "member", source = "member")
-    PersonalStudyCategory toEntity(CreateCategoryReq req, Member member);
+    StudyCategory toEntity(CreateCategoryDto dto);
 
     @Mapping(source = "id", target = "typeId")
     @Mapping(target = "studyType", constant = "PERSONAL")
-    GetCategoryRes toDto(PersonalStudyCategory entity);
+    GetCategoryRes toDto(StudyCategory entity);
+
+    @Mapping(target = "studyType", source = "studyType")
+    @Mapping(target = "typeId", source = "typeId")
+    CreateCategoryDto reqToDto(CreateCategoryReq req, StudyType studyType, Long typeId);
 }

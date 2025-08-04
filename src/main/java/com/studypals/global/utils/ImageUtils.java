@@ -1,6 +1,7 @@
 package com.studypals.global.utils;
 
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,5 +48,17 @@ public class ImageUtils {
      */
     private static boolean isImageMimeType(String contentType) {
         return contentType != null && contentType.startsWith("image/");
+    }
+
+    public static String randomHexColor() {
+        Random random = new Random();
+        int r, g, b;
+        do {
+            r = random.nextInt(256);
+            g = random.nextInt(256);
+            b = random.nextInt(256);
+        } while ((r + g + b < 100) || (r + g + b) > 700);
+
+        return String.format("#%02X%02X%02X", r, g, b);
     }
 }

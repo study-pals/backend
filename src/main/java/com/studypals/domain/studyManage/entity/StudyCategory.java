@@ -1,13 +1,8 @@
 package com.studypals.domain.studyManage.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import lombok.*;
 
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
@@ -31,25 +26,55 @@ import lombok.experimental.SuperBuilder;
  * @see
  * @since 2025-07-29
  */
-@SuperBuilder
+@Builder
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@MappedSuperclass
-@Getter
-public abstract class StudyCategory {
+@Entity
+public class StudyCategory {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, unique = true)
+    private Long id;
+
+    @Setter
     @Column(name = "name", nullable = false, length = 255)
-    protected String name;
+    private String name;
 
+    @Column(name = "study_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private StudyType studyType;
+
+    @Setter
+    @Column(name = "date_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DateType dateType;
+
+    @Column(name = "type_id", nullable = false)
+    private Long typeId;
+
+    @Setter
     @Column(name = "goal")
-    protected Long goal;
+    private Long goal;
 
+    @Setter
     @Column(name = "day_belong", nullable = false, columnDefinition = "INTEGER")
-    protected Integer dayBelong;
+    private Integer dayBelong;
 
+    @Setter
     @Column(name = "color", nullable = true, length = 9)
-    protected String color;
+    private String color;
 
+    @Setter
     @Column(name = "description", nullable = true, columnDefinition = "TEXT")
-    protected String description;
+    private String description;
+
+    @PrePersist
+    @PreUpdate
+    public void validateType() {
+        if (studyType == StudyType.REMOVED || studyType == StudyType.TEMPORARY) {
+            throw new IllegalArgumentException("studyType " + studyType + " is not allowed");
+        }
+    }
 }

@@ -40,7 +40,8 @@ public enum StudyErrorCode implements ErrorCode {
     STUDY_CATEGORY_DELETE_FAIL_PENDING_STUDY(
             ResponseCode.STUDY_CATEGORY_DELETE, HttpStatus.BAD_REQUEST, "can't delete pending study category"),
     STUDY_CATEGORY_UPDATE_FAIL(
-            ResponseCode.STUDY_CATEGORY_UPDATE, HttpStatus.BAD_REQUEST, "failed to update study category");
+            ResponseCode.STUDY_CATEGORY_UPDATE, HttpStatus.BAD_REQUEST, "failed to update study category"),
+    STUDY_CATEGORY_ACCESS_FAIL(ResponseCode.STUDY_CATEGORY_LIST, HttpStatus.UNAUTHORIZED, "this is not yours");
 
     private final ResponseCode responseCode;
     private final HttpStatus status;
