@@ -1,5 +1,6 @@
 package com.studypals.global.redis.redisHashRepository;
 
+import java.time.Duration;
 import java.util.*;
 
 import org.springframework.data.repository.Repository;
@@ -119,4 +120,10 @@ public interface RedisHashRepository<E, ID> extends Repository<E, ID> {
      * @param fieldKey 삭제할 필드 키
      */
     void deleteMapById(ID hashKey, String fieldKey);
+
+    String tryLock(ID id, Duration ttl);
+
+    boolean unlock(ID id, String token);
+
+    boolean refreshLock(ID id, String token, Duration ttl);
 }

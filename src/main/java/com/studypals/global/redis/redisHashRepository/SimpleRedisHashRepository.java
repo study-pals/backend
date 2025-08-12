@@ -1,9 +1,11 @@
 package com.studypals.global.redis.redisHashRepository;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.core.*;
 
 /**
@@ -282,6 +284,7 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
         deleteMapById(Map.of(hashKey, Set.of(fieldKey)));
     }
 
+    @Override
     public String tryLock(ID id, Duration ttl) {
         if (ttl == null || ttl.isZero() || ttl.isNegative()) {
             throw new IllegalArgumentException("ttl value error");
@@ -292,7 +295,55 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
         return Boolean.TRUE.equals(ok) ? token : null;
     }
 
+    @Override
+    public boolean unlock(ID id, String token) {
+        if (token == null || token.isBlank()) return false;
+        String key = lockKeyOf(id);
+
+        Long res = tpl.execute((RedisCallback<Long>) conn -> conn.scriptingCommands()
+                .eval(
+                        UNLOCK_LUA,
+                        ReturnType.INTEGER,
+                        1,
+                        key.getBytes(StandardCharsets.UTF_8),
+                        token.getBytes(StandardCharsets.UTF_8)));
+        return res != null && res > 0;
+    }
+
+    @Override
+    public boolean refreshLock(ID id, String token, Duration ttl) {
+        if (token == null || token.isBlank()) return false;
+        if (ttl == null || ttl.isZero() || ttl.isNegative()) {
+            throw new IllegalArgumentException("ttl must be > 0");
+        }
+        String key = lockKeyOf(id);
+        Long res = tpl.execute((RedisCallback<Long>) conn -> conn.scriptingCommands()
+                .eval(
+                        REFRESH_LUA,
+                        ReturnType.INTEGER,
+                        1,
+                        key.getBytes(StandardCharsets.UTF_8),
+                        token.getBytes(StandardCharsets.UTF_8),
+                        String.valueOf(ttl.toMillis()).getBytes(StandardCharsets.UTF_8)));
+        return res != null && res > 0;
+    }
+
     private String lockKeyOf(ID id) {
         return meta.lockPrefix() + id.toString();
     }
+
+    private static final byte[] UNLOCK_LUA =
+            """
+            if redis.call('get', KEYS[1]) == ARGV[1] then
+                return call('del', KEYS[1])
+            else return 0 end
+            """
+                    .getBytes(StandardCharsets.UTF_8);
+
+    private static final byte[] REFRESH_LUA = ("if redis.call('get', KEYS[1]) == ARGV[1] then "
+                    + "  return redis.call('pexpire', KEYS[1], ARGV[2]) "
+                    + "else return 0 end")
+            .getBytes(StandardCharsets.UTF_8);
+
+    /** 현재 토큰 보유자가 TTL을 연장(밀리초 단위). 성공 시 true */
 }

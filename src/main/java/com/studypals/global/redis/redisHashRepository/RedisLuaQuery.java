@@ -1,6 +1,10 @@
 package com.studypals.global.redis.redisHashRepository;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.data.projection.ProjectionFactory;
@@ -71,10 +75,33 @@ public class RedisLuaQuery implements RepositoryQuery {
      */
     @Override
     public Object execute(Object[] args) {
-        String keyPefix = entityMeta.keyPrefix();
-        String hashKey = (String) args[0];
-        List<?> fieldKeys = (List<?>) args[1];
-        return template.execute(script, List.of(keyPefix + hashKey), fieldKeys.toArray());
+        if (args.length == 0) {
+            throw new IllegalArgumentException("@LuaQuery need parameters");
+        }
+
+        Object id = args[0];
+        String redisKey = entityMeta.keyPrefix() + id;
+
+        Object[] argv = flattenArgs(Arrays.copyOfRange(args, 1, args.length));
+        return template.execute(script, Collections.singletonList(redisKey), argv);
+    }
+
+    private static Object[] flattenArgs(Object[] in) {
+        List<Object> out = new ArrayList<>();
+        for (Object a : in) {
+            if (a == null) continue;
+            Class<?> c = a.getClass();
+
+            if (c.isArray()) {
+                int len = Array.getLength(a);
+                for (int i = 0; i < len; i++) out.add(Array.get(a, i));
+            } else if (a instanceof Iterable<?> it) {
+                for (Object e : it) if (e != null) out.add(e);
+            } else {
+                out.add(a);
+            }
+        }
+        return out.toArray();
     }
 
     /**

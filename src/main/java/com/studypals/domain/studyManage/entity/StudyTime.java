@@ -34,7 +34,7 @@ public class StudyTime {
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "study_category_id", nullable = true)
     private StudyCategory studyCategory;
 

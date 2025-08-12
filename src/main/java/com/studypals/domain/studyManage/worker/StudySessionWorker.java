@@ -36,7 +36,7 @@ public class StudySessionWorker {
      * @param studiedDate 언제 공부했는지에 대한 날짜(today)
      * @param time 초 단위 공부 시간
      */
-    public void upsert(Member member, StudyStatus status, LocalDate studiedDate, Long time) {
+    public StudyTime upsert(Member member, StudyStatus status, LocalDate studiedDate, Long time) {
 
         if (member == null || studiedDate == null || time == null || time <= 0) {
             throw new StudyException(
@@ -70,7 +70,7 @@ public class StudySessionWorker {
             studyTime.addTime(time);
             saveTime(studyTime);
 
-            return;
+            return studyTime;
         }
 
         if (name == null || name.isBlank()) {
@@ -91,6 +91,8 @@ public class StudySessionWorker {
 
         studyTime.addTime(time);
         saveTime(studyTime);
+
+        return studyTime;
     }
 
     private void saveTime(StudyTime time) {
