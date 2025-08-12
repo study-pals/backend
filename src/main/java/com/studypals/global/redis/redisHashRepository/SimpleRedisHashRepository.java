@@ -281,4 +281,18 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
     public void deleteMapById(ID hashKey, String fieldKey) {
         deleteMapById(Map.of(hashKey, Set.of(fieldKey)));
     }
+
+    public String tryLock(ID id, Duration ttl) {
+        if (ttl == null || ttl.isZero() || ttl.isNegative()) {
+            throw new IllegalArgumentException("ttl value error");
+        }
+        String key = lockKeyOf(id);
+        String token = UUID.randomUUID().toString();
+        Boolean ok = tpl.opsForValue().setIfAbsent(key, token, ttl);
+        return Boolean.TRUE.equals(ok) ? token : null;
+    }
+
+    private String lockKeyOf(ID id) {
+        return meta.lockPrefix() + id.toString();
+    }
 }

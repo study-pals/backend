@@ -45,8 +45,8 @@ public class StudyCategoryWriter {
         return new Updater(studyCategory);
     }
 
-    public void delete(StudyCategory studyCategory) {
-        studyCategoryRepository.delete(studyCategory);
+    public void remove(StudyCategory studyCategory) {
+        studyCategory.setAsRemoved();
     }
 
     @AllArgsConstructor

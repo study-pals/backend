@@ -1,6 +1,7 @@
 package com.studypals.domain.studyManage.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -8,19 +9,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.CreateCategoryDto;
 import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
 import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
+import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudyCategoryWriter;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
 import com.studypals.domain.studyManage.worker.StudyTimeWriter;
-import com.studypals.domain.studyManage.worker.validateStrategy.ValidateStrategy;
-import com.studypals.domain.studyManage.worker.validateStrategy.ValidateStrategyFactory;
+import com.studypals.domain.studyManage.worker.categoryStrategy.CategoryStrategy;
+import com.studypals.domain.studyManage.worker.categoryStrategy.CategoryStrategyFactory;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
 
@@ -44,20 +45,19 @@ import com.studypals.global.exceptions.exception.StudyException;
 @RequiredArgsConstructor
 public class StudyCategoryServiceImpl implements StudyCategoryService {
 
-    private final MemberReader memberReader;
     private final StudyCategoryWriter studyCategoryWriter;
     private final StudyCategoryReader studyCategoryReader;
     private final StudyStatusWorker studyStatusWorker;
     private final StudyTimeWriter studyTimeWriter;
     private final CategoryMapper categoryMapper;
 
-    private final ValidateStrategyFactory validateStrategyFactory;
+    private final CategoryStrategyFactory categoryStrategyFactory;
 
     /*tested*/
     @Override
     @Transactional
     public Long createCategory(Long userId, CreateCategoryDto dto) {
-        ValidateStrategy strategy = validateStrategyFactory.resolve(dto.studyType());
+        CategoryStrategy strategy = categoryStrategyFactory.resolve(dto.studyType());
         strategy.validateToCreate(userId, dto.typeId());
 
         StudyCategory category = categoryMapper.toEntity(dto);
@@ -70,9 +70,10 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     /*tested*/
     @Override
     @Transactional(readOnly = true)
-    public List<GetCategoryRes> getUserCategory(Long userId) {
+    public List<GetCategoryRes> getAllUserCategories(Long userId) {
+        Map<StudyType, List<Long>> typeMap = categoryStrategyFactory.getTypeMap(userId);
 
-        return studyCategoryReader.findByMemberId(userId).stream()
+        return studyCategoryReader.findByTypeAndTypeId(typeMap).stream()
                 .map(categoryMapper::toDto)
                 .toList();
     }
@@ -82,7 +83,7 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     public Long updateCategory(Long userId, UpdateCategoryReq dto) {
         StudyCategory category = studyCategoryReader.findById(dto.categoryId());
 
-        ValidateStrategy strategy = validateStrategyFactory.resolve(category.getStudyType());
+        CategoryStrategy strategy = categoryStrategyFactory.resolve(category.getStudyType());
         strategy.validateToWrite(userId, category);
 
         studyCategoryWriter
@@ -102,21 +103,27 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     @Transactional
     public void deleteCategory(Long userId, Long categoryId) {
 
-        StudyCategory category = studyCategoryReader.getAndValidate(userId, categoryId);
+        StudyCategory category = studyCategoryReader.findById(categoryId);
 
-        ValidateStrategy strategy = validateStrategyFactory.resolve(category.getStudyType());
+        CategoryStrategy strategy = categoryStrategyFactory.resolve(category.getStudyType());
         strategy.validateToWrite(userId, category);
 
-        Optional<StudyStatus> status = studyStatusWorker.findAndDelete(userId);
+        Optional<StudyStatus> status = studyStatusWorker.find(userId);
 
-        if (status.isPresent() && status.get().getId().equals(categoryId)) {
+        if (status.isPresent() && status.get().getCategoryId().equals(categoryId)) {
             throw new StudyException(
                     StudyErrorCode.STUDY_CATEGORY_DELETE_FAIL_PENDING_STUDY,
                     "[StudyCategoryServiceImpl#deleteCategory] try to delete pending study category");
         }
 
-        studyTimeWriter.changeStudyTimeToRemoved(userId, categoryId);
+        studyCategoryWriter.remove(category);
+    }
 
-        studyCategoryWriter.delete(category);
+    @Override
+    @Transactional(readOnly = true)
+    public List<GetCategoryRes> getByTypeInfo(StudyType type, Long typeId) {
+        List<StudyCategory> categories = studyCategoryReader.findByStudyTypeAndTypeId(type, typeId);
+
+        return categories.stream().map(categoryMapper::toDto).toList();
     }
 }

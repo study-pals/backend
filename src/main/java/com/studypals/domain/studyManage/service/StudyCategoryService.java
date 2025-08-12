@@ -5,6 +5,7 @@ import java.util.List;
 import com.studypals.domain.studyManage.dto.CreateCategoryDto;
 import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
+import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.global.exceptions.exception.AuthException;
 import com.studypals.global.exceptions.exception.StudyException;
 
@@ -31,7 +32,7 @@ public interface StudyCategoryService {
      * @param userId 검색하고자 하는 유저의 id
      * @return 카테고리 리스트. 만약 없으면 빈 리스트가 반환된다.
      */
-    List<GetCategoryRes> getUserCategory(Long userId);
+    List<GetCategoryRes> getAllUserCategories(Long userId);
 
     /**
      * 카테고리 update를 위한 메서드.
@@ -51,4 +52,6 @@ public interface StudyCategoryService {
      * @throws StudyException {@code StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, "In StudyCategoryServiceImpl} 포함
      */
     void deleteCategory(Long userId, Long categoryId);
+
+    List<GetCategoryRes> getByTypeInfo(StudyType type, Long typeId);
 }

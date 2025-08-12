@@ -48,9 +48,7 @@ public class StudyStatus {
     @Builder.Default
     private Long studyTime = 0L;
 
-    private StudyType studyType;
-
-    private Long typeId;
+    private Long categoryId;
 
     private String name;
 

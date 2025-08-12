@@ -1,8 +1,8 @@
-package com.studypals.domain.studyManage.worker.validateStrategy;
+package com.studypals.domain.groupManage.api;
 
-import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.studyManage.entity.StudyType;
+import com.studypals.global.annotations.Facade;
 
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
@@ -24,12 +24,8 @@ import com.studypals.domain.studyManage.entity.StudyType;
  *
  * @author jack8
  * @see
- * @since 2025-08-04
+ * @since 2025-08-11
  */
-@Component
-public class PersonalValidateStrategy extends SimpValidateStrategy {
-    @Override
-    public StudyType getType() {
-        return StudyType.PERSONAL;
-    }
-}
+@RequiredArgsConstructor
+@Facade
+public class GroupStudyStatusFacade {}

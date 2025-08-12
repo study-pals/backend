@@ -68,10 +68,9 @@ public class StudyStatusWorker {
 
         return StudyStatus.builder()
                 .id(member.getId())
+                .categoryId(dto.categoryId())
                 .studying(true)
                 .startTime(dto.startTime())
-                .studyType(dto.studyType())
-                .typeId(dto.typeId())
                 .name(dto.temporaryName())
                 .build();
     }
@@ -102,8 +101,7 @@ public class StudyStatusWorker {
         StudyStatus updated = status.update()
                 .studying(false)
                 .startTime(null)
-                .studyType(null)
-                .typeId(null)
+                .categoryId(null)
                 .name(null)
                 .build();
 

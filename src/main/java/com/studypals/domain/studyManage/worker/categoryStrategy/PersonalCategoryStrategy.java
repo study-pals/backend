@@ -1,6 +1,10 @@
-package com.studypals.domain.studyManage.worker.validateStrategy;
+package com.studypals.domain.studyManage.worker.categoryStrategy;
 
-import com.studypals.domain.studyManage.entity.StudyCategory;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
 import com.studypals.domain.studyManage.entity.StudyType;
 
 /**
@@ -25,15 +29,15 @@ import com.studypals.domain.studyManage.entity.StudyType;
  * @see
  * @since 2025-08-04
  */
-public interface ValidateStrategy {
+@Component
+public class PersonalCategoryStrategy extends SimpCategoryStrategy {
+    @Override
+    public StudyType getType() {
+        return StudyType.PERSONAL;
+    }
 
-    StudyType getType();
-
-    boolean supports(StudyType type);
-
-    void validateToCreate(Long userId, Long typeId);
-
-    void validateToRead(Long userId, StudyCategory studyCategory);
-
-    void validateToWrite(Long userId, StudyCategory studyCategory);
+    @Override
+    public Map<StudyType, List<Long>> getMapByUserId(Long userId) {
+        return Map.of(getType(), List.of(userId));
+    }
 }

@@ -16,6 +16,5 @@ package com.studypals.domain.studyManage.entity;
 public enum StudyType {
     PERSONAL,
     GROUP,
-    TEMPORARY,
     REMOVED
 }

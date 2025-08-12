@@ -9,10 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.studyManage.dto.GetDailyStudyRes;
-import com.studypals.domain.studyManage.dto.GetStudyRes;
-import com.studypals.domain.studyManage.dto.PeriodDto;
-import com.studypals.domain.studyManage.facade.StudyTimeFacade;
+import com.studypals.domain.studyManage.dto.*;
+import com.studypals.domain.studyManage.service.StudyTimeService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
@@ -33,26 +31,26 @@ import com.studypals.global.responses.ResponseCode;
 @RequestMapping("/studies/stat")
 public class StudyTimeController {
 
-    private final StudyTimeFacade studyTimeFacade;
+    private final StudyTimeService studyTimeService;
 
     @GetMapping(params = "date")
-    public ResponseEntity<Response<List<GetStudyRes>>> studiesDate(
+    public ResponseEntity<Response<List<GetStudyDto>>> studiesDate(
             @AuthenticationPrincipal Long userId, @RequestParam LocalDate date) {
 
-        List<GetStudyRes> response = studyTimeFacade.getStudyTimeByDate(userId, date);
+        List<GetStudyDto> studyData = studyTimeService.getStudyList(userId, date);
 
         // 공부 시간이 존재하지 않는 카테고리에 대한 정보 또한 반환합니다.
-        return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_TIME_PARTIAL, response, "data of date"));
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_TIME_PARTIAL, studyData, "data of date"));
     }
 
     @GetMapping(params = {"start", "end"})
-    public ResponseEntity<Response<List<GetDailyStudyRes>>> studiesDateByPeriod(
+    public ResponseEntity<Response<List<GetDailyStudyDto>>> studiesDateByPeriod(
             @AuthenticationPrincipal Long userId, @RequestParam LocalDate start, @RequestParam LocalDate end) {
         PeriodDto periodDto = new PeriodDto(start, end);
-        List<GetDailyStudyRes> response = studyTimeFacade.getDailyStudyTimeByPeriod(userId, periodDto);
 
+        List<GetDailyStudyDto> studyData = studyTimeService.getDailyStudyList(userId, periodDto);
         // 공부 시간이 존재하지 않는 카테고리에 대한 정보는 반환하지 않습니다.
         return ResponseEntity.ok(
-                CommonResponse.success(ResponseCode.STUDY_TIME_ALL, response, "data of study time by period"));
+                CommonResponse.success(ResponseCode.STUDY_TIME_ALL, studyData, "data of study time by period"));
     }
 }

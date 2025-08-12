@@ -3,10 +3,8 @@ package com.studypals.domain.studyManage.dao;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -43,6 +41,11 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
      */
     List<StudyTime> findAllByMemberIdAndStudiedDateBetween(Long memberId, LocalDate start, LocalDate end);
 
+    Optional<StudyTime> findByMemberIdAndStudiedDateAndName(Long memberId, LocalDate studiedDate, String name);
+
+    List<StudyTime> findAllByStudyCategoryIdInAndStudiedDateBetween(
+            List<Long> categoryIds, LocalDate start, LocalDate end);
+
     /**
      * 사용자 아이디, 공부 날짜, 카테고리 타입, 타입 아이디를 기반으로 studyTime optional 객체를 반환합니다. <br>
      * 카테고리는 {@link com.studypals.domain.studyManage.entity.StudyType StudyType} 에 정의되어 있으며 해당하는 테이블과
@@ -50,8 +53,6 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
      * 카테고리와 연관이 없는 {@code TEMPORARY} 이나 {@code REMOVED} 는 typeId 가 null 이므로 검색되지 않습니다.
      * @param memberId 사용자 아이디
      * @param studiedDate 공부 날짜
-     * @param studyType 카테고리 종류
-     * @param typeId 카테고리 아이디
      * @return StudyTime 에 대한 optional
      */
     @Query(
@@ -60,15 +61,13 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
         SELECT * FROM study_time st
         WHERE st.member_id = :memberId
         AND st.studied_date = :studiedDate
-        AND st.study_type = :studyType
-        AND st.type_id = :typeId
+        AND st.study_category_id = :categoryId
     """,
             nativeQuery = true)
-    Optional<StudyTime> findByStudyType(
+    Optional<StudyTime> findByCategoryAndDate(
             @Param("memberId") Long memberId,
             @Param("studiedDate") LocalDate studiedDate,
-            @Param("studyType") String studyType,
-            @Param("typeId") Long typeId);
+            @Param("categoryId") Long categoryId);
 
     /**
      * 사용자 아이디, 공부 날짜 및 카테고리 이름을 기반으로 하여
@@ -94,27 +93,11 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
                     """
         SELECT * FROM study_time st
         WHERE st.studied_date BETWEEN :start AND :end
-        AND st.study_type = :studyType
-        AND st.type_id IN :typeIds
+        AND st.category_id IN :categoryIds
     """,
             nativeQuery = true)
-    List<StudyTime> findByStudyTypeBetween(
+    List<StudyTime> findByCategoryIdsBetween(
             @Param("start") LocalDate start,
             @Param("end") LocalDate end,
-            @Param("studyType") String studyType,
-            @Param("typeIds") Set<Long> typeIds);
-
-    @Modifying
-    @Query(
-            value =
-                    """
-        UPDATE study_time st
-        SET st.study_type = 'REMOVED',
-            st.type_id = NULL
-        WHERE st.member_id = :memberId
-        AND st.type_id = :categoryId
-        AND st.study_type = 'PERSONAL'
-""",
-            nativeQuery = true)
-    void markStudyTimeAsRemoved(@Param("memberId") Long memberId, @Param("categoryId") Long categoryId);
+            @Param("categoryIds") List<Long> cateogoryIds);
 }

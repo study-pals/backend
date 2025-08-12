@@ -1,5 +1,6 @@
 package com.studypals.domain.groupManage.dao;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +26,6 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
 
     @Query(value = "SELECT * FROM group_member WHERE member_id = :userId AND group_id = :groupId", nativeQuery = true)
     Optional<GroupMember> findByMemberIdAndGroupId(Long userId, Long groupId);
+
+    List<GroupMember> findAllByMemberId(Long memberId);
 }

@@ -2,7 +2,6 @@ package com.studypals.domain.studyManage.worker;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.studyManage.dao.StudyTimeRepository;
 import com.studypals.global.annotations.Worker;
 
 /**
@@ -21,11 +20,4 @@ import com.studypals.global.annotations.Worker;
  */
 @Worker
 @RequiredArgsConstructor
-public class StudyTimeWriter {
-
-    private final StudyTimeRepository studyTimeRepository;
-
-    public void changeStudyTimeToRemoved(Long userId, Long categoryId) {
-        studyTimeRepository.markStudyTimeAsRemoved(userId, categoryId);
-    }
-}
+public class StudyTimeWriter {}

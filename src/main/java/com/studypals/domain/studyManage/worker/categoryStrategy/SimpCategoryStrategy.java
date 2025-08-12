@@ -1,4 +1,4 @@
-package com.studypals.domain.studyManage.worker.validateStrategy;
+package com.studypals.domain.studyManage.worker.categoryStrategy;
 
 import java.util.Objects;
 
@@ -29,7 +29,7 @@ import com.studypals.global.exceptions.exception.StudyException;
  * @see
  * @since 2025-08-04
  */
-public abstract class SimpValidateStrategy implements ValidateStrategy {
+public abstract class SimpCategoryStrategy implements CategoryStrategy {
 
     @Override
     public boolean supports(StudyType type) {
@@ -41,7 +41,7 @@ public abstract class SimpValidateStrategy implements ValidateStrategy {
         if (!Objects.equals(userId, typeId))
             throw new StudyException(
                     StudyErrorCode.STUDY_CATEGORY_ADD_FAIL,
-                    "[SimpValidateStrategy#validateToCreate] cannot create category with other user id");
+                    "[SimpCategoryStrategy#validateToCreate] cannot create category with other user id");
     }
 
     @Override
@@ -57,7 +57,7 @@ public abstract class SimpValidateStrategy implements ValidateStrategy {
     private void validateInternal(Long userId, StudyCategory studyCategory) {
         if (!Objects.equals(userId, studyCategory.getTypeId())) {
             throw new StudyException(
-                    StudyErrorCode.STUDY_CATEGORY_ACCESS_FAIL, "[SimpValidateStrategy#validateInternal] access fail");
+                    StudyErrorCode.STUDY_CATEGORY_ACCESS_FAIL, "[SimpCategoryStrategy#validateInternal] access fail");
         }
     }
 }

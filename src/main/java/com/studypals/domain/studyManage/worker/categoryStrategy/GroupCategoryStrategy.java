@@ -1,10 +1,14 @@
-package com.studypals.domain.studyManage.worker.validateStrategy;
+package com.studypals.domain.studyManage.worker.categoryStrategy;
+
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
+import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.entity.StudyCategory;
@@ -36,7 +40,7 @@ import com.studypals.global.exceptions.exception.GroupException;
  */
 @Component
 @RequiredArgsConstructor
-public class GroupValidateStrategy implements ValidateStrategy {
+public class GroupCategoryStrategy implements CategoryStrategy {
 
     private final GroupMemberRepository groupMemberRepository;
     private final StudyCategoryRepository studyCategoryRepository;
@@ -57,7 +61,7 @@ public class GroupValidateStrategy implements ValidateStrategy {
         if (!groupMember.isLeader())
             throw new GroupException(
                     GroupErrorCode.GROUP_UPDATE_FAIL,
-                    "[GroupValidateStrategy#validateToCreate] only leader can create");
+                    "[GroupCategoryStrategy#validateToCreate] only leader can create");
     }
 
     // used in transaction
@@ -72,7 +76,17 @@ public class GroupValidateStrategy implements ValidateStrategy {
         GroupMember groupMember = findGroupMember(userId, studyCategory.getTypeId());
         if (!groupMember.isLeader())
             throw new GroupException(
-                    GroupErrorCode.GROUP_UPDATE_FAIL, "[GroupValidateStrategy#validateToWrite] only leader can write");
+                    GroupErrorCode.GROUP_UPDATE_FAIL, "[GroupCategoryStrategy#validateToWrite] only leader can write");
+    }
+
+    @Override
+    public Map<StudyType, List<Long>> getMapByUserId(Long userId) {
+        List<Long> groupIds = groupMemberRepository.findAllByMemberId(userId).stream()
+                .map(GroupMember::getGroup)
+                .map(Group::getId)
+                .toList();
+
+        return Map.of(getType(), groupIds);
     }
 
     private GroupMember findGroupMember(Long userId, Long groupId) {
@@ -80,6 +94,6 @@ public class GroupValidateStrategy implements ValidateStrategy {
                 .findByMemberIdAndGroupId(userId, groupId)
                 .orElseThrow(() -> new GroupException(
                         GroupErrorCode.GROUP_MEMBER_NOT_FOUND,
-                        "[GroupValidateStrategy#findGroupMember] unkown user - group match"));
+                        "[GroupCategoryStrategy#findGroupMember] unkown user - group match"));
     }
 }

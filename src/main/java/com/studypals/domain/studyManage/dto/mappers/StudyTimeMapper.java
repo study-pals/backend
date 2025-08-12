@@ -1,6 +1,7 @@
 package com.studypals.domain.studyManage.dto.mappers;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
@@ -20,7 +21,9 @@ public interface StudyTimeMapper {
 
     StartStudyRes toDto(StudyStatus entity);
 
+    @Mapping(target = "categoryId", source = "id")
     GetStudyDto toDto(StudyTime entity);
 
+    @Mapping(target = "categoryId", source = "studyCategory.id")
     StudyList toStudyDto(StudyTime entity);
 }

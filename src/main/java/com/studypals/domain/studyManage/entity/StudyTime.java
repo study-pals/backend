@@ -35,15 +35,12 @@ public class StudyTime {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "study_category_id", nullable = true)
+    private StudyCategory studyCategory;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
-
-    @Column(name = "study_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private StudyType studyType;
-
-    @Column(name = "type_id")
-    private Long typeId;
 
     @Column(name = "name", nullable = true, length = 255)
     private String name;

@@ -18,10 +18,9 @@ import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.worker.DailyInfoWriter;
+import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
-import com.studypals.domain.studyManage.worker.strategy.StudyTimePersistenceStrategy;
-import com.studypals.domain.studyManage.worker.strategy.StudyTimePersistenceStrategyFactory;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
 import com.studypals.global.utils.TimeUtils;
@@ -60,10 +59,9 @@ public class StudySessionServiceImpl implements StudySessionService {
 
     private final StudySessionWorker studySessionWorker;
     private final StudyStatusWorker studyStatusWorker;
+    private final StudyCategoryReader studyCategoryReader;
     private final DailyInfoWriter dailyInfoWriter;
     private final MemberReader memberReader;
-
-    private final StudyTimePersistenceStrategyFactory studyTimeFactory;
 
     @Override
     @Transactional
@@ -76,19 +74,19 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         StudyStatus startStatus = studyStatusWorker.startStatus(member, dto);
 
-        StudyTimePersistenceStrategy strategy = studyTimeFactory.resolve(startStatus);
-        try {
-            Optional<? extends StudyCategory> category = strategy.getCategoryInfo(member, startStatus.getTypeId());
-
-            if (category.isPresent()) {
+        if (dto.categoryId() != null) {
+            try {
+                StudyCategory category = studyCategoryReader.findById(dto.categoryId());
                 startStatus = startStatus
                         .update()
-                        .goal(category.get().getGoal())
-                        .name(category.get().getName())
+                        .goal(category.getGoal())
+                        .name(category.getName())
                         .build();
+            } catch (Exception e) {
+                throw new StudyException(
+                        StudyErrorCode.STUDY_CATEGORY_NOT_FOUND,
+                        "[StudySessionServiceImpl#startStudy] " + e.getMessage());
             }
-        } catch (IllegalArgumentException e) {
-            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL, e.getMessage());
         }
 
         studyStatusWorker.saveStatus(startStatus);
@@ -102,7 +100,8 @@ public class StudySessionServiceImpl implements StudySessionService {
         LocalDate today = timeUtils.getToday();
         StudyStatus status = studyStatusWorker
                 .findAndDelete(userId)
-                .orElseThrow(() -> new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL));
+                .orElseThrow(() -> new StudyException(
+                        StudyErrorCode.STUDY_TIME_END_FAIL, "[StudySessionServiceImpl#endStudy] unknown status"));
 
         studyStatusWorker.validStatus(status); // 받아온 status 가 정상인지 확인
 
@@ -111,8 +110,13 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         // 2) DB에 공부시간 및 종료 시간 upsert
         Member member = memberReader.getRef(userId);
-        studySessionWorker.upsert(member, status, today, durationInSec);
-        dailyInfoWriter.updateEndtime(member, today, endTime);
+        try {
+            studySessionWorker.upsert(member, status, today, durationInSec);
+            dailyInfoWriter.updateEndtime(member, today, endTime);
+        } catch (Exception e) {
+            studyStatusWorker.saveStatus(status);
+            throw e;
+        }
 
         return durationInSec;
     }

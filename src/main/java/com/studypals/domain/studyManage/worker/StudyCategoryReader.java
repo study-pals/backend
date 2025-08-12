@@ -2,7 +2,6 @@ package com.studypals.domain.studyManage.worker;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
 
@@ -62,21 +61,5 @@ public class StudyCategoryReader {
 
     public List<StudyCategory> findByStudyTypeAndTypeId(StudyType type, Long typeId) {
         return studyCategoryRepository.findByStudyTypeAndTypeId(type, typeId);
-    }
-
-    public StudyCategory getAndValidate(Long userId, Long categoryId) {
-        StudyCategory category = studyCategoryRepository
-                .findById(categoryId)
-                .orElseThrow(() -> new StudyException(
-                        StudyErrorCode.STUDY_CATEGORY_NOT_FOUND,
-                        "[StudyCategoryReader#getAndValidate] can't find category"));
-
-        if (category.getStudyType() != StudyType.PERSONAL || !Objects.equals(category.getTypeId(), userId)) {
-            throw new StudyException(
-                    StudyErrorCode.STUDY_CATEGORY_ACCESS_FAIL,
-                    "[StudyCategoryReader#getAndValidate] invalid category access");
-        }
-
-        return category;
     }
 }

@@ -71,10 +71,13 @@ public class StudyCategory {
     private String description;
 
     @PrePersist
-    @PreUpdate
     public void validateType() {
-        if (studyType == StudyType.REMOVED || studyType == StudyType.TEMPORARY) {
+        if (studyType == StudyType.REMOVED) {
             throw new IllegalArgumentException("studyType " + studyType + " is not allowed");
         }
+    }
+
+    public void setAsRemoved() {
+        this.studyType = StudyType.REMOVED;
     }
 }

@@ -26,13 +26,12 @@ import com.studypals.domain.studyManage.entity.StudyType;
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
+    @Mapping(target = "id", ignore = true)
     StudyCategory toEntity(CreateCategoryDto dto);
 
     @Mapping(source = "id", target = "typeId")
-    @Mapping(target = "studyType", constant = "PERSONAL")
     GetCategoryRes toDto(StudyCategory entity);
 
     @Mapping(target = "studyType", source = "studyType")
-    @Mapping(target = "typeId", source = "typeId")
     CreateCategoryDto reqToDto(CreateCategoryReq req, StudyType studyType, Long typeId);
 }
