@@ -69,6 +69,17 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
             @Param("studiedDate") LocalDate studiedDate,
             @Param("categoryId") Long categoryId);
 
+    @Query(
+            value =
+                    """
+        SELECT * FROM study_time st
+        WHERE st.studied_date = :studiedDate
+        AND st.category_id IN :categoryIds
+    """,
+            nativeQuery = true)
+    List<StudyTime> findByCategoryAndDate(
+            @Param("studiedDate") LocalDate studiedDate, @Param("categoryIds") List<Long> cateogoryIds);
+
     /**
      * 사용자 아이디, 공부 날짜 및 카테고리 이름을 기반으로 하여
      * @param memberId

@@ -1,6 +1,7 @@
 package com.studypals.global.redis.redisHashRepository;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -128,6 +129,7 @@ public final class RedisEntityMapper {
         if (target == int.class || target == Integer.class) return Integer.parseInt(s);
         if (target == long.class || target == Long.class) return Long.parseLong(s);
         if (target == double.class || target == Double.class) return Double.parseDouble(s);
+        if (target == LocalDate.class) return LocalDate.parse(s);
         if (target == char.class || target == Character.class) {
             if (s.isEmpty()) throw new IllegalArgumentException("Empty char field");
             return s.charAt(0);

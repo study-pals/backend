@@ -82,7 +82,9 @@ public class RedisLuaQuery implements RepositoryQuery {
         Object id = args[0];
         String redisKey = entityMeta.keyPrefix() + id;
 
-        Object[] argv = flattenArgs(Arrays.copyOfRange(args, 1, args.length));
+        Object[] raw = flattenArgs(Arrays.copyOfRange(args, 1, args.length));
+        Object[] argv = toStringArgs(flattenArgs(raw));
+
         return template.execute(script, Collections.singletonList(redisKey), argv);
     }
 
@@ -102,6 +104,14 @@ public class RedisLuaQuery implements RepositoryQuery {
             }
         }
         return out.toArray();
+    }
+
+    private static Object[] toStringArgs(Object[] src) {
+        String[] r = new String[src.length];
+        for (int i = 0; i < src.length; i++) {
+            r[i] = String.valueOf(src[i]); // Long, Integer, etc. 모두 안전히 문자열화
+        }
+        return r;
     }
 
     /**

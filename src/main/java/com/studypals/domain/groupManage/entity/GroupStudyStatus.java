@@ -25,7 +25,7 @@ import com.studypals.global.redis.redisHashRepository.annotations.RedisId;
  */
 @RedisHashEntity(value = "groupStudyStatus", lock = "lock")
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Builder
 @Getter
 public class GroupStudyStatus {

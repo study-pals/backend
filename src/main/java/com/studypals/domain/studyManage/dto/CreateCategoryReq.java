@@ -20,6 +20,7 @@ import com.studypals.domain.studyManage.entity.DateType;
  * @since 2025-04-11
  */
 public record CreateCategoryReq(
+        Long groupId,
         @NotBlank String name,
         @NotNull DateType dateType,
         Long goal,

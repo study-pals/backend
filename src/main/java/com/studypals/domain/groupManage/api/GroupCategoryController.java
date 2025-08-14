@@ -40,7 +40,6 @@ import com.studypals.global.responses.Response;
  * @see
  * @since 2025-08-11
  */
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/groups/categories")
@@ -53,7 +52,7 @@ public class GroupCategoryController {
     public ResponseEntity<Void> create(
             @AuthenticationPrincipal Long userId, @Valid @RequestBody CreateCategoryReq req) {
 
-        CreateCategoryDto dto = categoryMapper.reqToDto(req, StudyType.GROUP, userId);
+        CreateCategoryDto dto = categoryMapper.reqToDto(req, StudyType.GROUP, req.groupId());
 
         Long categoryId = studyCategoryService.createCategory(userId, dto);
         return ResponseEntity.created(URI.create("/categories/" + categoryId)).build();
@@ -73,7 +72,4 @@ public class GroupCategoryController {
         Long categoryId = studyCategoryService.updateCategory(userId, req);
         return ResponseEntity.created(URI.create("/categories/" + categoryId)).build();
     }
-
-    @GetMapping
-    public ResponseEntity<List<>>
 }

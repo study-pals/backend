@@ -27,9 +27,15 @@ public interface GroupStudyStatusRepository extends RedisHashRepository<GroupStu
     @LuaQuery(
             value =
                     """
-            redis.call('hincrby', KEYS[1], 'f:updateCnt', 1)
-            redis.call('hincrby', KEYS[1], ARGV[1], tonumber(ARGV[2]))"
+                local key = KEYS[1]
+                local field = ARGV[1]
+                local delta = tonumber(ARGV[2])
+
+                redis.call('HINCRBY', key, 'f:updateCnt', 1)
+                redis.call('HINCRBY', key, field, delta)
+
+                return nil
             """,
             resultType = Void.class)
-    void hIncrField(Long id, Long categoryId, long delta);
+    void initOrIncrField(Long id, Long field, long delta);
 }

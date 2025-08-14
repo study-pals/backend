@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.groupManage.worker.GroupStudyStatusWorker;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
@@ -17,6 +18,7 @@ import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
+import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.worker.DailyInfoWriter;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
@@ -60,6 +62,7 @@ public class StudySessionServiceImpl implements StudySessionService {
     private final StudySessionWorker studySessionWorker;
     private final StudyStatusWorker studyStatusWorker;
     private final StudyCategoryReader studyCategoryReader;
+    private final GroupStudyStatusWorker groupStudyStatusWorker;
     private final DailyInfoWriter dailyInfoWriter;
     private final MemberReader memberReader;
 
@@ -111,8 +114,9 @@ public class StudySessionServiceImpl implements StudySessionService {
         // 2) DB에 공부시간 및 종료 시간 upsert
         Member member = memberReader.getRef(userId);
         try {
-            studySessionWorker.upsert(member, status, today, durationInSec);
+            StudyTime studyTime = studySessionWorker.upsert(member, status, today, durationInSec);
             dailyInfoWriter.updateEndtime(member, today, endTime);
+            groupStudyStatusWorker.updateStatusCache(studyTime, durationInSec);
         } catch (Exception e) {
             studyStatusWorker.saveStatus(status);
             throw e;

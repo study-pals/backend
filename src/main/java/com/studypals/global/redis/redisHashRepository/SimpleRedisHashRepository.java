@@ -335,7 +335,7 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
     private static final byte[] UNLOCK_LUA =
             """
             if redis.call('get', KEYS[1]) == ARGV[1] then
-                return call('del', KEYS[1])
+                return redis.call('del', KEYS[1])
             else return 0 end
             """
                     .getBytes(StandardCharsets.UTF_8);

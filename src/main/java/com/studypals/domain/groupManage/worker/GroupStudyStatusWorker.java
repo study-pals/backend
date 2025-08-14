@@ -1,6 +1,9 @@
 package com.studypals.domain.groupManage.worker;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -8,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupStudyStatusRepository;
 import com.studypals.domain.groupManage.entity.GroupStudyStatus;
+import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
-import com.studypals.domain.studyManage.entity.DateType;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.entity.StudyType;
@@ -30,6 +33,8 @@ import com.studypals.global.utils.TimeUtils;
  *
  * } </pre>
  */
+
+// todo : delta buffer implement?
 @Worker
 @RequiredArgsConstructor
 public class GroupStudyStatusWorker {
@@ -37,52 +42,63 @@ public class GroupStudyStatusWorker {
     private final GroupStudyStatusRepository studyStatusRepository;
     private final TimeUtils timeUtils;
     private final StudyTimeRepository studyTimeRepository;
+    private final StudyCategoryRepository studyCategoryRepository;
 
     private static final Long UPDATE_COUNT_MAX = 30L;
+    private final GroupStudyStatusRepository groupStudyStatusRepository;
 
-    public void overwriteData(Long groupId) {
-        String token = studyStatusRepository.tryLock()
+    public void overwriteData(Long groupId, LocalDate today) {
+        String token = studyStatusRepository.tryLock(groupId, Duration.ofSeconds(15));
+        if (token == null) return;
+
+        try {
+            List<Long> categoryIds = studyCategoryRepository.findByStudyTypeAndTypeId(StudyType.GROUP, groupId).stream()
+                    .map(StudyCategory::getId)
+                    .toList();
+
+            List<StudyTime> studyTimes = studyTimeRepository.findByCategoryAndDate(today, categoryIds);
+
+            Map<Long, Long> timeStat = new HashMap<>();
+            for (StudyTime time : studyTimes) {
+                Long categoryId = time.getStudyCategory().getId();
+                long studying = time.getTime();
+                long goal = time.getGoal() == null ? Long.MAX_VALUE : time.getGoal();
+                long inc = Math.min(studying, goal);
+                timeStat.merge(categoryId, inc, Long::sum);
+            }
+
+            groupStudyStatusRepository.save(GroupStudyStatus.builder()
+                    .id(groupId)
+                    .studyStatus(timeStat)
+                    .date(today)
+                    .updateCnt(0L)
+                    .build());
+        } finally {
+            studyStatusRepository.unlock(groupId, token);
+        }
     }
 
     public void updateStatusCache(StudyTime studyTime, Long deltaSecond) {
-        //카테고리 추출
         StudyCategory c = studyTime.getStudyCategory();
+        if (c == null || c.getStudyType() != StudyType.GROUP) return;
 
-        //GROUP 타입 여부 검사
-        if(c == null) return;
-        if(c.getStudyType() != StudyType.GROUP) return;
-
-        //group 및 주차 추출
         Long groupId = c.getTypeId();
-        LocalDate date = timeUtils.getToday();
+        LocalDate today = timeUtils.getToday();
 
+        Optional<GroupStudyStatus> curOpt = studyStatusRepository.findById(groupId);
 
-        //
-        Optional<GroupStudyStatus> curStatus = studyStatusRepository.findById(groupId);
+        if (curOpt.isPresent()
+                && today.equals(curOpt.get().getDate())
+                && (curOpt.get().getUpdateCnt() == null || curOpt.get().getUpdateCnt() <= UPDATE_COUNT_MAX)) {
 
-        if(curStatus.isPresent() && curStatus.get().getDate() == date) {
-            if(curStatus.get().getUpdateCnt() <= UPDATE_COUNT_MAX) {
-                studyStatusRepository.hIncrField(groupId, c.getId(), deltaSecond);
-
-            } else {
-                overwriteData(groupId);
-            }
+            studyStatusRepository.initOrIncrField(groupId, c.getId(), deltaSecond);
             return;
-        } else {
-            GroupStudyStatus groupStudyStatus = create(groupId, date);
-            groupStudyStatus.getStudyStatus().put(c.getId(), deltaSecond);
-            studyStatusRepository.save(groupStudyStatus);
         }
 
+        overwriteData(groupId, today);
     }
 
-
-
     private GroupStudyStatus create(Long groupId, LocalDate date) {
-        return GroupStudyStatus.builder()
-                .id(groupId)
-                .date(date)
-                .updateCnt(1L)
-                .build();
+        return GroupStudyStatus.builder().id(groupId).date(date).updateCnt(1L).build();
     }
 }
