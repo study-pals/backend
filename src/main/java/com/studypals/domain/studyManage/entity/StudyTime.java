@@ -29,11 +29,13 @@ import com.studypals.domain.memberManage.entity.Member;
         indexes = {@Index(name = "idx_member_studied", columnList = "member_id, studied_date")})
 public class StudyTime {
 
+    // auto increase 타입의 id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
 
+    // 연관관계를 맺는 study Category. nullable 하며, null 시 임시 토픽에 대한 공부입니다.
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "study_category_id", nullable = true)
     private StudyCategory studyCategory;

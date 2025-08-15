@@ -39,7 +39,6 @@ public class StudyTimeController {
 
         List<GetStudyDto> studyData = studyTimeService.getStudyList(userId, date);
 
-        // 공부 시간이 존재하지 않는 카테고리에 대한 정보 또한 반환합니다.
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_TIME_PARTIAL, studyData, "data of date"));
     }
 
@@ -49,7 +48,6 @@ public class StudyTimeController {
         PeriodDto periodDto = new PeriodDto(start, end);
 
         List<GetDailyStudyDto> studyData = studyTimeService.getDailyStudyList(userId, periodDto);
-        // 공부 시간이 존재하지 않는 카테고리에 대한 정보는 반환하지 않습니다.
         return ResponseEntity.ok(
                 CommonResponse.success(ResponseCode.STUDY_TIME_ALL, studyData, "data of study time by period"));
     }

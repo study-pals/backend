@@ -24,10 +24,10 @@ import com.studypals.global.responses.ResponseCode;
 
 /**
  * category 에 대한 컨트롤러입니다. 기본적인 CRUD 에 대한 요청이 포함되어 있으며,
- * 사용자는 해당 엔드포인트를 사용해 공부를 기록할 카테고리를 저장해야 됩니다.
+ * 개인이 생성한 카테고리에 대한 정보를 취급합니다.
  * 담당하는 엔드포인트는 다음과 같습니다.
  * <pre>
- *     - POST /category                   : 카테고리 생성({@link CreateCategoryReq})
+ *     - POST /category                   : 개인 카테고리 생성({@link CreateCategoryReq})
  *     - DELETE /category/{categoryId}    : 카테고리 제거
  *     - PUT /category                    : 카테고리 수정({@link UpdateCategoryReq})
  *     - GET /category                    : 카테고리 정보 요청

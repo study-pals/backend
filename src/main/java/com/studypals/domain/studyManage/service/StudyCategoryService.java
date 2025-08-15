@@ -5,7 +5,6 @@ import java.util.List;
 import com.studypals.domain.studyManage.dto.CreateCategoryDto;
 import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
-import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.global.exceptions.exception.AuthException;
 import com.studypals.global.exceptions.exception.StudyException;
 
@@ -20,7 +19,7 @@ import com.studypals.global.exceptions.exception.StudyException;
 public interface StudyCategoryService {
 
     /**
-     * 카테고리 생성을 위한 메서드.
+     * 카테고리를 생성합니다.
      * @param dto 카테고리 정보가 포함
      * @return 생성된 category 의 id를 반환
      * @throws AuthException {@code AuthErrorCode.USER_NOT_FOUND, "In StudyCategoryServiceImpl} 포함
@@ -28,15 +27,15 @@ public interface StudyCategoryService {
     Long createCategory(Long userId, CreateCategoryDto dto);
 
     /**
-     * userId 를 통하여, 해당 유저가 보유한 PersonalStudyCategory 리스트를 반환하는 메서드.
+     * 특정 유저가 표시할 수 있는 모든 카테고리 리스트 정보를 가져옵니다.
      * @param userId 검색하고자 하는 유저의 id
      * @return 카테고리 리스트. 만약 없으면 빈 리스트가 반환된다.
      */
     List<GetCategoryRes> getAllUserCategories(Long userId);
 
     /**
-     * 카테고리 update를 위한 메서드.
-     * 요창자가 해당 카테고리의 소유주인지 확인하고, 갱신한다.
+     * 카테고리의 update 를 담당합니다. {@link UpdateCategoryReq} 의 필드가 null 인 경우 해당 값은 보통 갱신되지 않습니ㅏㄷ.
+     * 자세한 정보는 {@link com.studypals.domain.studyManage.worker.StudyCategoryWriter} 에서 확인 가능합니다.
      * @param userId 갱신을 요청한 사용자의 id
      * @param dto categoryId 및 category 의 정보
      * @return cateogoryId 변경된 카테고리의 id
@@ -46,12 +45,10 @@ public interface StudyCategoryService {
 
     /**
      * 카테고리 delete를 위한 메서드.
-     * 요청자가 해당 카테고리의 소유주인지 확인하고, 삭제한다.
+     * 다만 실제로 삭제되는 것이 아닌, StudyType 이 REMOVED / GROUP_REMOVED로 변경됩니다.
      * @param userId 삭제 요청자의 id
      * @param categoryId 삭제할 카테고리의 id
      * @throws StudyException {@code StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, "In StudyCategoryServiceImpl} 포함
      */
     void deleteCategory(Long userId, Long categoryId);
-
-    List<GetCategoryRes> getByTypeInfo(StudyType type, Long typeId);
 }
