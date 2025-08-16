@@ -30,7 +30,7 @@ public class StudyCategoryReader {
 
     /**
      * studyCategory id 에 대해 검색합니다. 없으면 예외를 던집니다.
-     * @throws StudyException  StudyErrorCode.STUDY_CATEGORY_NOT_FOUND
+     * @throws StudyException  StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, 카테고리 없음
      * @param id 찾고자 하는 카테고리 아이디
      * @return 검색된 StudyCategory
      */
@@ -38,7 +38,7 @@ public class StudyCategoryReader {
         return studyCategoryRepository
                 .findById(id)
                 .orElseThrow(() -> new StudyException(
-                        StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, "[StudyCategoryReader#findById] can't find category"));
+                        StudyErrorCode.STUDY_CATEGORY_NOT_FOUND, "[StudyCategoryReader#getById] can't find category"));
     }
 
     /**

@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.studypals.domain.groupManage.worker.GroupStudyStatusWorker;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
@@ -22,6 +23,7 @@ import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.DailyInfoWriter;
+import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
 import com.studypals.global.utils.TimeUtils;
@@ -36,13 +38,25 @@ import com.studypals.global.utils.TimeUtils;
 class StudySessionServiceTest {
 
     @Mock
+    private StudyTimeMapper mapper;
+
+    @Mock
+    private TimeUtils timeUtils;
+
+    @Mock
     private StudySessionWorker studySessionWorker;
 
     @Mock
     private StudyStatusWorker studyStatusWorker;
 
     @Mock
-    private DailyInfoWriter dailyInfoWriter; // no delete
+    private StudyCategoryReader studyCategoryReader;
+
+    @Mock
+    private GroupStudyStatusWorker groupStudyStatusWorker;
+
+    @Mock
+    private DailyInfoWriter dailyInfoWriter;
 
     @Mock
     private MemberReader memberReader;
@@ -51,10 +65,7 @@ class StudySessionServiceTest {
     private Member mockMember;
 
     @Mock
-    private StudyTimeMapper mapper;
-
-    @Mock
-    private TimeUtils timeUtils;
+    private StudyStatus mockStudyStatus;
 
     @InjectMocks
     private StudySessionServiceImpl studySessionService;
@@ -63,22 +74,22 @@ class StudySessionServiceTest {
     void startStudy_success_firstCategory() {
         // given
         Long userId = 1L;
-        Long typeId = 2L;
+        Long categoryId = 2L;
         LocalTime time = LocalTime.of(10, 0);
         StudyType type = StudyType.PERSONAL;
-        StartStudyReq req = new StartStudyReq(type, typeId, null, time);
+        StartStudyReq req = new StartStudyReq(categoryId, null, time);
 
         StudyStatus status = StudyStatus.builder()
                 .id(userId)
-                .studyType(type)
-                .typeId(typeId)
-                .startTime(time)
                 .studying(true)
+                .startTime(time)
+                .categoryId(categoryId)
+                .goal(3600L)
                 .build();
-        StartStudyRes expected = new StartStudyRes(true, time, 0L, type, typeId, null, null);
+        StartStudyRes expected = new StartStudyRes(true, time, 0L, categoryId, null, 3600L);
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
-        given(studyStatusWorker.findAndDelete(userId)).willReturn(Optional.empty());
+        given(studyStatusWorker.find(userId)).willReturn(Optional.empty());
         given(studyStatusWorker.startStatus(mockMember, req)).willReturn(status);
         given(mapper.toDto(status)).willReturn(expected);
 
@@ -88,36 +99,6 @@ class StudySessionServiceTest {
         // then
         assertThat(result).isEqualTo(expected);
         then(studyStatusWorker).should().saveStatus(status);
-    }
-
-    @Test
-    void startStudy_success_restart() {
-        // given
-        Long userId = 1L;
-        Long typeId = 3L;
-        LocalTime time = LocalTime.of(9, 30);
-        StudyType type = StudyType.PERSONAL;
-        StartStudyReq req = new StartStudyReq(type, typeId, null, time);
-
-        StudyStatus oldStatus = StudyStatus.builder().id(userId).studying(false).build();
-        StudyStatus newStatus = StudyStatus.builder()
-                .id(userId)
-                .studyType(type)
-                .typeId(typeId)
-                .startTime(time)
-                .studying(true)
-                .build();
-        StartStudyRes expected = new StartStudyRes(true, time, 0L, type, typeId, null);
-
-        given(studyStatusWorker.findAndDelete(userId)).willReturn(Optional.of(oldStatus));
-        given(studyStatusWorker.restartStatus(oldStatus, req)).willReturn(newStatus);
-        given(mapper.toDto(newStatus)).willReturn(expected);
-        // when
-        StartStudyRes result = studySessionService.startStudy(userId, req);
-
-        // then
-        assertThat(result).isEqualTo(expected);
-        then(studyStatusWorker).should().saveStatus(newStatus);
     }
 
     @Test

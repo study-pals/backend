@@ -84,7 +84,7 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
         CategoryStrategy strategy = categoryStrategyFactory.resolve(category.getStudyType());
         strategy.validateToWrite(userId, category);
 
-        studyCategoryWriter
+        category = studyCategoryWriter
                 .update(category)
                 .name(dto.name())
                 .color(dto.color())
@@ -93,6 +93,7 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
                 .dayBelong(dto.dayBelong())
                 .description(dto.description())
                 .build();
+        studyCategoryWriter.save(category);
 
         return category.getId();
     }
