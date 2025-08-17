@@ -55,6 +55,7 @@ public enum ResponseCode {
     // I01 - Image
     IMAGE_UPLOAD("I01-00"),
     IMAGE_ACCESS("I01-01"),
+    IMAGE_DELETE("I01-02"),
 
     // C01 - chatRoom(not messaging)
     CHAT_ROOM_SEARCH("C01-00"),
