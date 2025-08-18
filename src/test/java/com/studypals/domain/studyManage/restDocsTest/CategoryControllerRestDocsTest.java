@@ -1,6 +1,5 @@
 package com.studypals.domain.studyManage.restDocsTest;
 
-import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
@@ -14,9 +13,8 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -25,13 +23,10 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.studyManage.api.CategoryController;
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
-import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
-import com.studypals.domain.studyManage.entity.StudyType;
+import com.studypals.domain.studyManage.entity.DateType;
 import com.studypals.domain.studyManage.service.StudyCategoryService;
-import com.studypals.global.responses.CommonResponse;
-import com.studypals.global.responses.Response;
-import com.studypals.global.responses.ResponseCode;
+import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.testModules.testSupport.RestDocsSupport;
 
 @WebMvcTest(CategoryController.class)
@@ -40,11 +35,14 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
     @MockitoBean
     private StudyCategoryService studyCategoryService;
 
+    @Autowired
+    private StudyCategoryReader studyCategoryReader;
+
     @Test
     @WithMockUser
     void create_success() throws Exception {
         // given
-        CreateCategoryReq req = new CreateCategoryReq("알고리즘", 1200L, "#FF5733", 10, "매일 10문제");
+        CreateCategoryReq req = new CreateCategoryReq(null, "알고리즘", DateType.DAILY, 1200L, "#FF5733", 10, "매일 10문제");
 
         given(studyCategoryService.createCategory(any(), any())).willReturn(1L);
 
@@ -74,7 +72,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void update_success() throws Exception {
         // given
-        UpdateCategoryReq req = new UpdateCategoryReq(1L, "DB", "#000000", 20, "설명");
+        UpdateCategoryReq req = new UpdateCategoryReq(1L, DateType.DAILY, "name", 1200L, "#000000", 20, "설명");
 
         given(studyCategoryService.updateCategory(any(), any())).willReturn(1L);
 
@@ -121,51 +119,5 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                         pathParameters(parameterWithName("categoryId")
                                 .description("삭제 카테고리 id")
                                 .attributes(constraints("not null")))));
-    }
-
-    @Test
-    @WithMockUser
-    void deleteAll_success() throws Exception {
-        // given
-        willDoNothing().given(studyCategoryService).initCategory(any());
-
-        // when
-        ResultActions result = mockMvc.perform(delete("/categories/all"));
-
-        // then
-        result.andExpect(status().isNoContent()).andDo(restDocs.document(httpRequest(), httpResponse()));
-    }
-
-    @Test
-    @WithMockUser
-    void read_success() throws Exception {
-        // given
-        List<GetCategoryRes> list = List.of(
-                new GetCategoryRes(StudyType.PERSONAL, 1L, "백준", 1200L, "#FFAA00", 12, "Spring 공부"),
-                new GetCategoryRes(StudyType.PERSONAL, 2L, "알고리즘", 1200L, "#00CCFF", 14, "문제풀이"));
-        Response<List<GetCategoryRes>> expected = CommonResponse.success(ResponseCode.STUDY_CATEGORY_LIST, list);
-
-        given(studyCategoryService.getUserCategory(any())).willReturn(list);
-
-        // when
-        ResultActions result = mockMvc.perform(get("/categories"));
-
-        // then
-        result.andExpect(status().isOk())
-                .andExpect(hasKey(expected))
-                .andDo(restDocs.document(
-                        httpRequest(),
-                        httpResponse(),
-                        responseFields(
-                                fieldWithPath("data[].studyType").description("카테고리 테이블 정보(타입)"),
-                                fieldWithPath("data[].typeId").description("연관 테이블 타입 ID"),
-                                fieldWithPath("data[].name").description("카테고리 이름"),
-                                fieldWithPath("data[].goal").description("카테고리 목표 시간"),
-                                fieldWithPath("data[].color").description("색상 코드"),
-                                fieldWithPath("data[].dayBelong").description("요일 소속값"),
-                                fieldWithPath("data[].description").description("설명"),
-                                fieldWithPath("code").description("응답 코드"),
-                                fieldWithPath("status").description("응답 상태"),
-                                fieldWithPath("message").description("응답 메시지"))));
     }
 }

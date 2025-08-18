@@ -13,6 +13,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.studyManage.entity.DateType;
+import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.testModules.testSupport.DataJpaSupport;
@@ -40,9 +42,20 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
                 .build());
     }
 
+    private StudyCategory insertCategory(Long userId, int cnt) {
+        return em.persist(StudyCategory.builder()
+                .studyType(StudyType.PERSONAL)
+                .goal(3600L)
+                .color("#FFFFF")
+                .dateType(DateType.DAILY)
+                .name("category" + cnt)
+                .typeId(userId)
+                .description("description")
+                .build());
+    }
+
     private StudyTime make(Member member, String temporaryName, LocalDate date, Long time) {
         return StudyTime.builder()
-                .studyType(StudyType.TEMPORARY)
                 .name(temporaryName)
                 .member(member)
                 .studiedDate(date)
@@ -50,10 +63,9 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
                 .build();
     }
 
-    private StudyTime make(Member member, Long typeId, LocalDate date, Long time) {
+    private StudyTime make(Member member, StudyCategory category, LocalDate date, Long time) {
         return StudyTime.builder()
-                .studyType(StudyType.PERSONAL)
-                .typeId(typeId)
+                .studyCategory(category)
                 .member(member)
                 .studiedDate(date)
                 .time(time)
@@ -78,11 +90,14 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
     void findByMemberIdAndStudiedDate_success() {
         // given
         Member member = insertMember();
+        StudyCategory studyCategory1 = insertCategory(member.getId(), 1);
+        StudyCategory studyCategory2 = insertCategory(member.getId(), 2);
+        StudyCategory studyCategory3 = insertCategory(member.getId(), 3);
         LocalDate date = LocalDate.of(2024, 4, 10);
 
-        em.persist(make(member, "temp1", date, 100L));
-        em.persist(make(member, "temp2", date, 100L));
-        em.persist(make(member, "temp3", date, 100L));
+        em.persist(make(member, studyCategory1, date, 100L));
+        em.persist(make(member, studyCategory2, date, 110L));
+        em.persist(make(member, studyCategory3, date, 120L));
         em.persist(make(member, "temp4", date.plusDays(1), 100L)); // 다른 날
 
         em.flush();
@@ -137,27 +152,6 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
 
         // then
         assertThat(results).isEmpty();
-    }
-
-    @Test
-    void findByStudyType_success() {
-        // given
-        Member member = insertMember();
-        LocalDate march = LocalDate.of(2024, 3, 1);
-        Long typeId = 1L;
-
-        em.persist(make(member, typeId, march, 100L));
-
-        em.flush();
-        em.clear();
-
-        // when
-        Optional<StudyTime> result =
-                studyTimeRepository.findByStudyType(member.getId(), march, StudyType.PERSONAL.name(), typeId);
-
-        // then
-        assertThat(result).isNotEmpty();
-        assertThat(result.get().getTime()).isEqualTo(100L);
     }
 
     @Test

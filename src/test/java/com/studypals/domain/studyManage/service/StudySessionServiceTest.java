@@ -113,8 +113,7 @@ class StudySessionServiceTest {
 
         StudyStatus status = StudyStatus.builder()
                 .id(userId)
-                .studyType(type)
-                .typeId(1L)
+                .categoryId(1L)
                 .startTime(start)
                 .studying(true)
                 .studyTime(300L)
@@ -129,7 +128,6 @@ class StudySessionServiceTest {
         given(timeUtils.getToday()).willReturn(today);
         given(studyStatusWorker.findAndDelete(userId)).willReturn(Optional.of(status));
         willDoNothing().given(studyStatusWorker).validStatus(status);
-        given(studyStatusWorker.resetStatus(status, duration)).willReturn(updated);
 
         // when
         Long result = studySessionService.endStudy(userId, end);
@@ -153,8 +151,7 @@ class StudySessionServiceTest {
 
         StudyStatus status = StudyStatus.builder()
                 .id(userId)
-                .studyType(StudyType.PERSONAL)
-                .typeId(1L)
+                .categoryId(1L)
                 .startTime(start)
                 .studying(true)
                 .studyTime(100L)
@@ -169,7 +166,6 @@ class StudySessionServiceTest {
         given(timeUtils.getToday()).willReturn(today);
         given(studyStatusWorker.findAndDelete(userId)).willReturn(Optional.of(status));
         willDoNothing().given(studyStatusWorker).validStatus(status);
-        given(studyStatusWorker.resetStatus(status, duration)).willReturn(updated);
 
         Long result = studySessionService.endStudy(userId, end);
 

@@ -63,6 +63,7 @@ public class StudyTimeServiceImpl implements StudyTimeService {
     @Transactional(readOnly = true)
     public List<GetDailyStudyDto> getDailyStudyList(Long userId, PeriodDto period) {
         List<StudyTime> summaries = studyTimeReader.findByUserIdAndPeriod(userId, period);
+        if (summaries.isEmpty()) return List.of();
 
         return summaries.stream()
                 .collect(Collectors.groupingBy(StudyTime::getStudiedDate))

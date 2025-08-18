@@ -22,7 +22,6 @@ import com.studypals.domain.studyManage.api.StudySessionController;
 import com.studypals.domain.studyManage.dto.EndStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
-import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.service.StudySessionService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -45,9 +44,9 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void start_success_withCategoryId() throws Exception {
         // given
-        StartStudyReq req = new StartStudyReq(StudyType.PERSONAL, 1L, null, LocalTime.of(10, 0));
+        StartStudyReq req = new StartStudyReq(1L, null, LocalTime.of(10, 0));
 
-        StartStudyRes res = new StartStudyRes(true, LocalTime.of(10, 0, 0), 0L, StudyType.PERSONAL, null, "some name");
+        StartStudyRes res = new StartStudyRes(true, LocalTime.of(10, 0, 0), 0L, null, "some name", 1200L);
         Response<StartStudyRes> expected = CommonResponse.success(ResponseCode.STUDY_START, res, "success start");
 
         given(studySessionService.startStudy(any(), any())).willReturn(res);

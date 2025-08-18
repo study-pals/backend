@@ -24,7 +24,7 @@ import lombok.*;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
+@Entity(name = "study_category")
 public class StudyCategory {
 
     // Auto Increment type id

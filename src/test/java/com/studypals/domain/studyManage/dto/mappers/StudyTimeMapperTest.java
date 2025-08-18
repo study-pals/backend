@@ -12,7 +12,7 @@ import org.mapstruct.factory.Mappers;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
-import com.studypals.domain.studyManage.entity.PersonalStudyCategory;
+import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
 
@@ -33,7 +33,7 @@ class StudyTimeMapperTest {
                 .id(1L)
                 .studyTime(100L)
                 .startTime(LocalTime.of(10, 30))
-                .typeId(5L)
+                .categoryId(1L)
                 .name("temp")
                 .build();
 
@@ -44,7 +44,7 @@ class StudyTimeMapperTest {
         assertThat(dto.studying()).isTrue();
         assertThat(dto.startTime()).isEqualTo(LocalTime.of(10, 30));
         assertThat(dto.studyTime()).isEqualTo(100L);
-        assertThat(dto.typeId()).isEqualTo(5L);
+        assertThat(dto.categoryId()).isEqualTo(1L);
         assertThat(dto.name()).isEqualTo("temp");
     }
 
@@ -52,8 +52,8 @@ class StudyTimeMapperTest {
     @DisplayName("StudyTime → GetStudyDto 매핑 성공")
     void toDto_success_studyTimeToGetStudyDto() {
         // given
-        PersonalStudyCategory category =
-                PersonalStudyCategory.builder().id(7L).name("algorithm").build();
+        StudyCategory category =
+                StudyCategory.builder().id(7L).name("algorithm").build();
 
         StudyTime studyTime = StudyTime.builder()
                 .id(1L)

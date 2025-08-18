@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
+import com.studypals.domain.studyManage.entity.DateType;
 import com.studypals.global.responses.ResponseCode;
 import com.studypals.testModules.testSupport.IntegrationSupport;
 
@@ -32,7 +33,7 @@ public class CategoryIntegrationTest extends IntegrationSupport {
     void create_success() throws Exception {
         // given
         CreateUserVar user = createUser();
-        CreateCategoryReq req = new CreateCategoryReq("알고리즘", 1200L, "#112233", 7, "문제풀이");
+        CreateCategoryReq req = new CreateCategoryReq(null, "알고리즘", DateType.DAILY, 1200L, "#112233", 7, "문제풀이");
 
         // when
         ResultActions result = mockMvc.perform(post("/categories")
@@ -52,7 +53,7 @@ public class CategoryIntegrationTest extends IntegrationSupport {
         CreateUserVar user = createUser();
         Long categoryId = createCategory(user.getUserId(), "이전 이름");
 
-        UpdateCategoryReq req = new UpdateCategoryReq(categoryId, "새 이름", "#000000", 3, "설명 수정");
+        UpdateCategoryReq req = new UpdateCategoryReq(categoryId, DateType.DAILY, "새 이름", 1200L, "#000000", 3, "설명 수정");
 
         // when
         ResultActions result = mockMvc.perform(put("/categories")
