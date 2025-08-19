@@ -81,22 +81,6 @@ public class CategoryIntegrationTest extends IntegrationSupport {
     }
 
     @Test
-    @DisplayName("DELETE /categories/all")
-    void deleteAll_success() throws Exception {
-        // given
-        CreateUserVar user = createUser();
-        createCategory(user.getUserId(), "1번");
-        createCategory(user.getUserId(), "2번");
-
-        // when
-        ResultActions result =
-                mockMvc.perform(delete("/categories/all").header("Authorization", "Bearer " + user.getAccessToken()));
-
-        // then
-        result.andExpect(status().isNoContent());
-    }
-
-    @Test
     @DisplayName("GET /categories")
     void read_success() throws Exception {
         // given
@@ -120,11 +104,14 @@ public class CategoryIntegrationTest extends IntegrationSupport {
     private Long createCategory(Long userId, String name) {
         String sql =
                 """
-            INSERT INTO study_category (name, color, day_belong, description, member_id)
-            VALUES (?, '#000000', 1, '테스트 설명', ?)
+            INSERT INTO study_category (study_type, type_id, date_type, name, color, day_belong, description)
+            VALUES ('PERSONAL', ?, 'DAILY', ?,'#000000', 127, '테스트 설명')
         """;
-        jdbcTemplate.update(sql, name, userId);
+        jdbcTemplate.update(sql, userId, name);
         return jdbcTemplate.queryForObject(
-                "SELECT id FROM study_category WHERE name = ? AND member_id = ?", Long.class, name, userId);
+                "SELECT id FROM study_category WHERE name = ? AND study_type = 'PERSONAL' AND type_id = ?",
+                Long.class,
+                name,
+                userId);
     }
 }

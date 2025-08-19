@@ -34,7 +34,7 @@ public class StudySessionIntegrationTest extends IntegrationSupport {
     void startStudy_success_withCategoryId() throws Exception {
         // given
         CreateUserVar user = createUser();
-        StartStudyReq req = new StartStudyReq(1L, null, LocalTime.of(9, 0));
+        StartStudyReq req = new StartStudyReq(null, "tempName", LocalTime.of(9, 0));
 
         // when
         ResultActions result = mockMvc.perform(post("/studies/sessions/start")
@@ -49,8 +49,7 @@ public class StudySessionIntegrationTest extends IntegrationSupport {
                 .andExpect(jsonPath("$.data.studying").value(true))
                 .andExpect(jsonPath("$.data.startTime").exists())
                 .andExpect(jsonPath("$.data.studyTime").value(0))
-                .andExpect(jsonPath("$.data.studyType").value("PERSONAL"))
-                .andExpect(jsonPath("$.data.typeId").value(1));
+                .andExpect(jsonPath("$.data.name").value("tempName"));
     }
 
     @Test

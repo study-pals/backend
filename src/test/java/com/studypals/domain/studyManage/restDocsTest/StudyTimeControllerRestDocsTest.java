@@ -18,7 +18,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
@@ -69,27 +68,13 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("code").description("응답 코드"),
                                 fieldWithPath("status").description("응답 상태"),
                                 fieldWithPath("message").description("응답 메시지"),
-                                fieldWithPath("data[].studyType").description("타입 종류"),
-                                fieldWithPath("data[].typeId")
-                                        .description("해당 타입의 id")
+                                fieldWithPath("data[].categoryId")
+                                        .description("카테고리 아이디(영구)")
                                         .optional(),
                                 fieldWithPath("data[].name")
-                                        .description("카테고리 이름")
+                                        .description("카테고리 이름(임시)")
                                         .optional(),
-                                fieldWithPath("data[].name")
-                                        .description("카테고리 이름 / 혹은 TEMPORARY 시 임시 카테고리 이름")
-                                        .optional(),
-                                fieldWithPath("data[].color")
-                                        .description("카테고리 색상")
-                                        .optional(),
-                                fieldWithPath("data[].description")
-                                        .description("카테고리 설명")
-                                        .optional(),
-                                fieldWithPath("data[].time").description("공부 시간 (초 단위)"),
-                                fieldWithPath("data[].goal")
-                                        .type(JsonFieldType.NUMBER)
-                                        .description("공부 목표 (분 단위) / 임시 토픽 -> null")
-                                        .optional())));
+                                fieldWithPath("data[].time").description("공부 시간 (초 단위)"))));
     }
 
     @Test
@@ -131,16 +116,15 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("status").description("응답 상태 (예: success 또는 fail)"),
                                 fieldWithPath("message").description("응답 메시지"),
                                 fieldWithPath("data[].studiedDate").description("공부한 날짜"),
-                                fieldWithPath("data[].startTime").description("해당 날짜 공부 시작 시간"),
-                                fieldWithPath("data[].endTime").description("해당 날짜 공부 종료 시간"),
-                                fieldWithPath("data[].memo").description("간단한 메모"),
-                                fieldWithPath("data[].studies[].studyType").description("타입 종류"),
-                                fieldWithPath("data[].studies[].typeId")
-                                        .description("해당 타입의 ID (없으면 null)")
+                                // fieldWithPath("data[].startTime").description("해당 날짜 공부 시작 시간"),
+                                // fieldWithPath("data[].endTime").description("해당 날짜 공부 종료 시간"),
+                                // fieldWithPath("data[].memo").description("간단한 메모"),
+                                fieldWithPath("data[].studyList[].categoryId")
+                                        .description("카테고리 아이디(영구)")
                                         .optional(),
-                                fieldWithPath("data[].studies[].name")
-                                        .description("카테고리 이름 (임시/영구)")
+                                fieldWithPath("data[].studyList[].name")
+                                        .description("카테고리 이름 (임시)")
                                         .optional(),
-                                fieldWithPath("data[].studies[].time").description("해당 항목 공부 시간 (초 단위)"))));
+                                fieldWithPath("data[].studyList[].time").description("해당 항목 공부 시간 (초 단위)"))));
     }
 }

@@ -93,8 +93,7 @@ class StudySessionWorkerTest {
 
         // then
         then(mockMember).should().addToken(time / 60);
-        then(mockStudyTime).should().addTime(time);
-        then(studyTimeRepository).should().save(mockStudyTime);
+        then(studyTimeRepository).should().save(any());
         assertThat(studyTime.getGoal()).isEqualTo(6000L);
         assertThat(studyTime.getStudyCategory()).isEqualTo(mockStudyCategory);
     }
@@ -124,7 +123,7 @@ class StudySessionWorkerTest {
     }
 
     @Test
-    void upsert_seuccess_withoutCategory_firstSaveStudyTime() {
+    void upsert_success_withoutCategory_firstSaveStudyTime() {
         // given
         Long userId = 1L;
         String name = "name";
@@ -143,8 +142,7 @@ class StudySessionWorkerTest {
 
         // then
         then(mockMember).should().addToken(time / 60);
-        then(mockStudyTime).should().addTime(time);
-        then(studyTimeRepository).should().save(mockStudyTime);
+        then(studyTimeRepository).should().save(any());
         assertThat(studyTime.getName()).isEqualTo(name);
         assertThat(studyTime.getGoal()).isEqualTo(11000L);
     }

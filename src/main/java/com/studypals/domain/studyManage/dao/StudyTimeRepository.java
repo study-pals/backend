@@ -25,7 +25,7 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
 
     /**
      * 사용자 아이디와 공부 날짜를 사용하여 해당 날짜에 공부한 StudyTime 리스트를 반환합니다.
-     * 공부 기록이 없는 카테고리에 대한 정보는 반환되지 않습니다.
+     * 공부 기록이 없는 카테고리에 대한 정보는 반환되지 않습니다.x
      * @param memberId 사용자 아이디
      * @param studiedDate 공부 날짜
      * @return 해당 날짜에 공부한 기록에 대한 리스트
@@ -41,10 +41,14 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
      */
     List<StudyTime> findAllByMemberIdAndStudiedDateBetween(Long memberId, LocalDate start, LocalDate end);
 
+    /**
+     * 사용자, 날짜 및 이름을 기반으로 하여 StudyTime을 검색합니다. 임시 목표에 대한 검색을 위한 메서드입니다.
+     * @param memberId 사용자 id
+     * @param studiedDate 공부한 날짜
+     * @param name 임시 목표 이름
+     * @return StudyTime 에 대한 optional
+     */
     Optional<StudyTime> findByMemberIdAndStudiedDateAndName(Long memberId, LocalDate studiedDate, String name);
-
-    List<StudyTime> findAllByStudyCategoryIdInAndStudiedDateBetween(
-            List<Long> categoryIds, LocalDate start, LocalDate end);
 
     /**
      * 사용자 아이디, 공부 날짜, 카테고리 타입, 타입 아이디를 기반으로 studyTime optional 객체를 반환합니다. <br>
@@ -74,41 +78,9 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
                     """
         SELECT * FROM study_time st
         WHERE st.studied_date = :studiedDate
-        AND st.category_id IN :categoryIds
+        AND st.study_category_id IN :categoryIds
     """,
             nativeQuery = true)
     List<StudyTime> findByCategoryAndDate(
             @Param("studiedDate") LocalDate studiedDate, @Param("categoryIds") List<Long> cateogoryIds);
-
-    /**
-     * 사용자 아이디, 공부 날짜 및 카테고리 이름을 기반으로 하여
-     * @param memberId
-     * @param studiedDate
-     * @param name
-     * @return
-     */
-    @Query(
-            value =
-                    """
-        SELECT * FROM study_time st
-        WHERE st.member_id = :memberId
-        AND st.studied_date = :studiedDate
-        AND st.name = :name
-    """,
-            nativeQuery = true)
-    Optional<StudyTime> findByName(
-            @Param("memberId") Long memberId, @Param("studiedDate") LocalDate studiedDate, @Param("name") String name);
-
-    @Query(
-            value =
-                    """
-        SELECT * FROM study_time st
-        WHERE st.studied_date BETWEEN :start AND :end
-        AND st.category_id IN :categoryIds
-    """,
-            nativeQuery = true)
-    List<StudyTime> findByCategoryIdsBetween(
-            @Param("start") LocalDate start,
-            @Param("end") LocalDate end,
-            @Param("categoryIds") List<Long> cateogoryIds);
 }

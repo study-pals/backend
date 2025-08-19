@@ -63,13 +63,10 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                         httpRequest(),
                         httpResponse(),
                         requestFields(
-                                fieldWithPath("studyType")
-                                        .description("공부 유형 타입 정의")
-                                        .attributes(constraints("GROUP / PERSONAL / TEMPORARY 허용")),
-                                fieldWithPath("typeId")
-                                        .description("연관된 테이블의 레코드 ID")
+                                fieldWithPath("categoryId")
+                                        .description("공부를 시작할 카테고리의 아이디")
                                         .attributes(constraints("temporaryName과 상호 베타적")),
-                                fieldWithPath("name")
+                                fieldWithPath("temporaryName")
                                         .description("임시 카테고리 이름")
                                         .attributes(constraints("categoryId 와 상호 베타적")),
                                 fieldWithPath("startTime").description("공부 시작 시간 - HH:mm 형식")),
@@ -80,9 +77,9 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data.studying").description("공부 중 여부"),
                                 fieldWithPath("data.startTime").description("공부 시작 시간"),
                                 fieldWithPath("data.studyTime").description("현재까지 누적 공부 시간"),
-                                fieldWithPath("data.studyType").description("공부 유형 타입"),
-                                fieldWithPath("data.typeId").description("공부 유형 타입 ID"),
-                                fieldWithPath("data.name").description("카테고리 이름(임시/영구)"))));
+                                fieldWithPath("data.categoryId").description("공부 중인 카테고리 아이디"),
+                                fieldWithPath("data.name").description("공부 중인 임시 카테고리 이름"),
+                                fieldWithPath("data.goal").description("공부 중인 카테고리의 목표 시간"))));
     }
 
     @Test

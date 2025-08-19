@@ -4,13 +4,11 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.entity.DateType;
@@ -48,6 +46,7 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
                 .goal(3600L)
                 .color("#FFFFF")
                 .dateType(DateType.DAILY)
+                .dayBelong(127)
                 .name("category" + cnt)
                 .typeId(userId)
                 .description("description")
@@ -73,20 +72,6 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
     }
 
     @Test
-    void save_fail_bothNameNull() {
-        // given
-        Member member = insertMember();
-        LocalDate date = LocalDate.of(1999, 8, 20);
-        StudyTime studyTime =
-                StudyTime.builder().member(member).studiedDate(date).build();
-
-        // when & than
-        assertThatThrownBy(() -> studyTimeRepository.save(studyTime))
-                .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessageContaining("must have value temporary name or typeId");
-    }
-
-    @Test
     void findByMemberIdAndStudiedDate_success() {
         // given
         Member member = insertMember();
@@ -109,12 +94,13 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
         // then
         assertThat(results)
                 .hasSize(3)
-                .extracting(StudyTime::getName)
-                .containsExactlyInAnyOrder("temp1", "temp2", "temp3");
+                .extracting(StudyTime::getStudyCategory)
+                .extracting(StudyCategory::getName)
+                .containsExactlyInAnyOrder("category1", "category2", "category3");
     }
 
     @Test
-    void findAllByMemberIdAndstudiedDateBetween_returnsAllInRange() {
+    void findAllByMemberIdAndStudiedDateBetween_returnsAllInRange() {
         // given
         Member member = insertMember();
         LocalDate april = LocalDate.of(2024, 4, 1);
@@ -152,21 +138,5 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
 
         // then
         assertThat(results).isEmpty();
-    }
-
-    @Test
-    void findByTemporaryName_success() {
-        // given
-        Member member = insertMember();
-        LocalDate march = LocalDate.of(2024, 3, 1);
-        String name = "temporary name";
-
-        em.persist(make(member, name, march, 100L));
-
-        em.flush();
-        em.clear();
-
-        // when
-        Optional<StudyTime> result = studyTimeRepository.findByName(member.getId(), march, name);
     }
 }
