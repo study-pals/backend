@@ -36,7 +36,7 @@ public class StudyTime {
     private Long id;
 
     // 연관관계를 맺는 study Category. nullable 하며, null 시 임시 토픽에 대한 공부입니다.
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_category_id", nullable = true)
     private StudyCategory studyCategory;
 

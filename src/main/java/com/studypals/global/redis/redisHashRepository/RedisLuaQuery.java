@@ -83,7 +83,7 @@ public class RedisLuaQuery implements RepositoryQuery {
         String redisKey = entityMeta.keyPrefix() + id;
 
         Object[] raw = flattenArgs(Arrays.copyOfRange(args, 1, args.length));
-        Object[] argv = toStringArgs(flattenArgs(raw));
+        Object[] argv = toStringArgs(raw);
 
         return template.execute(script, Collections.singletonList(redisKey), argv);
     }

@@ -50,6 +50,10 @@ public class ImageUtils {
         return contentType != null && contentType.startsWith("image/");
     }
 
+    /**
+     * 임의의 색상을 생성하여 반환합니다. 단, 너무 짙은 색은 제외됩니다.
+     * @return 랜덤한 색상에 대한 hex code 문자열
+     */
     public static String randomHexColor() {
         Random random = new Random();
         int r, g, b;

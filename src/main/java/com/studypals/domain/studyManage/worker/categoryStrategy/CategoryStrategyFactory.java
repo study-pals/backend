@@ -74,18 +74,11 @@ public class CategoryStrategyFactory {
      * @return StudyType / typeId list 의 MAP -> 카테고리 검색을 위한 정보
      */
     public Map<StudyType, List<Long>> getTypeMap(Long userId) {
-        Map<StudyType, List<Long>> result = new HashMap<>();
-        for (CategoryStrategy strategy : strategies) {
-            Map<StudyType, List<Long>> part = strategy.getMapByUserId(userId);
-            for (Map.Entry<StudyType, List<Long>> entry : part.entrySet()) {
-                result.merge(entry.getKey(), entry.getValue(), (v1, v2) -> {
-                    List<Long> before = new ArrayList<>(v1);
-                    before.addAll(v2);
-                    return before;
-                });
-            }
-        }
-
-        return result;
+        return strategies.stream()
+                .map(strategy -> strategy.getMapByUserId(userId))
+                .flatMap(map -> map.entrySet().stream())
+                .collect(Collectors.groupingBy(
+                        Map.Entry::getKey,
+                        Collectors.flatMapping(entry -> entry.getValue().stream(), Collectors.toList())));
     }
 }

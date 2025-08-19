@@ -21,7 +21,7 @@ public interface StudyTimeMapper {
 
     StartStudyRes toDto(StudyStatus entity);
 
-    @Mapping(target = "categoryId", source = "id")
+    @Mapping(target = "categoryId", source = "studyCategory.id")
     GetStudyDto toDto(StudyTime entity);
 
     @Mapping(target = "categoryId", source = "studyCategory.id")
