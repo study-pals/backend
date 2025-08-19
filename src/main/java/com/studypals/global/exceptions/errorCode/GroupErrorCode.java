@@ -25,7 +25,7 @@ import com.studypals.global.responses.ResponseCode;
 @RequiredArgsConstructor
 public enum GroupErrorCode implements ErrorCode {
     // U02: User <-> Group 관련
-    GROUP_NOT_FOUND(ResponseCode.GROUP_SEARCH, HttpStatus.NOT_FOUND, "can't find group"),
+    GROUP_NOT_FOUND(ResponseCode.GROUP_SEARCH, HttpStatus.NOT_FOUND, "can't findAndDelete group"),
     GROUP_FORBIDDEN(ResponseCode.GROUP_LEADER, HttpStatus.FORBIDDEN, "no authorization for managing group"),
     GROUP_CREATE_FAIL(ResponseCode.GROUP_CREATE, HttpStatus.BAD_REQUEST, "failed to createWithCategory group"),
     GROUP_DELETE_FAIL(ResponseCode.GROUP_DELETE, HttpStatus.BAD_REQUEST, "failed to delete group"),
@@ -35,16 +35,16 @@ public enum GroupErrorCode implements ErrorCode {
     GROUP_KICK_FAIL(ResponseCode.GROUP_KICK, HttpStatus.BAD_REQUEST, "failed to kick user from group"),
     GROUP_INVITE_FAIL(ResponseCode.GROUP_INVITE, HttpStatus.BAD_REQUEST, "failed to invite user to group"),
 
-    GROUP_CODE_NOT_FOUND(ResponseCode.GROUP_ENTRY_CODE, HttpStatus.NOT_FOUND, "can't find group entry code"),
+    GROUP_CODE_NOT_FOUND(ResponseCode.GROUP_ENTRY_CODE, HttpStatus.NOT_FOUND, "can't findAndDelete group entry code"),
     GROUP_CODE_INVALID(ResponseCode.GROUP_ENTRY_CODE, HttpStatus.BAD_REQUEST, "invalid group entry code"),
 
-    GROUP_MEMBER_NOT_FOUND(ResponseCode.GROUP_MEMBER_LIST, HttpStatus.NOT_FOUND, "can't find member in group"),
+    GROUP_MEMBER_NOT_FOUND(ResponseCode.GROUP_MEMBER_LIST, HttpStatus.NOT_FOUND, "can't findAndDelete member in group"),
     GROUP_MEMBER_CREATE_FAIL(
             ResponseCode.GROUP_CREATE, HttpStatus.BAD_REQUEST, "failed to createWithCategory group member"),
-    GROUP_CATEGORY_NOT_FOUND(ResponseCode.GROUP_CATEGORY, HttpStatus.BAD_REQUEST, "can't find group category"),
+    GROUP_CATEGORY_NOT_FOUND(ResponseCode.GROUP_CATEGORY, HttpStatus.BAD_REQUEST, "can't findAndDelete group category"),
 
     GROUP_ENTRY_REQUEST_NOT_FOUND(
-            ResponseCode.GROUP_ENTRY_REQUEST, HttpStatus.NOT_FOUND, "can't find group entry request");
+            ResponseCode.GROUP_ENTRY_REQUEST, HttpStatus.NOT_FOUND, "can't findAndDelete group entry request");
 
     private final ResponseCode responseCode;
     private final HttpStatus status;

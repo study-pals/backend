@@ -22,7 +22,6 @@ import com.studypals.domain.studyManage.api.StudySessionController;
 import com.studypals.domain.studyManage.dto.EndStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
-import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.service.StudySessionService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -45,9 +44,9 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void start_success_withCategoryId() throws Exception {
         // given
-        StartStudyReq req = new StartStudyReq(StudyType.PERSONAL, 1L, null, LocalTime.of(10, 0));
+        StartStudyReq req = new StartStudyReq(1L, null, LocalTime.of(10, 0));
 
-        StartStudyRes res = new StartStudyRes(true, LocalTime.of(10, 0, 0), 0L, StudyType.PERSONAL, null, "some name");
+        StartStudyRes res = new StartStudyRes(true, LocalTime.of(10, 0, 0), 0L, null, "some name", 1200L);
         Response<StartStudyRes> expected = CommonResponse.success(ResponseCode.STUDY_START, res, "success start");
 
         given(studySessionService.startStudy(any(), any())).willReturn(res);
@@ -64,11 +63,8 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                         httpRequest(),
                         httpResponse(),
                         requestFields(
-                                fieldWithPath("studyType")
-                                        .description("공부 유형 타입 정의")
-                                        .attributes(constraints("GROUP / PERSONAL / TEMPORARY 허용")),
-                                fieldWithPath("typeId")
-                                        .description("연관된 테이블의 레코드 ID")
+                                fieldWithPath("categoryId")
+                                        .description("공부를 시작할 카테고리의 아이디")
                                         .attributes(constraints("temporaryName과 상호 베타적")),
                                 fieldWithPath("temporaryName")
                                         .description("임시 카테고리 이름")
@@ -81,9 +77,9 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data.studying").description("공부 중 여부"),
                                 fieldWithPath("data.startTime").description("공부 시작 시간"),
                                 fieldWithPath("data.studyTime").description("현재까지 누적 공부 시간"),
-                                fieldWithPath("data.studyType").description("공부 유형 타입"),
-                                fieldWithPath("data.typeId").description("공부 유형 타입 ID"),
-                                fieldWithPath("data.temporaryName").description("임시 카테고리 이름"))));
+                                fieldWithPath("data.categoryId").description("공부 중인 카테고리 아이디"),
+                                fieldWithPath("data.name").description("공부 중인 임시 카테고리 이름"),
+                                fieldWithPath("data.goal").description("공부 중인 카테고리의 목표 시간"))));
     }
 
     @Test

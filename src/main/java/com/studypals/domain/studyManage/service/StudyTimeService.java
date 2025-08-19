@@ -20,7 +20,7 @@ import com.studypals.domain.studyManage.dto.PeriodDto;
 public interface StudyTimeService {
     /**
      * studies 를 반환합니다. 이는 StudyTime 테이블에 특정 날짜에 대한 유저의 카테고리-공부시간 에 대한
-     * 리스트를 반환합니다. 카테고리 대신 temporaryName 이 들어가 있을 수도 있습니다.
+     * 리스트를 반환합니다. 영속화된 카테고리의 경우 categoryId 와 name 이 모두 존재합니다. 임시 카테고리의 경우 name 만 존재합니다.
      * 만약 "오늘"보다 이후의 날짜가 들어오면 빈 리스트를 반환합니다.
      * 해당 날짜에 아무런 데이터가 없으면 빈 리스트를 반환합니다.
      * @param userId 찾고자 하는 user의 id

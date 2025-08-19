@@ -34,4 +34,6 @@ import com.studypals.global.redis.redisHashRepository.RedisEntityMetadataReader;
 public @interface RedisHashEntity {
 
     String value() default "";
+
+    String lock() default "";
 }

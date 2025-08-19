@@ -13,9 +13,12 @@ import com.studypals.domain.chatManage.dto.IncomingMessage;
 import com.studypals.domain.chatManage.service.ChatService;
 
 /**
- * websocket 기반 stomp 채팅 시 message mapping 을 통해 바인딩되어 처리를 수행합니다.
+ * websocket 기반 stomp 채팅 시 message mapping 을 통해 바인딩되어 처리를 수행합니다. <br>
+ * 인증/인가 및 유저 정보, 세션 처리 등은 {@link com.studypals.global.websocket.StompAuthChannelInterceptor StompAuthChannelInterceptor}
+ * 에서 관리됩니다. {@code Principal} 로 들어오는 유저 데이터 역시 해당 인터셉터에서 바이딩됩니다.
  * <pre>
- *     - GET /send/message : 채팅 내용 전송 시 사용
+ *     - (/pub)/send/message : 채팅 메시지를 송신
+ *     - (/pub)/read/message : 메시지 읽음 알림
  * </pre>
  *
  * @author jack8
@@ -33,7 +36,9 @@ public class ChatController {
 
         Long userId = Long.parseLong(principal.getName());
 
+        // 유저가 송신하는 목적지가 가능한 값인지 검증(채팅방에 속해 있는지)
         chatService.sendDestinationValidate(sessionId, message.getRoom());
+        // 메시지를 전송
         chatService.sendMessage(userId, message);
     }
 

@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 public record EntityMeta(
         Class<?> type,
         String keyPrefix,
+        String lockPrefix,
         long ttlValue,
         TimeUnit ttlUnit,
         Field idField,

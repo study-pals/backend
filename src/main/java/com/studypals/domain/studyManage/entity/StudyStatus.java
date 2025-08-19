@@ -25,7 +25,7 @@ import lombok.Getter;
  * Long expiration;
  * StudyType studyType;
  * Long typeId;
- * String temporaryName;
+ * String name;
  *     }
  * </pre>
  *
@@ -48,11 +48,11 @@ public class StudyStatus {
     @Builder.Default
     private Long studyTime = 0L;
 
-    private StudyType studyType;
+    private Long categoryId;
 
-    private Long typeId;
+    private String name;
 
-    private String temporaryName;
+    private Long goal;
 
     @TimeToLive(unit = TimeUnit.DAYS)
     @Builder.Default

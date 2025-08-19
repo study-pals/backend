@@ -11,20 +11,24 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.studyManage.dto.CreateCategoryDto;
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
 import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
+import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
+import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.service.StudyCategoryService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 
 /**
- * category 에 대한 컨트롤러입니다. 담당하는 엔드포인트는 다음과 같습니다.
+ * category 에 대한 컨트롤러입니다. 기본적인 CRUD 에 대한 요청이 포함되어 있으며,
+ * 개인이 생성한 카테고리에 대한 정보를 취급합니다.
+ * 담당하는 엔드포인트는 다음과 같습니다.
  * <pre>
- *     - POST /category                   : 카테고리 생성({@link CreateCategoryReq})
+ *     - POST /category                   : 개인 카테고리 생성({@link CreateCategoryReq})
  *     - DELETE /category/{categoryId}    : 카테고리 제거
- *     - DELETE /category/all             : 카테고리 전부 제거
  *     - PUT /category                    : 카테고리 수정({@link UpdateCategoryReq})
  *     - GET /category                    : 카테고리 정보 요청
  * </pre>
@@ -38,12 +42,15 @@ import com.studypals.global.responses.ResponseCode;
 public class CategoryController {
 
     private final StudyCategoryService studyCategoryService;
+    private final CategoryMapper categoryMapper;
 
     @PostMapping
     public ResponseEntity<Void> create(
             @AuthenticationPrincipal Long userId, @Valid @RequestBody CreateCategoryReq req) {
 
-        Long categoryId = studyCategoryService.createCategory(userId, req);
+        CreateCategoryDto dto = categoryMapper.reqToDto(req, StudyType.PERSONAL, userId);
+
+        Long categoryId = studyCategoryService.createCategory(userId, dto);
         return ResponseEntity.created(URI.create("/categories/" + categoryId)).build();
     }
 
@@ -54,16 +61,10 @@ public class CategoryController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/all")
-    public ResponseEntity<Void> deleteAll(@AuthenticationPrincipal Long userId) {
-
-        studyCategoryService.initCategory(userId);
-        return ResponseEntity.noContent().build();
-    }
-
     @PutMapping
     public ResponseEntity<Response<Void>> update(
             @AuthenticationPrincipal Long userId, @Valid @RequestBody UpdateCategoryReq req) {
+
         Long categoryId = studyCategoryService.updateCategory(userId, req);
         return ResponseEntity.created(URI.create("/categories/" + categoryId)).build();
     }
@@ -71,7 +72,7 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<Response<List<GetCategoryRes>>> read(@AuthenticationPrincipal Long userId) {
 
-        List<GetCategoryRes> res = studyCategoryService.getUserCategory(userId);
+        List<GetCategoryRes> res = studyCategoryService.getAllUserCategories(userId);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_CATEGORY_LIST, res));
     }
 }

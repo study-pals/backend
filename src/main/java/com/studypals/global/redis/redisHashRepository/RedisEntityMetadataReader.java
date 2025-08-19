@@ -4,6 +4,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,10 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import com.studypals.global.redis.redisHashRepository.annotations.Expires;
-import com.studypals.global.redis.redisHashRepository.annotations.RedisHashEntity;
-import com.studypals.global.redis.redisHashRepository.annotations.RedisHashMapField;
-import com.studypals.global.redis.redisHashRepository.annotations.RedisId;
+import com.studypals.global.redis.redisHashRepository.annotations.*;
 
 /**
  * {@code @RedisHashEntity} 어노테이션이 붙은 클래스의 메타데이터를 분석하고 캐싱하는 리더 클래스입니다.
@@ -66,6 +65,10 @@ public final class RedisEntityMetadataReader {
                         + type.getSimpleName().substring(1)
                 : rh.value();
         keyPrefix = keyPrefix + ":";
+
+        String lockPrefix = rh.lock().isBlank() ? ("lock:" + keyPrefix) : rh.lock();
+
+        lockPrefix = lockPrefix + ":";
 
         // TTL setting
         Expires expires = type.getAnnotation(Expires.class);
@@ -128,6 +131,7 @@ public final class RedisEntityMetadataReader {
             return new EntityMeta(
                     type,
                     keyPrefix,
+                    lockPrefix,
                     ttlValue,
                     ttlUnit,
                     idField,
@@ -155,6 +159,8 @@ public final class RedisEntityMetadataReader {
                 || t == double.class
                 || t == Double.class
                 || t == char.class
-                || t == Character.class;
+                || t == Character.class
+                || t == LocalDate.class
+                || t == LocalDateTime.class;
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
+import com.studypals.domain.studyManage.entity.DateType;
 import com.studypals.global.responses.ResponseCode;
 import com.studypals.testModules.testSupport.IntegrationSupport;
 
@@ -32,7 +33,7 @@ public class CategoryIntegrationTest extends IntegrationSupport {
     void create_success() throws Exception {
         // given
         CreateUserVar user = createUser();
-        CreateCategoryReq req = new CreateCategoryReq("알고리즘", 1200L, "#112233", 7, "문제풀이");
+        CreateCategoryReq req = new CreateCategoryReq(null, "알고리즘", DateType.DAILY, 1200L, "#112233", 7, "문제풀이");
 
         // when
         ResultActions result = mockMvc.perform(post("/categories")
@@ -52,7 +53,7 @@ public class CategoryIntegrationTest extends IntegrationSupport {
         CreateUserVar user = createUser();
         Long categoryId = createCategory(user.getUserId(), "이전 이름");
 
-        UpdateCategoryReq req = new UpdateCategoryReq(categoryId, "새 이름", "#000000", 3, "설명 수정");
+        UpdateCategoryReq req = new UpdateCategoryReq(categoryId, DateType.DAILY, "새 이름", 1200L, "#000000", 3, "설명 수정");
 
         // when
         ResultActions result = mockMvc.perform(put("/categories")
@@ -74,22 +75,6 @@ public class CategoryIntegrationTest extends IntegrationSupport {
         // when
         ResultActions result = mockMvc.perform(delete("/categories/{categoryId}", categoryId)
                 .header("Authorization", "Bearer " + user.getAccessToken()));
-
-        // then
-        result.andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("DELETE /categories/all")
-    void deleteAll_success() throws Exception {
-        // given
-        CreateUserVar user = createUser();
-        createCategory(user.getUserId(), "1번");
-        createCategory(user.getUserId(), "2번");
-
-        // when
-        ResultActions result =
-                mockMvc.perform(delete("/categories/all").header("Authorization", "Bearer " + user.getAccessToken()));
 
         // then
         result.andExpect(status().isNoContent());
@@ -119,11 +104,14 @@ public class CategoryIntegrationTest extends IntegrationSupport {
     private Long createCategory(Long userId, String name) {
         String sql =
                 """
-            INSERT INTO study_category (name, color, day_belong, description, member_id)
-            VALUES (?, '#000000', 1, '테스트 설명', ?)
+            INSERT INTO study_category (study_type, type_id, date_type, name, color, day_belong, description)
+            VALUES ('PERSONAL', ?, 'DAILY', ?,'#000000', 127, '테스트 설명')
         """;
-        jdbcTemplate.update(sql, name, userId);
+        jdbcTemplate.update(sql, userId, name);
         return jdbcTemplate.queryForObject(
-                "SELECT id FROM study_category WHERE name = ? AND member_id = ?", Long.class, name, userId);
+                "SELECT id FROM study_category WHERE name = ? AND study_type = 'PERSONAL' AND type_id = ?",
+                Long.class,
+                name,
+                userId);
     }
 }

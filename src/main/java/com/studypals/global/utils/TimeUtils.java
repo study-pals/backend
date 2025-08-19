@@ -1,9 +1,7 @@
 package com.studypals.global.utils;
 
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
+import java.time.temporal.WeekFields;
 
 import org.springframework.stereotype.Component;
 
@@ -29,14 +27,57 @@ public class TimeUtils {
 
     private final Clock clock;
 
+    private static final LocalTime CUTOFF = LocalTime.of(6, 0);
+
+    private volatile WeekSnapshot weekCache;
+
     public LocalDate getToday() {
         LocalDateTime now = LocalDateTime.now(clock);
-        LocalTime cutOff = LocalTime.of(6, 0);
 
-        if (now.toLocalTime().isBefore(cutOff)) {
+        if (now.toLocalTime().isBefore(CUTOFF)) {
             return now.toLocalDate().minusDays(1);
         } else {
             return now.toLocalDate();
+        }
+    }
+
+    public WeekSnapshot getWeeks() {
+        WeekSnapshot snap = weekCache;
+
+        // 캐시가 있고 아직 만료 전이면 그대로 반환
+        if (snap != null && snap.isSameDate(getToday())) {
+            return snap;
+        }
+
+        // 갱신 필요: 새 스냅샷 계산
+        weekCache = updateWeekCache(); // volatile로 가벼운 퍼블리시
+        return weekCache;
+    }
+
+    private WeekSnapshot updateWeekCache() {
+        ZoneId zone = clock.getZone();
+
+        LocalDate today = getToday(); // cut-off 반영
+        WeekFields wf = WeekFields.ISO;
+
+        int week = today.get(wf.weekOfWeekBasedYear());
+        int weekYear = today.get(wf.weekBasedYear());
+        DayOfWeek dayOfWeek = today.getDayOfWeek();
+
+        return new WeekSnapshot(weekYear, week, dayOfWeek, today);
+    }
+
+    public record WeekSnapshot(int year, int week, DayOfWeek dayOfWeek, LocalDate date) {
+        public Boolean isSameDate(WeekSnapshot other) {
+            return other != null && this.date == other.date();
+        }
+
+        public Boolean isSameDate(LocalDate date) {
+            return date != null && this.date == date;
+        }
+
+        public Boolean isSameWeek(WeekSnapshot other) {
+            return other != null && this.year == other.year() && this.week == other.week();
         }
     }
 }

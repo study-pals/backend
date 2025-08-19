@@ -18,7 +18,6 @@ import com.studypals.domain.studyManage.dao.DailyStudyInfoRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.entity.StudyStatus;
-import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
 import com.studypals.global.utils.TimeUtils;
@@ -45,89 +44,56 @@ class StudyStatusWorkerTest {
     private StudyStatusWorker studyStatusWorker;
 
     @Test
-    void find_success() {
+    void find_AndDelete_success() {
         // given
         Long userId = 1L;
         StudyStatus status = StudyStatus.builder().id(userId).studyTime(120L).build();
         given(studyStatusRedisRepository.findById(userId)).willReturn(Optional.of(status));
 
         // when
-        Optional<StudyStatus> result = studyStatusWorker.find(userId);
+        Optional<StudyStatus> result = studyStatusWorker.findAndDelete(userId);
 
         // then
         assertThat(result).isPresent().contains(status);
     }
 
     @Test
-    void find_success_notExist() {
+    void find_AndDelete_success_notExist() {
         // given
         Long userId = 1L;
         given(studyStatusRedisRepository.findById(userId)).willReturn(Optional.empty());
 
         // when
-        Optional<StudyStatus> result = studyStatusWorker.find(userId);
+        Optional<StudyStatus> result = studyStatusWorker.findAndDelete(userId);
 
         // then
         assertThat(result).isEmpty();
     }
 
     @Test
-    void firstStatus_success() {
+    void startStatus_success_firstInDay() {
         // given
         Long userId = 1L;
+        Long categoryId = 2L;
         LocalDate today = LocalDate.of(2025, 1, 1);
-        StartStudyReq req = new StartStudyReq(StudyType.PERSONAL, 1L, null, LocalTime.of(9, 30));
-        given(timeUtils.getToday()).willReturn(today);
+        LocalTime time = LocalTime.of(11, 0);
+        StartStudyReq req = new StartStudyReq(categoryId, null, time);
+
         given(mockMember.getId()).willReturn(userId);
+        given(timeUtils.getToday()).willReturn(today);
+        given(dailyStudyInfoRepository.existsByMemberIdAndStudiedDate(userId, today))
+                .willReturn(false);
 
         // when
-        StudyStatus result = studyStatusWorker.firstStatus(mockMember, req);
+        StudyStatus result = studyStatusWorker.startStatus(mockMember, req);
 
         // then
+        then(dailyStudyInfoRepository).should().save(any());
         assertThat(result.getId()).isEqualTo(userId);
         assertThat(result.getStartTime()).isEqualTo(req.startTime());
-        assertThat(result.getTypeId()).isEqualTo(req.typeId());
-        assertThat(result.getTemporaryName()).isEqualTo(req.temporaryName());
+        assertThat(result.getCategoryId()).isEqualTo(categoryId);
+        assertThat(result.getName()).isEqualTo(req.temporaryName());
         assertThat(result.isStudying()).isTrue();
-    }
-
-    @Test
-    void resetStatus_success() {
-        // given
-        StudyStatus original = StudyStatus.builder()
-                .id(1L)
-                .studyTime(100L)
-                .studyType(StudyType.TEMPORARY)
-                .temporaryName("test")
-                .startTime(LocalTime.of(10, 0))
-                .studying(true)
-                .build();
-
-        // when
-        StudyStatus updated = studyStatusWorker.resetStatus(original, 200L);
-
-        // then
-        assertThat(updated.isStudying()).isFalse();
-        assertThat(updated.getStudyTime()).isEqualTo(300L);
-        assertThat(updated.getTemporaryName()).isNull();
-        assertThat(updated.getStartTime()).isNull();
-    }
-
-    @Test
-    void restartStatus_success() {
-        // given
-        StartStudyReq req = new StartStudyReq(StudyType.TEMPORARY, null, "focus", LocalTime.of(9, 30));
-        StudyStatus current =
-                StudyStatus.builder().id(1L).studyTime(120L).studying(false).build();
-
-        // when
-        StudyStatus restarted = studyStatusWorker.restartStatus(current, req);
-
-        // then
-        assertThat(restarted.isStudying()).isTrue();
-        assertThat(restarted.getStartTime()).isEqualTo(req.startTime());
-        assertThat(restarted.getTypeId()).isNull();
-        assertThat(restarted.getTemporaryName()).isEqualTo("focus");
     }
 
     @Test

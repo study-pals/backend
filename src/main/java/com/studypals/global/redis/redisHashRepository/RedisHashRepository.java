@@ -1,5 +1,6 @@
 package com.studypals.global.redis.redisHashRepository;
 
+import java.time.Duration;
 import java.util.*;
 
 import org.springframework.data.repository.Repository;
@@ -119,4 +120,23 @@ public interface RedisHashRepository<E, ID> extends Repository<E, ID> {
      * @param fieldKey 삭제할 필드 키
      */
     void deleteMapById(ID hashKey, String fieldKey);
+
+    /**
+     * 락 취득을 위한 메서드입니다. 락에 대한 정보가 redis에 등록됩니다.
+     * 락 취득에 실패하면 null 이 반환됩니다.
+     * @param id 엔티티 아이디
+     * @param ttl 해당 락의 time to leave
+     * @return 락 토큰 문자열(UUID) 혹은 null
+     */
+    String tryLock(ID id, Duration ttl);
+
+    /**
+     * 락을 해제합니다.
+     * @param id 엔티티 아이디
+     * @param token 해제를 위한 토큰
+     * @return 해제 성공 여부
+     */
+    boolean unlock(ID id, String token);
+
+    boolean refreshLock(ID id, String token, Duration ttl);
 }
