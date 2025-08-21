@@ -98,7 +98,7 @@ class StudySessionServiceTest {
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(studyStatusWorker.find(userId)).willReturn(Optional.empty());
-        given(studyStatusWorker.startStatus(mockMember, req)).willReturn(status);
+        given(studyStatusWorker.startStatus(any(), any())).willReturn(status);
         given(studyCategoryReader.getById(categoryId)).willReturn(mockStudyCategory);
         given(mockStudyCategory.getGoal()).willReturn(3600L);
         given(mockStudyCategory.getName()).willReturn(null);

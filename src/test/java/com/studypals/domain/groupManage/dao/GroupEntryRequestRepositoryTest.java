@@ -7,7 +7,6 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
@@ -22,19 +21,7 @@ import com.studypals.testModules.testSupport.DataJpaSupport;
 public class GroupEntryRequestRepositoryTest extends DataJpaSupport {
 
     @Autowired
-    private TestEntityManager em;
-
-    @Autowired
     private GroupEntryRequestRepository entryRequestRepository;
-
-    private Member insertMember(String username, String nickname) {
-        return em.persist(Member.builder()
-                .username(username)
-                .password("password")
-                .nickname(nickname)
-                .imageUrl("imageUrl-url")
-                .build());
-    }
 
     private Group insertGroup() {
         return em.persist(Group.builder().name("group").tag("tag").build());

@@ -1,6 +1,6 @@
 package com.studypals.domain.studyManage.entity;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.persistence.Id;
@@ -43,7 +43,7 @@ public class StudyStatus {
     @Builder.Default
     private boolean studying = true;
 
-    private LocalTime startTime;
+    private LocalDateTime startTime;
 
     @Builder.Default
     private Long studyTime = 0L;

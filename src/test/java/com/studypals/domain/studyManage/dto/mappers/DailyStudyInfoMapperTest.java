@@ -33,7 +33,7 @@ class DailyStudyInfoMapperTest {
                 .studiedDate(LocalDate.of(2024, 4, 20))
                 .startTime(LocalTime.of(9, 0))
                 .endTime(LocalTime.of(12, 30))
-                .memo("집중 잘 됨")
+                .description("집중 잘 됨")
                 .build();
 
         // when

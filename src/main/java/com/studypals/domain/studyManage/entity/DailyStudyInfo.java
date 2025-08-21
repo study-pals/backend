@@ -23,7 +23,11 @@ import com.studypals.domain.memberManage.entity.Member;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         name = "daily_study_info",
-        indexes = {@Index(name = "idx_member_studied", columnList = "member_id, studied_at")})
+        uniqueConstraints =
+                @UniqueConstraint(
+                        name = "uq_member_date",
+                        columnNames = {"member_id", "studied_date"}),
+        indexes = {@Index(name = "idx_member_date", columnList = "member_id, studied_date")})
 public class DailyStudyInfo {
 
     @Id
@@ -35,16 +39,16 @@ public class DailyStudyInfo {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(name = "studied_at", nullable = false)
+    @Column(name = "studied_date", nullable = false)
     private LocalDate studiedDate;
 
-    @Column(name = "start_at", nullable = false)
+    @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
 
-    @Column(name = "end_at", nullable = true)
+    @Column(name = "end_time", nullable = true)
     @Setter
     private LocalTime endTime;
 
-    @Column(name = "memo", columnDefinition = "TEXT")
-    private String memo;
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 }

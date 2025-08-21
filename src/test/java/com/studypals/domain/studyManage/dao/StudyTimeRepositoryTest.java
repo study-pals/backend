@@ -8,7 +8,6 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.entity.DateType;
@@ -27,18 +26,7 @@ import com.studypals.testModules.testSupport.DataJpaSupport;
 class StudyTimeRepositoryTest extends DataJpaSupport {
 
     @Autowired
-    private TestEntityManager em;
-
-    @Autowired
     private StudyTimeRepository studyTimeRepository;
-
-    private Member insertMember() {
-        return em.persist(Member.builder()
-                .username("username")
-                .password("password")
-                .nickname("nickname")
-                .build());
-    }
 
     private StudyCategory insertCategory(Long userId, int cnt) {
         return em.persist(StudyCategory.builder()
