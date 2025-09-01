@@ -1,9 +1,6 @@
 package com.studypals.domain.chatManage.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * server -> client 로의 메시지 형식을 정의합니다.
@@ -18,6 +15,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OutgoingMessage {
+    @Setter
+    private String id;
+
     private ChatType type;
     private String message;
     private Long senderId;

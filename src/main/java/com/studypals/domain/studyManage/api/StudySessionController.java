@@ -20,7 +20,9 @@ import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 
 /**
- * 공부 시간 데이터 전반에 대한 컨트롤러입니다. 담당하는 엔드포인트는 다음과 같습니다.
+ * 공부 시간 데이터 전반에 대한 컨트롤러입니다. 사용자는 해당 엔드포인트를 사용하여 공부를 시작하고 마칠 수 있습니다. <br>
+ * 내부 구현 원리는 문서를 참조해 주시기 바랍니다. <br>
+ * 담당하는 엔드포인트는 다음과 같습니다.
  * <pre>
  *     - POST /studies/sessions/start        : 공부 시작
  *     - POST /studies/sessions/end          : 공부 끝

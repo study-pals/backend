@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.studyManage.dto.EndStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
-import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.global.responses.ResponseCode;
 import com.studypals.testModules.testSupport.IntegrationSupport;
 
@@ -35,7 +34,7 @@ public class StudySessionIntegrationTest extends IntegrationSupport {
     void startStudy_success_withCategoryId() throws Exception {
         // given
         CreateUserVar user = createUser();
-        StartStudyReq req = new StartStudyReq(StudyType.PERSONAL, 1L, null, LocalTime.of(9, 0));
+        StartStudyReq req = new StartStudyReq(null, "tempName", LocalTime.of(9, 0));
 
         // when
         ResultActions result = mockMvc.perform(post("/studies/sessions/start")
@@ -50,8 +49,7 @@ public class StudySessionIntegrationTest extends IntegrationSupport {
                 .andExpect(jsonPath("$.data.studying").value(true))
                 .andExpect(jsonPath("$.data.startTime").exists())
                 .andExpect(jsonPath("$.data.studyTime").value(0))
-                .andExpect(jsonPath("$.data.studyType").value("PERSONAL"))
-                .andExpect(jsonPath("$.data.typeId").value(1));
+                .andExpect(jsonPath("$.data.name").value("tempName"));
     }
 
     @Test
@@ -61,7 +59,7 @@ public class StudySessionIntegrationTest extends IntegrationSupport {
         CreateUserVar user = createUser();
 
         // 공부 시작
-        StartStudyReq startReq = new StartStudyReq(StudyType.TEMPORARY, null, "name", LocalTime.of(9, 0));
+        StartStudyReq startReq = new StartStudyReq(null, "name", LocalTime.of(9, 0));
         ResultActions result = mockMvc.perform(post("/studies/sessions/start")
                 .header("Authorization", "Bearer " + user.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)

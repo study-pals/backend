@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.studypals.domain.studyManage.dto.*;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyTime;
-import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.StudyTimeReader;
 import com.studypals.global.utils.TimeUtils;
 
@@ -47,7 +46,7 @@ class StudyTimeServiceTest {
 
     private StudyTime make(String name, LocalDate studiedDate, Long time) {
         return StudyTime.builder()
-                .temporaryName(name)
+                .name(name)
                 .studiedDate(studiedDate)
                 .time(time)
                 .build();
@@ -76,10 +75,10 @@ class StudyTimeServiceTest {
         // given
         Long userId = 1L;
         LocalDate today = LocalDate.of(2025, 4, 14);
-        GetStudyDto dto = new GetStudyDto(StudyType.PERSONAL, 1L, null, 3600L);
+        GetStudyDto dto = new GetStudyDto(1L, null, 3600L);
 
         given(timeUtils.getToday()).willReturn(today);
-        given(studyTimeReader.getListByMemberAndDate(userId, today)).willReturn(List.of(mockStudyTime));
+        given(studyTimeReader.findByUserIdAndDate(userId, today)).willReturn(List.of(mockStudyTime));
         given(studyTimeMapper.toDto(mockStudyTime)).willReturn(dto);
 
         // when
@@ -97,7 +96,7 @@ class StudyTimeServiceTest {
         LocalDate today = LocalDate.of(2025, 4, 14);
 
         given(timeUtils.getToday()).willReturn(today);
-        given(studyTimeReader.getListByMemberAndDate(userId, today)).willReturn(List.of());
+        given(studyTimeReader.findByUserIdAndDate(userId, today)).willReturn(List.of());
 
         // when
         List<GetStudyDto> result = studyTimeService.getStudyList(userId, today);
@@ -121,7 +120,7 @@ class StudyTimeServiceTest {
                 make("time5", date.plusDays(3), 100L),
                 make("time6", date.plusDays(3), 100L));
 
-        given(studyTimeReader.getListByMemberAndDateByPeriod(userId, period)).willReturn(timeList);
+        given(studyTimeReader.findByUserIdAndPeriod(userId, period)).willReturn(timeList);
 
         // when
         List<GetDailyStudyDto> results = studyTimeService.getDailyStudyList(userId, period);

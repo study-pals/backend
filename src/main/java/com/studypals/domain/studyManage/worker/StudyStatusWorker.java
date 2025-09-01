@@ -16,12 +16,10 @@ import com.studypals.global.exceptions.exception.StudyException;
 import com.studypals.global.utils.TimeUtils;
 
 /**
- * 공부 상태를 나타내는 studyStatus 의 저장/조회 및, 해당 객체의 생성에 대한
- * 역할을 수행합니다.
+ * 공부 상태를 나타내는 studyStatus 의 저장/조회 및, 해당 객체의 생성 등을 담당합니다.
  *
  * <p><b>빈 관리:</b><br>
  * Worker
- *
  *
  * @author jack8
  * @see StudyStatus
@@ -45,62 +43,45 @@ public class StudyStatusWorker {
     }
 
     /**
-     * 처음 공부 시작 시 객체를 생성합니다. 추가로, DailyStudyInfo를 생성하고 추가합니다.
+     * id 에 대해 studyStatus 를 검색하고, 이를 삭제합니다.
+     * @param id 검새갛고자 하는 id(userId)
+     * @return Optional - study status
+     */
+    public Optional<StudyStatus> findAndDelete(Long id) {
+        Optional<StudyStatus> result = studyStatusRedisRepository.findById(id);
+        result.ifPresent(x -> studyStatusRedisRepository.deleteById(id));
+        return result;
+    }
+
+    public void delete(Long id) {
+        studyStatusRedisRepository.deleteById(id);
+    }
+
+    /**
+     * StudyStatus 를 생성하고 적절한 값을 넣어 반환 <br>
+     * {@link DailyStudyInfo} 를 같이 생성한다.
      * @param dto 공부 데이터
      * @return 만들어진 객체
      */
-    public StudyStatus firstStatus(Member member, StartStudyReq dto) {
+    public StudyStatus startStatus(Member member, StartStudyReq dto) {
 
-        DailyStudyInfo summary = DailyStudyInfo.builder()
-                .member(member)
-                .studiedDate(timeUtils.getToday())
-                .startTime(dto.startTime())
-                .build();
-
-        try {
+        // dailyStudyInfo 를 찾고, 만약 존재하지 않으면 적절한 값(date, startTime)을 넣어 시작
+        if (!dailyStudyInfoRepository.existsByMemberIdAndStudiedDate(member.getId(), timeUtils.getToday())) {
+            DailyStudyInfo summary = DailyStudyInfo.builder()
+                    .member(member)
+                    .studiedDate(timeUtils.getToday())
+                    .startTime(dto.startTime())
+                    .build();
             dailyStudyInfoRepository.save(summary);
-        } catch (Exception e) {
-            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL, "fail to create daily study info");
         }
 
+        // 새로운 studyStatus 를 생성하여 반환
         return StudyStatus.builder()
                 .id(member.getId())
+                .categoryId(dto.categoryId())
                 .studying(true)
                 .startTime(dto.startTime())
-                .studyType(dto.studyType())
-                .typeId(dto.typeId())
-                .temporaryName(dto.temporaryName())
-                .build();
-    }
-
-    /**
-     * 공부 종료 후, 해당 메서드를 통해 사용자가 공부 중이 아님을 표시한다.
-     * @param status 기존에 존재하던 사용자의 공부 상태
-     * @param studiedTimeToAdd 사용자가 추가로 공부한 시간
-     */
-    public StudyStatus resetStatus(StudyStatus status, Long studiedTimeToAdd) {
-        return status.update()
-                .studyTime(status.getStudyTime() + studiedTimeToAdd)
-                .studying(false)
-                .startTime(null)
-                .studyType(null)
-                .typeId(null)
-                .temporaryName(null)
-                .build();
-    }
-
-    /**
-     * 기존에 공부한 흔적이 redis에 있는 경우, 이를 업데이트하는 status 생성
-     * @param status 기존에 존재하던 사용자의 공부 상태
-     * @param dto 재시작하는 공부 정보
-     */
-    public StudyStatus restartStatus(StudyStatus status, StartStudyReq dto) {
-        return status.update()
-                .studying(true)
-                .startTime(dto.startTime())
-                .studyType(dto.studyType())
-                .typeId(dto.typeId())
-                .temporaryName(dto.temporaryName())
+                .name(dto.temporaryName())
                 .build();
     }
 
@@ -126,13 +107,21 @@ public class StudyStatusWorker {
         }
     }
 
+    /**
+     * 특정 userId 에 대해, 해당 값이 존재하는지 여부를 반환합니다.
+     * @param userId 유저 아이디 및 key
+     * @return 존재 여부에 대한 boolean 값
+     */
+    public boolean isStudying(Long userId) {
+        return studyStatusRedisRepository.existsById(userId);
+    }
+
     private void resetAndSaveStatus(StudyStatus status) {
         StudyStatus updated = status.update()
                 .studying(false)
                 .startTime(null)
-                .studyType(null)
-                .typeId(null)
-                .temporaryName(null)
+                .categoryId(null)
+                .name(null)
                 .build();
 
         saveStatus(updated);

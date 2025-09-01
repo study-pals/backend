@@ -33,8 +33,8 @@ class StudyTimeMapperTest {
                 .id(1L)
                 .studyTime(100L)
                 .startTime(LocalTime.of(10, 30))
-                .typeId(5L)
-                .temporaryName("temp")
+                .categoryId(1L)
+                .name("temp")
                 .build();
 
         // when
@@ -44,8 +44,8 @@ class StudyTimeMapperTest {
         assertThat(dto.studying()).isTrue();
         assertThat(dto.startTime()).isEqualTo(LocalTime.of(10, 30));
         assertThat(dto.studyTime()).isEqualTo(100L);
-        assertThat(dto.typeId()).isEqualTo(5L);
-        assertThat(dto.temporaryName()).isEqualTo("temp");
+        assertThat(dto.categoryId()).isEqualTo(1L);
+        assertThat(dto.name()).isEqualTo("temp");
     }
 
     @Test
@@ -57,7 +57,7 @@ class StudyTimeMapperTest {
 
         StudyTime studyTime = StudyTime.builder()
                 .id(1L)
-                .temporaryName("temp")
+                .name("temp")
                 .studiedDate(LocalDate.of(2024, 1, 1))
                 .time(80L)
                 .member(Member.builder().id(1L).build())
@@ -67,7 +67,7 @@ class StudyTimeMapperTest {
         GetStudyDto dto = mapper.toDto(studyTime);
 
         // then
-        assertThat(dto.temporaryName()).isEqualTo("temp");
+        assertThat(dto.name()).isEqualTo("temp");
         assertThat(dto.time()).isEqualTo(80L);
     }
 }

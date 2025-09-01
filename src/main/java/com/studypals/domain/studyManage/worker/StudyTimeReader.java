@@ -6,7 +6,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
-import com.studypals.domain.studyManage.dto.GroupTypeDto;
 import com.studypals.domain.studyManage.dto.PeriodDto;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.global.annotations.Worker;
@@ -28,19 +27,23 @@ public class StudyTimeReader {
 
     private final StudyTimeRepository studyTimeRepository;
 
-    public List<StudyTime> getListByMemberAndDate(Long userId, LocalDate date) {
+    /**
+     * 사용자 아이디와 날짜를 통해, 해당 날짜에서 해당 유저가 공부한 기록을 list 로 반환합니다.
+     * @param userId 검색하고자 하는 user id
+     * @param date 검색하고자 하는 날짜
+     * @return StudyTime 에 대한 리스트
+     */
+    public List<StudyTime> findByUserIdAndDate(Long userId, LocalDate date) {
         return studyTimeRepository.findByMemberIdAndStudiedDate(userId, date);
     }
 
-    public List<StudyTime> getListByMemberAndDateByPeriod(Long userId, PeriodDto periodDto) {
+    /**
+     * 사용자 아이디와, 특정 기간에 대해, 해당 유저가 공부한 기록에 대한 리스트를 반환합니다.
+     * @param userId 검새갛조가 하는 user id
+     * @param periodDto 기간에 대한 dto
+     * @return StudyTime 에 대한 리스트
+     */
+    public List<StudyTime> findByUserIdAndPeriod(Long userId, PeriodDto periodDto) {
         return studyTimeRepository.findAllByMemberIdAndStudiedDateBetween(userId, periodDto.start(), periodDto.end());
-    }
-
-    public List<StudyTime> getListByGroup(GroupTypeDto groupTypeDto) {
-        return studyTimeRepository.findByStudyTypeBetween(
-                groupTypeDto.period().start(),
-                groupTypeDto.period().end(),
-                groupTypeDto.type().name(),
-                groupTypeDto.ids());
     }
 }
