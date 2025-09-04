@@ -5,14 +5,12 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.studyManage.dao.DailyStudyInfoRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
 import com.studypals.domain.studyManage.dto.StartStudyDto;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
-import com.studypals.global.utils.TimeUtils;
 
 /**
  * 공부 상태를 나타내는 studyStatus 의 저장/조회 및, 해당 객체의 생성 등을 담당합니다.
@@ -29,8 +27,6 @@ import com.studypals.global.utils.TimeUtils;
 public class StudyStatusWorker {
 
     private final StudyStatusRedisRepository studyStatusRedisRepository;
-    private final DailyStudyInfoRepository dailyStudyInfoRepository;
-    private final TimeUtils timeUtils;
 
     /**
      * id에 대하여 studyStatus 를 redis로 부터 검색합니다.

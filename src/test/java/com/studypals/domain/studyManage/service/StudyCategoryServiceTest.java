@@ -31,7 +31,7 @@ import com.studypals.domain.studyManage.worker.categoryStrategy.PersonalCategory
  * @since 2025-08-15
  */
 @ExtendWith(MockitoExtension.class)
-class StudyCategoryServiceImplTest {
+class StudyCategoryServiceTest {
 
     @Mock
     private StudyCategoryWriter studyCategoryWriter;

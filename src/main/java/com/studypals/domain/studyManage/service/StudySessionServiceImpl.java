@@ -14,7 +14,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.worker.GroupStudyStatusWorker;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyDto;
@@ -54,7 +53,6 @@ public class StudySessionServiceImpl implements StudySessionService {
     private final StudySessionWorker studySessionWorker;
     private final StudyStatusWorker studyStatusWorker;
     private final StudyCategoryReader studyCategoryReader;
-    private final GroupStudyStatusWorker groupStudyStatusWorker;
     private final DailyInfoWriter dailyInfoWriter;
     private final MemberReader memberReader;
 
@@ -79,11 +77,7 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         if (req.categoryId() != null) { // 만약 졍규 카테고리에 대한 공부라면
             StudyCategory category = studyCategoryReader.getById(req.categoryId());
-            startStatus = startStatus // 카테고리 정보 반영
-                    .update()
-                    .goal(category.getGoal())
-                    .name(category.getName())
-                    .build();
+            startStatus.setGoal(category.getGoal());
         }
 
         // 공부 상태 저장
@@ -120,7 +114,7 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         } else if (startDate.plusDays(1).isEqual(today)) {
 
-            LocalTime pointTime = LocalTime.of(6, 0);
+            LocalTime pointTime = LocalTime.of(6, 0);//to static var
             long day1DurationInSec = getTimeDuration(startTime, pointTime);
             long day2DurationInSec = getTimeDuration(pointTime, endTime);
             timeSaveInfoMap.put(startDate, new TimeSaveInfo(member, startTime, pointTime));
@@ -133,9 +127,9 @@ public class StudySessionServiceImpl implements StudySessionService {
         } else {
             throw new StudyException(
                     StudyErrorCode.STUDY_TIME_END_FAIL,
-                    "[STudySessionServiceImpl#endStudy] over 1 day pass is invalid");
+                    "[StudySessionServiceImpl#endStudy] over 1 day pass is invalid");
         }
-        saveStudyTime(timeSaveInfoMap);
+        saveDailyInfo(timeSaveInfoMap);
 
         // 커밋 이후 status 반영 및 초기화
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
@@ -150,9 +144,16 @@ public class StudySessionServiceImpl implements StudySessionService {
         return totalTime;
     }
 
+    /**
+     *  dailyStudyInfo 를 저장하기 위해 구성된 데이터 전송 목적의 record. saveDailyInfo 메서드의 매개변수
+     *  구성 요소로 사용됩니다.
+     * @param member 저장할 사용자
+     * @param start 공부 시작 시간
+     * @param end 공부 종료 시간
+     */
     private record TimeSaveInfo(Member member, LocalTime start, LocalTime end) {}
 
-    private void saveStudyTime(Map<LocalDate, TimeSaveInfo> saveMap) {
+    private void saveDailyInfo(Map<LocalDate, TimeSaveInfo> saveMap) {
 
         for (Map.Entry<LocalDate, TimeSaveInfo> entry : saveMap.entrySet()) {
             TimeSaveInfo info = entry.getValue();

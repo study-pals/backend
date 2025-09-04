@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import jakarta.persistence.Id;
 
+import lombok.Setter;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 
@@ -52,6 +53,7 @@ public class StudyStatus {
 
     private String name;
 
+    @Setter
     private Long goal;
 
     @TimeToLive(unit = TimeUnit.DAYS)

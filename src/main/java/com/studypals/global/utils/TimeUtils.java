@@ -46,29 +46,29 @@ public class TimeUtils {
     }
 
     public LocalDate getToday() {
-        //        LocalDateTime now = LocalDateTime.now(clock);
-        //
-        //        if (now.toLocalTime().isBefore(CUTOFF)) {
-        //            return now.toLocalDate().minusDays(1);
-        //        } else {
-        //            return now.toLocalDate();
-        //        }
+                LocalDateTime now = LocalDateTime.now(clock);
 
-        LocalDateTime now = resolveNow();
-        return (now.toLocalTime().isBefore(CUTOFF)) ? now.toLocalDate().minusDays(1) : now.toLocalDate();
+                if (now.toLocalTime().isBefore(CUTOFF)) {
+                    return now.toLocalDate().minusDays(1);
+                } else {
+                    return now.toLocalDate();
+                }
+
+//        LocalDateTime now = resolveNow();
+//        return (now.toLocalTime().isBefore(CUTOFF)) ? now.toLocalDate().minusDays(1) : now.toLocalDate();
     }
 
     public LocalDate getToday(LocalTime time) {
-        //        LocalDateTime now = LocalDateTime.now(clock);
-        //
-        //        if (now.toLocalTime().isBefore(CUTOFF)) {
-        //            return now.toLocalDate().minusDays(1);
-        //        } else {
-        //            return now.toLocalDate();
-        //        }
+                LocalDateTime now = LocalDateTime.now(clock);
 
-        LocalDateTime now = resolveNow();
-        return (time.isBefore(CUTOFF)) ? now.toLocalDate().minusDays(1) : now.toLocalDate();
+                if (now.toLocalTime().isBefore(CUTOFF)) {
+                    return now.toLocalDate().minusDays(1);
+                } else {
+                    return now.toLocalDate();
+                }
+
+//        LocalDateTime now = resolveNow();
+//        return (time.isBefore(CUTOFF)) ? now.toLocalDate().minusDays(1) : now.toLocalDate();
     }
 
     private LocalDateTime resolveNow() {

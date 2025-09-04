@@ -3,6 +3,7 @@ package com.studypals.global.redis.redisHashRepository;
 import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.RepositoryInformation;
@@ -40,7 +41,6 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
      * 리포지토리 구현체로 사용할 클래스 지정
      * 이 클래스는 실제 동작을 수행하는 concrete 클래스입니다.
      */
-    @NotNull
     @Override
     protected Class<?> getRepositoryBaseClass(@NotNull RepositoryMetadata metadata) {
         return SimpleRedisHashRepository.class;
@@ -54,7 +54,6 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
      * @param <ID> ID 타입
      * @return EntityInformation 객체
      */
-    @NotNull
     @Override
     public <T, ID> EntityInformation<T, ID> getEntityInformation(@NotNull Class<T> domainClass) {
         EntityMeta entityMeta = RedisEntityMetadataReader.get(domainClass);
@@ -67,7 +66,6 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
      * @param metadata 리포지토리 정보 (도메인 타입 등 포함)
      * @return 실제 동작을 수행할 구현체 인스턴스
      */
-    @NotNull
     @Override
     protected Object getTargetRepository(RepositoryInformation metadata) {
         Class<?> entityType = metadata.getDomainType();
@@ -79,10 +77,9 @@ public class RedisHashRepositoryFactory extends RepositoryFactorySupport {
      * 쿼리 메서드 커스텀 전략 등록.
      * {@link com.studypals.global.redis.redisHashRepository.annotations.LuaQuery} 어노테이션이 붙은 Repository 메서드를 지원합니다.
      */
-    @NotNull
     @Override
     protected Optional<QueryLookupStrategy> getQueryLookupStrategy(
-            @NotNull QueryLookupStrategy.Key key, @NotNull ValueExpressionDelegate valueExpressionDelegate) {
+            @Nullable QueryLookupStrategy.Key key, @NotNull ValueExpressionDelegate valueExpressionDelegate) {
         return Optional.of((method, md, proj, named) -> {
             EntityMeta entityMeta = RedisEntityMetadataReader.get(md.getDomainType());
             return new RedisLuaQuery(tpl, method, md, proj, entityMeta);

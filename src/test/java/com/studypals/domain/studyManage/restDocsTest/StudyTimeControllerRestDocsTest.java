@@ -118,7 +118,7 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data[].studiedDate").description("공부한 날짜"),
                                 // fieldWithPath("data[].startTime").description("해당 날짜 공부 시작 시간"),
                                 // fieldWithPath("data[].endTime").description("해당 날짜 공부 종료 시간"),
-                                // fieldWithPath("data[].memo").description("간단한 메모"),
+                                // fieldWithPath("data[].description").description("간단한 메모"),
                                 fieldWithPath("data[].studyList[].categoryId")
                                         .description("카테고리 아이디(영구)")
                                         .optional(),
