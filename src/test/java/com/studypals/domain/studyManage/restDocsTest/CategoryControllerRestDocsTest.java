@@ -180,7 +180,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
         result.andExpect(status().isOk())
                 .andDo(restDocs.document(
                         httpRequest(),
-                        httpRequest(),
+                        httpResponse(),
                         responseFields(
                                 fieldWithPath("code").description("U03-05"),
                                 fieldWithPath("status").description("응답 상태(예: success or failed"),

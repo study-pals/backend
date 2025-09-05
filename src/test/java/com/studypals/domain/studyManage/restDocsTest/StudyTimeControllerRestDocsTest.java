@@ -84,11 +84,11 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
         List<GetDailyStudyDto> expectedData = List.of(
                 GetDailyStudyDto.builder()
                         .studiedDate(LocalDate.of(2024, 4, 1))
-                        .studyList(List.of(new StudyList(1L, null, 60L), new StudyList(2L, "some category", 30L)))
+                        .studyTimeInfo(List.of(new StudyTimeInfo(1L, null, 60L), new StudyTimeInfo(2L, "some category", 30L)))
                         .build(),
                 GetDailyStudyDto.builder()
                         .studiedDate(LocalDate.of(2024, 4, 3))
-                        .studyList(List.of(new StudyList(1L, null, 60L), new StudyList(2L, "some category", 30L)))
+                        .studyTimeInfo(List.of(new StudyTimeInfo(1L, null, 60L), new StudyTimeInfo(2L, "some category", 30L)))
                         .build());
 
         Response<List<GetDailyStudyDto>> expectedResponse =
