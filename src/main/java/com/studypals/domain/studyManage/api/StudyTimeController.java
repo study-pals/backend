@@ -3,8 +3,7 @@ package com.studypals.domain.studyManage.api;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.studypals.domain.studyManage.StudyTimeFacade;
-import com.studypals.domain.studyManage.service.DailyStudyInfoService;
+import com.studypals.domain.studyManage.facade.StudyTimeFacade;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +36,7 @@ public class StudyTimeController {
     private final StudyTimeFacade studyTimeFacade;
 
     @GetMapping(params = "date")
-    public ResponseEntity<Response<List<GetStudyDto>>> studiesDate(
+    public ResponseEntity<Response<List<GetStudyDto>>> getStudiesInfoByDate(
             @AuthenticationPrincipal Long userId, @RequestParam LocalDate date) {
 
         List<GetStudyDto> studyData = studyTimeService.getStudyList(userId, date);
@@ -46,7 +45,7 @@ public class StudyTimeController {
     }
 
     @GetMapping(params = {"start", "end"})
-    public ResponseEntity<Response<List<GetDailyStudyRes>>> studiesDateByPeriod(
+    public ResponseEntity<Response<List<GetDailyStudyRes>>> getStudiesInfoByPeriod(
             @AuthenticationPrincipal Long userId, @RequestParam LocalDate start, @RequestParam LocalDate end) {
         PeriodDto periodDto = new PeriodDto(start, end);
 

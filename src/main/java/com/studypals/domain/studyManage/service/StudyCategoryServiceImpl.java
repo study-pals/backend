@@ -75,6 +75,14 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<GetCategoryRes> getGroupCategories(Long groupId) {
+        return studyCategoryReader.findByStudyTypeAndTypeId(StudyType.GROUP, groupId).stream()
+                .map(categoryMapper::toDto)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public Long updateCategory(Long userId, UpdateCategoryReq dto) {
         ifStudyNotWrite(userId);

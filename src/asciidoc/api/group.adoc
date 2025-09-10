@@ -34,7 +34,7 @@
 
 == ✨ API 문서
 
-=== 그룹 관련 API
+=== 그룹 가입/탈퇴/관리 API
 ''''
 
 ==== 1. 그룹 태그 불러오기
@@ -239,4 +239,28 @@ include::{snippets}/group-entry-controller-rest-docs-test/refuse-entry-request_s
 
 '''
 include::{snippets}/group-entry-controller-rest-docs-test/refuse-entry-request_success/http-response.adoc[]
+
+=== 그룹 스터디 조회/생성/관리 API
+''''
+
+==== 그룹 카테고리 생성
+
+*Description*
+
+'''
+
+해당하는 그룹의 카테고리를 새롭게 생성합니다. admin 만이 가능합니다.
+
+*Request* +
+
+'''
+include::{snippets}/group-category-controller-rest-docs-test/create_success/http-request.adoc[]
+include::{snippets}/group-category-controller-rest-docs-test/create_success/request-fields.adoc[]
+
+*Response* +
+
+'''
+include::{snippets}/group-category-controller-rest-docs-test/create_success/http-response.adoc[]
+include::{snippets}/group-category-controller-rest-docs-test/create_success/response-headers.adoc[]
+
 

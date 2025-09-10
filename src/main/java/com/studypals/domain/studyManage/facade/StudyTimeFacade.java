@@ -1,4 +1,4 @@
-package com.studypals.domain.studyManage;
+package com.studypals.domain.studyManage.facade;
 
 
 import com.studypals.domain.studyManage.dto.*;
@@ -62,6 +62,13 @@ public class StudyTimeFacade {
                 .map(date -> {  //객체 생성
                     GetDailyStudyDto studyTime = studyDataMap.get(date);
                     GetDailyStudyInfoDto info = dailyDataMap.get(date);
+
+                    if(info == null) {
+                        return GetDailyStudyRes.builder()
+                                .studiedDate(date)
+                                .studies(studyTime.studyTimeInfo())
+                                .build();
+                    }
 
                     return GetDailyStudyRes.builder()
                             .studiedDate(date)

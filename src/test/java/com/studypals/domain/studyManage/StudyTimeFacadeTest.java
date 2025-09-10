@@ -1,6 +1,7 @@
 package com.studypals.domain.studyManage;
 
 import com.studypals.domain.studyManage.dto.*;
+import com.studypals.domain.studyManage.facade.StudyTimeFacade;
 import com.studypals.domain.studyManage.service.DailyStudyInfoService;
 import com.studypals.domain.studyManage.service.StudyTimeService;
 import org.junit.jupiter.api.Test;
