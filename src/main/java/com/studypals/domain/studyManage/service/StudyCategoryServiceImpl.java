@@ -3,6 +3,9 @@ package com.studypals.domain.studyManage.service;
 import java.util.List;
 import java.util.Map;
 
+import com.studypals.domain.studyManage.dto.UpdateCategoryDto;
+import com.studypals.domain.studyManage.entity.DateType;
+import com.studypals.global.utils.ImageUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,23 +87,24 @@ public class StudyCategoryServiceImpl implements StudyCategoryService {
 
     @Override
     @Transactional
-    public Long updateCategory(Long userId, UpdateCategoryReq dto) {
+    public Long updateCategory(Long userId, UpdateCategoryReq req) {
         ifStudyNotWrite(userId);
 
-        StudyCategory category = studyCategoryReader.getById(dto.categoryId());
+        StudyCategory category = studyCategoryReader.getById(req.categoryId());
 
         CategoryStrategy strategy = categoryStrategyFactory.resolve(category.getStudyType());
         strategy.validateToWrite(userId, category);
 
-        category = studyCategoryWriter
-                .update(category)
-                .name(dto.name())
-                .color(dto.color())
-                .goal(dto.goal())
-                .dateType(dto.dateType())
-                .dayBelong(dto.dayBelong())
-                .description(dto.description())
+        UpdateCategoryDto dto = UpdateCategoryDto.builder()
+                .name(req.name() == null ? category.getName() : req.name())
+                .color(req.color() == null ? ImageUtils.randomHexColor() : req.color())
+                .dateType(req.dateType() == null ? DateType.DAILY : req.dateType())
+                .dayBelong(req.dayBelong() == null ? 127 : req.dayBelong())
+                .description(req.description() == null ? "no content" : req.description())
+                .goal(req.goal())
                 .build();
+
+        studyCategoryWriter.update(category, dto);
         studyCategoryWriter.save(category);
 
         return category.getId();
