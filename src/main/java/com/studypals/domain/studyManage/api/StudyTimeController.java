@@ -3,7 +3,6 @@ package com.studypals.domain.studyManage.api;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.studypals.domain.studyManage.facade.StudyTimeFacade;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dto.*;
+import com.studypals.domain.studyManage.facade.StudyTimeFacade;
 import com.studypals.domain.studyManage.service.StudyTimeService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;

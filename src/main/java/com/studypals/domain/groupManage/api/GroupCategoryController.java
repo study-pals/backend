@@ -3,9 +3,6 @@ package com.studypals.domain.groupManage.api;
 import java.net.URI;
 import java.util.List;
 
-import com.studypals.domain.studyManage.dto.GetCategoryRes;
-import com.studypals.global.responses.CommonResponse;
-import com.studypals.global.responses.ResponseCode;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -16,11 +13,14 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dto.CreateCategoryDto;
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
+import com.studypals.domain.studyManage.dto.GetCategoryRes;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
 import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.service.StudyCategoryService;
+import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
+import com.studypals.global.responses.ResponseCode;
 
 /**
  * 그룹 카테고리에 대한 CRUD 엔드포인트입니다.
@@ -49,7 +49,8 @@ public class GroupCategoryController {
         CreateCategoryDto dto = categoryMapper.reqToDto(req, StudyType.GROUP, req.groupId());
 
         Long categoryId = studyCategoryService.createCategory(userId, dto);
-        return ResponseEntity.created(URI.create("/groups/categories/" + categoryId)).build();
+        return ResponseEntity.created(URI.create("/groups/categories/" + categoryId))
+                .build();
     }
 
     @GetMapping("/{groupId}")
@@ -71,6 +72,7 @@ public class GroupCategoryController {
             @AuthenticationPrincipal Long userId, @Valid @RequestBody UpdateCategoryReq req) {
 
         Long categoryId = studyCategoryService.updateCategory(userId, req);
-        return ResponseEntity.created(URI.create("/groups/categories/" + categoryId)).build();
+        return ResponseEntity.created(URI.create("/groups/categories/" + categoryId))
+                .build();
     }
 }

@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import com.studypals.domain.studyManage.facade.StudyTimeFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -26,6 +25,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.studyManage.api.StudyTimeController;
 import com.studypals.domain.studyManage.dto.*;
+import com.studypals.domain.studyManage.facade.StudyTimeFacade;
 import com.studypals.domain.studyManage.service.StudyTimeService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -89,14 +89,14 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
         List<GetDailyStudyRes> expectedData = List.of(
                 GetDailyStudyRes.builder()
                         .studiedDate(LocalDate.of(2024, 4, 1))
-                        .startTime(LocalTime.of(10,30))
+                        .startTime(LocalTime.of(10, 30))
                         .endTime(LocalTime.of(15, 20))
                         .studies(List.of(new StudyTimeInfo(1L, null, 60L), new StudyTimeInfo(2L, "some category", 30L)))
                         .description("description")
                         .build(),
                 GetDailyStudyRes.builder()
                         .studiedDate(LocalDate.of(2024, 4, 3))
-                        .startTime(LocalTime.of(9,30))
+                        .startTime(LocalTime.of(9, 30))
                         .endTime(LocalTime.of(17, 0))
                         .studies(List.of(new StudyTimeInfo(1L, null, 60L), new StudyTimeInfo(2L, "some category", 30L)))
                         .description("description")
@@ -127,9 +127,9 @@ class StudyTimeControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("status").description("응답 상태 (예: success 또는 fail)"),
                                 fieldWithPath("message").description("응답 메시지"),
                                 fieldWithPath("data[].studiedDate").description("공부한 날짜"),
-                                 fieldWithPath("data[].startTime").description("해당 날짜 공부 시작 시간"),
-                                 fieldWithPath("data[].endTime").description("해당 날짜 공부 종료 시간"),
-                                 fieldWithPath("data[].description").description("간단한 메모"),
+                                fieldWithPath("data[].startTime").description("해당 날짜 공부 시작 시간"),
+                                fieldWithPath("data[].endTime").description("해당 날짜 공부 종료 시간"),
+                                fieldWithPath("data[].description").description("간단한 메모"),
                                 fieldWithPath("data[].studies[].categoryId")
                                         .description("카테고리 아이디(영구)")
                                         .optional(),

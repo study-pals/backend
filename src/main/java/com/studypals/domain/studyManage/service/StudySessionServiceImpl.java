@@ -114,7 +114,7 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         } else if (startDate.plusDays(1).isEqual(today)) {
 
-            LocalTime pointTime = LocalTime.of(6, 0);//to static var
+            LocalTime pointTime = LocalTime.of(6, 0); // to static var
             long day1DurationInSec = getTimeDuration(startTime, pointTime);
             long day2DurationInSec = getTimeDuration(pointTime, endTime);
             timeSaveInfoMap.put(startDate, new TimeSaveInfo(member, startTime, pointTime));

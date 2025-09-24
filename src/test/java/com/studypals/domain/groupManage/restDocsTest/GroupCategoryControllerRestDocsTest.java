@@ -1,24 +1,5 @@
 package com.studypals.domain.groupManage.restDocsTest;
 
-import com.studypals.domain.groupManage.api.GroupCategoryController;
-import com.studypals.domain.studyManage.dto.CreateCategoryDto;
-import com.studypals.domain.studyManage.dto.CreateCategoryReq;
-import com.studypals.domain.studyManage.dto.GetCategoryRes;
-import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
-import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
-import com.studypals.domain.studyManage.entity.DateType;
-import com.studypals.domain.studyManage.entity.StudyType;
-import com.studypals.domain.studyManage.service.StudyCategoryService;
-import com.studypals.testModules.testSupport.RestDocsSupport;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.ResultActions;
-
-import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -33,6 +14,26 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.ResultActions;
+
+import com.studypals.domain.groupManage.api.GroupCategoryController;
+import com.studypals.domain.studyManage.dto.CreateCategoryDto;
+import com.studypals.domain.studyManage.dto.CreateCategoryReq;
+import com.studypals.domain.studyManage.dto.GetCategoryRes;
+import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
+import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
+import com.studypals.domain.studyManage.entity.DateType;
+import com.studypals.domain.studyManage.entity.StudyType;
+import com.studypals.domain.studyManage.service.StudyCategoryService;
+import com.studypals.testModules.testSupport.RestDocsSupport;
 
 @WebMvcTest(GroupCategoryController.class)
 public class GroupCategoryControllerRestDocsTest extends RestDocsSupport {
@@ -175,8 +176,8 @@ public class GroupCategoryControllerRestDocsTest extends RestDocsSupport {
         given(studyCategoryService.getGroupCategories(any())).willReturn(response);
 
         // when
-        ResultActions result = mockMvc.perform(get("/groups/categories/{groupId}", 1L)
-                .contentType(MediaType.APPLICATION_JSON));
+        ResultActions result =
+                mockMvc.perform(get("/groups/categories/{groupId}", 1L).contentType(MediaType.APPLICATION_JSON));
 
         // then
         result.andExpect(status().isOk())
@@ -187,8 +188,7 @@ public class GroupCategoryControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("code").description("U03-05"),
                                 fieldWithPath("status").description("응답 상태(예: success or failed"),
                                 fieldWithPath("message").description("응답 메시지"),
-                                fieldWithPath("data[].studyType")
-                                        .description("해당 카테고리의 타입(GROUP)"),
+                                fieldWithPath("data[].studyType").description("해당 카테고리의 타입(GROUP)"),
                                 fieldWithPath("data[].typeId").description("studyType 에 대한 id"),
                                 fieldWithPath("data[].dateType").description("카테고리의 date type"),
                                 fieldWithPath("data[].name").description("카테고리 이름"),
@@ -199,6 +199,4 @@ public class GroupCategoryControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data[].dayBelong").description("카테고리 포함 요일"),
                                 fieldWithPath("data[].description").description("카테고리 설명"))));
     }
-
-
 }

@@ -1,9 +1,10 @@
 package com.studypals.domain.studyManage.entity;
 
-import com.studypals.domain.studyManage.dto.UpdateCategoryDto;
 import jakarta.persistence.*;
 
 import lombok.*;
+
+import com.studypals.domain.studyManage.dto.UpdateCategoryDto;
 
 /**
  * 공부 카테고리에 대한 엔티티입니다.
@@ -90,6 +91,4 @@ public class StudyCategory {
         this.dayBelong = dto.dayBelong();
         this.description = dto.description();
     }
-
-
 }
