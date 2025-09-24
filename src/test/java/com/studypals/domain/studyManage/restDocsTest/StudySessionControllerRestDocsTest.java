@@ -47,7 +47,8 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
         // given
         StartStudyReq req = new StartStudyReq(1L, null, LocalTime.of(10, 0));
 
-        StartStudyRes res = new StartStudyRes(true, LocalDateTime.of(2025, 8, 20, 10, 0, 0), 0L, null, "some name", 1200L);
+        StartStudyRes res =
+                new StartStudyRes(true, LocalDateTime.of(2025, 8, 20, 10, 0, 0), 0L, null, "some name", 1200L);
         Response<StartStudyRes> expected = CommonResponse.success(ResponseCode.STUDY_START, res, "success start");
 
         given(studySessionService.startStudy(any(), any())).willReturn(res);

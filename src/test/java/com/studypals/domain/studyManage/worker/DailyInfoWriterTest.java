@@ -60,7 +60,7 @@ class DailyInfoWriterTest {
 
     @Test
     void createIfNotExist_success_createdBefore() {
-        //given
+        // given
         Long userId = 1L;
         LocalDate studiedDate = LocalDate.of(2025, 8, 1);
         LocalTime startTime = LocalTime.of(10, 30);
@@ -70,10 +70,10 @@ class DailyInfoWriterTest {
         given(dailyStudyInfoRepository.existsByMemberIdAndStudiedDate(userId, studiedDate))
                 .willReturn(false);
 
-        //when
+        // when
         boolean res = dailyInfoWriter.createIfNotExist(mockMember, studiedDate, startTime, endTime);
 
-        //then
+        // then
         assertThat(res).isEqualTo(true);
         then(dailyStudyInfoRepository).should().save(any());
     }

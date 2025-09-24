@@ -128,5 +128,4 @@ public class StudyTimeIntegrationTest extends IntegrationSupport {
                 kh);
         return kh.getKeyAs(BigInteger.class).longValue();
     }
-
 }

@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
-import com.studypals.domain.studyManage.dto.StartStudyDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -17,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
+import com.studypals.domain.studyManage.dto.StartStudyDto;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
@@ -32,7 +32,6 @@ class StudyStatusWorkerTest {
 
     @Mock
     private Member mockMember;
-
 
     @InjectMocks
     private StudyStatusWorker studyStatusWorker;
@@ -74,7 +73,6 @@ class StudyStatusWorkerTest {
         StartStudyDto dto = new StartStudyDto(categoryId, null, LocalDateTime.of(today, time));
 
         given(mockMember.getId()).willReturn(userId);
-
 
         // when
         StudyStatus result = studyStatusWorker.startStatus(mockMember, dto);

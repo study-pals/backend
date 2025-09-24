@@ -3,9 +3,6 @@ package com.studypals.domain.studyManage.service;
 import java.util.List;
 import java.util.Map;
 
-import com.studypals.domain.studyManage.dto.UpdateCategoryDto;
-import com.studypals.domain.studyManage.entity.DateType;
-import com.studypals.global.utils.ImageUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dto.CreateCategoryDto;
 import com.studypals.domain.studyManage.dto.GetCategoryRes;
+import com.studypals.domain.studyManage.dto.UpdateCategoryDto;
 import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
 import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
+import com.studypals.domain.studyManage.entity.DateType;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
@@ -24,6 +23,7 @@ import com.studypals.domain.studyManage.worker.categoryStrategy.CategoryStrategy
 import com.studypals.domain.studyManage.worker.categoryStrategy.CategoryStrategyFactory;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
+import com.studypals.global.utils.ImageUtils;
 
 /**
  * PersonalStudyCategory 에 대한 service implement class 입니다.

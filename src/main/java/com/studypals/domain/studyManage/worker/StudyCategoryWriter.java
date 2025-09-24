@@ -1,9 +1,9 @@
 package com.studypals.domain.studyManage.worker;
 
-import com.studypals.domain.studyManage.dto.UpdateCategoryDto;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
+import com.studypals.domain.studyManage.dto.UpdateCategoryDto;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.global.annotations.Worker;
 
@@ -33,7 +33,6 @@ public class StudyCategoryWriter {
      * 갱신을 위한 빌더 패턴의 시작점 메서드입니다. Updater 내부 클래스를 호출하여 체이닝을 시작합니다.
      * @param category 갱신하고자 할 카테고리
      * @param req 사용자가 변경을 원하는 데이터
-     * @return 갱신을 도와줄 내부 헬퍼 클래스
      */
     public void update(StudyCategory category, UpdateCategoryDto req) {
         category.update(req);
