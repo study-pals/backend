@@ -1,7 +1,11 @@
 package com.studypals.domain.groupManage.api;
 
 import java.net.URI;
+import java.util.List;
 
+import com.studypals.domain.studyManage.dto.GetCategoryRes;
+import com.studypals.global.responses.CommonResponse;
+import com.studypals.global.responses.ResponseCode;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -19,25 +23,15 @@ import com.studypals.domain.studyManage.service.StudyCategoryService;
 import com.studypals.global.responses.Response;
 
 /**
- * 코드에 대한 전체적인 역할을 적습니다.
- * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
- *
- * <p><b>상속 정보:</b><br>
- * 상속 정보를 적습니다.
- *
- * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br>
- * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
- *
- * <p><b>빈 관리:</b><br>
- * 필요 시 빈 관리에 대한 내용을 적습니다.
- *
- * <p><b>외부 모듈:</b><br>
- * 필요 시 외부 모듈에 대한 내용을 적습니다.
+ * 그룹 카테고리에 대한 CRUD 엔드포인트입니다.
+ * <pre>
+ *     - POST /groups/categories     : 새로운 카테고리를 생성합니다.
+ *     - GET /groups/categories/{groupId} : 특정 그룹에 대한 카테고리 정보를 반환합니다.
+ *     - DELETE /groups/categories/{categoryId} : 해당하는 카테고리를 약한 삭제합니다.
+ *     - PUT /groups/categories : 해당하는 카테고리 정보를 갱신합니다.
+ * </pre>
  *
  * @author jack8
- * @see
  * @since 2025-08-11
  */
 @RestController
@@ -55,7 +49,14 @@ public class GroupCategoryController {
         CreateCategoryDto dto = categoryMapper.reqToDto(req, StudyType.GROUP, req.groupId());
 
         Long categoryId = studyCategoryService.createCategory(userId, dto);
-        return ResponseEntity.created(URI.create("/categories/" + categoryId)).build();
+        return ResponseEntity.created(URI.create("/groups/categories/" + categoryId)).build();
+    }
+
+    @GetMapping("/{groupId}")
+    public ResponseEntity<Response<List<GetCategoryRes>>> read(@PathVariable Long groupId) {
+
+        List<GetCategoryRes> res = studyCategoryService.getGroupCategories(groupId);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_CATEGORY_LIST, res));
     }
 
     @DeleteMapping("/{categoryId}")
@@ -70,6 +71,6 @@ public class GroupCategoryController {
             @AuthenticationPrincipal Long userId, @Valid @RequestBody UpdateCategoryReq req) {
 
         Long categoryId = studyCategoryService.updateCategory(userId, req);
-        return ResponseEntity.created(URI.create("/categories/" + categoryId)).build();
+        return ResponseEntity.created(URI.create("/groups/categories/" + categoryId)).build();
     }
 }

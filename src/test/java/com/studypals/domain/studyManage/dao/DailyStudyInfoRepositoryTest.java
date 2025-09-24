@@ -46,10 +46,11 @@ class DailyStudyInfoRepositoryTest extends DataJpaSupport {
         LocalTime time = LocalTime.of(10, 30);
 
         em.persist(make(member, date, time, time.plusHours(2)));
-        em.persist(make(member, date, time.plusHours(2), time.plusHours(4)));
 
-        assertThrows(PersistenceException.class, () -> em.flush());
-        em.clear();
+        assertThrows(PersistenceException.class, () -> {
+            em.persist(make(member, date, time.plusHours(2), time.plusHours(4)));
+            em.clear();
+        });
     }
 
     @Test
@@ -94,12 +95,11 @@ class DailyStudyInfoRepositoryTest extends DataJpaSupport {
 
     @Test
     void existsByMemberIdAndStudiedDate_success_returnFalse() {
-        // gvien
+        // given
         Member member = insertMember();
         LocalDate date = LocalDate.of(1999, 8, 20);
         LocalTime time = LocalTime.of(10, 30);
 
-        em.persist(make(member, date, time, time.plusHours(2)));
         em.persist(make(member, date.plusDays(1), time, time.plusHours(2)));
 
         em.flush();

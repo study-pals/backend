@@ -34,6 +34,13 @@ public interface StudyCategoryService {
     List<GetCategoryRes> getAllUserCategories(Long userId);
 
     /**
+     * 특정 그룹이 정의한 카테고리 리스트 정보를 가져옵니다.
+     * @param groupId 그룹 아이디 정보
+     * @return 카테고리 리스트. 만약 없으면 빈 리스트가 반환된다.
+     */
+    List<GetCategoryRes> getGroupCategories(Long groupId);
+
+    /**
      * 카테고리의 update 를 담당합니다. {@link UpdateCategoryReq} 의 필드가 null 인 경우 해당 값은 보통 갱신되지 않습니ㅏㄷ.
      * 자세한 정보는 {@link com.studypals.domain.studyManage.worker.StudyCategoryWriter} 에서 확인 가능합니다.
      * @param userId 갱신을 요청한 사용자의 id

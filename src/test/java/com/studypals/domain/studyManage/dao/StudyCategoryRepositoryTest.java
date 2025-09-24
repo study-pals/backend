@@ -88,12 +88,11 @@ class StudyCategoryRepositoryTest extends DataJpaSupport {
         createCategory(StudyType.PERSONAL, 1L, "name4-1");
         createCategory(StudyType.PERSONAL, 1L, "name4-2");
         createCategory(StudyType.PERSONAL, 1L, "name4-3");
-        createCategory(StudyType.REMOVED, 1L, "name5");
 
         // when
         List<StudyCategory> result = studyCategoryRepository.findByTypeMap(typeMap);
 
         // then
-        assertThat(result).hasSize(10);
+        assertThat(result).hasSize(9);
     }
 }

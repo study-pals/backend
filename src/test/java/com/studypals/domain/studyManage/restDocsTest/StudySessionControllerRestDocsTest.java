@@ -9,6 +9,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
         // given
         StartStudyReq req = new StartStudyReq(1L, null, LocalTime.of(10, 0));
 
-        StartStudyRes res = new StartStudyRes(true, LocalTime.of(10, 0, 0), 0L, null, "some name", 1200L);
+        StartStudyRes res = new StartStudyRes(true, LocalDateTime.of(2025, 8, 20, 10, 0, 0), 0L, null, "some name", 1200L);
         Response<StartStudyRes> expected = CommonResponse.success(ResponseCode.STUDY_START, res, "success start");
 
         given(studySessionService.startStudy(any(), any())).willReturn(res);

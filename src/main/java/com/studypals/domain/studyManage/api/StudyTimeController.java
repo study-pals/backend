@@ -3,6 +3,7 @@ package com.studypals.domain.studyManage.api;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.studypals.domain.studyManage.facade.StudyTimeFacade;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -32,9 +33,10 @@ import com.studypals.global.responses.ResponseCode;
 public class StudyTimeController {
 
     private final StudyTimeService studyTimeService;
+    private final StudyTimeFacade studyTimeFacade;
 
     @GetMapping(params = "date")
-    public ResponseEntity<Response<List<GetStudyDto>>> studiesDate(
+    public ResponseEntity<Response<List<GetStudyDto>>> getStudiesInfoByDate(
             @AuthenticationPrincipal Long userId, @RequestParam LocalDate date) {
 
         List<GetStudyDto> studyData = studyTimeService.getStudyList(userId, date);
@@ -43,12 +45,13 @@ public class StudyTimeController {
     }
 
     @GetMapping(params = {"start", "end"})
-    public ResponseEntity<Response<List<GetDailyStudyDto>>> studiesDateByPeriod(
+    public ResponseEntity<Response<List<GetDailyStudyRes>>> getStudiesInfoByPeriod(
             @AuthenticationPrincipal Long userId, @RequestParam LocalDate start, @RequestParam LocalDate end) {
         PeriodDto periodDto = new PeriodDto(start, end);
 
-        List<GetDailyStudyDto> studyData = studyTimeService.getDailyStudyList(userId, periodDto);
+        List<GetDailyStudyRes> response = studyTimeFacade.readAndConcatStudyData(userId, periodDto);
+
         return ResponseEntity.ok(
-                CommonResponse.success(ResponseCode.STUDY_TIME_ALL, studyData, "data of study time by period"));
+                CommonResponse.success(ResponseCode.STUDY_TIME_ALL, response, "data of study time by period"));
     }
 }

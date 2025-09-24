@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
+import com.studypals.domain.studyManage.dto.StartStudyDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -14,13 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
-import com.studypals.domain.studyManage.dao.DailyStudyInfoRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
-import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
-import com.studypals.global.utils.TimeUtils;
 
 @ExtendWith(MockitoExtension.class)
 class StudyStatusWorkerTest {
@@ -32,13 +31,8 @@ class StudyStatusWorkerTest {
     private MemberReader memberReader;
 
     @Mock
-    private DailyStudyInfoRepository dailyStudyInfoRepository;
-
-    @Mock
     private Member mockMember;
 
-    @Mock
-    private TimeUtils timeUtils;
 
     @InjectMocks
     private StudyStatusWorker studyStatusWorker;
@@ -77,22 +71,19 @@ class StudyStatusWorkerTest {
         Long categoryId = 2L;
         LocalDate today = LocalDate.of(2025, 1, 1);
         LocalTime time = LocalTime.of(11, 0);
-        StartStudyReq req = new StartStudyReq(categoryId, null, time);
+        StartStudyDto dto = new StartStudyDto(categoryId, null, LocalDateTime.of(today, time));
 
         given(mockMember.getId()).willReturn(userId);
-        given(timeUtils.getToday()).willReturn(today);
-        given(dailyStudyInfoRepository.existsByMemberIdAndStudiedDate(userId, today))
-                .willReturn(false);
+
 
         // when
-        StudyStatus result = studyStatusWorker.startStatus(mockMember, req);
+        StudyStatus result = studyStatusWorker.startStatus(mockMember, dto);
 
         // then
-        then(dailyStudyInfoRepository).should().save(any());
         assertThat(result.getId()).isEqualTo(userId);
-        assertThat(result.getStartTime()).isEqualTo(req.startTime());
+        assertThat(result.getStartTime()).isEqualTo(dto.startDateTime());
         assertThat(result.getCategoryId()).isEqualTo(categoryId);
-        assertThat(result.getName()).isEqualTo(req.temporaryName());
+        assertThat(result.getName()).isEqualTo(dto.temporaryName());
         assertThat(result.isStudying()).isTrue();
     }
 
