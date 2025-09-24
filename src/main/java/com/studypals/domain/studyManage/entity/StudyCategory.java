@@ -1,5 +1,6 @@
 package com.studypals.domain.studyManage.entity;
 
+import com.studypals.domain.studyManage.dto.UpdateCategoryDto;
 import jakarta.persistence.*;
 
 import lombok.*;
@@ -34,7 +35,6 @@ public class StudyCategory {
     private Long id;
 
     // 해당 카테고리의 이름을 정의합니다.
-    @Setter
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
@@ -44,7 +44,6 @@ public class StudyCategory {
     private StudyType studyType;
 
     // daily 를 사용합니다. 구현되지 않았습니다.
-    @Setter
     @Column(name = "date_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private DateType dateType;
@@ -54,22 +53,18 @@ public class StudyCategory {
     private Long typeId;
 
     // 목표 시간에 대한 정보입니다. nullable 하므로 사용자는 목표 시간을 설정하지 않아도 됩니다.
-    @Setter
     @Column(name = "goal")
     private Long goal;
 
     // 어느 요일에 속하는지를 반환합니다.
-    @Setter
     @Column(name = "day_belong", nullable = false, columnDefinition = "INTEGER")
     private Integer dayBelong;
 
     // 해당 카테고리를 표시할 색상을 정의합니다. null 시 매번 다르게 표시됩니다.
-    @Setter
     @Column(name = "color", nullable = true, length = 9)
     private String color;
 
     // 해당 카테고리의 설명을 추가합니다. nullable 합니다.
-    @Setter
     @Column(name = "description", nullable = true, columnDefinition = "TEXT")
     private String description;
 
@@ -86,4 +81,15 @@ public class StudyCategory {
         if (this.studyType == StudyType.PERSONAL) this.studyType = StudyType.REMOVED;
         else if (this.studyType == StudyType.GROUP) this.studyType = StudyType.GROUP_REMOVED;
     }
+
+    public void update(UpdateCategoryDto dto) {
+        this.name = dto.name();
+        this.color = dto.color();
+        this.goal = dto.goal();
+        this.dateType = dto.dateType();
+        this.dayBelong = dto.dayBelong();
+        this.description = dto.description();
+    }
+
+
 }

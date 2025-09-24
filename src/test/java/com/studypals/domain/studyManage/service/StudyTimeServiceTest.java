@@ -130,21 +130,21 @@ class StudyTimeServiceTest {
         assertThat(results)
                 .filteredOn(r -> r.studiedDate().equals(date))
                 .singleElement()
-                .extracting(GetDailyStudyDto::studyList)
+                .extracting(GetDailyStudyDto::studyTimeInfo)
                 .asInstanceOf(LIST)
                 .hasSize(3);
 
         assertThat(results)
                 .filteredOn(r -> r.studiedDate().equals(date.plusDays(1)))
                 .singleElement()
-                .extracting(GetDailyStudyDto::studyList)
+                .extracting(GetDailyStudyDto::studyTimeInfo)
                 .asInstanceOf(LIST)
                 .hasSize(1);
 
         assertThat(results)
                 .filteredOn(r -> r.studiedDate().equals(date.plusDays(3)))
                 .singleElement()
-                .extracting(GetDailyStudyDto::studyList)
+                .extracting(GetDailyStudyDto::studyTimeInfo)
                 .asInstanceOf(LIST)
                 .hasSize(2);
     }

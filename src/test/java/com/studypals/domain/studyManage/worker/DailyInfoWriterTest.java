@@ -1,5 +1,7 @@
 package com.studypals.domain.studyManage.worker;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -54,5 +56,25 @@ class DailyInfoWriterTest {
 
         // then
         then(mockDailyStudyInfo).should().setEndTime(endTime);
+    }
+
+    @Test
+    void createIfNotExist_success_createdBefore() {
+        //given
+        Long userId = 1L;
+        LocalDate studiedDate = LocalDate.of(2025, 8, 1);
+        LocalTime startTime = LocalTime.of(10, 30);
+        LocalTime endTime = LocalTime.of(14, 20);
+
+        given(mockMember.getId()).willReturn(userId);
+        given(dailyStudyInfoRepository.existsByMemberIdAndStudiedDate(userId, studiedDate))
+                .willReturn(false);
+
+        //when
+        boolean res = dailyInfoWriter.createIfNotExist(mockMember, studiedDate, startTime, endTime);
+
+        //then
+        assertThat(res).isEqualTo(true);
+        then(dailyStudyInfoRepository).should().save(any());
     }
 }

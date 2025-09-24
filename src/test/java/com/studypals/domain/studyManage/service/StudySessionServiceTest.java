@@ -4,15 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
+import com.studypals.domain.studyManage.dto.StartStudyDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.studypals.domain.groupManage.worker.GroupStudyStatusWorker;
 import com.studypals.domain.memberManage.entity.Member;
@@ -23,7 +25,6 @@ import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
-import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.DailyInfoWriter;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
@@ -78,31 +79,36 @@ class StudySessionServiceTest {
     @InjectMocks
     private StudySessionServiceImpl studySessionService;
 
+
     @Test
-    void startStudy_success_firstCategory() {
+    void startStudy_success_first() {
         // given
         Long userId = 1L;
         Long categoryId = 2L;
+        LocalDate today = LocalDate.of(2025, 8, 20);
         LocalTime time = LocalTime.of(10, 0);
-        StudyType type = StudyType.PERSONAL;
+        LocalDateTime dateTime = LocalDateTime.of(today, time);
         StartStudyReq req = new StartStudyReq(categoryId, null, time);
+        StartStudyDto dto = new StartStudyDto(categoryId, null, dateTime);
 
         StudyStatus status = StudyStatus.builder()
                 .id(userId)
                 .studying(true)
-                .startTime(time)
+                .startTime(dateTime)
                 .categoryId(categoryId)
-                .goal(3600L)
                 .build();
-        StartStudyRes expected = new StartStudyRes(true, time, 0L, categoryId, null, 3600L);
+        StartStudyRes expected = new StartStudyRes(true, dateTime, 0L, categoryId, null, 3600L);
 
+        given(timeUtils.getToday(any())).willReturn(today);
+        given(mapper.toDto(eq(req), eq(dateTime))).willReturn(dto);
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(studyStatusWorker.find(userId)).willReturn(Optional.empty());
-        given(studyStatusWorker.startStatus(mockMember, req)).willReturn(status);
+        given(studyStatusWorker.startStatus(mockMember, dto)).willReturn(status);
         given(studyCategoryReader.getById(categoryId)).willReturn(mockStudyCategory);
+        given(mapper.toDto(status)).willReturn(expected);
+
         given(mockStudyCategory.getGoal()).willReturn(3600L);
-        given(mockStudyCategory.getName()).willReturn(null);
-        given(mapper.toDto(any(StudyStatus.class))).willReturn(expected);
+
 
         // when
         StartStudyRes result = studySessionService.startStudy(userId, req);
@@ -113,26 +119,99 @@ class StudySessionServiceTest {
     }
 
     @Test
-    void endStudy_success_acrossDays() {
-        TransactionSynchronizationManager.initSynchronization();
+    void startStudy_success_alreadyStartBefore() {
+        //given
         Long userId = 1L;
-        LocalDate today = LocalDate.of(2025, 4, 15);
-        LocalTime start = LocalTime.of(23, 0);
-        LocalTime end = LocalTime.of(2, 0);
+        Long categoryId = 2L;
+        LocalDate today = LocalDate.of(2025, 8, 20);
+        LocalTime time = LocalTime.of(10, 30);
+        LocalDateTime dateTime = LocalDateTime.of(today, time);
 
-        long duration = 3 * 60 * 60;
+        StartStudyReq req = new StartStudyReq(categoryId, null, time);
+        StartStudyDto dto = new StartStudyDto(categoryId, null, dateTime);
 
-        given(studyStatusWorker.find(userId)).willReturn(Optional.of(mockStudyStatus));
+        StartStudyRes expected = new StartStudyRes(true, dateTime, 0L, categoryId, null, 3600L);
+
+        given(timeUtils.getToday(eq(time))).willReturn(today);
+        given(mapper.toDto(eq(req), eq(dateTime))).willReturn(dto);
         given(memberReader.getRef(userId)).willReturn(mockMember);
-        given(mockStudyStatus.getStartTime()).willReturn(start);
-        given(timeUtils.getToday()).willReturn(today);
-        given(studySessionWorker.upsert(mockMember, mockStudyStatus, today, duration))
-                .willReturn(mockStudyTime);
+        given(studyStatusWorker.find(userId)).willReturn(Optional.of(mockStudyStatus));
+        given(mockStudyStatus.isStudying()).willReturn(true);
+        given(mapper.toDto(mockStudyStatus)).willReturn(expected);
 
-        Long result = studySessionService.endStudy(userId, end);
+        //when
+        StartStudyRes res = studySessionService.startStudy(userId, req);
 
-        assertThat(result).isEqualTo(duration);
+        //then
+        assertThat(res).isEqualTo(expected);
+    }
 
-        TransactionSynchronizationManager.clearSynchronization();
+    @Test
+    void endStudy_success() {
+        //given
+        Long userId = 1L;
+
+        LocalDateTime startDateTime = LocalDateTime.of(2025, 8, 20, 10, 30);
+        LocalDateTime endDateTime = LocalDateTime.of(2025, 8, 20, 12, 30);
+
+
+        long time = 7200L;
+
+        given(timeUtils.getToday(eq(endDateTime.toLocalTime()))).willReturn(endDateTime.toLocalDate());
+        given(memberReader.getRef(userId)).willReturn(mockMember);
+        given(studyStatusWorker.find(userId)).willReturn(Optional.of(mockStudyStatus));
+        given(mockStudyStatus.getStartTime()).willReturn(startDateTime);
+
+        //in #saveDailyInfo
+        given(dailyInfoWriter.createIfNotExist(mockMember, endDateTime.toLocalDate(),
+                startDateTime.toLocalTime(), endDateTime.toLocalTime()))
+                .willReturn(true);
+
+        //when
+        Long res = studySessionService.endStudy(userId, endDateTime.toLocalTime());
+
+        //then
+        assertThat(res).isEqualTo(time);
+        ArgumentCaptor<Long> durationCaptor = ArgumentCaptor.forClass(Long.class);
+        then(studySessionWorker).should().upsert(eq(mockMember), eq(mockStudyStatus),
+                eq(endDateTime.toLocalDate()), durationCaptor.capture());
+        assertThat(durationCaptor.getValue()).isEqualTo(time);
+        then(dailyInfoWriter).should(never()).updateEndtime(any(), any(), any());
+    }
+
+    @Test
+    void endStudy_success_between6AM() {
+        //given
+        Long userId = 1L;
+
+        LocalDateTime startDateTime = LocalDateTime.of(2025, 8, 19, 3, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2025, 8, 20, 8, 0);
+
+        long time = 3600 * 5;
+
+        given(timeUtils.getToday(endDateTime.toLocalTime()))
+                .willReturn(endDateTime.toLocalDate());
+        given(memberReader.getRef(userId)).willReturn(mockMember);
+        given(studyStatusWorker.find(userId)).willReturn(Optional.of(mockStudyStatus));
+        given(mockStudyStatus.getStartTime()).willReturn(startDateTime);
+
+        given(dailyInfoWriter.createIfNotExist(any(), any(), any(), any())).willReturn(true);
+
+        //when
+        Long res = studySessionService.endStudy(userId, endDateTime.toLocalTime());
+
+        //then
+        assertThat(res).isEqualTo(time);
+        ArgumentCaptor<Long> beforeDateDurationCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<Long> afterDateDurationCaptor = ArgumentCaptor.forClass(Long.class);
+
+        then(studySessionWorker).should().upsert(eq(mockMember), eq(mockStudyStatus),
+                eq(startDateTime.toLocalDate()), beforeDateDurationCaptor.capture());
+        then(studySessionWorker).should().upsert(eq(mockMember), eq(mockStudyStatus),
+                eq(endDateTime.toLocalDate()), afterDateDurationCaptor.capture());
+
+        assertThat(beforeDateDurationCaptor.getValue()).isEqualTo(3600 * 3);
+        assertThat(afterDateDurationCaptor.getValue()).isEqualTo(3600 * 2);
+
     }
 }

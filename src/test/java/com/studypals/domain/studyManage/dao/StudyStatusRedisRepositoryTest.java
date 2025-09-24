@@ -2,7 +2,7 @@ package com.studypals.domain.studyManage.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -41,7 +41,7 @@ class StudyStatusRedisRepositoryTest {
         // given
         StudyStatus status = StudyStatus.builder()
                 .id(1L)
-                .startTime(LocalTime.of(10, 0))
+                .startTime(LocalDateTime.of(2025, 8, 20, 10, 0))
                 .studyTime(120L)
                 .expiration(1L)
                 .build();
@@ -60,7 +60,7 @@ class StudyStatusRedisRepositoryTest {
         // given
         StudyStatus status = StudyStatus.builder()
                 .id(2L)
-                .startTime(LocalTime.of(12, 0))
+                .startTime(LocalDateTime.of(2025, 8, 20, 12, 0))
                 .studyTime(90L)
                 .expiration(1L)
                 .build();

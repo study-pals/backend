@@ -5,15 +5,12 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.memberManage.entity.Member;
-import com.studypals.domain.studyManage.dao.DailyStudyInfoRepository;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
-import com.studypals.domain.studyManage.dto.StartStudyReq;
-import com.studypals.domain.studyManage.entity.DailyStudyInfo;
+import com.studypals.domain.studyManage.dto.StartStudyDto;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
-import com.studypals.global.utils.TimeUtils;
 
 /**
  * 공부 상태를 나타내는 studyStatus 의 저장/조회 및, 해당 객체의 생성 등을 담당합니다.
@@ -30,8 +27,6 @@ import com.studypals.global.utils.TimeUtils;
 public class StudyStatusWorker {
 
     private final StudyStatusRedisRepository studyStatusRedisRepository;
-    private final DailyStudyInfoRepository dailyStudyInfoRepository;
-    private final TimeUtils timeUtils;
 
     /**
      * id에 대하여 studyStatus 를 redis로 부터 검색합니다.
@@ -59,28 +54,17 @@ public class StudyStatusWorker {
 
     /**
      * StudyStatus 를 생성하고 적절한 값을 넣어 반환 <br>
-     * {@link DailyStudyInfo} 를 같이 생성한다.
      * @param dto 공부 데이터
      * @return 만들어진 객체
      */
-    public StudyStatus startStatus(Member member, StartStudyReq dto) {
-
-        // dailyStudyInfo 를 찾고, 만약 존재하지 않으면 적절한 값(date, startTime)을 넣어 시작
-        if (!dailyStudyInfoRepository.existsByMemberIdAndStudiedDate(member.getId(), timeUtils.getToday())) {
-            DailyStudyInfo summary = DailyStudyInfo.builder()
-                    .member(member)
-                    .studiedDate(timeUtils.getToday())
-                    .startTime(dto.startTime())
-                    .build();
-            dailyStudyInfoRepository.save(summary);
-        }
+    public StudyStatus startStatus(Member member, StartStudyDto dto) {
 
         // 새로운 studyStatus 를 생성하여 반환
         return StudyStatus.builder()
                 .id(member.getId())
                 .categoryId(dto.categoryId())
                 .studying(true)
-                .startTime(dto.startTime())
+                .startTime(dto.startDateTime())
                 .name(dto.temporaryName())
                 .build();
     }

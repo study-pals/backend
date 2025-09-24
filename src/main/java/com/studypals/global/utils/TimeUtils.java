@@ -1,8 +1,10 @@
 package com.studypals.global.utils;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -26,18 +28,59 @@ import com.studypals.global.configs.TimeConfig;
 public class TimeUtils {
 
     private final Clock clock;
+    private final StringRedisTemplate redisTemplate;
 
     private static final LocalTime CUTOFF = LocalTime.of(6, 0);
 
+    private static final String OVERRIDE_KEY = "timeutils:override:now";
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd:HH:mm:ss");
+
     private volatile WeekSnapshot weekCache;
 
-    public LocalDate getToday() {
-        LocalDateTime now = LocalDateTime.now(clock);
-
-        if (now.toLocalTime().isBefore(CUTOFF)) {
-            return now.toLocalDate().minusDays(1);
+    public LocalDate getDate(LocalDateTime dateTime) {
+        if (dateTime.toLocalTime().isBefore(LocalTime.of(6, 0))) {
+            return dateTime.toLocalDate().minusDays(1);
         } else {
-            return now.toLocalDate();
+            return dateTime.toLocalDate();
+        }
+    }
+
+    public LocalDate getToday() {
+                LocalDateTime now = LocalDateTime.now(clock);
+
+                if (now.toLocalTime().isBefore(CUTOFF)) {
+                    return now.toLocalDate().minusDays(1);
+                } else {
+                    return now.toLocalDate();
+                }
+
+//        LocalDateTime now = resolveNow();
+//        return (now.toLocalTime().isBefore(CUTOFF)) ? now.toLocalDate().minusDays(1) : now.toLocalDate();
+    }
+
+    public LocalDate getToday(LocalTime time) {
+                LocalDateTime now = LocalDateTime.now(clock);
+
+                if (now.toLocalTime().isBefore(CUTOFF)) {
+                    return now.toLocalDate().minusDays(1);
+                } else {
+                    return now.toLocalDate();
+                }
+
+//        LocalDateTime now = resolveNow();
+//        return (time.isBefore(CUTOFF)) ? now.toLocalDate().minusDays(1) : now.toLocalDate();
+    }
+
+    private LocalDateTime resolveNow() {
+        String v = redisTemplate.opsForValue().get(OVERRIDE_KEY);
+        if (v == null || v.isBlank()) {
+            return LocalDateTime.now(clock);
+        }
+        try {
+            return LocalDateTime.parse(v, FORMATTER);
+        } catch (Exception e) {
+            // 파싱 실패 시 안전하게 fallback
+            return LocalDateTime.now(clock);
         }
     }
 

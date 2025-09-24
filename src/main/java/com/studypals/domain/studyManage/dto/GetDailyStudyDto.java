@@ -15,4 +15,4 @@ import com.studypals.domain.studyManage.entity.DailyStudyInfo;
  * @since 2025-04-17
  */
 @Builder
-public record GetDailyStudyDto(LocalDate studiedDate, List<StudyList> studyList) {}
+public record GetDailyStudyDto(LocalDate studiedDate, List<StudyTimeInfo> studyTimeInfo) {}

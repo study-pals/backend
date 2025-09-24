@@ -8,8 +8,8 @@ package com.studypals.domain.studyManage.dto;
  * @see GetDailyStudyDto
  * @since 2025-04-19
  */
-public record StudyList(Long categoryId, String name, Long time) {
-    public StudyList {
+public record StudyTimeInfo(Long categoryId, String name, Long time) {
+    public StudyTimeInfo {
         if (time != null && time < 0) {
             throw new IllegalArgumentException("study time must be non-negative");
         }

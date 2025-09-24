@@ -1,7 +1,28 @@
-package com.studypals.domain.studyManage.restDocsTest;
+package com.studypals.domain.groupManage.restDocsTest;
+
+import com.studypals.domain.groupManage.api.GroupCategoryController;
+import com.studypals.domain.studyManage.dto.CreateCategoryDto;
+import com.studypals.domain.studyManage.dto.CreateCategoryReq;
+import com.studypals.domain.studyManage.dto.GetCategoryRes;
+import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
+import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
+import com.studypals.domain.studyManage.entity.DateType;
+import com.studypals.domain.studyManage.entity.StudyType;
+import com.studypals.domain.studyManage.service.StudyCategoryService;
+import com.studypals.testModules.testSupport.RestDocsSupport;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.ResultActions;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
@@ -13,28 +34,8 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.ResultActions;
-
-import com.studypals.domain.studyManage.api.CategoryController;
-import com.studypals.domain.studyManage.dto.CreateCategoryDto;
-import com.studypals.domain.studyManage.dto.CreateCategoryReq;
-import com.studypals.domain.studyManage.dto.GetCategoryRes;
-import com.studypals.domain.studyManage.dto.UpdateCategoryReq;
-import com.studypals.domain.studyManage.dto.mappers.CategoryMapper;
-import com.studypals.domain.studyManage.entity.DateType;
-import com.studypals.domain.studyManage.entity.StudyType;
-import com.studypals.domain.studyManage.service.StudyCategoryService;
-import com.studypals.testModules.testSupport.RestDocsSupport;
-
-@WebMvcTest(CategoryController.class)
-class CategoryControllerRestDocsTest extends RestDocsSupport {
+@WebMvcTest(GroupCategoryController.class)
+public class GroupCategoryControllerRestDocsTest extends RestDocsSupport {
 
     @MockitoBean
     private StudyCategoryService studyCategoryService;
@@ -46,25 +47,25 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void create_success() throws Exception {
         // given
-        CreateCategoryReq req = new CreateCategoryReq(null, "알고리즘", DateType.DAILY, 1200L, "#FF5733", 10, "매일 10문제");
+        CreateCategoryReq req = new CreateCategoryReq(1L, "알고리즘", DateType.DAILY, 1200L, "#FF5733", 10, "매일 10문제");
         CreateCategoryDto dto =
-                new CreateCategoryDto("알고리즘", StudyType.PERSONAL, 1L, DateType.DAILY, 1200L, "#FF5733", 10, "매일 10문제");
+                new CreateCategoryDto("알고리즘", StudyType.GROUP, 1L, DateType.DAILY, 1200L, "#FF5733", 10, "매일 10문제");
         given(categoryMapper.reqToDto(any(), any(), any())).willReturn(dto);
         given(studyCategoryService.createCategory(any(), any())).willReturn(1L);
 
         // when
-        ResultActions result = mockMvc.perform(post("/categories")
+        ResultActions result = mockMvc.perform(post("/groups/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 
         // then
         result.andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/categories/1"))
+                .andExpect(header().string("Location", "/groups/categories/1"))
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
                         requestFields(
-                                fieldWithPath("groupId").ignored(),
+                                fieldWithPath("groupId").description("카테고리를 생성할 그룹의 아이디"),
                                 fieldWithPath("name").description("카테고리 이름").attributes(constraints("not blank")),
                                 fieldWithPath("dateType")
                                         .description("목표 날짜 타입")
@@ -80,6 +81,27 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
 
     @Test
     @WithMockUser
+    void delete_success() throws Exception {
+        // given
+        Long categoryId = 1L;
+
+        willDoNothing().given(studyCategoryService).deleteCategory(any(), eq(categoryId));
+
+        // when
+        ResultActions result = mockMvc.perform(delete("/groups/categories/{categoryId}", categoryId));
+
+        // then
+        result.andExpect(status().isNoContent())
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        pathParameters(parameterWithName("categoryId")
+                                .description("삭제 카테고리 id")
+                                .attributes(constraints("not null")))));
+    }
+
+    @Test
+    @WithMockUser
     void update_success() throws Exception {
         // given
         UpdateCategoryReq req = new UpdateCategoryReq(1L, DateType.DAILY, "name", 1200L, "#000000", 20, "설명");
@@ -87,13 +109,13 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
         given(studyCategoryService.updateCategory(any(), any())).willReturn(1L);
 
         // when
-        ResultActions result = mockMvc.perform(put("/categories")
+        ResultActions result = mockMvc.perform(put("/groups/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 
         // then
         result.andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/categories/1"))
+                .andExpect(header().string("Location", "/groups/categories/1"))
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
@@ -116,35 +138,14 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
 
     @Test
     @WithMockUser
-    void delete_success() throws Exception {
-        // given
-        Long categoryId = 1L;
-
-        willDoNothing().given(studyCategoryService).deleteCategory(any(), eq(categoryId));
-
-        // when
-        ResultActions result = mockMvc.perform(delete("/categories/{categoryId}", categoryId));
-
-        // then
-        result.andExpect(status().isNoContent())
-                .andDo(restDocs.document(
-                        httpRequest(),
-                        httpResponse(),
-                        pathParameters(parameterWithName("categoryId")
-                                .description("삭제 카테고리 id")
-                                .attributes(constraints("not null")))));
-    }
-
-    @Test
-    @WithMockUser
     void read_success() throws Exception {
         // given
         List<GetCategoryRes> response = List.of(
                 GetCategoryRes.builder()
-                        .studyType(StudyType.PERSONAL)
+                        .studyType(StudyType.GROUP)
                         .typeId(1L)
                         .dateType(DateType.DAILY)
-                        .name("personal-category")
+                        .name("group-category1")
                         .goal(null)
                         .color("#FFFFFF")
                         .dayBelong(127)
@@ -152,9 +153,9 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                         .build(),
                 GetCategoryRes.builder()
                         .studyType(StudyType.GROUP)
-                        .typeId(15L)
+                        .typeId(1L)
                         .dateType(DateType.DAILY)
-                        .name("group-category")
+                        .name("group-category2")
                         .goal(3600L)
                         .color("#F1F2C")
                         .dayBelong(127)
@@ -164,17 +165,18 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                         .studyType(StudyType.REMOVED)
                         .typeId(1L)
                         .dateType(DateType.DAILY)
-                        .name("removed-category")
+                        .name("group-category3")
                         .goal(1200L)
                         .color("#F11111")
                         .dayBelong(127)
                         .description("description")
                         .build());
 
-        given(studyCategoryService.getAllUserCategories(any())).willReturn(response);
+        given(studyCategoryService.getGroupCategories(any())).willReturn(response);
 
         // when
-        ResultActions result = mockMvc.perform(get("/categories"));
+        ResultActions result = mockMvc.perform(get("/groups/categories/{groupId}", 1L)
+                .contentType(MediaType.APPLICATION_JSON));
 
         // then
         result.andExpect(status().isOk())
@@ -186,7 +188,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("status").description("응답 상태(예: success or failed"),
                                 fieldWithPath("message").description("응답 메시지"),
                                 fieldWithPath("data[].studyType")
-                                        .description("해당 카테고리의 타입(PERSONAL, GROUP, REMOVED...)"),
+                                        .description("해당 카테고리의 타입(GROUP)"),
                                 fieldWithPath("data[].typeId").description("studyType 에 대한 id"),
                                 fieldWithPath("data[].dateType").description("카테고리의 date type"),
                                 fieldWithPath("data[].name").description("카테고리 이름"),
@@ -197,4 +199,6 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data[].dayBelong").description("카테고리 포함 요일"),
                                 fieldWithPath("data[].description").description("카테고리 설명"))));
     }
+
+
 }

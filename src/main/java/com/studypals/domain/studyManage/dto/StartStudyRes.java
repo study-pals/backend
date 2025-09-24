@@ -1,6 +1,6 @@
 package com.studypals.domain.studyManage.dto;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 import com.studypals.domain.studyManage.entity.StudyStatus;
 
@@ -15,4 +15,4 @@ import com.studypals.domain.studyManage.entity.StudyStatus;
  * @since 2025-04-13
  */
 public record StartStudyRes(
-        boolean studying, LocalTime startTime, Long studyTime, Long categoryId, String name, Long goal) {}
+        boolean studying, LocalDateTime startTime, Long studyTime, Long categoryId, String name, Long goal) {}

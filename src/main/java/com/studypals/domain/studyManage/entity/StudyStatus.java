@@ -1,10 +1,11 @@
 package com.studypals.domain.studyManage.entity;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.persistence.Id;
 
+import lombok.Setter;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 
@@ -43,7 +44,7 @@ public class StudyStatus {
     @Builder.Default
     private boolean studying = true;
 
-    private LocalTime startTime;
+    private LocalDateTime startTime;
 
     @Builder.Default
     private Long studyTime = 0L;
@@ -52,6 +53,7 @@ public class StudyStatus {
 
     private String name;
 
+    @Setter
     private Long goal;
 
     @TimeToLive(unit = TimeUnit.DAYS)
