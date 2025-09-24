@@ -26,8 +26,7 @@ import com.studypals.domain.memberManage.entity.Member;
         uniqueConstraints =
                 @UniqueConstraint(
                         name = "uq_member_date",
-                        columnNames = {"member_id", "studied_date"}),
-        indexes = {@Index(name = "idx_member_date", columnList = "member_id, studied_date")})
+                        columnNames = {"member_id", "studied_date"}))
 public class DailyStudyInfo {
 
     @Id
