@@ -10,11 +10,13 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.studypals.domain.chatManage.dao.ChatMessageRepository;
 import com.studypals.domain.chatManage.entity.ChatMessage;
 import com.studypals.global.annotations.Worker;
 
+import reactor.core.publisher.BufferOverflowStrategy;
 import reactor.core.publisher.Flux;
 
 /**
@@ -40,6 +42,7 @@ import reactor.core.publisher.Flux;
  * @since 2025-07-14
  */
 @Worker
+@Slf4j
 @RequiredArgsConstructor
 public class ReactiveChatSaveWorker {
 
@@ -55,6 +58,8 @@ public class ReactiveChatSaveWorker {
         int maxBufferSize = 512;
         int maxBufferTime = 500;
         messageStream
+                .onBackpressureBuffer(
+                        10_000, msg -> log.error("chat message dropeed: {}", msg), BufferOverflowStrategy.DROP_LATEST)
                 .bufferTimeout(maxBufferSize, Duration.ofMillis(maxBufferTime))
                 .filter(batch -> !batch.isEmpty())
                 .flatMap(this::saveBatchAndCacheLatest)

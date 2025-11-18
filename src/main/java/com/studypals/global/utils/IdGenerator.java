@@ -157,47 +157,6 @@ public class IdGenerator {
         }
     }
 
-    //    private long generate(int type, int subtype) {
-    //        long now = currentTimeMillis() - EPOCH;
-    //        long base = now << SEQ_BITS;
-    //
-    //        long finalState;
-    //
-    //        while (true) {
-    //            long prev = state.get();
-    //            long prevTs = prev >>> SEQ_BITS;
-    //            int seq = (int) (prev & MAX_SEQUENCE);
-    //
-    //            if (prevTs < now) {
-    //                finalState = base;
-    //                if (state.compareAndSet(prev, base)) {
-    //                    break;
-    //                }
-    //            } else if (prevTs == now) {
-    //                if (seq < MAX_SEQUENCE) {
-    //                    finalState = prev + 1;
-    //                    if (state.compareAndSet(prev, finalState)) {
-    //                        break;
-    //                    }
-    //                } else {
-    //                    now = waitNextMillis(prevTs);
-    //                    base = now << SEQ_BITS;
-    //                }
-    //            } else {
-    //                now = prevTs;
-    //                base = now << SEQ_BITS;
-    //            }
-    //        }
-    //
-    //        long seq = finalState & MAX_SEQUENCE;
-    //
-    //        return (now << (64 - 41))
-    //                  | ((long) serverId << SERVER_ID_SHIFT)
-    //                  | (seq << SEQ_SHIFT)
-    //                  | ((long) type << TYPE_SHIFT)
-    //                  | ((long) subtype << SUBTYPE_SHIFT);
-    //    }
-
     /**
      * 아이디 생성 로직 - 멀티 스레드 환경을 상정하고 생성된 것이 아니기에
      * 단일 스레드 기반으로 작동해야 합니다. 멀티 환경의 경우 state 를 {@code AtomicLong} 으로
@@ -209,8 +168,9 @@ public class IdGenerator {
     private long generate(int type, int subtype) {
 
         long nowMs = currentTimeMillis() - EPOCH;
-
         long prevTs = state >>> SEQ_BITS;
+        if (nowMs < prevTs) nowMs = prevTs;
+
         int seq = (int) (state & MAX_SEQUENCE);
 
         if (prevTs != nowMs) {
@@ -233,13 +193,24 @@ public class IdGenerator {
                 | ((long) subtype << SUBTYPE_SHIFT);
     }
 
-    private long waitNextMillis(long lastTimestamp) {
-        long timestamp = System.currentTimeMillis() - EPOCH;
-        while (timestamp <= lastTimestamp) {
-            Thread.onSpinWait();
-            timestamp = System.currentTimeMillis() - EPOCH;
+    private long waitNextMillis(long lastTs) {
+        final long target = lastTs + 1;
+
+        while (true) {
+            long now = System.currentTimeMillis() - EPOCH;
+            if (now >= target) {
+                return now;
+            }
+
+            try {
+                Thread.onSpinWait();
+            } catch (Exception ie) {
+                Thread.currentThread().interrupt();
+                log.info("ID generator worker interrupted during wait", ie);
+
+                return System.currentTimeMillis() - EPOCH;
+            }
         }
-        return timestamp;
     }
 
     private static class IdRequest {

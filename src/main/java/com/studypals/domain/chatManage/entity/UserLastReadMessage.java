@@ -2,6 +2,8 @@ package com.studypals.domain.chatManage.entity;
 
 import java.util.Map;
 
+import lombok.AllArgsConstructor;
+
 import com.studypals.global.redis.redisHashRepository.annotations.RedisHashEntity;
 import com.studypals.global.redis.redisHashRepository.annotations.RedisHashMapField;
 import com.studypals.global.redis.redisHashRepository.annotations.RedisId;
@@ -29,6 +31,7 @@ import com.studypals.global.redis.redisHashRepository.annotations.RedisId;
  * @since 2025-07-17
  */
 @RedisHashEntity(value = "lastRead")
+@AllArgsConstructor
 public class UserLastReadMessage {
 
     @RedisId

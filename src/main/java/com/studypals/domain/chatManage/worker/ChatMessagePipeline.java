@@ -2,6 +2,8 @@ package com.studypals.domain.chatManage.worker;
 
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
 import com.studypals.domain.chatManage.entity.ChatMessage;
 
 import reactor.core.publisher.Flux;
@@ -22,16 +24,20 @@ import reactor.core.publisher.Sinks;
  * @since 2025-07-14
  */
 @Component
+@Slf4j
 public class ChatMessagePipeline {
 
-    private final Sinks.Many<ChatMessage> sink = Sinks.many().multicast().onBackpressureBuffer();
+    private final Sinks.Many<ChatMessage> sink = Sinks.many().unicast().onBackpressureBuffer();
 
     /**
      * 채팅 메시지를 발행합니다. 추후 소비자가 이를 가공하여 처리합니다.
      * @param chatMessage 채팅 메시지
      */
     public void publish(ChatMessage chatMessage) {
-        sink.tryEmitNext(chatMessage);
+        Sinks.EmitResult result = sink.tryEmitNext(chatMessage);
+        if (result.isFailure()) {
+            log.error("fail to emit chat message: {}", result);
+        }
     }
 
     /**

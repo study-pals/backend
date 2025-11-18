@@ -20,7 +20,7 @@ class IdGeneratorTest {
     /*   true  → 모든 성능 테스트 수행       */
     /*   false → generate_success 만 수행   */
     /* ────────────────────────────────── */
-    private static final boolean RUN_PERFORMANCE_TESTS = false;
+    private static final boolean RUN_PERFORMANCE_TESTS = true;
 
     @Autowired
     private IdGenerator idGenerator;
@@ -126,12 +126,12 @@ class IdGeneratorTest {
         latch.await();
         pool.shutdown();
 
-        printReport("1-Second-Burst", counter.get(), Duration.ofSeconds(1), ids.size());
+        printReport("1-Second-Burst, 10 Thread", counter.get(), Duration.ofSeconds(1), ids.size());
     }
 
     /* ────────────── 출력 유틸 ────────────── */
     private static void printReport(String title, int requested, Duration elapsed, int unique) {
-        System.out.println("\n─── [" + title + "] ────────────────────────────────────");
+        System.out.println("\n─── [" + title + "] ─────────────────────────");
         System.out.printf("Requested        : %,d%n", requested);
         if (!elapsed.isZero()) {
             long ms = elapsed.toMillis();
