@@ -1,6 +1,5 @@
 package com.studypals.domain.chatManage.dao;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,5 +17,5 @@ import reactor.core.publisher.Flux;
 @Repository
 public interface ChatMessageRepository extends ReactiveMongoRepository<ChatMessage, String> {
 
-    Flux<ChatMessage> findByRoomAndIdGreaterThanEqualOrderByIdAsc(String roomId, String idFrom, Pageable pageable);
+    Flux<ChatMessage> findByRoomAndIdGreaterThanEqualOrderByIdAsc(String roomId, String idFrom);
 }

@@ -3,6 +3,7 @@ package com.studypals.domain.chatManage.entity;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import com.studypals.global.redis.redisHashRepository.annotations.RedisHashEntity;
 import com.studypals.global.redis.redisHashRepository.annotations.RedisHashMapField;
@@ -44,5 +45,6 @@ public class UserLastReadMessage {
     private String lameCon;
 
     @RedisHashMapField
+    @Getter
     private Map<Long, String> lastMessage;
 }

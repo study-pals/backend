@@ -1,5 +1,13 @@
 package com.studypals.domain.chatManage.worker;
 
+import lombok.RequiredArgsConstructor;
+
+import com.studypals.domain.chatManage.dao.ChatMessageRepository;
+import com.studypals.domain.chatManage.entity.ChatMessage;
+import com.studypals.global.annotations.Worker;
+
+import reactor.core.publisher.Flux;
+
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
  * <p>
@@ -20,6 +28,14 @@ package com.studypals.domain.chatManage.worker;
  *
  * @author jack8
  * @see
- * @since 2025-07-17
+ * @since 2025-11-18
  */
-public class ChatReadUpdater {}
+@Worker
+@RequiredArgsConstructor
+public class ChatMessageReader {
+    private final ChatMessageRepository messageRepository;
+
+    public Flux<ChatMessage> getChatLog(String roomId, String chatId) {
+        return messageRepository.findByRoomAndIdGreaterThanEqualOrderByIdAsc(roomId, chatId);
+    }
+}

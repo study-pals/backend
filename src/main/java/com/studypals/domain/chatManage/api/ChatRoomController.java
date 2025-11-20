@@ -2,10 +2,7 @@ package com.studypals.domain.chatManage.api;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,8 +31,10 @@ public class ChatRoomController {
 
     @GetMapping("/{chatRoomId}")
     public ResponseEntity<Response<ChatRoomInfoRes>> getChatRoomInfo(
-            @PathVariable("chatRoomId") String chatRoomId, @AuthenticationPrincipal Long userId) {
-        ChatRoomInfoRes chatRoomInfo = chatRoomService.getChatRoomInfo(userId, chatRoomId);
+            @PathVariable("chatRoomId") String chatRoomId,
+            @RequestParam(defaultValue = "1", name = "after") String chatId,
+            @AuthenticationPrincipal Long userId) {
+        ChatRoomInfoRes chatRoomInfo = chatRoomService.getChatRoomInfo(userId, chatRoomId, chatId);
 
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.CHAT_ROOM_SEARCH, chatRoomInfo, chatRoomId));
     }

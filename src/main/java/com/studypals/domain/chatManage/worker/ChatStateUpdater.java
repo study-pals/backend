@@ -191,8 +191,8 @@ public class ChatStateUpdater {
             System.out.println("try send");
 
             try {
-                OutgoingMessage outgoingMessage = new OutgoingMessage(
-                        null, ChatType.STAT, objectMapper.writeValueAsString(userLastReads), null, null);
+                OutgoingMessage outgoingMessage =
+                        new OutgoingMessage(null, ChatType.STAT, objectMapper.writeValueAsString(userLastReads), null);
                 template.convertAndSend(DESTINATION_PREFIX + roomId, outgoingMessage);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();

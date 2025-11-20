@@ -121,6 +121,9 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
                     ChatErrorCode.CHAT_SUBSCRIBE_FAIL,
                     "[StompAuthChannelInterceptor#handleSubscribe] destination null");
 
+        if (!destination.startsWith("/sub/chat/room/")) {
+            return;
+        }
         // url 로 부터 구독하고자 하는 방의 id 를 추출
         String roomId = extractRoomIdFromDestination(destination);
         String sessionId = accessor.getSessionId();

@@ -1,12 +1,15 @@
 package com.studypals.domain.chatManage.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.chatManage.dto.ChatCursorRes;
 import com.studypals.domain.chatManage.dto.ChatRoomInfoRes;
 import com.studypals.domain.chatManage.dto.mapper.ChatRoomMapper;
 import com.studypals.domain.chatManage.entity.ChatRoom;
@@ -36,7 +39,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional(readOnly = true)
-    public ChatRoomInfoRes getChatRoomInfo(Long userId, String chatRoomId) {
+    public ChatRoomInfoRes getChatRoomInfo(Long userId, String chatRoomId, String chatId) {
         ChatRoom chatRoom = chatRoomReader.getById(chatRoomId);
 
         // Fetch Join 을 통한 1 + N 문제 방지
@@ -49,10 +52,21 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                     ChatErrorCode.CHAT_ROOM_PERMISSION_DENIED, "[ChatRoomService#getChatRoomInfo] not included user");
         }
 
+        Map<Long, String> cursorData = new HashMap<>();
+        for (ChatRoomMember chatRoomMember : members) {
+            cursorData.put(chatRoomMember.getId(), chatRoomMember.getLastReadMessage());
+        }
+        cursorData.putAll(chatRoomReader.getCachedCursor(chatRoomId).getLastMessage());
+
+        List<ChatCursorRes> chatCursorRes = cursorData.entrySet().stream()
+                .map(t -> new ChatCursorRes(t.getKey(), t.getValue()))
+                .toList();
+
         return ChatRoomInfoRes.builder()
                 .id(chatRoomId)
                 .name(chatRoom.getName())
                 .userInfos(members.stream().map(chatRoomMapper::toDto).toList())
+                .cursor(chatCursorRes)
                 .build();
     }
 }

@@ -15,7 +15,7 @@ import com.studypals.domain.chatManage.entity.ChatMessage;
 @Mapper(componentModel = "spring")
 public interface ChatMessageMapper {
 
-    OutgoingMessage toOutMessage(IncomingMessage message, Long senderId, String time);
+    OutgoingMessage toOutMessage(IncomingMessage message, Long senderId);
 
     ChatMessage toEntity(IncomingMessage message, String id, Long sender);
 }

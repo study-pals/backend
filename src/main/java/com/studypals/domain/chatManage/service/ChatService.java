@@ -1,6 +1,7 @@
 package com.studypals.domain.chatManage.service;
 
 import com.studypals.domain.chatManage.dto.IncomingMessage;
+import com.studypals.domain.chatManage.dto.SendChatLogDto;
 
 /**
  * websocket 기반의 메시지에 대하여 채팅을 저장/브로드 캐스트 등의 기능을 수행합니다.
@@ -41,4 +42,9 @@ public interface ChatService {
      * @throws com.studypals.global.exceptions.exception.ChatException 검증 실패 시 예외 반환
      */
     void sendDestinationValidate(String sessionId, String roomId);
+
+    /**
+     *
+     */
+    void sendChatLog(Long userId, SendChatLogDto dto);
 }
