@@ -102,27 +102,7 @@ include::{snippets}/category-controller-rest-docs-test/delete_success/http-reque
 
 include::{snippets}/category-controller-rest-docs-test/delete_success/http-response.adoc[]
 
-==== 4. 카테고리 전체 삭제
-
-*Description* +
-
-'''
-
-특정 카테고리의 삭제를 위해 사용합니다.
-
-*REQUEST* +
-
-'''
-
-include::{snippets}/category-controller-rest-docs-test/delete-all_success/http-request.adoc[]
-
-*RESPONSE* +
-
-'''
-
-include::{snippets}/category-controller-rest-docs-test/delete-all_success/http-response.adoc[]
-
-==== 5. 카테고리 정보 불러오기
+==== 4. 카테고리 정보 불러오기
 
 *Description* +
 

@@ -33,7 +33,7 @@ class DailyStudyInfoMapperTest {
                 .studiedDate(LocalDate.of(2024, 4, 20))
                 .startTime(LocalTime.of(9, 0))
                 .endTime(LocalTime.of(12, 30))
-                .memo("집중 잘 됨")
+                .description("집중 잘 됨")
                 .build();
 
         // when
@@ -43,6 +43,6 @@ class DailyStudyInfoMapperTest {
         assertThat(dto.studiedDate()).isEqualTo(LocalDate.of(2024, 4, 20));
         assertThat(dto.startTime()).isEqualTo(LocalTime.of(9, 0));
         assertThat(dto.endTime()).isEqualTo(LocalTime.of(12, 30));
-        assertThat(dto.memo()).isEqualTo("집중 잘 됨");
+        assertThat(dto.description()).isEqualTo("집중 잘 됨");
     }
 }

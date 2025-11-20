@@ -85,7 +85,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     private static final RedisStreamCommands.XAddOptions ADD_OPTS =
             RedisStreamCommands.XAddOptions.maxlen(MAX_LEN).approximateTrimming(true);
 
-    // field name of ChatMessage, to use when find value from Map or save by redisTemplate
+    // field name of ChatMessage, to use when findAndDelete value from Map or save by redisTemplate
     private static final String ID_FIELD = ChatMessage.FieldName.ID.getName();
     private static final String TYPE_FIELD = ChatMessage.FieldName.TYPE.getName();
     private static final String ROOM_FIELD = ChatMessage.FieldName.ROOM.getName();

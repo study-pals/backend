@@ -6,23 +6,24 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.entity.StudyType;
 
 /**
- * {@link StudyCategory} 에 대한 JPA DAO 클래스입니다.
+ * {@link StudyCategory} 에 대한 DAO 클래스입니다. QueryDSL을 사용한 커스텀 메서드가 포함되어 있습니다.
+ * <p>
  *
- * <p><b>상속 정보:</b><br>
- * {@code JpaRepository<StudyCategory, Long>}
+ * <p><b>빈 관리:</b><br>
+ * repository
+ *
+ * <p><b>외부 모듈:</b><br>
+ * QueryDSL / JPA
  *
  * @author jack8
- * @see StudyCategory
- * @since 2025-04-10
+ * @see StudyCategoryCustomRepository
+ * @since 2025-08-01
  */
 @Repository
-public interface StudyCategoryRepository extends JpaRepository<StudyCategory, Long> {
+public interface StudyCategoryRepository extends JpaRepository<StudyCategory, Long>, StudyCategoryCustomRepository {
 
-    // tested
-    List<StudyCategory> findByMemberId(Long memberId);
-
-    // tested
-    void deleteByMemberId(Long memberId);
+    List<StudyCategory> findByStudyTypeAndTypeId(StudyType studyType, Long typeId);
 }

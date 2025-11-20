@@ -1,21 +1,29 @@
 package com.studypals.domain.studyManage.service;
 
-import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
+import com.studypals.domain.studyManage.dto.StartStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
+import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.worker.DailyInfoWriter;
+import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
@@ -24,24 +32,12 @@ import com.studypals.global.utils.TimeUtils;
 
 /**
  * {@link StudySessionService} 의 구현 클래스입니다.
- * <p>
- * 오버라이드된 메서드와, 해당 메서드에 사용되는 private 메서드가 선언되어 있습니다. 자세한 주석은
- * interface 에 존재합니다.
  *
  * <p><b>상속 정보:</b><br>
  * {@code StudySessionService} 의 구현 클래스
  *
- *
  * <p><b>빈 관리:</b><br>
- * Service 빈
- * <pre>
- * private final StudyTimeMapper mapper;
- * private final TimeUtils timeUtils;
- *
- * private final StudySessionWorker studySessionWorker;
- * private final StudyStatusWorker studyStatusWorker;
- * </pre>>
- *
+ * Service
  *
  * @author jack8
  * @see StudySessionService
@@ -56,49 +52,116 @@ public class StudySessionServiceImpl implements StudySessionService {
 
     private final StudySessionWorker studySessionWorker;
     private final StudyStatusWorker studyStatusWorker;
+    private final StudyCategoryReader studyCategoryReader;
     private final DailyInfoWriter dailyInfoWriter;
     private final MemberReader memberReader;
 
+    private static final int SECS_PER_DAY = 24 * 60 * 60;
+
     @Override
     @Transactional
-    public StartStudyRes startStudy(Long userId, StartStudyReq dto) {
+    public StartStudyRes startStudy(Long userId, StartStudyReq req) {
+        LocalDate today = timeUtils.getToday(req.startTime());
+        LocalDateTime startDateTime = LocalDateTime.of(today, req.startTime());
+        StartStudyDto dto = mapper.toDto(req, startDateTime);
 
         Member member = memberReader.getRef(userId);
-        // status 정보 가져오기 - 존재하지 않으면 최초 양식 생성
-        StudyStatus status = studyStatusWorker.find(userId).orElseGet(() -> studyStatusWorker.firstStatus(member, dto));
+        Optional<StudyStatus> status = studyStatusWorker.find(userId);
 
-        if (!status.isStudying()) {
-            status = studyStatusWorker.restartStatus(status, dto);
+        // 만약 이미 공부 중인 경우, 공부를 시작하는 대신 현재 공부 상태를 반환함
+        if (status.isPresent() && status.get().isStudying()) return mapper.toDto(status.get());
+
+        // 공부 중이 아닌 경우, 새로운 redis에 저장할 공부 상태 객체 생성
+        StudyStatus startStatus = studyStatusWorker.startStatus(member, dto);
+        dailyInfoWriter.createIfNotExist(member, today, req.startTime());
+
+        if (req.categoryId() != null) { // 만약 졍규 카테고리에 대한 공부라면
+            StudyCategory category = studyCategoryReader.getById(req.categoryId());
+            startStatus.setGoal(category.getGoal());
         }
 
-        studyStatusWorker.saveStatus(status);
+        // 공부 상태 저장
+        studyStatusWorker.saveStatus(startStatus);
 
-        return mapper.toDto(status);
+        return mapper.toDto(startStatus);
     }
 
     @Override
     @Transactional
     public Long endStudy(Long userId, LocalTime endTime) {
-        LocalDate today = timeUtils.getToday();
+        // 저장할 날짜 및 저장 중인 공부 상태 객체 불러오기
+        Long totalTime = 0L;
+        LocalDate today = timeUtils.getToday(endTime);
+        Member member = memberReader.getRef(userId);
+
+        // 현재 공부 상태 불러오기
         StudyStatus status = studyStatusWorker
                 .find(userId)
-                .orElseThrow(() -> new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL));
+                .orElseThrow(() -> new StudyException(
+                        StudyErrorCode.STUDY_TIME_END_FAIL, "[StudySessionServiceImpl#endStudy] unknown status"));
+        studyStatusWorker.validStatus(status);
 
-        studyStatusWorker.validStatus(status); // 받아온 status 가 정상인지 확인
+        LocalDate startDate = status.getStartTime().toLocalDate();
+        LocalTime startTime = status.getStartTime().toLocalTime();
 
-        // 1) 실제 공부 시간(초)
-        Long durationInSec = getTimeDuration(status.getStartTime(), endTime);
+        Map<LocalDate, TimeSaveInfo> timeSaveInfoMap = new HashMap<>();
+        if (startDate.isEqual(today)) {
 
-        // 2) DB에 공부시간 및 종료 시간 upsert
-        Member member = memberReader.getRef(userId);
-        studySessionWorker.upsert(member, status, today, durationInSec);
-        dailyInfoWriter.updateEndtime(member, today, endTime);
+            long durationInSec = getTimeDuration(startTime, endTime);
+            timeSaveInfoMap.put(today, new TimeSaveInfo(member, startTime, endTime));
+            studySessionWorker.upsert(member, status, today, durationInSec);
+            totalTime += durationInSec;
 
-        // 3) 레디스 상태 값 리셋
-        status = studyStatusWorker.resetStatus(status, durationInSec);
-        studyStatusWorker.saveStatus(status);
+        } else if (startDate.plusDays(1).isEqual(today)) {
 
-        return durationInSec;
+            LocalTime pointTime = LocalTime.of(6, 0); // to static var
+            long day1DurationInSec = getTimeDuration(startTime, pointTime);
+            long day2DurationInSec = getTimeDuration(pointTime, endTime);
+            timeSaveInfoMap.put(startDate, new TimeSaveInfo(member, startTime, pointTime));
+            timeSaveInfoMap.put(today, new TimeSaveInfo(member, pointTime, endTime));
+
+            studySessionWorker.upsert(member, status, startDate, day1DurationInSec);
+            studySessionWorker.upsert(member, status, today, day2DurationInSec);
+
+            totalTime += day1DurationInSec + day2DurationInSec;
+        } else {
+            throw new StudyException(
+                    StudyErrorCode.STUDY_TIME_END_FAIL,
+                    "[StudySessionServiceImpl#endStudy] over 1 day pass is invalid");
+        }
+        saveDailyInfo(timeSaveInfoMap);
+
+        // 커밋 이후 status 반영 및 초기화
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    studyStatusWorker.delete(userId);
+                }
+            });
+        }
+
+        return totalTime;
+    }
+
+    /**
+     *  dailyStudyInfo 를 저장하기 위해 구성된 데이터 전송 목적의 record. saveDailyInfo 메서드의 매개변수
+     *  구성 요소로 사용됩니다.
+     * @param member 저장할 사용자
+     * @param start 공부 시작 시간
+     * @param end 공부 종료 시간
+     */
+    private record TimeSaveInfo(Member member, LocalTime start, LocalTime end) {}
+
+    private void saveDailyInfo(Map<LocalDate, TimeSaveInfo> saveMap) {
+
+        for (Map.Entry<LocalDate, TimeSaveInfo> entry : saveMap.entrySet()) {
+            TimeSaveInfo info = entry.getValue();
+            LocalDate date = entry.getKey();
+            if (!dailyInfoWriter.createIfNotExist(info.member, date, info.start, info.end)) {
+                dailyInfoWriter.updateEndtime(info.member, date, info.end);
+            }
+        }
     }
 
     /**
@@ -108,14 +171,10 @@ public class StudySessionServiceImpl implements StudySessionService {
      * @param end 공부 종료 시간
      * @return 초 단위 공부 시간
      */
-    private Long getTimeDuration(LocalTime start, LocalTime end) {
-        if (!start.isAfter(end)) {
-            return Duration.between(start, end).toSeconds();
-        }
-
-        // startTime 이 00:00 전이고, endTime 이 이후인 경우
-        long startToMidnight = Duration.between(start, LocalTime.MAX).toSeconds() + 1L;
-        long midnightToEnd = Duration.between(LocalTime.MIN, end).toSeconds();
-        return startToMidnight + midnightToEnd;
+    private long getTimeDuration(LocalTime start, LocalTime end) {
+        int s = start.toSecondOfDay();
+        int e = end.toSecondOfDay();
+        if (s == e) return 0L;
+        return (e >= s) ? (e - s) : (SECS_PER_DAY - s) + e;
     }
 }

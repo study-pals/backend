@@ -71,5 +71,78 @@ pipeline {
         }
     }
 
+    /* 8) 성공/실패 Discord 알림 (기존 코드 그대로) ------------------------- */
+    post {
+        success {
+            script {
+                def branch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                def commitMsg = sh(script: "git log -1 --pretty=%s", returnStdout: true).trim()
+                def author = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
+                def shortSha = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
+                def jenkinsUrl = "http://jack8226.ddns.net:3005/job/dev-build/${env.BUILD_NUMBER}/"
+                def reportUrl = "${jenkinsUrl}execution/node/3/ws/build/reports/tests/test/index.html"
+
+                def desc = """
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    📦 study-pal-dev Jenkins Pipeline
+
+    ✅ 빌드 성공
+
+    🌿 브랜치: ${branch}
+    ✍️ 커밋 메시지:
+          ${commitMsg}
+    🧑‍💻 작성자: ${author}
+    🔗 SHA: ${shortSha}
+
+    📄 테스트 리포트 보기: ${reportUrl}
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    """.stripIndent().trim()
+
+                discordSend(
+                    description: desc,
+                    link: jenkinsUrl,
+                    result: currentBuild.currentResult,
+                    title: "📦 study-pal Jenkins Pipeline",
+                    webhookURL: env.DISCORD_WEBHOOK
+                )
+            }
+        }
+
+        failure {
+            script {
+                def branch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                def commitMsg = sh(script: "git log -1 --pretty=%s", returnStdout: true).trim()
+                def author = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
+                def shortSha = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+
+                def jenkinsUrl = "http://jack8226.ddns.net:3005/job/study-pal/${env.BUILD_NUMBER}/"
+                def reportUrl = "${jenkinsUrl}execution/node/3/ws/build/reports/tests/test/index.html"
+
+                def desc = """
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    📦 study-pal-dev Jenkins Pipeline
+
+    ❌ 빌드 실패
+
+    🌿 브랜치: ${branch}
+    ✍️ 커밋 메시지:
+          ${commitMsg}
+    🧑‍💻 작성자: ${author}
+    🔗 SHA: ${shortSha}
+
+    📄 테스트 리포트 보기: ${reportUrl}
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    """.stripIndent().trim()
+
+                discordSend(
+                    description: desc,
+                    link: jenkinsUrl,
+                    result: currentBuild.currentResult,
+                    title: "📦 study-pal Jenkins Pipeline",
+                    webhookURL: env.DISCORD_WEBHOOK
+                )
+            }
+        }
+    }
 }

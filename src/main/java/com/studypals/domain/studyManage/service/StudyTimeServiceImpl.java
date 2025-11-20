@@ -54,7 +54,7 @@ public class StudyTimeServiceImpl implements StudyTimeService {
             return List.of();
         }
 
-        List<StudyTime> times = studyTimeReader.getListByMemberAndDate(userId, date);
+        List<StudyTime> times = studyTimeReader.findByUserIdAndDate(userId, date);
 
         return times.stream().map(studyTimeMapper::toDto).toList();
     }
@@ -62,7 +62,8 @@ public class StudyTimeServiceImpl implements StudyTimeService {
     @Override
     @Transactional(readOnly = true)
     public List<GetDailyStudyDto> getDailyStudyList(Long userId, PeriodDto period) {
-        List<StudyTime> summaries = studyTimeReader.getListByMemberAndDateByPeriod(userId, period);
+        List<StudyTime> summaries = studyTimeReader.findByUserIdAndPeriod(userId, period);
+        if (summaries.isEmpty()) return List.of();
 
         return summaries.stream()
                 .collect(Collectors.groupingBy(StudyTime::getStudiedDate))

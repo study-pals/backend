@@ -2,6 +2,7 @@ package com.studypals.domain.studyManage.dto;
 
 import lombok.Builder;
 
+import com.studypals.domain.studyManage.entity.DateType;
 import com.studypals.domain.studyManage.entity.StudyType;
 
 /**
@@ -14,6 +15,7 @@ import com.studypals.domain.studyManage.entity.StudyType;
 public record GetCategoryRes(
         StudyType studyType,
         Long typeId,
+        DateType dateType,
         String name,
         Long goal,
         String color,
