@@ -38,7 +38,7 @@ pipeline {
         stage('Build') { steps { sh './gradlew clean build' } }
 
         /* 5) Docker 이미지 빌드 ------------------------------------------- */
-        stage('Build Docker Image') { steps { sh "docker build -t ${DOCKER_IMAGE_NAME} ." } }
+        stage('Build Docker Image') { steps { sh "docker build -t ${DOCKER_IMAGE_NAME} -f DockerfileDev ." } }
 
         /* 6) 이미지 아카이브 ---------------------------------------------- */
         stage('Save Docker Image') {
@@ -58,7 +58,7 @@ pipeline {
 
                     // prod 프로필로 컨테이너 실행. 모든 env 는 env‑file 로 전달
                     sh """
-                        docker run -d --name study-pal-dev-container -p 8080:8080 \\
+                        docker run -d --name study-pal-dev-container -p 7070:8080 \\
                           --env-file ${env.ENV_FILE_PATH} \\
                           -e SPRING_PROFILES_ACTIVE=prod \\
                           --network docker_backend \\
