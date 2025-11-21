@@ -66,7 +66,7 @@ public class ChatRoomControllerRestDocsTest extends RestDocsSupport {
                                 .imageUrl("image3.jpg")
                                 .build()))
                 .build();
-        given(chatRoomService.getChatRoomInfo(any(), any())).willReturn(responseData);
+        given(chatRoomService.getChatRoomInfo(any(), any(), any())).willReturn(responseData);
         Response<ChatRoomInfoRes> expected =
                 CommonResponse.success(ResponseCode.CHAT_ROOM_SEARCH, responseData, chatRoomId);
 

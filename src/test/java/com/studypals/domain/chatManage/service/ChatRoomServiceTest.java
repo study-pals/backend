@@ -64,7 +64,7 @@ class ChatRoomServiceTest {
         given(mockMember.getId()).willReturn(userId);
 
         // when
-        ChatRoomInfoRes result = chatRoomService.getChatRoomInfo(userId, chatRoomId);
+        ChatRoomInfoRes result = chatRoomService.getChatRoomInfo(userId, chatRoomId, "0");
 
         // then
         assertThat(result.id()).isEqualTo(chatRoomId);

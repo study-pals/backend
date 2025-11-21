@@ -6,14 +6,11 @@ import static org.mockito.Mockito.*;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.studypals.domain.chatManage.dto.ChatType;
@@ -32,7 +29,6 @@ import com.studypals.testModules.testSupport.WebsocketStompSupport;
  * @since 2025-06-30
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext
 class StompAuthChannelInterceptorTest extends WebsocketStompSupport {
 
     @MockitoBean
@@ -52,7 +48,7 @@ class StompAuthChannelInterceptorTest extends WebsocketStompSupport {
 
         // when
         connectSession();
-        subscribe("/sub/chat/room/" + room1, String.class);
+        subscribe("/sub/chat/room/" + room1, String.class, 0);
         Thread.sleep(500);
         // then
         verify(userSubscribeInfoRepository, never()).saveMapById(any());
@@ -70,22 +66,25 @@ class StompAuthChannelInterceptorTest extends WebsocketStompSupport {
     void sendMessage_success() throws Exception {
         // given
         Long userId = 1L;
+        int expected = 1;
         IncomingMessage message = new IncomingMessage(ChatType.TEXT, "payload message", room1);
-        OutgoingMessage outMessage = new OutgoingMessage(null, ChatType.TEXT, "payload message", userId, "time");
+        OutgoingMessage outMessage = new OutgoingMessage(null, ChatType.TEXT, "payload message", userId);
         verifyToken(userId, true);
         verifyRoom(room1, userId, true);
         given(userSubscribeInfoRepository.existById(any())).willReturn(true);
         given(userSubscribeInfoRepository.findById(any())).willReturn(Optional.of(userSubscribeInfo));
         given(userSubscribeInfo.getRoomList()).willReturn(Map.of(room1, 17));
-        given(chatMessageMapper.toOutMessage(any(), any(), any())).willReturn(outMessage);
+        given(chatMessageMapper.toOutMessage(any(), any())).willReturn(outMessage);
 
         // when
         connectSession();
-        CompletableFuture<OutgoingMessage> messageFuture = subscribe("/sub/chat/room/" + room1, OutgoingMessage.class);
+        SubscribeRes<OutgoingMessage> res = subscribe("/sub/chat/room/" + room1, OutgoingMessage.class, expected);
         send("/pub/send/message", message);
 
+        res.await();
+
         // then
-        OutgoingMessage received = messageFuture.get(3, TimeUnit.SECONDS);
+        OutgoingMessage received = res.getMessage().get(0);
         assertThat(received.getMessage()).isEqualTo("payload message");
         assertThat(received.getType()).isEqualTo(ChatType.TEXT);
         assertThat(received.getSenderId()).isEqualTo(userId);

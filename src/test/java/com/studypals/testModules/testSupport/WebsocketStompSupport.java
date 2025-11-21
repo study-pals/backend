@@ -3,8 +3,12 @@ package com.studypals.testModules.testSupport;
 import static org.mockito.BDDMockito.given;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
@@ -16,6 +20,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
+
+import lombok.Getter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
@@ -114,9 +120,10 @@ public abstract class WebsocketStompSupport {
      * @return 해당 토픽에 오는 메시지 , 단 get으로 가져와야 함
      * @param <T> type에 입력되는 반환 타입 정보
      */
-    protected <T> CompletableFuture<T> subscribe(String destination, Class<T> type) {
-        CompletableFuture<T> future = new CompletableFuture<>();
+    protected <T> SubscribeRes<T> subscribe(String destination, Class<T> type, int cnt) {
 
+        CountDownLatch latch = new CountDownLatch(cnt);
+        List<T> messages = Collections.synchronizedList(new ArrayList<>());
         session.subscribe(destination, new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
@@ -125,11 +132,28 @@ public abstract class WebsocketStompSupport {
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                future.complete(type.cast(payload));
+                messages.add(type.cast(payload));
+                latch.countDown();
             }
         });
 
-        return future;
+        return new SubscribeRes<>(latch, messages);
+    }
+
+    protected static class SubscribeRes<T> {
+        private final CountDownLatch latch;
+
+        @Getter
+        private final List<T> messages;
+
+        public SubscribeRes(CountDownLatch latch, List<T> messages) {
+            this.latch = latch;
+            this.messages = messages;
+        }
+
+        public void await() throws InterruptedException {
+            latch.await();
+        }
     }
 
     /**

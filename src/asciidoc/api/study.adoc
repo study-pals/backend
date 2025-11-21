@@ -114,13 +114,13 @@ include::{snippets}/category-controller-rest-docs-test/delete_success/http-respo
 
 '''
 
-include::{snippets}/category-controller-rest-docs-test/delete-all_success/http-request.adoc[]
+include::{snippets}/category-controller-rest-docs-test/delete_success/http-request.adoc[]
 
 *RESPONSE* +
 
 '''
 
-include::{snippets}/category-controller-rest-docs-test/delete-all_success/http-response.adoc[]
+include::{snippets}/category-controller-rest-docs-test/delete_success/http-response.adoc[]
 
 ==== 5. 카테고리 정보 불러오기
 
@@ -237,15 +237,15 @@ include::{snippets}/study-session-controller-rest-docs-test/end_success/http-res
 *REQUEST* +
 
 '''
-include::{snippets}/study-time-controller-rest-docs-test/get-study-time-by-date_success/query-parameters.adoc[]
-include::{snippets}/study-time-controller-rest-docs-test/get-study-time-by-date_success/http-request.adoc[]
+include::{snippets}/study-time-controller-rest-docs-test/get-studies-info-by-date/query-parameters.adoc[]
+include::{snippets}/study-time-controller-rest-docs-test/get-studies-info-by-date/http-request.adoc[]
 
 *RESPONSE* +
 
 '''
 
-include::{snippets}/study-time-controller-rest-docs-test/get-study-time-by-date_success/response-fields.adoc[]
-include::{snippets}/study-time-controller-rest-docs-test/get-study-time-by-date_success/http-response.adoc[]
+include::{snippets}/study-time-controller-rest-docs-test/get-studies-info-by-date/response-fields.adoc[]
+include::{snippets}/study-time-controller-rest-docs-test/get-studies-info-by-date/http-response.adoc[]
 
 ==== 2. 특정 기간 간 공부 데이터 가져오기
 
