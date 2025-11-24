@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.AuthException;
@@ -45,6 +46,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
     private final JwtUtils jwtUtils;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
+    private final MemberReader memberReader;
     private final UserSubscribeInfoRepository userSubscribeInfoRepository;
 
     private static final String ACCESS_HEADER = "Authorization";
@@ -93,7 +95,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         }
 
         JwtUtils.JwtData jwtData = jwtUtils.tokenInfo(token);
-        if (jwtData.isInvalid()) {
+        if (!jwtData.isValid()) {
             throw new AuthException(
                     AuthErrorCode.USER_AUTH_FAIL, "[StompAuthChannelInterceptor#handleConnect] invalid token");
         }
@@ -128,6 +130,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         String roomId = extractRoomIdFromDestination(destination);
         String sessionId = accessor.getSessionId();
 
+        // todo: delete before prod
         if (roomId.equals("hello")) return;
         if (sessionId == null) return;
 

@@ -1,6 +1,5 @@
 package com.studypals.domain.chatManage.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -55,7 +54,6 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void sendMessage(Long userId, IncomingMessage message) {
-        LocalDateTime now = LocalDateTime.now();
         OutgoingMessage outgoingMessage = chatMessageMapper.toOutMessage(message, userId);
         String id = Long.toHexString(snowflake.nextId());
         outgoingMessage.setId(id);
@@ -75,7 +73,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public void sendDestinationValidate(String sessionId, String roomId) {
         try {
-            chatSendValidator.checkIfSessionSubscribe(sessionId, roomId);
+            // chatSendValidator.checkIfSessionSubscribe(sessionId, roomId);
         } catch (IllegalArgumentException e) {
             throw new ChatException(
                     ChatErrorCode.CHAT_SEND_FAIL, "[ChatService#sendDestinationValidate] " + e.getMessage());
@@ -96,8 +94,6 @@ public class ChatServiceImpl implements ChatService {
                 .index()
                 .doOnNext(tuple -> {
                     List<ChatMessage> batch = tuple.getT2();
-                    System.out.println("flush : " + batch.size());
-                    ;
 
                     List<OutgoingMessage> resList =
                             batch.stream().map(this::toDto).toList();

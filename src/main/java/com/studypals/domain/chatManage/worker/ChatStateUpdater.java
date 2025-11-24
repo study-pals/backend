@@ -188,7 +188,6 @@ public class ChatStateUpdater {
         for (Map.Entry<String, Map<String, String>> entry : messages.entrySet()) {
             String roomId = entry.getKey();
             Map<String, String> userLastReads = entry.getValue();
-            System.out.println("try send");
 
             try {
                 OutgoingMessage outgoingMessage =

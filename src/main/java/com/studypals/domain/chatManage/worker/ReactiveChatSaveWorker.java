@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import com.studypals.domain.chatManage.dao.ChatMessageCacheRepository;
 import com.studypals.domain.chatManage.dao.ChatMessageRepository;
 import com.studypals.domain.chatManage.entity.ChatMessage;
 import com.studypals.global.annotations.Worker;
@@ -48,6 +49,7 @@ public class ReactiveChatSaveWorker {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ReactiveRedisTemplate<String, Object> redisTemplate;
+    private final ChatMessageCacheRepository cacheRepository;
 
     private final ChatMessagePipeline chatMessagePipeline;
 
@@ -73,6 +75,7 @@ public class ReactiveChatSaveWorker {
             for (ChatMessage msg : savedMessages) {
                 latestByRoom.merge(msg.getRoom(), msg, (a, b) -> a.getId().compareTo(b.getId()) < 0 ? b : a);
             }
+            cacheRepository.saveAll(messages);
 
             return Flux.fromIterable(latestByRoom.entrySet())
                     .flatMap(

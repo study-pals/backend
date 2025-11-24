@@ -1,5 +1,6 @@
 package com.studypals.domain.chatManage.dao;
 
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,5 +18,8 @@ import reactor.core.publisher.Flux;
 @Repository
 public interface ChatMessageRepository extends ReactiveMongoRepository<ChatMessage, String> {
 
-    Flux<ChatMessage> findByRoomAndIdGreaterThanEqualOrderByIdAsc(String roomId, String idFrom);
+    Flux<ChatMessage> findByRoomAndIdGreaterThanEqualOrderByIdDesc(String roomId, String idFrom);
+
+    @Query("{ 'room': ?0, 'id': { $gte: ?1, $lt: ?2 } }")
+    Flux<ChatMessage> findRange(String roomId, String from, String to);
 }

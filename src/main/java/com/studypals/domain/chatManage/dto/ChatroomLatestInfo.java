@@ -30,8 +30,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ChatroomLatestInfo {
     @Setter
-    private int cnt;
+    private long cnt;
 
+    private String id;
     private ChatType type;
     private String message;
     private long sender;

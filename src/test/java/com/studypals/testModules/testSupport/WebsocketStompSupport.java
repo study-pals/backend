@@ -1,17 +1,16 @@
 package com.studypals.testModules.testSupport;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -26,6 +25,7 @@ import lombok.Getter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
 import com.studypals.global.security.jwt.JwtUtils;
+import com.studypals.global.websocket.subscibeManage.UserSubscribeInfo;
 import com.studypals.global.websocket.subscibeManage.UserSubscribeInfoRepository;
 
 /**
@@ -66,11 +66,21 @@ public abstract class WebsocketStompSupport {
     @Mock
     protected JwtUtils.JwtData mockJwtData;
 
+    @Mock
+    private UserSubscribeInfo userSubscribeInfo;
+
     @AfterEach
     void disconnectSession() {
         if (session != null && session.isConnected()) {
             session.disconnect();
         }
+    }
+
+    @BeforeEach
+    void beforeEach() {
+        given(chatRoomMemberRepository.existsByChatRoomIdAndMemberId(any(), any()))
+                .willReturn(true);
+        given(userSubscribeInfoRepository.existById(any())).willReturn(true);
     }
 
     protected String getToken() {
@@ -182,5 +192,10 @@ public abstract class WebsocketStompSupport {
     protected void verifyRoom(String roomId, Long userId, boolean isValid) {
         given(chatRoomMemberRepository.existsByChatRoomIdAndMemberId(roomId, userId))
                 .willReturn(isValid);
+    }
+
+    protected void verifySend() {
+        given(userSubscribeInfoRepository.findById(any())).willReturn(Optional.of(userSubscribeInfo));
+        given(userSubscribeInfo.getRoomList()).willReturn(Map.of(room1, 17));
     }
 }

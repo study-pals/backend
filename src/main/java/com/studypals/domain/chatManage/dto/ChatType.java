@@ -20,7 +20,8 @@ public enum ChatType {
     READ(3),
     STAT(4),
     LOG_REQ(5),
-    LOG_RES(6);
+    LOG_RES(6),
+    UNKNOWN(99);
 
     private final int subtype;
 }

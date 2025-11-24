@@ -32,6 +32,8 @@ import com.studypals.domain.chatManage.entity.ChatMessage;
  */
 public interface ChatMessageCacheRepository {
 
+    int getMaxLen();
+
     void save(ChatMessage chatMessage);
 
     void saveAll(Collection<ChatMessage> messages);

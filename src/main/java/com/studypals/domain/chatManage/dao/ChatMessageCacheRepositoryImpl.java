@@ -92,14 +92,20 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     private static final String SENDER_FIELD = ChatMessage.FieldName.SENDER.getName();
     private static final String MESSAGE_FIELD = ChatMessage.FieldName.MESSAGE.getName();
 
+    public int getMaxLen() {
+        return MAX_LEN;
+    }
+
     public void save(ChatMessage chatMessage) {
         MapRecord<String, String, String> record = recordBuilder(chatMessage);
 
+        // 단 건 저장
         redisTemplate.opsForStream().add(record, ADD_OPTS);
     }
 
     /**
      * 파이프라인을 이용해 벌크 데이터에 대한 묶음 저장 메서드입니다.
+     * todo :  이 친구도 비동기 방식이 필요한가??
      * @param messages
      */
     @SuppressWarnings("unchecked")
@@ -108,6 +114,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         List<Throwable> errors =
                 (messages instanceof ArrayList<?>) ? new ArrayList<>(messages.size()) : new ArrayList<>();
 
+        // 벌크 데이터 배치 처리
         redisTemplate.executePipelined(new SessionCallback<Void>() {
             @Override
             public Void execute(RedisOperations operations) throws DataAccessException {
@@ -131,27 +138,42 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         }
     }
 
+    /**
+     * 특정 채팅방의 채팅 아이디에 대해, 읽지 않은 메시지 개수를 센다. 해당 stream 의 데이터 개수는
+     * 대략 100개 이므로, 이를 넘기면, 100 을 반환한다. 단, 표시 전략에 따라 정확한 값을 반환할 수도 있다.
+     *
+     * @param roomId
+     * @param chatId
+     * @return
+     */
     public ChatroomLatestInfo countToLatest(String roomId, String chatId) {
+        // 해당 스트림의 키 가져오기
         String streamKey = KEY_PREFIX + roomId;
         StreamOperations<String, String, String> ops = redisTemplate.opsForStream();
 
         StreamInfo.XInfoStream info = ops.info(streamKey);
 
+        // 가장 마지막 항목의 아이디와, 가장 최근 항목의 아이디
         String newestId = String.valueOf(info.getLastEntry().get(ID_FIELD));
         String oldestId = String.valueOf(info.getFirstEntry().get(ID_FIELD));
 
-        RecordId targetRid = chatIdToRecordId(chatId);
+        RecordId targetRid = encode(chatId);
         String targetId = targetRid.getValue();
 
-        if (compareIds(targetId, oldestId) <= 0) return toLatestInfo(MAX_LEN, info.getLastEntry());
-        if (compareIds(targetId, newestId) == 0) return toLatestInfo(0, info.getLastEntry());
-        if (compareIds(targetId, newestId) > 0) return toLatestInfo(-1, info.getLastEntry());
+        // target 이, 가장 오랜된 아이디보다 이전 것임 -> 최대 길이 반환
+        if (targetId.compareTo(oldestId) < 0) return toLatestInfo(info.streamLength(), info.getLastEntry());
+        // target 이, 가장 최신의 아이디와 동일함 -> 0 길이 반환
+        if (targetId.compareTo(newestId) == 0) return toLatestInfo(0, info.getLastEntry());
+        // target 이 , 가장 최신의 아이디보다 이후의 것임 -> 오류, -1 반환
+        if (targetId.compareTo(newestId) > 0) return toLatestInfo(-1, info.getLastEntry());
 
         Range<String> range = Range.of(Range.Bound.exclusive(targetId), Range.Bound.unbounded());
 
+        // target Id ~ 최신까지의 아이디 가져오기 (최대 MAX_LEN + 1 개)
         List<MapRecord<String, String, String>> newer =
                 ops.range(streamKey, range, Limit.limit().count(MAX_LEN + 1));
 
+        // 아무런 응답이 오지 않으면 -> 예외 , -1 반환
         if (newer == null || newer.isEmpty()) return toLatestInfo(-1, info.getLastEntry());
 
         return toLatestInfo(Math.min(newer.size(), MAX_LEN), info.getLastEntry());
@@ -177,7 +199,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         for (String roomId : readInfos.keySet()) {
             StreamInfo.XInfoStream info = (StreamInfo.XInfoStream) rawInfoResult.get(idx++);
             if (info == null || info.streamLength() == 0) {
-                ChatroomLatestInfo latestInfo = new ChatroomLatestInfo(-1, null, null, -1);
+                ChatroomLatestInfo latestInfo = new ChatroomLatestInfo(-1, null, null, null, -1);
                 result.put(roomId, latestInfo);
                 continue;
             }
@@ -186,7 +208,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
             String oldestId = info.getFirstEntry().get(ID_FIELD).toString();
 
             String chatIdHex = readInfos.get(roomId);
-            String targetId = chatIdToRecordId(chatIdHex).getValue();
+            String targetId = encode(chatIdHex).getValue();
 
             if (compareIds(targetId, oldestId) <= 0) {
                 result.put(roomId, toLatestInfo(MAX_LEN, info.getLastEntry()));
@@ -205,8 +227,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
                     StreamOperations<String, String, String> streamOps = operations.opsForStream();
 
                     for (String roomId : needRange) {
-                        String targetId =
-                                chatIdToRecordId(readInfos.get(roomId)).getValue();
+                        String targetId = encode(readInfos.get(roomId)).getValue();
                         Range<String> r = Range.of(Range.Bound.exclusive(targetId), Range.Bound.unbounded());
                         streamOps.range(KEY_PREFIX + roomId, r, Limit.limit().count(MAX_LEN + 1));
                     }
@@ -239,7 +260,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         String streamKey = KEY_PREFIX + roomId;
         StreamOperations<String, String, String> streamOps = redisTemplate.opsForStream();
 
-        RecordId rid = chatIdToRecordId(chatId);
+        RecordId rid = encode(chatId);
         String targetId = rid.getValue();
 
         Range<String> range = Range.of(Range.Bound.inclusive(targetId), Range.Bound.unbounded());
@@ -252,40 +273,32 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         return result.stream().map(this::toEntity).toList();
     }
 
-    private static RecordId chatIdToRecordId(String chatId) {
-        long id = Long.parseUnsignedLong(chatId, 16);
+    // snowflake 는 시간 순에 의한 정렬이 가능
+    private static RecordId encode(String chatId) {
+        return RecordId.of(Long.parseLong(chatId, 16) + "-0");
+    }
 
-        long timestamp = id >>> 23;
-        long serverId = (id >>> 19) & 0xF;
-        long sequence = (id >>> 10) & 0x1FF;
-
-        long serverSequence = (sequence << 4) | serverId;
-
-        String recordId = timestamp + "-" + serverSequence;
-        return RecordId.of(recordId);
+    private static String decode(String id) {
+        return id.substring(0, id.length() - 2);
     }
 
     private static int compareIds(String a, String b) {
-        int da = a.indexOf('-'), db = b.indexOf('-');
-
-        if (da != db) return da - db;
-
-        int cmp = a.substring(0, da).compareTo(b.substring(0, db));
-        if (cmp != 0) return cmp;
-
-        return a.substring(da + 1).compareTo(b.substring(db + 1));
+        return a.compareTo(b);
     }
 
     private MapRecord<String, String, String> recordBuilder(ChatMessage message) {
+        // stream 에서 사용할 키 생성
         String streamKey = KEY_PREFIX + message.getRoom();
-        RecordId recordId = chatIdToRecordId(message.getId());
+        RecordId recordId = encode(message.getId());
 
-        Map<String, String> body = new LinkedHashMap<>(4);
-        body.put(ID_FIELD, message.getId());
-        body.put(TYPE_FIELD, message.getType().toString());
-        body.put(SENDER_FIELD, String.valueOf(message.getSender()));
+        // change LinkedHashMap -> HashMap , 순서가 중요한가?
+        Map<String, String> body = new HashMap<>(4);
+        body.put(ID_FIELD, Objects.toString(recordId.getValue(), ""));
+        body.put(TYPE_FIELD, Objects.toString(message.getType().toString(), ""));
+        body.put(SENDER_FIELD, Objects.toString(message.getSender(), ""));
         body.put(MESSAGE_FIELD, message.getMessage());
 
+        // 저장을 위한 MapRecord 빌드 후 반환.stream key 및 각 항목에 대한 recordId 부여
         return StreamRecords.<String, String, String>mapBacked(body)
                 .withStreamKey(streamKey)
                 .withId(recordId);
@@ -293,18 +306,20 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
 
     private ChatMessage toEntity(MapRecord<String, String, String> r) {
         Map<String, String> value = r.getValue();
+        long decimal = Long.parseLong(decode(value.get(ID_FIELD)));
 
         return new ChatMessage(
-                value.get(ID_FIELD),
+                Long.toHexString(decimal),
                 ChatType.valueOf(value.get(TYPE_FIELD)),
                 r.getStream(),
                 Long.parseLong(value.get(SENDER_FIELD)),
                 value.get(MESSAGE_FIELD));
     }
 
-    private ChatroomLatestInfo toLatestInfo(int cnt, Map<Object, Object> r) {
+    private ChatroomLatestInfo toLatestInfo(long cnt, Map<Object, Object> r) {
         return new ChatroomLatestInfo(
                 cnt,
+                r.get("id").toString(),
                 ChatType.valueOf(r.get("type").toString()),
                 r.get("message").toString(),
                 Long.parseLong(r.get("sender").toString()));

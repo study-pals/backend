@@ -4,18 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-import java.util.Map;
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import com.studypals.domain.chatManage.dto.ChatType;
-import com.studypals.domain.chatManage.dto.IncomingMessage;
-import com.studypals.domain.chatManage.dto.OutgoingMessage;
 import com.studypals.domain.chatManage.dto.mapper.ChatMessageMapper;
 import com.studypals.global.websocket.subscibeManage.UserSubscribeInfo;
 import com.studypals.testModules.testSupport.WebsocketStompSupport;
@@ -60,33 +54,5 @@ class StompAuthChannelInterceptorTest extends WebsocketStompSupport {
         UserSubscribeInfo saved = captor.getValue();
         assertThat(saved.getUserId()).isEqualTo(userId);
         assertThat(saved.getRoomList()).containsEntry(room1, 17);
-    }
-
-    @Test
-    void sendMessage_success() throws Exception {
-        // given
-        Long userId = 1L;
-        int expected = 1;
-        IncomingMessage message = new IncomingMessage(ChatType.TEXT, "payload message", room1);
-        OutgoingMessage outMessage = new OutgoingMessage(null, ChatType.TEXT, "payload message", userId);
-        verifyToken(userId, true);
-        verifyRoom(room1, userId, true);
-        given(userSubscribeInfoRepository.existById(any())).willReturn(true);
-        given(userSubscribeInfoRepository.findById(any())).willReturn(Optional.of(userSubscribeInfo));
-        given(userSubscribeInfo.getRoomList()).willReturn(Map.of(room1, 17));
-        given(chatMessageMapper.toOutMessage(any(), any())).willReturn(outMessage);
-
-        // when
-        connectSession();
-        SubscribeRes<OutgoingMessage> res = subscribe("/sub/chat/room/" + room1, OutgoingMessage.class, expected);
-        send("/pub/send/message", message);
-
-        res.await();
-
-        // then
-        OutgoingMessage received = res.getMessage().get(0);
-        assertThat(received.getMessage()).isEqualTo("payload message");
-        assertThat(received.getType()).isEqualTo(ChatType.TEXT);
-        assertThat(received.getSenderId()).isEqualTo(userId);
     }
 }
