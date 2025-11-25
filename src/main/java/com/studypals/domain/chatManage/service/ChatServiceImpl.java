@@ -1,12 +1,7 @@
 package com.studypals.domain.chatManage.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -22,8 +17,6 @@ import com.studypals.domain.chatManage.worker.ChatStateUpdater;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.ChatException;
 import com.studypals.global.utils.Snowflake;
-
-import reactor.core.publisher.Flux;
 
 /**
  * <p><b>상속 정보:</b><br>
@@ -78,46 +71,5 @@ public class ChatServiceImpl implements ChatService {
             throw new ChatException(
                     ChatErrorCode.CHAT_SEND_FAIL, "[ChatService#sendDestinationValidate] " + e.getMessage());
         }
-    }
-
-    @Override
-    public void sendChatLog(Long userId, SendChatLogDto dto) {
-        Flux<ChatMessage> messageFlux = chatMessageReader.getChatLog(dto.roomId(), dto.chatId());
-        // 요청 세션에만 메시지를 보내기 위한 헤더 설정
-        SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-        headers.setSessionId(dto.sessionId());
-        headers.setLeaveMutable(true);
-        MessageHeaders header = headers.getMessageHeaders();
-
-        messageFlux
-                .buffer(50)
-                .index()
-                .doOnNext(tuple -> {
-                    List<ChatMessage> batch = tuple.getT2();
-
-                    List<OutgoingMessage> resList =
-                            batch.stream().map(this::toDto).toList();
-
-                    boolean last = batch.size() < 50;
-
-                    ChatLogRes res = new ChatLogRes(dto.roomId(), resList, last);
-                    template.convertAndSendToUser(String.valueOf(userId), "/queue", res, header);
-                })
-                .doOnError(e -> {
-                    // error 처리
-                })
-                .doOnComplete(() -> {
-                    // 성공처리
-                })
-                .subscribe();
-    }
-
-    private OutgoingMessage toDto(ChatMessage message) {
-        return OutgoingMessage.builder()
-                .id(message.getId())
-                .type(message.getType())
-                .senderId(message.getSender())
-                .message(message.getMessage())
-                .build();
     }
 }

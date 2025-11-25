@@ -20,5 +20,5 @@ public class OutgoingMessage {
 
     private ChatType type;
     private String message;
-    private Long senderId;
+    private Long sender;
 }

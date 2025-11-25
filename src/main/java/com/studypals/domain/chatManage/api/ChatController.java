@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dto.IncomingMessage;
-import com.studypals.domain.chatManage.dto.SendChatLogDto;
-import com.studypals.domain.chatManage.dto.SendChatLogReq;
 import com.studypals.domain.chatManage.service.ChatService;
 
 /**
@@ -43,13 +41,5 @@ public class ChatController {
     public void readMessage(@Payload IncomingMessage message, Principal principal) {
         Long userId = Long.parseLong(principal.getName());
         chatService.readMessage(userId, message);
-    }
-
-    @MessageMapping("/log")
-    public void getLog(@Header("simpSessionId") String sessionId, @Payload SendChatLogReq req, Principal principal) {
-        Long userId = Long.parseLong(principal.getName());
-
-        chatService.sendDestinationValidate(sessionId, req.room());
-        chatService.sendChatLog(userId, new SendChatLogDto(sessionId, req.room(), req.chat()));
     }
 }

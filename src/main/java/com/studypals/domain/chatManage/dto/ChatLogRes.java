@@ -8,4 +8,4 @@ import java.util.List;
  * @author jack8
  * @since 2025-11-20
  */
-public record ChatLogRes(String roomId, List<OutgoingMessage> messages, boolean last) {}
+public record ChatLogRes(String roomId, List<OutgoingMessage> messages) {}

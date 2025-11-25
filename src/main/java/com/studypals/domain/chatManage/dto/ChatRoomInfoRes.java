@@ -15,7 +15,8 @@ import com.studypals.domain.chatManage.entity.ChatRoomRole;
  * @since 2025-05-10
  */
 @Builder
-public record ChatRoomInfoRes(String id, String name, List<UserInfo> userInfos, List<ChatCursorRes> cursor) {
+public record ChatRoomInfoRes(
+        String id, String name, List<UserInfo> userInfos, List<ChatCursorRes> cursor, List<OutgoingMessage> logs) {
 
     @Builder
     public record UserInfo(Long userId, ChatRoomRole role, String imageUrl) {}

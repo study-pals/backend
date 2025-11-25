@@ -19,5 +19,7 @@ public interface ChatMessageMapper {
     @Mapping(target = "id", ignore = true)
     OutgoingMessage toOutMessage(IncomingMessage message, Long senderId);
 
+    OutgoingMessage toOutMessage(ChatMessage message);
+
     ChatMessage toEntity(IncomingMessage message, String id, Long sender);
 }

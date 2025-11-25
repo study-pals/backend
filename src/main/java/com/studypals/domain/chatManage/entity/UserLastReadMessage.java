@@ -38,12 +38,6 @@ public class UserLastReadMessage {
     @RedisId
     private String roomId;
 
-    // last message id
-    private String lameId;
-
-    // last message context
-    private String lameCon;
-
     @RedisHashMapField
     @Getter
     private Map<Long, String> lastMessage;

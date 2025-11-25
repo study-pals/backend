@@ -1,6 +1,7 @@
 package com.studypals.domain.chatManage.worker;
 
 import java.util.List;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 
@@ -83,9 +84,6 @@ public class ChatRoomReader {
      * @return 해당 채팅방에 대한 정보
      */
     public UserLastReadMessage getCachedCursor(String roomId) {
-        return userLastReadMessageRepository
-                .findById(roomId)
-                .orElseThrow(() ->
-                        new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND, "not cached room or not exist room"));
+        return userLastReadMessageRepository.findById(roomId).orElse(new UserLastReadMessage(roomId, Map.of()));
     }
 }
