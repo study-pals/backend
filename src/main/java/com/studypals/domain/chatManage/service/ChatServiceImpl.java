@@ -73,7 +73,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public void sendDestinationValidate(String sessionId, String roomId) {
         try {
-            // chatSendValidator.checkIfSessionSubscribe(sessionId, roomId);
+            chatSendValidator.checkIfSessionSubscribe(sessionId, roomId);
         } catch (IllegalArgumentException e) {
             throw new ChatException(
                     ChatErrorCode.CHAT_SEND_FAIL, "[ChatService#sendDestinationValidate] " + e.getMessage());

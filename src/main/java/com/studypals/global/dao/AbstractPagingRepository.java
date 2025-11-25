@@ -28,6 +28,7 @@ public abstract class AbstractPagingRepository<T> {
         return direction == Sort.Direction.ASC ? Order.ASC : Order.DESC;
     }
 
+    @SuppressWarnings("unchecked")
     protected OrderSpecifier<?> getOrderSpecifier(Class<T> entityClass, SortType sortType) {
         String field = sortType.getField();
         Sort.Direction direction = sortType.getDirection();

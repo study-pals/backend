@@ -63,6 +63,7 @@ dependencies {
 
     // mongoDB
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
     // spring security
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -85,6 +86,7 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'io.projectreactor:reactor-test'
 }
 
 spotless {
