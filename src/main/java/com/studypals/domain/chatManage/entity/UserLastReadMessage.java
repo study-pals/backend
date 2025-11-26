@@ -4,6 +4,7 @@ import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import com.studypals.global.redis.redisHashRepository.annotations.RedisHashEntity;
 import com.studypals.global.redis.redisHashRepository.annotations.RedisHashMapField;
@@ -33,6 +34,7 @@ import com.studypals.global.redis.redisHashRepository.annotations.RedisId;
  */
 @RedisHashEntity(value = "lastRead")
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserLastReadMessage {
 
     @RedisId

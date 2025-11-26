@@ -94,6 +94,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         for (ChatRoomMember chatRoomMember : members) {
             cursorData.put(chatRoomMember.getId(), chatRoomMember.getLastReadMessage());
         }
+
         // 캐시에 저장된 최신 커서 정보로 덮어쓰기 (실시간 갱신분 반영)
         cursorData.putAll(chatRoomReader.getCachedCursor(chatRoomId).getLastMessage());
 

@@ -86,26 +86,28 @@ public final class RedisEntityMapper {
             // ID 주입
             m.idSetter().invoke(obj, convert(idKey, m.idField().getType()));
 
+            // Map 필드 역직렬화
+            if (m.mapField() != null) {
+
+                Field mf = m.mapField();
+                Map<Object, Object> mp = new HashMap<>();
+                hash.forEach((k, v) -> {
+                    String key = k.toString();
+                    if (!key.startsWith(FIELD_PREFIX) // 일반 필드 아님
+                            && !key.equals(m.idField().getName())) { // ID 아님
+                        mp.put(convert(key, m.mapKeyType()), convert(v, m.mapValueType()));
+                    }
+                });
+                m.setters().get(mf).invoke(obj, mp);
+            }
+
             // 일반 필드 역직렬화
             for (Field f : m.valueFields()) {
+
                 String redisKey = FIELD_PREFIX + f.getName();
                 Object ov = hash.get(redisKey);
                 if (ov != null) {
                     m.setters().get(f).invoke(obj, convert(ov, f.getType()));
-                }
-
-                // Map 필드 역직렬화
-                if (m.mapField() != null) {
-                    Field mf = m.mapField();
-                    Map<String, String> mp = new HashMap<>();
-                    hash.forEach((k, v) -> {
-                        String key = k.toString();
-                        if (!key.startsWith(FIELD_PREFIX) // 일반 필드 아님
-                                && !key.equals(m.idField().getName())) { // ID 아님
-                            mp.put(key, v.toString());
-                        }
-                    });
-                    m.setters().get(mf).invoke(obj, mp);
                 }
             }
             return obj;

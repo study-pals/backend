@@ -232,6 +232,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         });
 
         int idx = 0;
+        // 각 채팅방 당 데이터 추출
         for (String roomId : readInfos.keySet()) {
             StreamInfo.XInfoStream info = (StreamInfo.XInfoStream) rawInfoResult.get(idx++);
             if (info == null || info.streamLength() == 0) {

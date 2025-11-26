@@ -4,6 +4,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,6 +77,9 @@ public final class RedisEntityMetadataReader {
         // field 분류
         Field idField = null;
         Field mapField = null;
+
+        Class<?> mapKeyType = null;
+        Class<?> mapValueType = null;
         List<Field> valueFields = new ArrayList<>();
 
         for (Field f : type.getDeclaredFields()) {
@@ -93,6 +98,20 @@ public final class RedisEntityMetadataReader {
                     throw new IllegalArgumentException("@RedisHashMapField field '" + f.getName() + "' must be map");
                 }
                 mapField = f;
+                Class<?> keyType = String.class;
+                Class<?> valueType = String.class;
+
+                Type genericType = f.getGenericType();
+                if (genericType instanceof ParameterizedType pt) {
+                    Type[] args = pt.getActualTypeArguments();
+                    if (args.length == 2 && args[0] instanceof Class<?> k && args[1] instanceof Class<?> v) {
+                        keyType = k;
+                        valueType = v;
+                    }
+                }
+
+                mapKeyType = keyType;
+                mapValueType = valueType;
             } else {
                 if (!isAllowedType(f.getType()))
                     throw new IllegalStateException("Unsupported field type: " + f.getType());
@@ -135,6 +154,8 @@ public final class RedisEntityMetadataReader {
                     idSetter,
                     List.copyOf(valueFields),
                     mapField,
+                    mapKeyType,
+                    mapValueType,
                     Map.copyOf(getters),
                     Map.copyOf(setters));
         } catch (IllegalAccessException iae) {
