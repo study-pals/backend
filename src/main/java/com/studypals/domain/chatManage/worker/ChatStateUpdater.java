@@ -161,7 +161,7 @@ public class ChatStateUpdater {
         // 1) 브로드캐스트
         sendToClients(messages);
 
-        // 2) DB 저장
+        // 2) 캐시 저장
         userLastReadMessageRepository.saveMapById(messages);
     }
 

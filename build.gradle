@@ -76,6 +76,16 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-data-redis'
     testImplementation 'org.mockito:mockito-core:4.6.1'
 
+    // === Testcontainers BOM (버전 중앙관리) ===
+    testImplementation platform("org.testcontainers:testcontainers-bom:1.20.2")
+
+    // === Testcontainers 모듈들 (버전 X, BOM이 관리) ===
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:mysql'
+    testImplementation 'org.testcontainers:mongodb'
+    //testImplementation 'org.testcontainers:redis:1.20.2'
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'

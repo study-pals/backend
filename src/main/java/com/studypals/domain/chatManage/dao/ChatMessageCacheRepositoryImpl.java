@@ -179,30 +179,44 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         StreamInfo.XInfoStream info = ops.info(streamKey);
 
         // 스트림의 가장 최신/가장 오래된 메시지의 채팅 ID
-        String newestId = String.valueOf(info.getLastEntry().get(ID_FIELD));
-        String oldestId = String.valueOf(info.getFirstEntry().get(ID_FIELD));
+        String newestId = info.lastEntryId();
+        String oldestId = info.firstEntryId();
 
         RecordId targetRid = encode(chatId);
         String targetId = targetRid.getValue();
 
         // target 이 가장 오래된 아이디보다 이전이면 → 전체 길이를 기준으로 근사값 반환
-        if (targetId.compareTo(oldestId) < 0) return toLatestInfo(info.streamLength(), info.getLastEntry());
+        if (compareIds(targetId, oldestId) < 0) {
+            List<MapRecord<String, String, String>> latest =
+                    ops.reverseRange(streamKey, Range.unbounded(), Limit.limit().count(1));
+            if (latest == null || latest.isEmpty()) return createEmptyInfo((int) info.streamLength());
+
+            return toLatestInfo(info.streamLength(), toEntity(latest.get(0)));
+        }
         // target 이 가장 최신 아이디와 같으면 → 이후 메시지가 없으므로 0 반환
-        if (targetId.compareTo(newestId) == 0) return toLatestInfo(0, info.getLastEntry());
+        if (compareIds(targetId, newestId) == 0) {
+            return createEmptyInfo(0);
+        }
         // target 이 가장 최신 아이디보다 이후면 → 비정상 상태로 보고 -1 반환
-        if (targetId.compareTo(newestId) > 0) return toLatestInfo(-1, info.getLastEntry());
+        if (compareIds(targetId, newestId) > 0) {
+            return createEmptyInfo(-1);
+        }
 
         Range<String> range = Range.of(Range.Bound.exclusive(targetId), Range.Bound.unbounded());
 
-        // target Id 이후 ~ 최신까지의 아이디 가져오기 (최대 MAX_LEN + 1 개)
+        // target Id 이후 ~ 최신까지의 아이디 가져오기 (최대 MAX_LEN 개)
         List<MapRecord<String, String, String>> newer =
-                ops.range(streamKey, range, Limit.limit().count(MAX_LEN + 1));
+                ops.range(streamKey, range, Limit.limit().count(MAX_LEN));
 
         // 아무런 응답이 오지 않으면 → 스트림 상태와 기준 ID 간 불일치로 보고 -1
-        if (newer == null || newer.isEmpty()) return toLatestInfo(-1, info.getLastEntry());
+        if (newer == null || newer.isEmpty()) return createEmptyInfo(-1);
 
         // 실제 개수와 MAX_LEN 중 더 작은 값을 사용
-        return toLatestInfo(Math.min(newer.size(), MAX_LEN), info.getLastEntry());
+        return toLatestInfo(Math.min(newer.size(), MAX_LEN), toEntity(newer.get(newer.size() - 1)));
+    }
+
+    private ChatroomLatestInfo createEmptyInfo(int cnt) {
+        return new ChatroomLatestInfo(cnt, null, null, null, -1L);
     }
 
     /**
@@ -250,15 +264,15 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
 
             // 기준 ID 가 가장 오래된 것보다 이전인 경우 → 최대 길이로 간주
             if (compareIds(targetId, oldestId) <= 0) {
-                result.put(roomId, toLatestInfo(MAX_LEN, info.getLastEntry()));
+                // result.put(roomId, toLatestInfo(MAX_LEN, info.getLastEntry()));
             } else if (compareIds(targetId, newestId) >= 0) {
                 // 기준 ID 가 최신 이상인 경우 → 이후 메시지 0개
-                result.put(roomId, toLatestInfo(0, info.getLastEntry()));
+                // result.put(roomId, toLatestInfo(0, info.getLastEntry()));
             } else {
                 // 실제 범위 계산이 필요한 room 은 별도 리스트에 기록
                 needRange.add(roomId);
                 // 최신 메시지 정보는 우선 같이 채워둠 (cnt 는 이후 갱신)
-                result.put(roomId, toLatestInfo(0, info.getLastEntry()));
+                // result.put(roomId, toLatestInfo(0, info.getLastEntry()));
             }
         }
 
@@ -272,7 +286,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
                     for (String roomId : needRange) {
                         String targetId = encode(readInfos.get(roomId)).getValue();
                         Range<String> r = Range.of(Range.Bound.exclusive(targetId), Range.Bound.unbounded());
-                        streamOps.range(KEY_PREFIX + roomId, r, Limit.limit().count(MAX_LEN + 1));
+                        streamOps.range(KEY_PREFIX + roomId, r, Limit.limit().count(MAX_LEN));
                     }
                     return null;
                 }
@@ -343,7 +357,9 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
 
     // 단순 문자열 비교 기반 ID 크기 비교 (시간 순 비교와 동일한 효과)
     private static int compareIds(String a, String b) {
-        return a.compareTo(b);
+        long va = Long.parseLong(a.substring(0, a.indexOf('-')));
+        long vb = Long.parseLong(b.substring(0, b.indexOf('-')));
+        return Long.compare(va, vb);
     }
 
     private MapRecord<String, String, String> recordBuilder(ChatMessage message) {
@@ -376,12 +392,8 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
                 value.get(MESSAGE_FIELD));
     }
 
-    private ChatroomLatestInfo toLatestInfo(long cnt, Map<Object, Object> r) {
+    private ChatroomLatestInfo toLatestInfo(long cnt, ChatMessage chatMessage) {
         return new ChatroomLatestInfo(
-                cnt,
-                r.get("id").toString(),
-                ChatType.valueOf(r.get("type").toString()),
-                r.get("message").toString(),
-                Long.parseLong(r.get("sender").toString()));
+                cnt, chatMessage.getId(), chatMessage.getType(), chatMessage.getMessage(), chatMessage.getSender());
     }
 }
