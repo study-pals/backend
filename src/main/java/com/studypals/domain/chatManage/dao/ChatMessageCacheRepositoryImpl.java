@@ -1,20 +1,25 @@
 package com.studypals.domain.chatManage.dao;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Range;
 import org.springframework.data.redis.connection.Limit;
 import org.springframework.data.redis.connection.RedisStreamCommands;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.RecordId;
-import org.springframework.data.redis.connection.stream.StreamInfo;
 import org.springframework.data.redis.connection.stream.StreamRecords;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StreamOperations;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.FileCopyUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -60,8 +65,7 @@ import com.studypals.domain.chatManage.entity.ChatMessage;
  *  쌓였는지에 대한 카운트, 각 채팅방 별 가장 최신 메시지 정보 등을 캐싱하기 위해 사용됩니다.
  *  <br><br>
  *
- * 해당 데이터는 영속화 되지 않습니다. 오로지 캐싱의 용도로만 사용하여야 합니다.
- *
+ *  해당 데이터는 영속화 되지 않습니다. 오로지 캐싱의 용도로만 사용하여야 합니다.
  *
  * @author jack8
  * @see ChatMessageCacheRepository
@@ -72,7 +76,7 @@ import com.studypals.domain.chatManage.entity.ChatMessage;
 @RequiredArgsConstructor
 public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepository {
 
-    // base redis template to execute
+    /** Redis Streams 연산을 수행하기 위한 기본 템플릿입니다. */
     private final RedisTemplate<String, String> redisTemplate;
 
     /** 채팅방별 Redis Stream 키를 구성하기 위한 접두사입니다. */
@@ -81,11 +85,11 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     /** Redis Stream 에 유지할 메시지의 목표 최대 개수입니다. */
     private static final int MAX_LEN = 100;
 
-    /** XADD 시 적용할 maxlen 및 approximate trimming 옵션 설정입니다. */
+    /** XADD 실행 시 사용할 maxlen 및 approximate trimming 옵션입니다. */
     private static final RedisStreamCommands.XAddOptions ADD_OPTS =
             RedisStreamCommands.XAddOptions.maxlen(MAX_LEN).approximateTrimming(true);
 
-    /** ChatMessage 의 id 필드명 (Redis hash/stream 필드명으로 사용). */
+    /** ChatMessage 의 id 필드명 (Redis stream 내 필드명으로 사용). */
     private static final String ID_FIELD = ChatMessage.FieldName.ID.getName();
     /** ChatMessage 의 type 필드명 (메시지 타입 TEXT 등). */
     private static final String TYPE_FIELD = ChatMessage.FieldName.TYPE.getName();
@@ -95,6 +99,21 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     private static final String SENDER_FIELD = ChatMessage.FieldName.SENDER.getName();
     /** ChatMessage 의 message 필드명 (본문 내용). */
     private static final String MESSAGE_FIELD = ChatMessage.FieldName.MESSAGE.getName();
+
+    @SuppressWarnings("rawtypes")
+    private static final RedisScript<List> STREAM_META_SCRIPT = loadStreamMetaScript();
+
+    @SuppressWarnings("rawtypes")
+    private static RedisScript<List> loadStreamMetaScript() {
+        try (InputStreamReader reader = new InputStreamReader(
+                new ClassPathResource("redis/chat_stream_meta.lua").getInputStream(), StandardCharsets.UTF_8)) {
+            String script = FileCopyUtils.copyToString(reader);
+            return RedisScript.of(script, List.class);
+
+        } catch (IOException e) {
+            throw new IllegalStateException("failed to load lua script");
+        }
+    }
 
     /**
      * Stream 에 유지할 목표 최대 길이를 반환합니다.
@@ -110,24 +129,23 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     /**
      * 단일 채팅 메시지를 Redis Stream 에 저장합니다.
      * <p>
-     * 메시지의 room, id 등을 기반으로 stream key 와 record id 를 생성하여 추가합니다.
+     * 채팅방 ID와 메시지 ID를 기반으로 stream key 및 record id 를 생성하여 XADD 를 수행합니다.
      *
      * @param chatMessage 저장할 채팅 메시지
      */
     public void save(ChatMessage chatMessage) {
         MapRecord<String, String, String> record = recordBuilder(chatMessage);
-
-        // 단 건 저장
         redisTemplate.opsForStream().add(record, ADD_OPTS);
     }
 
     /**
-     * 파이프라인을 이용해 벌크 데이터에 대한 묶음 저장 메서드입니다.
+     * 여러 채팅 메시지를 파이프라인을 이용해 한 번에 Redis Stream 에 저장합니다.
      * <p>
-     * 여러 메시지를 한 번에 XADD 로 밀어 넣어 네트워크 왕복 횟수를 줄이고,
-     * 저장 도중 발생한 예외는 모아서 한 번에 던집니다.
+     * 네트워크 왕복 횟수를 줄이기 위해 executePipelined 를 사용하며,
+     * 개별 메시지 저장 중 발생한 예외는 모두 수집하여 마지막에 한 번에 던집니다.
      *
      * @param messages 저장할 채팅 메시지 컬렉션
+     * @throws RuntimeException 하나 이상의 메시지 저장에 실패한 경우, 실패 건수 및 suppressed 예외를 포함한 예외를 던집니다.
      */
     @SuppressWarnings("unchecked")
     public void saveAll(Collection<ChatMessage> messages) {
@@ -135,7 +153,6 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         List<Throwable> errors =
                 (messages instanceof ArrayList<?>) ? new ArrayList<>(messages.size()) : new ArrayList<>();
 
-        // 벌크 데이터 배치 처리
         redisTemplate.executePipelined(new SessionCallback<Void>() {
             @Override
             public Void execute(RedisOperations operations) throws DataAccessException {
@@ -153,7 +170,6 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
             }
         });
 
-        // 저장 실패가 하나라도 있으면 예외 발생
         if (!errors.isEmpty()) {
             RuntimeException ex = new RuntimeException("saveAll failed: " + errors.size() + " error(s)");
             errors.forEach(ex::addSuppressed);
@@ -162,143 +178,63 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     }
 
     /**
-     * 특정 채팅방에서 주어진 채팅 ID 이후에 쌓인 메시지 수와 최신 메시지 정보를 계산합니다.
+     * 여러 채팅방에 대해 기준 채팅 ID 이후의 메시지 개수와 최신 메시지 정보를 일괄 계산합니다.
      * <p>
-     * Stream 에 저장된 메시지가 대략 {@code MAX_LEN} 개이므로, 기준 ID가 너무 과거이면
-     * 실제 개수 대신 스트림 길이 또는 MAX_LEN 을 반환하는 식으로 근사값을 사용합니다.
-     *
-     * @param roomId 채팅방 ID
-     * @param chatId 기준 채팅 ID (hex 문자열)
-     * @return 기준 이후 메시지 개수 및 최신 메시지 정보
-     */
-    public ChatroomLatestInfo countToLatest(String roomId, String chatId) {
-        // 해당 스트림의 키 가져오기
-        String streamKey = KEY_PREFIX + roomId;
-        StreamOperations<String, String, String> ops = redisTemplate.opsForStream();
-
-        StreamInfo.XInfoStream info = ops.info(streamKey);
-
-        // 스트림의 가장 최신/가장 오래된 메시지의 채팅 ID
-        String newestId = info.lastEntryId();
-        String oldestId = info.firstEntryId();
-
-        RecordId targetRid = encode(chatId);
-        String targetId = targetRid.getValue();
-
-        // target 이 가장 오래된 아이디보다 이전이면 → 전체 길이를 기준으로 근사값 반환
-        if (compareIds(targetId, oldestId) < 0) {
-            List<MapRecord<String, String, String>> latest =
-                    ops.reverseRange(streamKey, Range.unbounded(), Limit.limit().count(1));
-            if (latest == null || latest.isEmpty()) return createEmptyInfo((int) info.streamLength());
-
-            return toLatestInfo(info.streamLength(), toEntity(latest.get(0)));
-        }
-        // target 이 가장 최신 아이디와 같으면 → 이후 메시지가 없으므로 0 반환
-        if (compareIds(targetId, newestId) == 0) {
-            return createEmptyInfo(0);
-        }
-        // target 이 가장 최신 아이디보다 이후면 → 비정상 상태로 보고 -1 반환
-        if (compareIds(targetId, newestId) > 0) {
-            return createEmptyInfo(-1);
-        }
-
-        Range<String> range = Range.of(Range.Bound.exclusive(targetId), Range.Bound.unbounded());
-
-        // target Id 이후 ~ 최신까지의 아이디 가져오기 (최대 MAX_LEN 개)
-        List<MapRecord<String, String, String>> newer =
-                ops.range(streamKey, range, Limit.limit().count(MAX_LEN));
-
-        // 아무런 응답이 오지 않으면 → 스트림 상태와 기준 ID 간 불일치로 보고 -1
-        if (newer == null || newer.isEmpty()) return createEmptyInfo(-1);
-
-        // 실제 개수와 MAX_LEN 중 더 작은 값을 사용
-        return toLatestInfo(Math.min(newer.size(), MAX_LEN), toEntity(newer.get(newer.size() - 1)));
-    }
-
-    private ChatroomLatestInfo createEmptyInfo(int cnt) {
-        return new ChatroomLatestInfo(cnt, null, null, null, -1L);
-    }
-
-    /**
-     * 여러 채팅방에 대해 기준 채팅 ID 이후 메시지 개수와 최신 메시지 정보를 일괄 계산합니다.
-     * <p>
-     * 우선 각 채팅방의 Stream info 를 파이프라인으로 조회하고, 기준 ID와 비교하여
-     * 범위 조회가 필요한 채팅방만 따로 range 쿼리를 수행합니다.
+     * 1차 파이프라인으로 각 채팅방 별 Stream info 를 조회하고,<br>
+     * info 만으로 판단 가능한 경우는 즉시 결과를 생성합니다. <br>
+     * 이후 범위 조회가 필요한 채팅방에 대해서만 2차 파이프라인으로 XRange 를 수행합니다.
      *
      * @param readInfos key: roomId, value: 기준 채팅 ID (hex 문자열)
-     * @return key: roomId, value: 해당 채팅방의 최신 정보 및 기준 이후 개수
+     * @return key: roomId, value: 기준 이후 메시지 개수 및 최신 메시지 정보를 담은 DTO
      */
     @SuppressWarnings("unchecked")
     public Map<String, ChatroomLatestInfo> countAllToLatest(Map<String, String> readInfos) {
         Map<String, ChatroomLatestInfo> result = new HashMap<>(readInfos.size());
-        List<String> needRange = new ArrayList<>();
+        StreamOperations<String, String, String> ops = redisTemplate.opsForStream();
+        List<String> rooms = new ArrayList<>(readInfos.keySet());
+        List<String> streamKeys = rooms.stream().map(id -> KEY_PREFIX + id).toList();
 
-        // 1차 파이프라인: 각 room 의 info 조회
-        List<Object> rawInfoResult = redisTemplate.executePipelined(new SessionCallback<Object>() {
-            @Override
-            public Object execute(RedisOperations operations) throws DataAccessException {
-                StreamOperations<String, String, String> streamOps = operations.opsForStream();
-                for (String roomId : readInfos.keySet()) {
-                    streamOps.info(KEY_PREFIX + roomId);
-                }
-                return null;
-            }
-        });
+        List<List<Object>> raws = (List<List<Object>>) (List<?>) redisTemplate.execute(
+                STREAM_META_SCRIPT, streamKeys, ID_FIELD, TYPE_FIELD, SENDER_FIELD, MESSAGE_FIELD);
 
-        int idx = 0;
-        // 각 채팅방 당 데이터 추출
-        for (String roomId : readInfos.keySet()) {
-            StreamInfo.XInfoStream info = (StreamInfo.XInfoStream) rawInfoResult.get(idx++);
-            if (info == null || info.streamLength() == 0) {
-                // 스트림 자체가 없거나 비어 있는 경우
-                ChatroomLatestInfo latestInfo = new ChatroomLatestInfo(-1, null, null, null, -1);
-                result.put(roomId, latestInfo);
-                continue;
-            }
+        List<RoomMeta> needRange = new ArrayList<>();
+        for (List<Object> raw : raws) {
+            RoomMeta meta = new RoomMeta(raw);
+            meta.targetId = encode(readInfos.get(meta.roomId)).getValue();
 
-            String newestId = info.getLastEntry().get(ID_FIELD).toString();
-            String oldestId = info.getFirstEntry().get(ID_FIELD).toString();
-
-            String chatIdHex = readInfos.get(roomId);
-            String targetId = encode(chatIdHex).getValue();
-
-            // 기준 ID 가 가장 오래된 것보다 이전인 경우 → 최대 길이로 간주
-            if (compareIds(targetId, oldestId) <= 0) {
-                // result.put(roomId, toLatestInfo(MAX_LEN, info.getLastEntry()));
-            } else if (compareIds(targetId, newestId) >= 0) {
-                // 기준 ID 가 최신 이상인 경우 → 이후 메시지 0개
-                // result.put(roomId, toLatestInfo(0, info.getLastEntry()));
-            } else {
-                // 실제 범위 계산이 필요한 room 은 별도 리스트에 기록
-                needRange.add(roomId);
-                // 최신 메시지 정보는 우선 같이 채워둠 (cnt 는 이후 갱신)
-                // result.put(roomId, toLatestInfo(0, info.getLastEntry()));
+            switch (meta.position()) {
+                case BEFORE_OLDEST -> result.put(meta.roomId, toLatestInfo(meta.length, meta.latestChat));
+                case AT_NEWEST, AFTER_NEWEST -> result.put(meta.roomId, createEmptyInfo(meta.position().def));
+                case BETWEEN_OLDEST_AND_NEWEST -> needRange.add(meta);
             }
         }
 
-        // 추가 범위 조회가 필요한 채팅방에 대해서만 range 쿼리 수행
+        // 2차 파이프라인: 기준 ID ~ 최신까지의 구간 범위를 조회해야 하는 방들만 처리
         if (!needRange.isEmpty()) {
             List<Object> ranges = redisTemplate.executePipelined(new SessionCallback<Object>() {
                 @Override
                 public Object execute(RedisOperations operations) throws DataAccessException {
                     StreamOperations<String, String, String> streamOps = operations.opsForStream();
-
-                    for (String roomId : needRange) {
-                        String targetId = encode(readInfos.get(roomId)).getValue();
-                        Range<String> r = Range.of(Range.Bound.exclusive(targetId), Range.Bound.unbounded());
-                        streamOps.range(KEY_PREFIX + roomId, r, Limit.limit().count(MAX_LEN));
+                    for (RoomMeta meta : needRange) {
+                        Range<String> r = Range.of(Range.Bound.exclusive(meta.targetId), Range.Bound.unbounded());
+                        streamOps.range(meta.streamKey, r, Limit.limit().count(MAX_LEN));
                     }
                     return null;
                 }
             });
 
-            idx = 0;
-            for (String roomId : needRange) {
+            int idx = 0;
+            for (RoomMeta meta : needRange) {
                 List<MapRecord<String, String, String>> eachResult =
                         (List<MapRecord<String, String, String>>) ranges.get(idx++);
-                int cnt = (eachResult == null) ? 0 : eachResult.size();
-                ChatroomLatestInfo latestInfo = result.get(roomId);
-                latestInfo.setCnt(Math.min(MAX_LEN, cnt));
+                if (eachResult == null || eachResult.isEmpty()) {
+                    // info 상으로는 범위가 있어야 하나, 실제 조회 결과가 비면 비정상 상태로 간주
+                    result.put(meta.roomId, createEmptyInfo(-1));
+                } else {
+                    int cnt = Math.min(MAX_LEN, eachResult.size());
+                    // range 는 오래된 → 최신 순이므로 마지막 요소가 최신 메시지
+                    result.put(meta.roomId, toLatestInfo(cnt, meta.latestChat));
+                }
             }
         }
 
@@ -309,7 +245,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
      * 특정 채팅방에서 가장 최신 메시지를 조회합니다.
      *
      * @param roomId 채팅방 ID
-     * @return 최신 메시지, 없으면 Optional.empty()
+     * @return 최신 메시지가 존재하면 Optional&lt;ChatMessage&gt;, 없으면 Optional.empty()
      */
     public Optional<ChatMessage> getLastest(String roomId) {
         StreamOperations<String, String, String> streamOps = redisTemplate.opsForStream();
@@ -322,11 +258,11 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     /**
      * 특정 채팅방에서 기준 채팅 ID를 포함하여 이후 구간의 메시지를 조회합니다.
      * <p>
-     * reverseRange 를 사용하므로 결과는 최신 메시지부터 역순으로 반환됩니다.
+     * reverseRange 를 사용하므로, 결과는 최신 메시지부터 오래된 메시지 순으로 반환됩니다.
      *
      * @param roomId 채팅방 ID
      * @param chatId 기준 채팅 ID (hex 문자열)
-     * @return 기준 ID를 포함한 이후 구간의 메시지 목록 (최대 MAX_LEN 개)
+     * @return 기준 ID를 포함한 이후 구간의 메시지 목록 (최대 {@link #MAX_LEN} 개)
      */
     public List<ChatMessage> fetchFromId(String roomId, String chatId) {
         String streamKey = KEY_PREFIX + roomId;
@@ -345,6 +281,47 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         return result.stream().map(this::toEntity).toList();
     }
 
+    /**
+     * 기준 이후 메시지 개수만 채워진 빈 ChatroomLatestInfo 를 생성합니다.
+     *
+     * @param cnt 기준 이후 메시지 개수(또는 비정상 상태를 나타내는 값)
+     * @return 메시지 내용이 비어 있는 ChatroomLatestInfo
+     */
+    private ChatroomLatestInfo createEmptyInfo(int cnt) {
+        return new ChatroomLatestInfo(cnt, null, null, null, -1L);
+    }
+
+    // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+    // ===============        MAPPER METHODS        ===============
+    // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+    /**
+     * 개수와 ChatMessage 엔티티를 기반으로 ChatroomLatestInfo DTO 로 변환합니다.
+     *
+     * @param cnt        기준 이후 메시지 개수
+     * @param chatMessage 최신 메시지 엔티티
+     * @return 변환된 ChatroomLatestInfo
+     */
+    private ChatroomLatestInfo toLatestInfo(long cnt, ChatMessage chatMessage) {
+        return new ChatroomLatestInfo(
+                cnt, chatMessage.getId(), chatMessage.getType(), chatMessage.getMessage(), chatMessage.getSender());
+    }
+
+    /**
+     * 지정된 Stream 에서 reverseRange 를 사용하여 가장 최신 메시지 한 건을 조회합니다.
+     *
+     * @param streamKey 조회할 Stream 키
+     * @param ops       StreamOperations 구현체
+     * @return 최신 MapRecord, 없으면 null
+     */
+    private MapRecord<String, String, String> searchLast(
+            String streamKey, StreamOperations<String, String, String> ops) {
+        List<MapRecord<String, String, String>> result =
+                ops.reverseRange(streamKey, Range.unbounded(), Limit.limit().count(1));
+        if (result == null || result.isEmpty()) return null;
+        return result.get(0);
+    }
+
     // snowflake 기반 ID 는 시간 순 정렬이 가능하므로, 이를 Redis Stream record id 로 변환
     private static RecordId encode(String chatId) {
         return RecordId.of(Long.parseLong(chatId, 16) + "-0");
@@ -352,48 +329,132 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
 
     // record id 문자열에서 하위 suffix("-0") 를 제거하고 원래 숫자 부분만 복원
     private static String decode(String id) {
-        return id.substring(0, id.length() - 2);
+        if (id == null) return null;
+        try {
+            return Long.toHexString(Long.parseLong(id.substring(0, id.length() - 2)));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    // 단순 문자열 비교 기반 ID 크기 비교 (시간 순 비교와 동일한 효과)
+    /**
+     * Redis Stream record id 문자열(앞부분 long 값)을 기준으로 두 ID 의 시간 순서를 비교합니다.
+     *
+     * @param a 비교 대상 ID A (예: "183495732-123")
+     * @param b 비교 대상 ID B (예: "183495752-35")
+     * @return Long.compare 결과 (음수: a &lt; b, 0: 동일, 양수: a &gt; b)
+     */
     private static int compareIds(String a, String b) {
         long va = Long.parseLong(a.substring(0, a.indexOf('-')));
         long vb = Long.parseLong(b.substring(0, b.indexOf('-')));
         return Long.compare(va, vb);
     }
 
+    /**
+     * ChatMessage 엔티티를 Redis Stream 에 저장하기 위한 MapRecord 로 변환합니다.
+     *
+     * @param message 저장할 채팅 메시지
+     * @return Stream key 및 recordId 가 설정된 MapRecord
+     */
     private MapRecord<String, String, String> recordBuilder(ChatMessage message) {
-        // stream 에서 사용할 키 생성
         String streamKey = KEY_PREFIX + message.getRoom();
         RecordId recordId = encode(message.getId());
 
-        // stream body 에 저장할 필드 구성 (필드 순서는 중요하지 않으므로 HashMap 사용)
+        // stream body 에 저장할 필드 구성 (필드 값이 null 인 경우 빈 문자열로 치환)
         Map<String, String> body = new HashMap<>(4);
         body.put(ID_FIELD, Objects.toString(recordId.getValue(), ""));
         body.put(TYPE_FIELD, Objects.toString(message.getType().toString(), ""));
         body.put(SENDER_FIELD, Objects.toString(message.getSender(), ""));
         body.put(MESSAGE_FIELD, message.getMessage());
 
-        // 저장을 위한 MapRecord 빌드 후 반환. stream key 및 recordId 를 함께 설정
         return StreamRecords.<String, String, String>mapBacked(body)
                 .withStreamKey(streamKey)
                 .withId(recordId);
     }
 
+    /**
+     * Redis Stream 의 MapRecord 를 ChatMessage 엔티티로 변환합니다.
+     * <p>
+     * Stream 내 ID 필드는 Snowflake 기반 16진수 문자열로 복원됩니다.
+     *
+     * @param r Redis MapRecord
+     * @return 변환된 ChatMessage 엔티티
+     */
     private ChatMessage toEntity(MapRecord<String, String, String> r) {
         Map<String, String> value = r.getValue();
-        long decimal = Long.parseLong(decode(value.get(ID_FIELD)));
 
         return new ChatMessage(
-                Long.toHexString(decimal),
+                decode(value.get(ID_FIELD)),
                 ChatType.valueOf(value.get(TYPE_FIELD)),
                 r.getStream(),
                 Long.parseLong(value.get(SENDER_FIELD)),
                 value.get(MESSAGE_FIELD));
     }
 
-    private ChatroomLatestInfo toLatestInfo(long cnt, ChatMessage chatMessage) {
-        return new ChatroomLatestInfo(
-                cnt, chatMessage.getId(), chatMessage.getType(), chatMessage.getMessage(), chatMessage.getSender());
+    /**
+     * 기준 ID 가 Stream 내에서 어느 위치에 있는지 나타내는 분류값입니다.
+     * <ul>
+     *     <li>BEFORE_OLDEST : 가장 오래된 엔트리보다 이전</li>
+     *     <li>BETWEEN_OLDEST_AND_NEWEST : 중간 구간</li>
+     *     <li>AT_NEWEST : 가장 최신 엔트리와 동일</li>
+     *     <li>AFTER_NEWEST : 가장 최신 엔트리보다 이후 또는 비정상 상태</li>
+     * </ul>
+     * def 값은 해당 상태에서 기본적으로 사용할 메시지 개수(근사값 또는 에러 코드)를 나타냅니다.
+     */
+    private enum Position {
+        BEFORE_OLDEST(0),
+        BETWEEN_OLDEST_AND_NEWEST(0),
+        AT_NEWEST(0),
+        AFTER_NEWEST(-1);
+
+        final int def;
+
+        Position(int def) {
+            this.def = def;
+        }
+    }
+
+    private static final class RoomMeta {
+        final String roomId;
+        final String streamKey;
+        final long length;
+        final String oldestEntryId;
+        final String newestEntryId;
+        final ChatMessage latestChat;
+
+        String targetId;
+
+        RoomMeta(List<Object> data) {
+            this.streamKey = (String) data.get(0);
+            this.length = (Long) data.get(1);
+            this.oldestEntryId = cast(data.get(2));
+            this.newestEntryId = cast(data.get(3));
+            String senderStr = cast(data.get(6));
+            this.latestChat = ChatMessage.builder()
+                    .id(decode(cast(data.get(4))))
+                    .type(ChatType.from(cast(data.get(5))))
+                    .sender(senderStr == null ? -1L : Long.parseLong(senderStr))
+                    .message(cast(data.get(7)))
+                    .build();
+            this.roomId = streamKey.substring(KEY_PREFIX.length());
+        }
+
+        Position position() {
+            if (isEmptyStream() || targetId == null) return Position.AFTER_NEWEST;
+            if (compareIds(targetId, oldestEntryId) < 0) return Position.BEFORE_OLDEST;
+            if (compareIds(targetId, newestEntryId) == 0) return Position.AT_NEWEST;
+            if (compareIds(targetId, newestEntryId) > 0) return Position.AFTER_NEWEST;
+            return Position.BETWEEN_OLDEST_AND_NEWEST;
+        }
+
+        boolean isEmptyStream() {
+            return length == 0;
+        }
+
+        private String cast(Object val) {
+            if (val == null) return null;
+            if (val instanceof Boolean) return null;
+            return String.valueOf(val);
+        }
     }
 }

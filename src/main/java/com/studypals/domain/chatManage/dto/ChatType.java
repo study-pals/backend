@@ -24,4 +24,13 @@ public enum ChatType {
     UNKNOWN(99);
 
     private final int subtype;
+
+    public static ChatType from(String raw) {
+        if (raw == null) return UNKNOWN;
+        try {
+            return ChatType.valueOf(raw.toUpperCase());
+        } catch (Exception e) {
+            return UNKNOWN;
+        }
+    }
 }

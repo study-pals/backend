@@ -62,18 +62,6 @@ public interface ChatMessageCacheRepository {
     void saveAll(Collection<ChatMessage> messages);
 
     /**
-     * 특정 채팅방에서 기준 메시지 ID 이후에 쌓인 메시지의 개수와 최신 메시지 정보를 반환합니다.
-     * <p>
-     * 기준 ID가 스트림 범위 밖(아주 오래되거나, 최신보다 이후)인 경우에도
-     * 구현체 정책에 따라 개수를 보정하거나, 특수한 카운트 값(-1 등)을 반환할 수 있습니다.
-     *
-     * @param roomId 채팅방 ID
-     * @param chatId 기준이 되는 채팅 메시지 ID (hex 문자열)
-     * @return 기준 이후 구간의 개수 및 최신 메시지 메타 정보
-     */
-    ChatroomLatestInfo countToLatest(String roomId, String chatId);
-
-    /**
      * 여러 채팅방 또는 여러 기준 ID에 대해, 기준 이후의 메시지 개수와 최신 메시지 정보를 한 번에 계산합니다.
      * <p>
      * 보통 사용자별 읽은 위치 정보를 기반으로, 각 채팅방의 unread count 를
