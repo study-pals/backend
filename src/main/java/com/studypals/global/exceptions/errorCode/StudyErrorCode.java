@@ -24,7 +24,7 @@ import com.studypals.global.responses.ResponseCode;
  */
 @RequiredArgsConstructor
 public enum StudyErrorCode implements ErrorCode {
-    STUDY_TIME_NOT_FOUND(ResponseCode.STUDY_TIME_ALL, HttpStatus.NOT_FOUND, "can't find study time"),
+    STUDY_TIME_NOT_FOUND(ResponseCode.STUDY_TIME_ALL, HttpStatus.NOT_FOUND, "can't findAndDelete study time"),
     STUDY_TIME_PARTIAL_FAIL(
             ResponseCode.STUDY_TIME_PARTIAL, HttpStatus.BAD_REQUEST, "failed to get partial study time"),
     STUDY_TIME_RESET_FAIL(ResponseCode.STUDY_TIME_RESET, HttpStatus.BAD_REQUEST, "failed to reset study time"),
@@ -32,12 +32,16 @@ public enum StudyErrorCode implements ErrorCode {
     STUDY_TIME_START_FAIL(ResponseCode.STUDY_START, HttpStatus.BAD_REQUEST, "failed to start study"),
     STUDY_TIME_END_FAIL(ResponseCode.STUDY_START, HttpStatus.BAD_REQUEST, "failed to end study"),
     STUDY_TIME_DELETE_FAIL(ResponseCode.STUDY_END, HttpStatus.BAD_REQUEST, "failed to delete study time"),
-    STUDY_CATEGORY_NOT_FOUND(ResponseCode.STUDY_CATEGORY_LIST, HttpStatus.NOT_FOUND, "can't find study category"),
+    STUDY_CATEGORY_NOT_FOUND(
+            ResponseCode.STUDY_CATEGORY_LIST, HttpStatus.NOT_FOUND, "can't findAndDelete study category"),
     STUDY_CATEGORY_ADD_FAIL(ResponseCode.STUDY_CATEGORY_ADD, HttpStatus.BAD_REQUEST, "failed to add study category"),
     STUDY_CATEGORY_DELETE_FAIL(
             ResponseCode.STUDY_CATEGORY_DELETE, HttpStatus.BAD_REQUEST, "failed to delete study category"),
+    STUDY_CATEGORY_DELETE_FAIL_PENDING_STUDY(
+            ResponseCode.STUDY_CATEGORY_DELETE, HttpStatus.BAD_REQUEST, "can't delete pending study category"),
     STUDY_CATEGORY_UPDATE_FAIL(
-            ResponseCode.STUDY_CATEGORY_UPDATE, HttpStatus.BAD_REQUEST, "failed to update study category");
+            ResponseCode.STUDY_CATEGORY_UPDATE, HttpStatus.BAD_REQUEST, "failed to update study category"),
+    STUDY_CATEGORY_ACCESS_FAIL(ResponseCode.STUDY_CATEGORY_LIST, HttpStatus.UNAUTHORIZED, "this is not yours");
 
     private final ResponseCode responseCode;
     private final HttpStatus status;

@@ -3,82 +3,96 @@ package com.studypals.domain.studyManage.dao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.studyManage.entity.DateType;
 import com.studypals.domain.studyManage.entity.StudyCategory;
+import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.testModules.testSupport.DataJpaSupport;
 
 /**
+ * {@link  StudyCategoryRepository} 에 대한 테스트코드입니다.
  *
  * @author jack8
- * @since 2025-04-10
+ * @since 2025-08-21
  */
-@DisplayName("StudyCategory_JPA_test")
+@DisplayName("StudyCategoryRepository_JPA_test")
 class StudyCategoryRepositoryTest extends DataJpaSupport {
-
-    @Autowired
-    private TestEntityManager em;
 
     @Autowired
     private StudyCategoryRepository studyCategoryRepository;
 
-    private Member insertMember() {
-        return em.persist(Member.builder()
-                .username("username")
-                .password("password")
-                .nickname("nickname")
+    private void createCategory(StudyType studyType, Long typeId, String name) {
+        em.persist(StudyCategory.builder()
+                .studyType(studyType)
+                .typeId(typeId)
+                .name(name)
+                .dayBelong(127)
+                .color("#FFFFFF")
+                .goal(3600L)
+                .dateType(DateType.DAILY)
+                .description("description")
                 .build());
     }
 
-    private StudyCategory make(Member member, String name) {
-        return StudyCategory.builder()
-                .name(name)
-                .member(member)
-                .color("color")
-                .dayBelong(12)
-                .description("description")
-                .build();
+    @Test
+    void findByStudyTypeAndTypeId_success_returnSize0() {
+        // given
+        StudyType type = StudyType.PERSONAL;
+        Long typeId = 1L;
+
+        createCategory(type, 2L, "name");
+
+        // when
+        List<StudyCategory> result = studyCategoryRepository.findByStudyTypeAndTypeId(type, typeId);
+
+        // then
+        assertThat(result).hasSize(0);
     }
 
     @Test
-    public void findByMemberId_success() {
-        // given
-        Member member = insertMember();
-        List<StudyCategory> categories = IntStream.range(1, 10)
-                .mapToObj(i -> make(member, "category " + i))
-                .toList();
-        List<String> expectedName =
-                categories.stream().map(StudyCategory::getName).toList();
-        studyCategoryRepository.saveAll(categories);
+    void findByStudyTypeAndTypeId_success() {
+        StudyType type = StudyType.PERSONAL;
+        Long typeId = 1L;
+
+        createCategory(type, 1L, "name1");
+        createCategory(type, 1L, "name2");
+        createCategory(type, 2L, "ignore1");
+        createCategory(StudyType.GROUP, 1L, "ignore2");
 
         // when
-        List<StudyCategory> finded = studyCategoryRepository.findByMemberId(member.getId());
+        List<StudyCategory> result = studyCategoryRepository.findByStudyTypeAndTypeId(type, typeId);
 
         // then
-        List<String> actualName = finded.stream().map(StudyCategory::getName).toList();
-        assertThat(actualName).containsExactlyInAnyOrderElementsOf(expectedName);
+        assertThat(result).hasSize(2);
     }
 
     @Test
-    public void deleteByMemberId_success() {
+    void findByTypeMap_success() {
         // given
-        Member member = insertMember();
-        IntStream.range(1, 10).mapToObj(i -> make(member, "category " + i)).forEach(category -> em.persist(category));
+        Map<StudyType, List<Long>> typeMap = Map.of(
+                StudyType.GROUP, List.of(53L, 11L, 831L),
+                StudyType.PERSONAL, List.of(1L),
+                StudyType.REMOVED, List.of(1L));
+        createCategory(StudyType.GROUP, 11L, "name1-1");
+        createCategory(StudyType.GROUP, 11L, "name1-2");
+        createCategory(StudyType.GROUP, 11L, "name1-3");
+        createCategory(StudyType.GROUP, 53L, "name2-1");
+        createCategory(StudyType.GROUP, 53L, "name2-2");
+        createCategory(StudyType.GROUP, 831L, "name3-1");
+
+        createCategory(StudyType.PERSONAL, 1L, "name4-1");
+        createCategory(StudyType.PERSONAL, 1L, "name4-2");
+        createCategory(StudyType.PERSONAL, 1L, "name4-3");
 
         // when
-        studyCategoryRepository.deleteByMemberId(member.getId());
+        List<StudyCategory> result = studyCategoryRepository.findByTypeMap(typeMap);
 
         // then
-        assertThat(em.getEntityManager()
-                        .createQuery("SELECT c FROM StudyCategory c WHERE c.member.id = :memberId", StudyCategory.class)
-                        .setParameter("memberId", member.getId())
-                        .getResultList())
-                .isEmpty();
+        assertThat(result).hasSize(9);
     }
 }

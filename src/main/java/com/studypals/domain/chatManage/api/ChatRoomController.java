@@ -13,7 +13,8 @@ import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 
 /**
- * 그룹 관리에 대한 컨트롤러입니다. 담당하는 엔드포인트는 다음과 같습니다.
+ * 채팅방 전반에 걸친 정보를 받는 엔드포인트입니다. 채팅방 정보, 로그 조회, 참여한 사용자 조회 등,
+ * 특정 채팅방의 부분 정보를 호출합니다. <br>
  *
  * <pre>
  *     - GET /chat/room/{chatRoomId} : 채팅방 정보 조회

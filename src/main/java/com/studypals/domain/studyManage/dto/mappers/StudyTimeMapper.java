@@ -1,10 +1,11 @@
 package com.studypals.domain.studyManage.dto.mappers;
 
-import org.mapstruct.Mapper;
+import java.time.LocalDateTime;
 
-import com.studypals.domain.studyManage.dto.GetStudyDto;
-import com.studypals.domain.studyManage.dto.StartStudyRes;
-import com.studypals.domain.studyManage.dto.StudyList;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import com.studypals.domain.studyManage.dto.*;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
 
@@ -20,7 +21,12 @@ public interface StudyTimeMapper {
 
     StartStudyRes toDto(StudyStatus entity);
 
+    @Mapping(target = "categoryId", source = "studyCategory.id")
     GetStudyDto toDto(StudyTime entity);
 
-    StudyList toStudyDto(StudyTime entity);
+    @Mapping(target = "categoryId", source = "studyCategory.id")
+    StudyTimeInfo toStudyDto(StudyTime entity);
+
+    @Mapping(target = "startDateTime", source = "startDateTime")
+    StartStudyDto toDto(StartStudyReq req, LocalDateTime startDateTime);
 }

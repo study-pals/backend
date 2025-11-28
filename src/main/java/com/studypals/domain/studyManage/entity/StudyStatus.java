@@ -1,6 +1,6 @@
 package com.studypals.domain.studyManage.entity;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.persistence.Id;
@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.TimeToLive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 현재 유저의 공부 상태 및 하루 간 공부 총합을 저장합니다. redis에 의해 관리됩니다.
@@ -25,7 +26,7 @@ import lombok.Getter;
  * Long expiration;
  * StudyType studyType;
  * Long typeId;
- * String temporaryName;
+ * String name;
  *     }
  * </pre>
  *
@@ -43,16 +44,17 @@ public class StudyStatus {
     @Builder.Default
     private boolean studying = true;
 
-    private LocalTime startTime;
+    private LocalDateTime startTime;
 
     @Builder.Default
     private Long studyTime = 0L;
 
-    private StudyType studyType;
+    private Long categoryId;
 
-    private Long typeId;
+    private String name;
 
-    private String temporaryName;
+    @Setter
+    private Long goal;
 
     @TimeToLive(unit = TimeUnit.DAYS)
     @Builder.Default

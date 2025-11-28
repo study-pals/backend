@@ -1,16 +1,18 @@
 package com.studypals.domain.studyManage.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.PersistenceException;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.entity.DailyStudyInfo;
@@ -26,18 +28,7 @@ import com.studypals.testModules.testSupport.DataJpaSupport;
 class DailyStudyInfoRepositoryTest extends DataJpaSupport {
 
     @Autowired
-    private TestEntityManager em;
-
-    @Autowired
     private DailyStudyInfoRepository dailyStudyInfoRepository;
-
-    private Member insertMember() {
-        return em.persist(Member.builder()
-                .username("username")
-                .password("password")
-                .nickname("nickname")
-                .build());
-    }
 
     private DailyStudyInfo make(Member member, LocalDate studiedDate, LocalTime startTime, LocalTime endTime) {
         return DailyStudyInfo.builder()
@@ -46,6 +37,20 @@ class DailyStudyInfoRepositoryTest extends DataJpaSupport {
                 .startTime(startTime)
                 .endTime(endTime)
                 .build();
+    }
+
+    @Test
+    void save_fail_uniqueConstraint() {
+        Member member = insertMember();
+        LocalDate date = LocalDate.of(1999, 8, 20);
+        LocalTime time = LocalTime.of(10, 30);
+
+        em.persist(make(member, date, time, time.plusHours(2)));
+
+        assertThrows(PersistenceException.class, () -> {
+            em.persist(make(member, date, time.plusHours(2), time.plusHours(4)));
+            em.clear();
+        });
     }
 
     @Test
@@ -65,6 +70,46 @@ class DailyStudyInfoRepositoryTest extends DataJpaSupport {
 
         // then
         assertThat(result).isNotEmpty();
+    }
+
+    @Test
+    void existsByMemberIdAndStudiedDate_success_returnTrue() {
+        // gvien
+        Member member = insertMember();
+        LocalDate date = LocalDate.of(1999, 8, 20);
+        LocalTime time = LocalTime.of(10, 30);
+
+        em.persist(make(member, date, time, time.plusHours(2)));
+        em.persist(make(member, date.minusDays(1), time, time.plusHours(2)));
+        em.persist(make(member, date.plusDays(1), time, time.plusHours(2)));
+
+        em.flush();
+        em.clear();
+
+        // when
+        boolean result = dailyStudyInfoRepository.existsByMemberIdAndStudiedDate(member.getId(), date);
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void existsByMemberIdAndStudiedDate_success_returnFalse() {
+        // given
+        Member member = insertMember();
+        LocalDate date = LocalDate.of(1999, 8, 20);
+        LocalTime time = LocalTime.of(10, 30);
+
+        em.persist(make(member, date.plusDays(1), time, time.plusHours(2)));
+
+        em.flush();
+        em.clear();
+
+        // when
+        boolean result = dailyStudyInfoRepository.existsByMemberIdAndStudiedDate(member.getId(), date);
+
+        // then
+        assertThat(result).isFalse();
     }
 
     @Test

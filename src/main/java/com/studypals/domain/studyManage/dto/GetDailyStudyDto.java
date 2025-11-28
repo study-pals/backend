@@ -3,6 +3,8 @@ package com.studypals.domain.studyManage.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import lombok.Builder;
+
 import com.studypals.domain.studyManage.entity.DailyStudyInfo;
 
 /**
@@ -12,4 +14,5 @@ import com.studypals.domain.studyManage.entity.DailyStudyInfo;
  * @see DailyStudyInfo
  * @since 2025-04-17
  */
-public record GetDailyStudyDto(LocalDate studiedDate, List<StudyList> studyList) {}
+@Builder
+public record GetDailyStudyDto(LocalDate studiedDate, List<StudyTimeInfo> studyTimeInfo) {}

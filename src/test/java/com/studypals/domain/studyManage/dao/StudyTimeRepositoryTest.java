@@ -4,15 +4,14 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.studyManage.entity.DateType;
+import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyTime;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.testModules.testSupport.DataJpaSupport;
@@ -27,62 +26,51 @@ import com.studypals.testModules.testSupport.DataJpaSupport;
 class StudyTimeRepositoryTest extends DataJpaSupport {
 
     @Autowired
-    private TestEntityManager em;
-
-    @Autowired
     private StudyTimeRepository studyTimeRepository;
 
-    private Member insertMember() {
-        return em.persist(Member.builder()
-                .username("username")
-                .password("password")
-                .nickname("nickname")
+    private StudyCategory insertCategory(Long userId, int cnt) {
+        return em.persist(StudyCategory.builder()
+                .studyType(StudyType.PERSONAL)
+                .goal(3600L)
+                .color("#FFFFF")
+                .dateType(DateType.DAILY)
+                .dayBelong(127)
+                .name("category" + cnt)
+                .typeId(userId)
+                .description("description")
                 .build());
     }
 
     private StudyTime make(Member member, String temporaryName, LocalDate date, Long time) {
         return StudyTime.builder()
-                .studyType(StudyType.TEMPORARY)
-                .temporaryName(temporaryName)
+                .name(temporaryName)
                 .member(member)
                 .studiedDate(date)
                 .time(time)
                 .build();
     }
 
-    private StudyTime make(Member member, Long typeId, LocalDate date, Long time) {
+    private StudyTime make(Member member, StudyCategory category, LocalDate date, Long time) {
         return StudyTime.builder()
-                .studyType(StudyType.PERSONAL)
-                .typeId(typeId)
+                .studyCategory(category)
                 .member(member)
                 .studiedDate(date)
                 .time(time)
                 .build();
-    }
-
-    @Test
-    void save_fail_bothNameNull() {
-        // given
-        Member member = insertMember();
-        LocalDate date = LocalDate.of(1999, 8, 20);
-        StudyTime studyTime =
-                StudyTime.builder().member(member).studiedDate(date).build();
-
-        // when & than
-        assertThatThrownBy(() -> studyTimeRepository.save(studyTime))
-                .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessageContaining("must have value temporary name or typeId");
     }
 
     @Test
     void findByMemberIdAndStudiedDate_success() {
         // given
         Member member = insertMember();
+        StudyCategory studyCategory1 = insertCategory(member.getId(), 1);
+        StudyCategory studyCategory2 = insertCategory(member.getId(), 2);
+        StudyCategory studyCategory3 = insertCategory(member.getId(), 3);
         LocalDate date = LocalDate.of(2024, 4, 10);
 
-        em.persist(make(member, "temp1", date, 100L));
-        em.persist(make(member, "temp2", date, 100L));
-        em.persist(make(member, "temp3", date, 100L));
+        em.persist(make(member, studyCategory1, date, 100L));
+        em.persist(make(member, studyCategory2, date, 110L));
+        em.persist(make(member, studyCategory3, date, 120L));
         em.persist(make(member, "temp4", date.plusDays(1), 100L)); // 다른 날
 
         em.flush();
@@ -94,12 +82,13 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
         // then
         assertThat(results)
                 .hasSize(3)
-                .extracting(StudyTime::getTemporaryName)
-                .containsExactlyInAnyOrder("temp1", "temp2", "temp3");
+                .extracting(StudyTime::getStudyCategory)
+                .extracting(StudyCategory::getName)
+                .containsExactlyInAnyOrder("category1", "category2", "category3");
     }
 
     @Test
-    void findAllByMemberIdAndstudiedDateBetween_returnsAllInRange() {
+    void findAllByMemberIdAndStudiedDateBetween_returnsAllInRange() {
         // given
         Member member = insertMember();
         LocalDate april = LocalDate.of(2024, 4, 1);
@@ -137,42 +126,5 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
 
         // then
         assertThat(results).isEmpty();
-    }
-
-    @Test
-    void findByStudyType_success() {
-        // given
-        Member member = insertMember();
-        LocalDate march = LocalDate.of(2024, 3, 1);
-        Long typeId = 1L;
-
-        em.persist(make(member, typeId, march, 100L));
-
-        em.flush();
-        em.clear();
-
-        // when
-        Optional<StudyTime> result =
-                studyTimeRepository.findByStudyType(member.getId(), march, StudyType.PERSONAL.name(), typeId);
-
-        // then
-        assertThat(result).isNotEmpty();
-        assertThat(result.get().getTime()).isEqualTo(100L);
-    }
-
-    @Test
-    void findByTemporaryName_success() {
-        // given
-        Member member = insertMember();
-        LocalDate march = LocalDate.of(2024, 3, 1);
-        String name = "temporary name";
-
-        em.persist(make(member, name, march, 100L));
-
-        em.flush();
-        em.clear();
-
-        // when
-        Optional<StudyTime> result = studyTimeRepository.findByTemporaryName(member.getId(), march, name);
     }
 }

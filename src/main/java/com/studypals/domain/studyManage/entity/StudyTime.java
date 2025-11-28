@@ -4,8 +4,6 @@ import java.time.LocalDate;
 
 import jakarta.persistence.*;
 
-import org.springframework.dao.DataIntegrityViolationException;
-
 import lombok.*;
 
 import com.studypals.domain.memberManage.entity.Member;
@@ -31,24 +29,23 @@ import com.studypals.domain.memberManage.entity.Member;
         indexes = {@Index(name = "idx_member_studied", columnList = "member_id, studied_date")})
 public class StudyTime {
 
+    // auto increase 타입의 id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
 
+    // 연관관계를 맺는 study Category. nullable 하며, null 시 임시 토픽에 대한 공부입니다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "study_category_id", nullable = true)
+    private StudyCategory studyCategory;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(name = "study_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private StudyType studyType;
-
-    @Column(name = "type_id")
-    private Long typeId;
-
-    @Column(name = "temporary_name", nullable = true, length = 255)
-    private String temporaryName;
+    @Column(name = "name", nullable = true, length = 255)
+    private String name;
 
     @Column(name = "studied_date", nullable = false)
     private LocalDate studiedDate;
@@ -57,13 +54,8 @@ public class StudyTime {
     @Builder.Default
     private Long time = 0L;
 
-    @PrePersist
-    @PreUpdate
-    private void validateTemporaryOrCategory() {
-        if (this.temporaryName == null && this.typeId == null) {
-            throw new DataIntegrityViolationException("must have value temporary name or typeId");
-        }
-    }
+    @Column(name = "goal", nullable = true)
+    private Long goal;
 
     public void addTime(Long time) {
         this.time += time;

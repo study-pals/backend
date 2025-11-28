@@ -5,12 +5,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigInteger;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -34,31 +39,8 @@ public class StudyTimeIntegrationTest extends IntegrationSupport {
         // given
         CreateUserVar user = createUser();
         LocalDate date = LocalDate.of(2025, 4, 10);
-
-        // study_category, study_time 테이블에 직접 삽입
-        jdbcTemplate.update(
-                """
-                INSERT INTO study_category (id, name, color, day_belong, description, member_id)
-                VALUES (?, ?, ?, ?, ?, ?)
-""",
-                1L,
-                "자바",
-                "#FFCC00",
-                12,
-                "자바 공부",
-                user.getUserId());
-
-        jdbcTemplate.update(
-                """
-                INSERT INTO study_time (id, study_type, type_id, member_id, time, studied_date)
-                VALUES (?, ?, ?, ?, ?, ?)
-    """,
-                1L,
-                "PERSONAL",
-                1L,
-                user.getUserId(),
-                120L,
-                date);
+        Long categoryKey = createCategory(user.getUserId(), "category", 1200L);
+        createStudyTime(user.getUserId(), categoryKey, date, 1000L);
 
         // when
         ResultActions result = mockMvc.perform(get("/studies/stat")
@@ -69,9 +51,8 @@ public class StudyTimeIntegrationTest extends IntegrationSupport {
         // then
         result.andExpect(status().isOk())
                 .andExpect(hasKey("code", ResponseCode.STUDY_TIME_PARTIAL.getCode()))
-                .andExpect(jsonPath("$.data[0].typeId").value(1L))
-                .andExpect(jsonPath("$.data[0].name").value("자바"))
-                .andExpect(jsonPath("$.data[0].time").value(120L));
+                .andExpect(jsonPath("$.data[0].categoryId").value(categoryKey))
+                .andExpect(jsonPath("$.data[0].time").value(1000L));
     }
 
     @Test
@@ -83,69 +64,13 @@ public class StudyTimeIntegrationTest extends IntegrationSupport {
         LocalDate date1 = LocalDate.of(2025, 4, 9);
         LocalDate date2 = LocalDate.of(2025, 4, 10);
 
-        // category 삽입
-        jdbcTemplate.update(
-                """
-                INSERT INTO study_category (id, name, color, day_belong, description, member_id)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                100L,
-                "CS",
-                "#00AAFF",
-                7,
-                "CS 카테고리",
-                userId);
+        Long ck1 = createCategory(userId, "category1", 1200L);
+        Long ck2 = createCategory(userId, "category2", 3600L);
 
-        // study_time (카테고리 기반)
-        jdbcTemplate.update(
-                """
-                INSERT INTO study_time (id, study_type, type_id, member_id, time, studied_date)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                1L,
-                "PERSONAL",
-                100L,
-                userId,
-                60L,
-                date1);
+        createStudyTime(userId, ck1, date1, 1000L);
+        createStudyTime(userId, ck2, date1, 2000L);
 
-        // study_time (임시이름 기반)
-        jdbcTemplate.update(
-                """
-                INSERT INTO study_time (id, study_type,  temporary_name, member_id, time, studied_date)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                2L,
-                "TEMPORARY",
-                "토익",
-                userId,
-                90L,
-                date2);
-
-        // daily_study_info 삽입 (기간용)
-        jdbcTemplate.update(
-                """
-                INSERT INTO daily_study_info (id, member_id, studied_at, start_at, end_at, memo)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                1L,
-                userId,
-                date1,
-                LocalTime.of(9, 0),
-                LocalTime.of(11, 0),
-                "집중 잘 됨");
-
-        jdbcTemplate.update(
-                """
-                INSERT INTO daily_study_info (id, member_id, studied_at, start_at, end_at, memo)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                2L,
-                userId,
-                date2,
-                LocalTime.of(10, 0),
-                LocalTime.of(12, 0),
-                "단어 외움");
+        createStudyTime(userId, ck1, date2, 1000L);
 
         // when
         ResultActions result = mockMvc.perform(get("/studies/stat")
@@ -160,7 +85,47 @@ public class StudyTimeIntegrationTest extends IntegrationSupport {
                 .andExpect(jsonPath("$.data.length()").value(2))
                 .andExpect(jsonPath("$.data[0].studiedDate").value("2025-04-09"))
                 .andExpect(jsonPath("$.data[1].studiedDate").value("2025-04-10"))
-                .andExpect(jsonPath("$.data[0].studies.length()").value(1))
+                .andExpect(jsonPath("$.data[0].studies.length()").value(2))
                 .andExpect(jsonPath("$.data[1].studies.length()").value(1));
+    }
+
+    private Long createCategory(Long userId, String name, Long goal) {
+        KeyHolder kh = new GeneratedKeyHolder();
+        jdbcTemplate.update(
+                con -> {
+                    PreparedStatement ps = con.prepareStatement(
+                            """
+                INSERT INTO study_category (study_type, type_id, date_type, name, color, day_belong, description)
+                VALUES ('PERSONAL', ?, 'DAILY', ?,'#000000', ?, '테스트 설명')
+            """,
+                            Statement.RETURN_GENERATED_KEYS);
+                    ps.setLong(1, userId);
+                    ps.setString(2, name);
+                    ps.setLong(3, goal);
+                    return ps;
+                },
+                kh);
+        return kh.getKeyAs(BigInteger.class).longValue();
+    }
+
+    private Long createStudyTime(Long userId, Long categoryId, LocalDate date, Long time) {
+        KeyHolder kh = new GeneratedKeyHolder();
+        jdbcTemplate.update(
+                con -> {
+                    PreparedStatement ps = con.prepareStatement(
+                            """
+            INSERT INTO study_time(studied_date, goal, member_id, study_category_id, time, name)
+            VALUES (?, 1200, ?, ?, ?, null)
+        """,
+                            Statement.RETURN_GENERATED_KEYS);
+                    ps.setDate(1, Date.valueOf(date));
+                    ps.setLong(2, userId);
+                    ps.setLong(3, categoryId);
+                    ps.setLong(4, time);
+
+                    return ps;
+                },
+                kh);
+        return kh.getKeyAs(BigInteger.class).longValue();
     }
 }

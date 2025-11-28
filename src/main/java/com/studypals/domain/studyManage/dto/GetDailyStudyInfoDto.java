@@ -11,4 +11,4 @@ import java.time.LocalTime;
  * @see com.studypals.domain.studyManage.entity.DailyStudyInfo DailyStudyInfo
  * @since 2025-04-19
  */
-public record GetDailyStudyInfoDto(LocalDate studiedDate, LocalTime startTime, LocalTime endTime, String memo) {}
+public record GetDailyStudyInfoDto(LocalDate studiedDate, LocalTime startTime, LocalTime endTime, String description) {}

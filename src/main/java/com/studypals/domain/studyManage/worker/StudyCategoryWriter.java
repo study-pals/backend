@@ -3,19 +3,17 @@ package com.studypals.domain.studyManage.worker;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
+import com.studypals.domain.studyManage.dto.UpdateCategoryDto;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.global.annotations.Worker;
-import com.studypals.global.exceptions.errorCode.StudyErrorCode;
-import com.studypals.global.exceptions.exception.StudyException;
 
 /**
- * 공부 category 의 쓰기에 대한 로직을 수행합니다.
- *
- * <p><b>빈 관리:</b><br>
- * worker
+ * StudyCategory 에 대한 쓰기 전용 워커 클래스. 갱신 및 저장에 대한 로직을 담고 있다.
+ * 갱신의 경우 update 메서드를 통해 임의의 빌더 패턴을 구성하였다.
  *
  * @author jack8
- * @since 2025-04-15
+ * @see StudyCategoryRepository
+ * @since 2025-08-01
  */
 @Worker
 @RequiredArgsConstructor
@@ -24,32 +22,28 @@ public class StudyCategoryWriter {
     private final StudyCategoryRepository studyCategoryRepository;
 
     /**
-     * 카테고리를 저장하고, 안되면 적절한 예외를 생성합니다.
-     * @param category 저장하고자 하는 카테고리
+     * 새로운 studyCategory 를 저장합니다.
+     * @param studyCategory 저장할 엔티티
      */
-    public void save(StudyCategory category) {
-        try {
-            studyCategoryRepository.save(category);
-        } catch (Exception e) {
-            throw new StudyException(StudyErrorCode.STUDY_CATEGORY_ADD_FAIL);
-        }
+    public void save(StudyCategory studyCategory) {
+        studyCategoryRepository.save(studyCategory);
     }
 
     /**
-     * 특정 카테고리를 삭제
-     * @param category 삭제하고자 할, id 가 포함된 영속성 엔티티
+     * 갱신을 위한 빌더 패턴의 시작점 메서드입니다. Updater 내부 클래스를 호출하여 체이닝을 시작합니다.
+     * @param category 갱신하고자 할 카테고리
+     * @param req 사용자가 변경을 원하는 데이터
      */
-    public void delete(StudyCategory category) {
-
-        studyCategoryRepository.delete(category);
+    public void update(StudyCategory category, UpdateCategoryDto req) {
+        category.update(req);
     }
 
     /**
-     * 특정 유저의 카테고리를 전부 초기화
-     * @param userId 삭제하고자 할 user의 아이디
+     * 카테고리를 삭제합니다. 단, 실제로 삭제하는 것이 아닌  {@link com.studypals.domain.studyManage.entity.StudyType StudyType}
+     * 을 {@code StudyType.REMOVED} 혹은 {@code StdudyType.GROUP_REMOVED}로 변경합니다.
+     * @param studyCategory 삭제하고자 할 studyCategory
      */
-    public void deleteAll(Long userId) {
-
-        studyCategoryRepository.deleteByMemberId(userId);
+    public void remove(StudyCategory studyCategory) {
+        studyCategory.setAsRemoved();
     }
 }

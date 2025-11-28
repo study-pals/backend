@@ -1,81 +1,74 @@
 package com.studypals.domain.studyManage.facade;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dto.*;
-import com.studypals.domain.studyManage.entity.StudyType;
-import com.studypals.domain.studyManage.facade.strategy.StudyRenderStrategyFactory;
 import com.studypals.domain.studyManage.service.DailyStudyInfoService;
-import com.studypals.domain.studyManage.service.StudyCategoryService;
 import com.studypals.domain.studyManage.service.StudyTimeService;
 import com.studypals.global.annotations.Facade;
 
 /**
- * StudyTime 에 대하 facade 레이어 객체이다. 공부 시간 및 카테고리 데이터를 정제할 때 사용한다.
- * <p>
- * studyTimeSerivce 및 studyCategoryService 의 의존성을 주입받아, 해당 하는 데이터를 받아 취합한다.
- *
- * <p><b>빈 관리:</b><br>
- * custom component {@code @Facade}
- *
+ * 공부 시간을 반환하기 전, 읽어온 데이터를 하나의 데이터로 합치는 역할을 수행하는 파사드 객체입니다.
+ * StudyTime 과 DailyStudyInfo 테이블의 정보를 읽어와, 요구 사항에 맞게 이를 병합하는 과정을 포함하고 있습니다.
  * @author jack8
- * @since 2025-04-15
+ * @since 2025-09-05
  */
-@RequiredArgsConstructor
 @Facade
+@RequiredArgsConstructor
 public class StudyTimeFacade {
 
     private final StudyTimeService studyTimeService;
-    private final StudyCategoryService studyCategoryService;
     private final DailyStudyInfoService dailyStudyInfoService;
-    private final StudyRenderStrategyFactory strategyFactory;
 
     /**
-     * 특정 날짜의 공부 시간을 반환한다. studyTimeService 로부터 해당 날짜에 공부한 기록 및,
-     * studyCateogrySerivce 로 부터 해당 날짜의 카테고리 리스트를 받아온 다음, 이 내용을
-     * 취합하여 반환한다.
-     * @param userId 검색하고자 하는 유저의 id
-     * @param date 검색하고 하는 날짜
-     * @return 해당 날짜의 공부 기록(카테고리, 혹은 임시 이름 기반 공부 시간 등)
+     * 사용자의 아이디와 period 를 기반으로 하여, 공부 시간 및 당일 날 시작/종료 시각을 불러와, 하나의 데이터로 합칩니다.
+     * 읽어온 데이터에 대해, 동일한 날짜를 기반으로 하여 {@link GetDailyStudyRes} 로 변환하여 반환합니다.
+     * @param userId 사용자 아이디
+     * @param periodDto 기간
+     * @return 날짜에 대한 카테고리 별 공부 시간 및 시작/종료 시각, description 등
      */
-    public List<GetStudyRes> getStudyTimeByDate(Long userId, LocalDate date) {
-        List<GetStudyDto> studies = studyTimeService.getStudyList(userId, date);
+    public List<GetDailyStudyRes> readAndConcatStudyData(Long userId, PeriodDto periodDto) {
+        List<GetDailyStudyDto> studyData = studyTimeService.getDailyStudyList(userId, periodDto);
+        List<GetDailyStudyInfoDto> dailyData = dailyStudyInfoService.getDailyStudyInfoList(userId, periodDto);
 
-        // 고민 중... 해당 부분도 전략 패턴으로 옮기는게 맞을까?
-        // 유지보수성이냐(전략 패턴에 옮기기), 객체의 책임의 분리냐(현재 위치 유지)
-        List<GetCategoryRes> personalCategories = studyCategoryService.getUserCategory(userId);
+        // 읽어온 데이터를 날짜에 대한 map 으로 변환
+        Map<LocalDate, GetDailyStudyDto> studyDataMap = studyData.stream()
+                .collect(Collectors.toMap(GetDailyStudyDto::studiedDate, x -> x, (a, b) -> a, LinkedHashMap::new));
 
-        return strategyFactory.compose(studies, Map.of(StudyType.PERSONAL, personalCategories));
-    }
+        Map<LocalDate, GetDailyStudyInfoDto> dailyDataMap = dailyData.stream()
+                .collect(Collectors.toMap(GetDailyStudyInfoDto::studiedDate, x -> x, (a, b) -> a, LinkedHashMap::new));
 
-    /**
-     * 특정 기간에 대하여, 해당 기간 동안의 공부 정보를 받아온다.
-     * studyTimeService 로부터 특정 기간 동안의 모든 기록(카테고리/임시 토픽 - 시간)을 받아오고
-     * dailyStudyInfoService 로부터 해당 날짜의 시작/종료 시간 및 메모를 받아와 합쳐서 반환한다.
-     * @param userId 검색하고자 하는 user 의 id
-     * @param period 검색하고자 하는 기간
-     * @return 특정 날짜 구간에 대한 공부 정보 리스트
-     */
-    public List<GetDailyStudyRes> getDailyStudyTimeByPeriod(Long userId, PeriodDto period) {
-        List<GetDailyStudyDto> dailyStudies = studyTimeService.getDailyStudyList(userId, period);
-        List<GetDailyStudyInfoDto> infos = dailyStudyInfoService.getDailyStudyInfoList(userId, period);
+        // 읽어온 데이터를 Stream 을 통해 하나로 합침
+        return Stream.concat(studyDataMap.keySet().stream(), dailyDataMap.keySet().stream()) // key set 에 대한 stream 생성
+                .distinct() // 중복 제거
+                .sorted() // 날짜에 따른 정렬
+                .map(
+                        date -> { // 객체 생성
+                            GetDailyStudyDto studyTime = studyDataMap.get(date);
+                            GetDailyStudyInfoDto info = dailyDataMap.get(date);
 
-        Map<LocalDate, List<StudyList>> studyMap = dailyStudies.stream()
-                .collect(Collectors.toMap(GetDailyStudyDto::studiedDate, GetDailyStudyDto::studyList));
+                            if (info == null) {
+                                return GetDailyStudyRes.builder()
+                                        .studiedDate(date)
+                                        .studies(studyTime.studyTimeInfo())
+                                        .build();
+                            }
 
-        return infos.stream()
-                .map(info -> GetDailyStudyRes.builder()
-                        .studiedDate(info.studiedDate())
-                        .startTime(info.startTime())
-                        .endTime(info.endTime())
-                        .memo(info.memo())
-                        .studies(studyMap.getOrDefault(info.studiedDate(), List.of()))
-                        .build())
-                .toList();
+                            return GetDailyStudyRes.builder()
+                                    .studiedDate(date)
+                                    .studies(studyTime.studyTimeInfo())
+                                    .startTime(info.startTime())
+                                    .endTime(info.endTime())
+                                    .description(info.description())
+                                    .build();
+                        })
+                .toList(); // 리스트 변환
     }
 }

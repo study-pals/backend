@@ -45,7 +45,7 @@ public class SignInServiceImpl implements SignInService {
             MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
             return jwtUtils.createJwt(memberDetails.getId());
         } catch (Exception e) {
-            throw new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't find user while signIn");
+            throw new AuthException(AuthErrorCode.USER_NOT_FOUND, "can't findAndDelete user while signIn");
         }
     }
 }
