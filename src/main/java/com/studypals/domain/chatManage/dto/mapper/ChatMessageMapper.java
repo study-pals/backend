@@ -17,7 +17,7 @@ import com.studypals.domain.chatManage.entity.ChatMessage;
 public interface ChatMessageMapper {
 
     @Mapping(target = "id", ignore = true)
-    OutgoingMessage toOutMessage(IncomingMessage message, Long senderId);
+    OutgoingMessage toOutMessage(IncomingMessage message, Long sender);
 
     OutgoingMessage toOutMessage(ChatMessage message);
 

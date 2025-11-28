@@ -54,6 +54,6 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
      * @param to     미포함(upper bound) 기준 메시지 ID
      * @return 범위 내 메시지 목록
      */
-    @Query("{ 'room': ?0, 'id': { $gte: ?1, $lt: ?2 } }")
+    @Query(value = "{ 'room': ?0, 'id': { $gte: ?1, $lt: ?2 } }", sort = "{ 'id' :  -1 }")
     List<ChatMessage> findRange(String roomId, String from, String to);
 }

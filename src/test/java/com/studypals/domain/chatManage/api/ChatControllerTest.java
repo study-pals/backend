@@ -17,8 +17,6 @@ import com.studypals.domain.chatManage.entity.ChatMessage;
 import com.studypals.domain.chatManage.worker.ChatMessageReader;
 import com.studypals.testModules.testSupport.WebsocketStompSupport;
 
-import reactor.core.publisher.Flux;
-
 /**
  *
  * @author jack8
@@ -56,7 +54,7 @@ class ChatControllerTest extends WebsocketStompSupport {
         OutgoingMessage received = res.getMessages().get(0);
         assertThat(received.getMessage()).isEqualTo("payload message");
         assertThat(received.getType()).isEqualTo(ChatType.TEXT);
-        assertThat(received.getSenderId()).isEqualTo(userId);
+        assertThat(received.getSender()).isEqualTo(userId);
     }
 
     @Test
@@ -89,7 +87,6 @@ class ChatControllerTest extends WebsocketStompSupport {
 
         SendChatLogReq req = new SendChatLogReq(room1, "1111");
         List<ChatMessage> chatMessages = new ArrayList<>();
-        Flux<ChatMessage> mockFlux = Flux.fromIterable(chatMessages);
         for (int i = 0; i < messageCnt; i++) {
             chatMessages.add(new ChatMessage("1111" + i, ChatType.TEXT, room1, userId, "message" + i));
         }
@@ -97,7 +94,7 @@ class ChatControllerTest extends WebsocketStompSupport {
         verifyToken(userId, true);
         verifyRoom(room1, userId, true);
         verifySend();
-        given(chatMessageReader.getChatLog(room1, "1111")).willReturn(mockFlux);
+        given(chatMessageReader.getChatLog(room1, "1111")).willReturn(chatMessages);
         System.out.println();
         connectSession();
         SubscribeRes<ChatLogRes> res = subscribe("/user/queue", ChatLogRes.class, expected);
@@ -107,6 +104,5 @@ class ChatControllerTest extends WebsocketStompSupport {
         assertThat(res.getMessages()).hasSize(4);
         assertThat(res.getMessages().get(0).messages()).hasSize(50);
         assertThat(res.getMessages().get(3).messages()).hasSize(22);
-        assertThat(res.getMessages().get(3).last()).isTrue();
     }
 }

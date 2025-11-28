@@ -83,6 +83,10 @@ public class ChatMessageReader {
         }
 
         // 기준 ID가 캐시 범위보다 더 과거라면 → 더 이전 데이터를 DB에서 조회해 반환
-        return messageRepository.findRange(roomId, chatId, oldestId);
+        List<ChatMessage> savedMessage = messageRepository.findRange(roomId, chatId, oldestId);
+        List<ChatMessage> merged = new ArrayList<>();
+        merged.addAll(cachedMessage);
+        merged.addAll(savedMessage);
+        return merged;
     }
 }

@@ -11,25 +11,11 @@ import com.studypals.global.redis.redisHashRepository.annotations.RedisHashMapFi
 import com.studypals.global.redis.redisHashRepository.annotations.RedisId;
 
 /**
- * 코드에 대한 전체적인 역할을 적습니다.
- * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
- *
- * <p><b>상속 정보:</b><br>
- * 상속 정보를 적습니다.
- *
- * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br>
- * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
- *
- * <p><b>빈 관리:</b><br>
- * 필요 시 빈 관리에 대한 내용을 적습니다.
- *
- * <p><b>외부 모듈:</b><br>
- * 필요 시 외부 모듈에 대한 내용을 적습니다.
+ * 특정 채팅방에 대해, 사용자 별 가장 마지막으로 읽은 메시지 정보를 기록합니다.
+ * userId - chatId 로 저장되며, Redis 의 Hash 자료구조로 괸리됩니다.
+ * RedisHashRepository 에 사용되는 엔티티입니다.
  *
  * @author jack8
- * @see
  * @since 2025-07-17
  */
 @RedisHashEntity(value = "lastRead")

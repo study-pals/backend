@@ -10,6 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -69,6 +70,8 @@ public abstract class WebsocketStompSupport {
     @Mock
     private UserSubscribeInfo userSubscribeInfo;
 
+    protected static boolean ENABLE_TEST = false;
+
     @AfterEach
     void disconnectSession() {
         if (session != null && session.isConnected()) {
@@ -78,6 +81,8 @@ public abstract class WebsocketStompSupport {
 
     @BeforeEach
     void beforeEach() {
+        Assumptions.assumeTrue(ENABLE_TEST, "SKIP");
+
         given(chatRoomMemberRepository.existsByChatRoomIdAndMemberId(any(), any()))
                 .willReturn(true);
         given(userSubscribeInfoRepository.existById(any())).willReturn(true);

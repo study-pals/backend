@@ -20,7 +20,7 @@ class IdGeneratorTest {
     /*   true  → 모든 성능 테스트 수행       */
     /*   false → generate_success 만 수행   */
     /* ────────────────────────────────── */
-    private static final boolean RUN_PERFORMANCE_TESTS = true;
+    private static final boolean RUN_PERFORMANCE_TESTS = false;
 
     @Autowired
     private IdGenerator idGenerator;

@@ -1,188 +1,218 @@
 package com.studypals.domain.chatManage.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Range;
 import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.StreamInfo;
-import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StreamOperations;
 
+import com.studypals.domain.chatManage.dto.ChatType;
 import com.studypals.domain.chatManage.dto.ChatroomLatestInfo;
+import com.studypals.domain.chatManage.entity.ChatMessage;
 import com.studypals.global.utils.Snowflake;
+import com.studypals.testModules.testSupport.TestEnvironment;
 
-@ExtendWith(MockitoExtension.class)
-class ChatMessageCacheRepositoryTest {
+/**
+ * {@link ChatMessageCacheRepositoryImpl} 에 대한 test container - 테스트입니다.
+ * 실제 환경과 비슷하게 구성하기 위해 redis 를 test 용 컨테이너로 띄워 사용하였습니다.
+ * @author jack8
+ * @see ChatMessageCacheRepository
+ * @since 2025-11-25
+ */
+@SpringBootTest
+class ChatMessageCacheRepositoryTest extends TestEnvironment {
 
-    @Mock
-    private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    ChatMessageCacheRepositoryImpl cacheRepository;
 
-    @Mock
-    private StreamOperations<String, String, String> streamOps;
+    @Autowired
+    RedisTemplate<String, String> redisTemplate;
 
-    @Mock
-    private RedisOperations operations;
-
-    @InjectMocks
-    private ChatMessageCacheRepositoryImpl chatMessageCacheRepository;
+    @Autowired
+    Snowflake snowflake;
 
     private static final String KEY_PREFIX = "chat:msg:room:";
-    private static final int MAX_LEN = 100;
+
+    @BeforeEach
+    void beforeEach() {
+        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
+    }
 
     @Test
-    void test1() {
-        Snowflake snowflake = new Snowflake();
-        String id = Long.toHexString(snowflake.nextId());
+    void save_success() {
+        String roomId = UUID.randomUUID().toString();
+        String chatId = Long.toHexString(snowflake.nextId());
+        ChatMessage chatMessage = ChatMessage.builder()
+                .id(chatId)
+                .message("example message")
+                .sender(1L)
+                .room(roomId)
+                .type(ChatType.TEXT)
+                .build();
+
+        cacheRepository.save(chatMessage);
+
+        StreamOperations<String, String, String> streamOps = redisTemplate.opsForStream();
+
+        List<MapRecord<String, String, String>> saved = streamOps.range(KEY_PREFIX + roomId, Range.unbounded());
+
+        assertThat(saved).hasSize(1);
+        Map<String, String> message = saved.get(0).getValue();
+        assertThat(message.get("id")).isEqualTo(Long.parseLong(chatId, 16) + "-0");
+        assertThat(message.get("sender")).isEqualTo("1");
+        assertThat(message.get("message")).isEqualTo("example message");
+    }
+
+    @Test
+    void saveAll_success() {
+        String roomId = UUID.randomUUID().toString();
+        int size = 512;
+        List<ChatMessage> messages = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            messages.add(ChatMessage.builder()
+                    .id(Long.toHexString(snowflake.nextId()))
+                    .type(ChatType.TEXT)
+                    .message("example message " + i)
+                    .room(roomId)
+                    .sender(1L)
+                    .build());
+        }
+        cacheRepository.saveAll(messages);
+
+        StreamOperations<String, String, String> streamOps = redisTemplate.opsForStream();
+
+        List<MapRecord<String, String, String>> saved = streamOps.range(KEY_PREFIX + roomId, Range.unbounded());
+
+        assertThat(saved).hasSizeGreaterThanOrEqualTo(100);
     }
 
     @Test
     void countAllToLatest_success() {
-        Snowflake snowflake = new Snowflake();
-
-        // 1. 테스트용 roomId 5개 + readInfos (LinkedHashMap 로 순서 보장)
         List<String> roomIds = new ArrayList<>();
+        Map<String, String> req = new HashMap<>();
+
         for (int i = 0; i < 5; i++) {
             roomIds.add(UUID.randomUUID().toString());
         }
 
-        Map<String, String> readInfos = new LinkedHashMap<>();
-        List<String> searchIds = new ArrayList<>();
-
-        // 1번 방은 어차피 null info 로 처리할 예정이므로, 읽은 id 아무거나
-        for (int i = 0; i < 5; i++) {
-            String id = genId(snowflake);
-            searchIds.add(id);
-            readInfos.put(roomIds.get(i), id);
+        // 1번째 방 : 아무런 채팅이 존재하지 않음
+        req.put(roomIds.get(0), "0");
+        // 2번째 방 : 저장된 채팅 20개, 유저는 아무것도 읽지 않음
+        List<ChatMessage> second = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            second.add(createChat(roomIds.get(1)));
         }
-
-        // 2. 첫 번째 pipeline: XINFO STREAM 결과 구성
-        //    방 1: null, 방 2~5: mock StreamInfo.XInfoStream
-        List<StreamInfo.XInfoStream> infos = new ArrayList<>();
-        infos.add(null); // room1
-
-        for (int i = 1; i < 5; i++) {
-            infos.add(org.mockito.Mockito.mock(StreamInfo.XInfoStream.class));
+        cacheRepository.saveAll(second);
+        req.put(roomIds.get(1), "0");
+        // 3번째 방 : 저장된 채팅 110개, 유저는 최신 채팅을 읽은 상태
+        List<ChatMessage> third = new ArrayList<>();
+        for (int i = 0; i < 110; i++) {
+            third.add(createChat(roomIds.get(2)));
         }
+        cacheRepository.saveAll(third);
+        req.put(roomIds.get(2), third.get(third.size() - 1).getId());
 
-        // 길이 설정 (실제로는 길이 안 써도 되지만 시나리오 맞춰 둠)
-        given(infos.get(1).streamLength()).willReturn(61L);
-        given(infos.get(2).streamLength()).willReturn(31L);
-        given(infos.get(3).streamLength()).willReturn(103L);
-        given(infos.get(4).streamLength()).willReturn(99L);
-
-        // 2~5번 방에 대해 first / last entry 설정
-        // -> 모두 "중간 구간" 케이스로 만들어 needRange 에 포함되게 함
-        for (int i = 1; i < 5; i++) {
-            String first = genId(snowflake);
-            String mid = genId(snowflake);
-            String last = genId(snowflake);
-
-            // readInfos 에 들어가는 값(사용자가 마지막으로 읽은 chatId)은 mid 로 덮어쓰기
-            String roomId = roomIds.get(i);
-            searchIds.set(i, mid);
-            readInfos.put(roomId, mid);
-
-            given(infos.get(i).getFirstEntry()).willReturn(createMap(first));
-            given(infos.get(i).getLastEntry()).willReturn(createMap(last));
+        // 4번째 방 : 저장된 채팅 100개, 유저는 60개의 채팅을 읽은 상태
+        List<ChatMessage> forth = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            forth.add(createChat(roomIds.get(3)));
         }
+        cacheRepository.saveAll(forth);
+        req.put(roomIds.get(3), forth.get(59).getId());
 
-        // 3. 두 번째 pipeline: XRANGE 결과 구성
-        // needRange 에는 방 2~5 가 들어간다고 가정하고, 각 방의 range 사이즈를
-        // 61, 14, 100, 99 로 맞춘다.
-        List<MapRecord<String, String, String>> room2Range = new ArrayList<>();
-        for (int i = 0; i < 61; i++) {
-            room2Range.add(mock(MapRecord.class));
+        // 5번째 방 : 저장된 채팅 101개, 유저는 120개이 채팅을 읽지 않음
+        List<ChatMessage> fifth = new ArrayList<>();
+        req.put(roomIds.get(4), Long.toHexString(snowflake.nextId()));
+        for (int i = 0; i < 101; i++) {
+            fifth.add(createChat(roomIds.get(4)));
         }
+        cacheRepository.saveAll(fifth);
 
-        List<MapRecord<String, String, String>> room3Range = new ArrayList<>();
-        for (int i = 0; i < 14; i++) {
-            room3Range.add(mock(MapRecord.class));
-        }
+        Map<String, ChatroomLatestInfo> response = cacheRepository.countAllToLatest(req);
 
-        List<MapRecord<String, String, String>> room4Range = new ArrayList<>();
-        for (int i = 0; i < 100; i++) { // MAX_LEN 과 같게
-            room4Range.add(mock(MapRecord.class));
-        }
-
-        List<MapRecord<String, String, String>> room5Range = new ArrayList<>();
-        for (int i = 0; i < 99; i++) {
-            room5Range.add(mock(MapRecord.class));
-        }
-
-        // 첫 번째 pipeline 결과(List<Object>), 두 번째 pipeline 결과(List<Object>) 준비
-        List<Object> firstPipelineResult = new ArrayList<>(infos); // XInfoStream 들
-        List<Object> secondPipelineResult = List.of(room2Range, room3Range, room4Range, room5Range);
-
-        // 4. opsForStream() -> streamOps 모킹
-        when(operations.opsForStream()).thenReturn(streamOps);
-
-        // 5. executePipelined 호출을 두 번 다르게 동작시키기 위한 callCount + thenAnswer
-        AtomicInteger callCount = new AtomicInteger(0);
-
-        when(redisTemplate.executePipelined(any(SessionCallback.class))).thenAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            SessionCallback<Object> callback = invocation.getArgument(0);
-
-            int n = callCount.getAndIncrement();
-
-            if (n == 0) {
-                // 첫 번째 호출: XINFO STREAM 묶음
-                // 실제로는 callback.execute(operations) 안에서
-                // streamOps.info(KEY_PREFIX + roomId) 가 여러 번 호출될 것.
-                callback.execute(operations);
-                return firstPipelineResult;
-            } else {
-                // 두 번째 호출: XRANGE 묶음
-                callback.execute(operations);
-                return secondPipelineResult;
-            }
-        });
-
-        // 6. 실제 호출
-        Map<String, ChatroomLatestInfo> result = chatMessageCacheRepository.countAllToLatest(readInfos);
-
-        // 7. 검증
-        // roomIds 순서를 기준으로 결과 확인
-        ChatroomLatestInfo r1 = result.get(roomIds.get(0));
-        ChatroomLatestInfo r2 = result.get(roomIds.get(1));
-        ChatroomLatestInfo r3 = result.get(roomIds.get(2));
-        ChatroomLatestInfo r4 = result.get(roomIds.get(3));
-        ChatroomLatestInfo r5 = result.get(roomIds.get(4));
-
-        // 1번 방: info 가 null 이므로 (-1, null, null, -1) 형태
-        assertThat(r1.getCnt()).isEqualTo(-1);
-
-        // 2~5번 방: range 결과 개수와 MAX_LEN 에 따라
-        // 2: 61개
-        assertThat(r2.getCnt()).isEqualTo(61);
-
-        // 3: 14개
-        assertThat(r3.getCnt()).isEqualTo(14);
-
-        // 4: min(100, 100) = 100
-        assertThat(r4.getCnt()).isEqualTo(100);
-
-        // 5: 99개
-        assertThat(r5.getCnt()).isEqualTo(99);
+        assertThat(response).hasSize(5);
+        assertThat(response)
+                .hasEntrySatisfying(roomIds.get(0), msg -> {
+                    assertThat(msg.getCnt()).isEqualTo(-1);
+                    assertThat(msg.getId()).isNull();
+                    assertThat(msg.getSender()).isEqualTo(-1L);
+                    assertThat(msg.getType()).isNull();
+                })
+                .hasEntrySatisfying(roomIds.get(1), msg -> {
+                    assertThat(msg.getCnt()).isEqualTo(20);
+                    assertThat(msg.getId())
+                            .isEqualTo(second.get(second.size() - 1).getId());
+                })
+                .hasEntrySatisfying(roomIds.get(2), msg -> {
+                    assertThat(msg.getCnt()).isEqualTo(0);
+                    assertThat(msg.getId()).isNull();
+                })
+                .hasEntrySatisfying(roomIds.get(3), msg -> {
+                    assertThat(msg.getCnt()).isEqualTo(40);
+                    assertThat(msg.getId())
+                            .isEqualTo(forth.get(forth.size() - 1).getId());
+                })
+                .hasEntrySatisfying(roomIds.get(4), msg -> {
+                    assertThat(msg.getCnt()).isEqualTo(101);
+                    assertThat(msg.getId())
+                            .isEqualTo(fifth.get(fifth.size() - 1).getId());
+                });
     }
 
-    private Map<Object, Object> createMap(String id) {
-        return Map.of("id", id, "type", "TEXT", "message", "text message", "sender", 1);
+    @Test
+    void getLatest_success() {
+        String roomId = UUID.randomUUID().toString();
+        List<ChatMessage> saved = new ArrayList<>();
+        for (int i = 0; i < 500; i++) {
+            saved.add(createChat(roomId));
+        }
+        cacheRepository.saveAll(saved);
+
+        Optional<ChatMessage> result = cacheRepository.getLastest(roomId);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(saved.get(saved.size() - 1).getId());
     }
 
-    private String genId(Snowflake snowflake) {
-        return Long.toHexString(snowflake.nextId());
+    @Test
+    void fetchFromId_success() {
+        String roomId = UUID.randomUUID().toString();
+        List<ChatMessage> before = new ArrayList<>();
+        List<ChatMessage> after = new ArrayList<>();
+
+        for (int i = 0; i < 160; i++) {
+            before.add(createChat(roomId));
+        }
+        for (int i = 0; i < 31; i++) {
+            after.add(createChat(roomId));
+        }
+        String chatId = before.get(before.size() - 1).getId();
+        cacheRepository.saveAll(before);
+        cacheRepository.saveAll(after);
+
+        List<ChatMessage> response = cacheRepository.fetchFromId(roomId, chatId);
+
+        assertThat(response).hasSize(after.size() + 1);
+        assertThat(response.get(0).getId())
+                .isEqualTo(after.get(after.size() - 1).getId());
+        assertThat(response.get(response.size() - 1).getId())
+                .isEqualTo(before.get(before.size() - 1).getId());
+    }
+
+    ChatMessage createChat(String roomId) {
+        return ChatMessage.builder()
+                .id(Long.toHexString(snowflake.nextId()))
+                .type(ChatType.TEXT)
+                .message("test message")
+                .sender(1L)
+                .room(roomId)
+                .build();
     }
 }

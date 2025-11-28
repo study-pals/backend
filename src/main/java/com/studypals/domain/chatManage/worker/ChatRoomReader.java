@@ -5,7 +5,6 @@ import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.chatManage.dao.ChatMessageReactiveRepository;
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
 import com.studypals.domain.chatManage.dao.ChatRoomRepository;
 import com.studypals.domain.chatManage.dao.UserLastReadMessageRepository;
@@ -32,7 +31,6 @@ public class ChatRoomReader {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
-    private final ChatMessageReactiveRepository chatMessageReactiveRepository;
     private final UserLastReadMessageRepository userLastReadMessageRepository;
 
     /**

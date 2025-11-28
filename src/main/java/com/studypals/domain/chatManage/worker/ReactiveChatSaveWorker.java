@@ -7,8 +7,6 @@ import java.util.Map;
 
 import jakarta.annotation.PostConstruct;
 
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,7 +46,6 @@ import reactor.core.publisher.Flux;
 public class ReactiveChatSaveWorker {
 
     private final ChatMessageReactiveRepository chatMessageReactiveRepository;
-    private final ReactiveRedisTemplate<String, Object> redisTemplate;
     private final ChatMessageCacheRepository cacheRepository;
 
     private final ChatMessagePipeline chatMessagePipeline;
@@ -95,10 +92,7 @@ public class ReactiveChatSaveWorker {
 
             // 이후 해당 값은 단순한 key-value 쌍에 대해 redis 에 저장합니다.
             // todo : 해당하는 redis 도 적절히 변경 필요할듯 , 혹은, cache 에서 가져오면 될 것 같은데?
-            return Flux.fromIterable(latestByRoom.entrySet())
-                    .flatMap(
-                            entry -> redisTemplate.opsForValue().set("chat:latest:" + entry.getKey(), entry.getValue()))
-                    .thenMany(Flux.fromIterable(savedMessages));
+            return Flux.fromIterable(latestByRoom.entrySet()).thenMany(Flux.fromIterable(savedMessages));
         });
     }
 }
