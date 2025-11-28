@@ -44,13 +44,7 @@ import com.studypals.domain.chatManage.entity.ChatMessage;
  *     -------------------------------------------------------------------------------
  *  </pre>
  *
- *  entry key 는 다음과 같은 과정을 통해 생성됩니다. <br>
- *  1. {@link com.studypals.global.utils.IdGenerator IdGenerator} 를 통해 생성된 chat id 에서 시간(41 bit),
- *  서버 넘버링(4 bit), 시퀀스 번호(9 bit) 추출 <br>
- *  2. 시간을 통해 entry id 의 앞 부분, 시퀀스 번호-서버 넘버링 순으로 뒷 부분을 채웁니다. <br>
- *  3. [epoch millis from 2025-01-01 00:00]-[sequence number][server instance number] 형식입니다. <br>
- *  이를 통하여 streams 내에서의 시간 순 정렬 및 가장 최신의 100개 메시지 캐싱을 위한 trimming 전략이 가능해집니다.
- *  <br> <br>
+ *  <br>
  *  해당 자료구조는 다음과 같은 성질을 가집니다. <br>
  *  - 상위 {@code MAX_LEN} 개의 메시지를 캐싱합니다. 느슨한 트리밍 전략을 통해 그보다 좀 더 많을 수는 있습니다. <br>
  *  - TTL 전략이 불가능합니다. 데이터 범위 초과에 따른 자동 삭제 전략에 의해 삭제될 수 있습니다. <br>
