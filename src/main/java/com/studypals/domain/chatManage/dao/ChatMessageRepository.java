@@ -41,7 +41,8 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
      * @param idFrom 기준 메시지 ID (포함)
      * @return 메시지 목록 (ID 내림차순)
      */
-    List<ChatMessage> findByRoomAndIdGreaterThanEqualOrderByIdDesc(String roomId, String idFrom);
+    @Query(value = "{ 'room': ?0, 'id': { $gte: ?1 } }", sort = "{ 'id': -1 }")
+    List<ChatMessage> findRecent(String roomId, String idFrom);
 
     /**
      * 특정 채팅방에서 지정된 ID 범위 내의 메시지를 조회합니다.

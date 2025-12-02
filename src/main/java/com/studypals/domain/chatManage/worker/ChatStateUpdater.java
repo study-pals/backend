@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.studypals.domain.chatManage.dao.UserLastReadMessageRepository;
 import com.studypals.domain.chatManage.dto.ChatType;
 import com.studypals.domain.chatManage.dto.ChatUpdateDto;
@@ -76,9 +78,11 @@ public class ChatStateUpdater {
 
     /**
      * 읽음 내역이 도착하여 임시로 저장되는 장소입니다. <br>
+     * caffeine 을 사용한 내장 메모리 캐시입니다.
      * key -> roomId , userId    ///     value -> chatId <br>
      */
-    private final ConcurrentMap<PairKey, String> buckets = new ConcurrentHashMap<>();
+    private final Cache<PairKey, String> buckets =
+            Caffeine.newBuilder().maximumSize(1_000_000).build();
 
     /**
      * scheduler 를 구동합니다. 지정할 작업, 실행 주기에 대해 정의합니다.
@@ -88,7 +92,7 @@ public class ChatStateUpdater {
         scheduler.scheduleAtFixedRate(
                 () -> {
                     // flush 필요할 때만 실행
-                    if (!buckets.isEmpty()) {
+                    if (buckets.estimatedSize() > 0) {
                         triggerFlushAsync();
                     }
                 },
@@ -115,7 +119,7 @@ public class ChatStateUpdater {
         buckets.put(keys, dto.chatId());
 
         // 배치 크기가 커지면, 스케쥴러의 스레드가 작업을 진행하도록 강제합니다.
-        if (buckets.size() >= MAX_BATCH_SIZE) {
+        if (buckets.estimatedSize() >= MAX_BATCH_SIZE) {
             triggerFlushAsync();
         }
     }
@@ -171,11 +175,10 @@ public class ChatStateUpdater {
      * @return 복사된 bucket 의 snapshot
      */
     private Map<PairKey, String> snapshotAndClear() {
-        if (buckets.isEmpty()) {
-            return Map.of();
-        }
-        Map<PairKey, String> snapshot = new HashMap<>(buckets);
-        buckets.keySet().removeAll(snapshot.keySet());
+
+        Map<PairKey, String> snapshot = new HashMap<>(buckets.asMap());
+        // 동일한 key-value 인 경우에만 지움
+        snapshot.forEach((k, v) -> buckets.asMap().remove(k, v));
         return snapshot;
     }
 

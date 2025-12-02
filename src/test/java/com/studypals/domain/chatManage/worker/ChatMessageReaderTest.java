@@ -56,7 +56,7 @@ class ChatMessageReaderTest {
 
         assertThat(response).hasSize(100);
 
-        verify(chatMessageRepository, never()).findByRoomAndIdGreaterThanEqualOrderByIdDesc(any(), any());
+        verify(chatMessageRepository, never()).findRecent(any(), any());
         verify(chatMessageCacheRepository, never()).saveAll(any());
     }
 
@@ -79,7 +79,7 @@ class ChatMessageReaderTest {
         // when
         List<ChatMessage> response = chatMessageReader.getChatLog("room", "1");
 
-        verify(chatMessageRepository, never()).findByRoomAndIdGreaterThanEqualOrderByIdDesc(any(), any());
+        verify(chatMessageRepository, never()).findRecent(any(), any());
         verify(chatMessageCacheRepository, never()).saveAll(any());
 
         assertThat(response).hasSize(200);
@@ -97,8 +97,7 @@ class ChatMessageReaderTest {
         Collections.reverse(savedMessages);
 
         given(chatMessageCacheRepository.fetchFromId("room", "1")).willReturn(cachedMessage);
-        given(chatMessageRepository.findByRoomAndIdGreaterThanEqualOrderByIdDesc("room", "1"))
-                .willReturn(savedMessages);
+        given(chatMessageRepository.findRecent("room", "1")).willReturn(savedMessages);
         given(chatMessageCacheRepository.getMaxLen()).willReturn(100);
 
         // given

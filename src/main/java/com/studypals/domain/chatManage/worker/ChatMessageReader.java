@@ -58,7 +58,7 @@ public class ChatMessageReader {
 
         // 캐시에 데이터가 없을 경우 → 전체 구간을 DB에서 조회
         if (cachedMessage.isEmpty()) {
-            List<ChatMessage> source = messageRepository.findByRoomAndIdGreaterThanEqualOrderByIdDesc(roomId, chatId);
+            List<ChatMessage> source = messageRepository.findRecent(roomId, chatId);
 
             // 조회 결과가 없으면 빈 리스트 반환
             if (source == null || source.isEmpty()) return List.of();

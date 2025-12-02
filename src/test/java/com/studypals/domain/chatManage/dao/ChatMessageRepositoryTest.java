@@ -32,7 +32,7 @@ class ChatMessageRepositoryTest extends TestEnvironment {
     Snowflake snowflake;
 
     @Test
-    void findByRoomAndIdGreaterThanEqualOrderByIdDesc() {
+    void findRecent() {
         int resultLen = 142;
         List<ChatMessage> messages = new ArrayList<>();
         String roomId = UUID.randomUUID().toString();
@@ -44,7 +44,7 @@ class ChatMessageRepositoryTest extends TestEnvironment {
 
         String reqId = messages.get(messages.size() - resultLen).getId();
 
-        List<ChatMessage> response = chatMessageRepository.findByRoomAndIdGreaterThanEqualOrderByIdDesc(roomId, reqId);
+        List<ChatMessage> response = chatMessageRepository.findRecent(roomId, reqId);
 
         assertThat(response).hasSize(resultLen);
         assertThat(response.get(0).getId())
