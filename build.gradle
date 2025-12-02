@@ -139,6 +139,17 @@ tasks.named('test', Test) {
     outputs.dir(snippetsDir)
     environment envProps
     systemProperty 'spring.profiles.active', 'test'
+
+    testLogging {
+        events "passed", "skipped", "failed"
+
+        showStandardStreams = true
+
+        exceptionFormat = 'short'
+        showExceptions = true
+        showCauses = true
+        showStackTraces = false
+    }
 }
 
 // Asciidoctor: adoc -> HTML
