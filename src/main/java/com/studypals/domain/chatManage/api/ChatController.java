@@ -45,6 +45,5 @@ public class ChatController {
     @MessageMapping("/read/message")
     public void readMessage(@Payload IncomingMessage message, Principal principal) {
         Long userId = Long.parseLong(principal.getName());
-        chatService.readMessage(userId, message);
     }
 }

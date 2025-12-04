@@ -20,5 +20,6 @@ public class OutgoingMessage {
 
     private ChatType type;
     private String message;
-    private Long sender;
+    private Long senderId;
+    private String time;
 }

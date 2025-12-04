@@ -1,9 +1,4 @@
-package com.studypals.domain.chatManage.dao;
-
-import org.springframework.stereotype.Repository;
-
-import com.studypals.domain.chatManage.entity.UserLastReadMessage;
-import com.studypals.global.redis.redisHashRepository.RedisHashRepository;
+package com.studypals.domain.chatManage.worker;
 
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
@@ -25,7 +20,6 @@ import com.studypals.global.redis.redisHashRepository.RedisHashRepository;
  *
  * @author jack8
  * @see
- * @since 2025-07-24
+ * @since 2025-07-17
  */
-@Repository
-public interface UserLastReadMessageRepository extends RedisHashRepository<UserLastReadMessage, String> {}
+public class ChatReadUpdater {}

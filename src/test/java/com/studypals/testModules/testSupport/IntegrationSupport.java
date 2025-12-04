@@ -49,7 +49,7 @@ import com.studypals.testModules.testUtils.CleanUp;
 @AutoConfigureMockMvc
 @Import({SecurityConfig.class})
 @ActiveProfiles("test")
-public class IntegrationSupport extends TestEnvironment {
+public class IntegrationSupport {
 
     @Autowired
     protected MockMvc mockMvc;

@@ -1,5 +1,7 @@
 package com.studypals.domain.chatManage.service;
 
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,14 +36,15 @@ class ChatServiceTest {
         return new IncomingMessage(ChatType.TEXT, "test message", "room-id");
     }
 
-    private OutgoingMessage createOutgoing(Long userId) {
-        return new OutgoingMessage(null, ChatType.TEXT, "text message", userId);
+    private OutgoingMessage createOutgoing(Long userId, String time) {
+        return new OutgoingMessage(null, ChatType.TEXT, "text message", userId, time);
     }
 
     @Test
     void sendMessage_success() {
         // given
-        OutgoingMessage outgoingMessage = createOutgoing(1L);
+        LocalDateTime now = LocalDateTime.now();
+        OutgoingMessage outgoingMessage = createOutgoing(1L, now.toString());
         // given(chatMessageMapper.toOutMessage(any(), any(), any())).willReturn(outgoingMessage);
         // willDoNothing().given(template).convertAndSend(any(String.class), any(Object.class));
     }

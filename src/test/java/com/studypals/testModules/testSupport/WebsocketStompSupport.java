@@ -1,17 +1,13 @@
 package com.studypals.testModules.testSupport;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -21,12 +17,9 @@ import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
-import lombok.Getter;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
 import com.studypals.global.security.jwt.JwtUtils;
-import com.studypals.global.websocket.subscibeManage.UserSubscribeInfo;
 import com.studypals.global.websocket.subscibeManage.UserSubscribeInfoRepository;
 
 /**
@@ -67,25 +60,11 @@ public abstract class WebsocketStompSupport {
     @Mock
     protected JwtUtils.JwtData mockJwtData;
 
-    @Mock
-    private UserSubscribeInfo userSubscribeInfo;
-
-    protected static boolean ENABLE_TEST = false;
-
     @AfterEach
     void disconnectSession() {
         if (session != null && session.isConnected()) {
             session.disconnect();
         }
-    }
-
-    @BeforeEach
-    void beforeEach() {
-        Assumptions.assumeTrue(ENABLE_TEST, "SKIP");
-
-        given(chatRoomMemberRepository.existsByChatRoomIdAndMemberId(any(), any()))
-                .willReturn(true);
-        given(userSubscribeInfoRepository.existById(any())).willReturn(true);
     }
 
     protected String getToken() {
@@ -135,10 +114,9 @@ public abstract class WebsocketStompSupport {
      * @return 해당 토픽에 오는 메시지 , 단 get으로 가져와야 함
      * @param <T> type에 입력되는 반환 타입 정보
      */
-    protected <T> SubscribeRes<T> subscribe(String destination, Class<T> type, int cnt) {
+    protected <T> CompletableFuture<T> subscribe(String destination, Class<T> type) {
+        CompletableFuture<T> future = new CompletableFuture<>();
 
-        CountDownLatch latch = new CountDownLatch(cnt);
-        List<T> messages = Collections.synchronizedList(new ArrayList<>());
         session.subscribe(destination, new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
@@ -147,28 +125,11 @@ public abstract class WebsocketStompSupport {
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                messages.add(type.cast(payload));
-                latch.countDown();
+                future.complete(type.cast(payload));
             }
         });
 
-        return new SubscribeRes<>(latch, messages);
-    }
-
-    protected static class SubscribeRes<T> {
-        private final CountDownLatch latch;
-
-        @Getter
-        private final List<T> messages;
-
-        public SubscribeRes(CountDownLatch latch, List<T> messages) {
-            this.latch = latch;
-            this.messages = messages;
-        }
-
-        public void await() throws InterruptedException {
-            latch.await();
-        }
+        return future;
     }
 
     /**
@@ -197,10 +158,5 @@ public abstract class WebsocketStompSupport {
     protected void verifyRoom(String roomId, Long userId, boolean isValid) {
         given(chatRoomMemberRepository.existsByChatRoomIdAndMemberId(roomId, userId))
                 .willReturn(isValid);
-    }
-
-    protected void verifySend() {
-        given(userSubscribeInfoRepository.findById(any())).willReturn(Optional.of(userSubscribeInfo));
-        given(userSubscribeInfo.getRoomList()).willReturn(Map.of(room1, 17));
     }
 }

@@ -1,9 +1,8 @@
-package com.studypals.domain.chatManage.dao;
+package com.studypals.domain.chatManage.dto;
 
-import org.springframework.stereotype.Repository;
+import java.util.List;
 
-import com.studypals.domain.chatManage.entity.UserLastReadMessage;
-import com.studypals.global.redis.redisHashRepository.RedisHashRepository;
+import com.studypals.domain.chatManage.entity.ChatMessage;
 
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
@@ -25,7 +24,6 @@ import com.studypals.global.redis.redisHashRepository.RedisHashRepository;
  *
  * @author jack8
  * @see
- * @since 2025-07-24
+ * @since 2025-07-26
  */
-@Repository
-public interface UserLastReadMessageRepository extends RedisHashRepository<UserLastReadMessage, String> {}
+public record ChatStateCacheInfo(List<ChatMessage> messages, String oldestCachedId, String newestCachedId) {}
