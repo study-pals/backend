@@ -7,14 +7,15 @@ import java.util.Map;
 
 import jakarta.annotation.PostConstruct;
 
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
-
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-import com.studypals.domain.chatManage.dao.ChatMessageRepository;
+import com.studypals.domain.chatManage.dao.ChatMessageCacheRepository;
+import com.studypals.domain.chatManage.dao.ChatMessageReactiveRepository;
 import com.studypals.domain.chatManage.entity.ChatMessage;
 import com.studypals.global.annotations.Worker;
 
+import reactor.core.publisher.BufferOverflowStrategy;
 import reactor.core.publisher.Flux;
 
 /**
@@ -40,14 +41,23 @@ import reactor.core.publisher.Flux;
  * @since 2025-07-14
  */
 @Worker
+@Slf4j
 @RequiredArgsConstructor
 public class ReactiveChatSaveWorker {
 
-    private final ChatMessageRepository chatMessageRepository;
-    private final ReactiveRedisTemplate<String, Object> redisTemplate;
+    private final ChatMessageReactiveRepository chatMessageReactiveRepository;
+    private final ChatMessageCacheRepository cacheRepository;
 
     private final ChatMessagePipeline chatMessagePipeline;
 
+    /**
+     * 빈에 올라가는 동시에, Flux 기반의 메시지 스트림을 정의합니다. maxBufferSize 만큼의 데이터가 쌓이거나,
+     * maxBufferTime 이 지나면 {@code saveBatchAndCacheLatest} 메서드가 호출됩니다.
+     * <pre>
+     *     - backpressure 가 존재합니다.
+     *     - 버퍼가 비어 있으면 넘어갑니다.
+     * </pre>
+     */
     @PostConstruct
     public void init() {
         Flux<ChatMessage> messageStream = chatMessagePipeline.getStream();
@@ -55,24 +65,34 @@ public class ReactiveChatSaveWorker {
         int maxBufferSize = 512;
         int maxBufferTime = 500;
         messageStream
+                .onBackpressureBuffer(
+                        10_000, msg -> log.error("chat message dropeed: {}", msg), BufferOverflowStrategy.DROP_LATEST)
                 .bufferTimeout(maxBufferSize, Duration.ofMillis(maxBufferTime))
                 .filter(batch -> !batch.isEmpty())
                 .flatMap(this::saveBatchAndCacheLatest)
                 .subscribe();
     }
 
+    /**
+     * 비동기적 dao 인 {@code MongoReactiveRepository} 인 {@link ChatMessageReactiveRepository} 에 대해,
+     * 벌크 데이터 저장을 시도합니다.
+     * @param messages 저장할 {@code ChatMessage} 에 대한 리스트
+     * @return 저장된 ChatMessage 들에 대한 Flux 파이프라인
+     */
     private Flux<ChatMessage> saveBatchAndCacheLatest(List<ChatMessage> messages) {
-        return chatMessageRepository.saveAll(messages).collectList().flatMapMany(savedMessages -> {
+        // saveAll 시 저장된 데이터에 대해, 이후 처리를 수행합니다. List 로 모읍니다.
+        return chatMessageReactiveRepository.saveAll(messages).collectList().flatMapMany(savedMessages -> {
             Map<String, ChatMessage> latestByRoom = new HashMap<>();
 
+            // 채팅방에 대해 - 가장 마지막 메시지를 저장합니다. 모든 메시지에 대해, 크기 비교를 통해 더 큰 값이(최신값) 들어옵니다.
             for (ChatMessage msg : savedMessages) {
                 latestByRoom.merge(msg.getRoom(), msg, (a, b) -> a.getId().compareTo(b.getId()) < 0 ? b : a);
             }
+            cacheRepository.saveAll(savedMessages); // 캐시에 해당 데이터를 전부 저장합니다.
 
-            return Flux.fromIterable(latestByRoom.entrySet())
-                    .flatMap(
-                            entry -> redisTemplate.opsForValue().set("chat:latest:" + entry.getKey(), entry.getValue()))
-                    .thenMany(Flux.fromIterable(savedMessages));
+            // 이후 해당 값은 단순한 key-value 쌍에 대해 redis 에 저장합니다.
+            // todo : 해당하는 redis 도 적절히 변경 필요할듯 , 혹은, cache 에서 가져오면 될 것 같은데?
+            return Flux.fromIterable(latestByRoom.entrySet()).thenMany(Flux.fromIterable(savedMessages));
         });
     }
 }

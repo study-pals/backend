@@ -38,7 +38,16 @@
 
 '''
 
-특정 채팅방에 대한 정보를 path parameter로 받아 조회, 반한합니다.
+특정 채팅방에 대한 정보를 path parameter로 받아 조회 후 반환합니다.
+
+채팅방 아이디는 UUID 값입니다.
+각 채팅 아이디는 64비트 16진수 문자열입니다.
+
+cursor  는 각 사용자가 가장 마지막으로 읽은 메시지의 아이디에 대한 데이터입니다.
+logs    는 해당 채팅방의 최신순 100개(오차가능) 데이터를 반환합니다.
+
+[NOTE]
+추후 로그 같은 경우는 paging 을 통해, 개별적인 endpoint 로 분리될 가능성이 존재합니다.
 
 
 *REQUEST* +
@@ -55,3 +64,154 @@ include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_succe
 
 include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_success/response-fields.adoc[]
 include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_success/http-response.adoc[]
+
+''''
+
+=== 채팅
+''''
+
+==== CONNECT frame
+
+클라이언트 -> 서버
+[source,stomp]
+----
+CONNECT
+accept-version:1.2
+host:{HOST}
+Authorization:Bearer {ACCESS_TOKEN}
+
+^@
+----
+[NOTE]
+`{ACCESS_TOEKN}` 은 로그인부터 발급받은 토큰을 사용합니다.
+
+==== SUBSCRIBE frame (채팅방 구독)
+
+클라이언트 → 서버
+
+[source,stomp]
+----
+SUBSCRIBE
+id:sub-0
+destination:/sub/chat/room/{chatRoomId}
+
+^@
+----
+
+서버는 이후 `/sub/chat/room/{chatRoomId}` 로 전달되는 MESSAGE 프레임을
+해당 세션으로 push 해야합니다.
+
+
+==== SEND frame (채팅 메시지 전송)
+
+[WARNING]
+클라이언트에서는 메시지를 보낼 때, 다음과 같은 방식으로 보내야 합니다. 단, SEND 시 사용되는 chatRoomId 는,
+현재 세션에서 구독이 되어 있어야 합니다. 다른 클라이언트의 세션에서, 동일한 사용자가 구독을 했더라도 해당 세션에 구독이 되어 있지 않으면
+전송이 되지 않습니다.
+
+DESTINATION : /pub/read/message
+
+클라이언트 → 서버
+
+[source,stomp]
+----
+SEND
+destination:/pub/send/message
+content-type:application/json
+
+{
+  "roomId": "{chatRoomId}",
+  "type": "TEXT",
+  "message": "안녕하세요, 내일 10시에 회의할까요?"
+}
+^@
+----
+
+서버 → 클라이언트 (예시 응답 MESSAGE)
+
+[source,stomp]
+----
+MESSAGE
+subscription:sub-0
+destination:/sub/chat/room/{chatRoomId}
+message-id:msg-15
+
+{
+  "id": "15",
+  "type": "TEXT",
+  "message": "안녕하세요, 내일 10시에 회의할까요?",
+  "sender": 1
+}
+^@
+----
+
+
+==== SEND frame (읽음 처리)
+
+클라이언트는 메시지를 읽으면, 가장 마지막으로 읽은 메시지를 서버로 보내야 합니다.
+이는 필수적인 과정이며 클라이언트 측에서 어느정도 최적화를 하면 서버 측의 부담이 줄어들 여지가 있습니다.
+
+1. 가령 매우 짧은 시간에 수 건의 메시지가 온다면, 가장 마지막 메시지만 "읽음 완료" 처리를 수행할 수 있습니다. 서버는 어쨋거나
+가장 마지막 메시지만 최신화 하면 됩니다.
+2. 다만, 어쨋거나 유저가 본 가장 마지막 메시지를 서버로 보낸다는 과정만 수행하면 됩니다. 갑작스러운 네트워크 오류, 어플리케이션 종료 시에도
+안전하게 마지막으로 읽은 채팅 정보를 전송만 할 수 있으면 어떤 방식도 상관이 없습니다.
+
+DESTINATION : /pub/read/message
+
+클라이언트 → 서버
+
+[source,stomp]
+----
+SEND
+destination:/pub/read/message
+content-type:application/json
+
+{
+  "roomId": "{chatRoomId}",
+  "chatId": "15"
+}
+^@
+----
+
+==== SUBSCRIBE frame (유저 개인 큐 구독)
+
+/user/queue 는 특정 유저에게만 전달되는 개인용 메시지를 받기 위한 채널입니다.
+클라이언트는 다음과 같이 단순히 구독만 하면 됩니다.
+
+구독 시점은 어플리케이션이 시작될 때 입니다. 접속이 끊기면 재접속을 시도해야 하며, 재접속도 시도하면 오프라인 모드로 전환하여야 합니다.
+
+DESTINATION : `/user/queue/notifications`
+
+클라이언트 → 서버
+
+[source,stomp]
+----
+SUBSCRIBE
+id:sub-user
+destination:/user/queue/notifications
+
+^@
+----
+
+이후 해당 유저에게 전달되는 개인 메시지가 모두 이 채널로 도착합니다.
+
+
+==== USER QUEUE MESSAGE frame (개인 메시지)
+
+서버 → 클라이언트
+
+[source,stomp]
+----
+MESSAGE
+subscription:sub-user
+destination:/user/queue/notifications
+message-id:user-msg-1
+
+{
+  "type": "NOTICE",
+  "content": "새로운 알림이 있습니다."
+}
+^@
+----
+[NOTE]
+단, 개인 메시지의 형식은 아직 정의되지 않았습니다.

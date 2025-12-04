@@ -54,53 +54,50 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 
-    //cafeine
+    // caffeine
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'com.github.ben-manes.caffeine:caffeine'
 
     // minio
     implementation 'io.minio:minio:8.5.17'
 
-    //mongoDB
+    // mongoDB
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
     // spring security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    // test
+    // REST Docs / test
     asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
-    testImplementation 'org.mockito:mockito-core:4.6.1'
     testImplementation 'org.springframework.restdocs:spring-restdocs-core'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    testCompileOnly 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.mockito:mockito-core:4.6.1'
 
+    // === Testcontainers BOM (버전 중앙관리) ===
+    testImplementation platform("org.testcontainers:testcontainers-bom:1.20.2")
 
+    // === Testcontainers 모듈들 (버전 X, BOM이 관리) ===
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:mysql'
+    testImplementation 'org.testcontainers:mongodb'
+    //testImplementation 'org.testcontainers:redis:1.20.2'
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
 
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'io.projectreactor:reactor-test'
 }
-
-//def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
-//
-//sourceSets {
-//    main {
-//        java {
-//            srcDirs += querydslDir
-//        }
-//    }
-//}
-//
-//tasks.withType(JavaCompile).configureEach {
-//    options.annotationProcessorGeneratedSourcesDirectory = querydslDir
-//}
 
 spotless {
     java {
@@ -117,11 +114,12 @@ tasks.register("addGitPreCommitHook", Copy) {
     into './.git/hooks'
 }
 
+// --- REST Docs / Asciidoctor 설정 ---
 
-ext {
-    snippetsDir = file('build/generated-snippets')
-}
+// build/generated-snippets 디렉터리 (Provider 기반)
+def snippetsDir = layout.buildDirectory.dir("generated-snippets")
 
+// .env 로부터 테스트 환경변수 로드
 def envProps = new Properties()
 file('.env').withInputStream { stream ->
     stream.withReader('UTF-8') { reader ->
@@ -135,40 +133,59 @@ file('.env').withInputStream { stream ->
     }
 }
 
-
 tasks.named('test', Test) {
     useJUnitPlatform()
-    outputs.dir snippetsDir
+    // REST Docs snippets 출력 디렉터리
+    outputs.dir(snippetsDir)
     environment envProps
     systemProperty 'spring.profiles.active', 'test'
+
+    testLogging {
+        events "passed", "skipped", "failed"
+
+        showStandardStreams = true
+
+        exceptionFormat = 'short'
+        showExceptions = true
+        showCauses = true
+        showStackTraces = false
+    }
 }
 
+// Asciidoctor: adoc -> HTML
 asciidoctor {
     configurations 'asciidoctorExt'
     sourceDir = file('src/asciidoc')
-    outputDir = file("build/docs/asciidoc")
+    // build/docs/asciidoc (Provider API 사용)
+    outputDir = layout.buildDirectory.dir("docs/asciidoc").get().asFile
+
     sources {
         include 'index.adoc'
         include 'api/*.adoc'
-
     }
 
     baseDirFollowsSourceFile()
 
-    inputs.dir snippetsDir
-    dependsOn test
+    // REST Docs snippets 입력
+    inputs.dir(snippetsDir)
+
+    // 테스트(=snippets 생성) 후에 실행
+    dependsOn tasks.named('test')
+
+    // adoc 에서 {snippets} attribute 쓰고 있다면 이렇게 매핑
+    attributes 'snippets': snippetsDir.get().asFile
 }
 
-asciidoctor.doFirst {
-    delete file('src/main/resources/static/docs')
-}
+// jar 생성 시점에 문서 포함 (src/main/resources 건드리지 않음)
+bootJar {
+    // jar 만들기 전에 asciidoctor 반드시 실행
+    dependsOn tasks.named('asciidoctor')
 
-tasks.register('copyDocument', Copy) {
-    dependsOn asciidoctor
-    from file("build/docs/asciidoc")
-    into file("src/main/resources/static/docs")
-}
+    // build/docs/asciidoc → jar 내부 static/docs 로 복사
+    from(layout.buildDirectory.dir("docs/asciidoc")) {
+        into 'BOOT-INF/classes/static/docs'
+    }
 
-build {
-    dependsOn copyDocument
+    // docs 변경 시에도 bootJar 를 up-to-date 로 오판하지 않도록 입력에 포함
+    inputs.dir(layout.buildDirectory.dir("docs/asciidoc"))
 }

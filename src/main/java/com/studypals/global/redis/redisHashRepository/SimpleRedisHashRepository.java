@@ -147,7 +147,7 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
         ids.forEach(idList::add);
 
         // 2) SessionCallback + Pipeline 실행
-        List<Object> rawResults = tpl.executePipelined(new SessionCallback<Object>() {
+        List<Object> rawResults = tpl.executePipelined(new SessionCallback<>() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
 
@@ -188,7 +188,7 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
         List<ID> idList = new ArrayList<>(fieldKey.keySet());
         String keyPrefix = meta.keyPrefix();
 
-        List<Object> result = tpl.executePipelined(new SessionCallback<Object>() {
+        List<Object> result = tpl.executePipelined(new SessionCallback<>() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
                 HashOperations<String, String, String> hashOps = operations.opsForHash();

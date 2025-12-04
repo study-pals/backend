@@ -23,7 +23,8 @@ public interface ChatRoomService {
      * 해당 채팅방의 정보와, 채팅방에 속한 유저의 리스트 또한 포함됩니다.
      * @param userId 검증을 위한 요청자의 userId
      * @param chatRoomId 검색하고자 할 채팅방 아이디
+     * @param chatId 채팅 내역 불러오기 시 기준이 되는 아이디
      * @return 채팅방 정보 및 해당 채팅방에 소속된 유저의 정보 리스트
      */
-    ChatRoomInfoRes getChatRoomInfo(Long userId, String chatRoomId);
+    ChatRoomInfoRes getChatRoomInfo(Long userId, String chatRoomId, String chatId);
 }

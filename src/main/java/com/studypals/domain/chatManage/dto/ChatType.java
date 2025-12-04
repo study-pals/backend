@@ -18,7 +18,17 @@ public enum ChatType {
     TEXT(1),
     IMAGE(2),
     READ(3),
-    STAT(4);
+    STAT(4),
+    UNKNOWN(99);
 
     private final int subtype;
+
+    public static ChatType from(String raw) {
+        if (raw == null) return UNKNOWN;
+        try {
+            return ChatType.valueOf(raw.toUpperCase());
+        } catch (Exception e) {
+            return UNKNOWN;
+        }
+    }
 }

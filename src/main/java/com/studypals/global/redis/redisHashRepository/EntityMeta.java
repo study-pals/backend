@@ -43,5 +43,7 @@ public record EntityMeta(
         MethodHandle idSetter,
         List<Field> valueFields,
         Field mapField,
+        Class<?> mapKeyType,
+        Class<?> mapValueType,
         Map<Field, MethodHandle> getters,
         Map<Field, MethodHandle> setters) {}

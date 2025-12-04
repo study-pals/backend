@@ -21,7 +21,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.chatManage.api.ChatRoomController;
+import com.studypals.domain.chatManage.dto.ChatCursorRes;
 import com.studypals.domain.chatManage.dto.ChatRoomInfoRes;
+import com.studypals.domain.chatManage.dto.ChatType;
+import com.studypals.domain.chatManage.dto.OutgoingMessage;
 import com.studypals.domain.chatManage.entity.ChatRoomRole;
 import com.studypals.domain.chatManage.service.ChatRoomService;
 import com.studypals.global.responses.CommonResponse;
@@ -36,7 +39,7 @@ import com.studypals.testModules.testSupport.RestDocsSupport;
  * @since 2025-05-19
  */
 @WebMvcTest(ChatRoomController.class)
-public class ChatRoomControllerRestDocsTest extends RestDocsSupport {
+class ChatRoomControllerRestDocsTest extends RestDocsSupport {
 
     @MockitoBean
     private ChatRoomService chatRoomService;
@@ -45,28 +48,51 @@ public class ChatRoomControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void getChatRoomInfo_success() throws Exception {
         // given
-        String chatRoomId = "chatroom";
+        String chatRoomId = "study-room-1";
+
         ChatRoomInfoRes responseData = ChatRoomInfoRes.builder()
                 .id(chatRoomId)
-                .name("chatRoom")
+                .name("스터디 1반 단톡방")
                 .userInfos(List.of(
                         ChatRoomInfoRes.UserInfo.builder()
                                 .userId(1L)
                                 .role(ChatRoomRole.ADMIN)
-                                .imageUrl("image1.img")
+                                .imageUrl("https://cdn.example.com/profiles/user1.png")
                                 .build(),
                         ChatRoomInfoRes.UserInfo.builder()
                                 .userId(2L)
                                 .role(ChatRoomRole.MANAGER)
-                                .imageUrl("image2.png")
+                                .imageUrl("https://cdn.example.com/profiles/user2.png")
                                 .build(),
                         ChatRoomInfoRes.UserInfo.builder()
                                 .userId(3L)
                                 .role(ChatRoomRole.MEMBER)
-                                .imageUrl("image3.jpg")
+                                .imageUrl("https://cdn.example.com/profiles/user3.png")
+                                .build()))
+                .cursor(List.of(new ChatCursorRes(1L, "15"), new ChatCursorRes(2L, "14"), new ChatCursorRes(3L, "15")))
+                .logs(List.of(
+                        OutgoingMessage.builder()
+                                .id("15")
+                                .type(ChatType.TEXT)
+                                .message("내일 10시에 회의할까요?")
+                                .sender(1L)
+                                .build(),
+                        OutgoingMessage.builder()
+                                .id("14")
+                                .type(ChatType.TEXT)
+                                .message("네, 가능합니다.")
+                                .sender(2L)
+                                .build(),
+                        OutgoingMessage.builder()
+                                .id("13")
+                                .type(ChatType.TEXT)
+                                .message("저도 참석할게요.")
+                                .sender(3L)
                                 .build()))
                 .build();
-        given(chatRoomService.getChatRoomInfo(any(), any())).willReturn(responseData);
+
+        given(chatRoomService.getChatRoomInfo(any(), any(), any())).willReturn(responseData);
+
         Response<ChatRoomInfoRes> expected =
                 CommonResponse.success(ResponseCode.CHAT_ROOM_SEARCH, responseData, chatRoomId);
 
@@ -83,11 +109,17 @@ public class ChatRoomControllerRestDocsTest extends RestDocsSupport {
                         responseFields(
                                 fieldWithPath("code").description("응답 코드"),
                                 fieldWithPath("status").description("응답 상태"),
-                                fieldWithPath("message").description("채팅방 id"),
-                                fieldWithPath("data.id").description("채팅방 id"),
+                                fieldWithPath("message").description("채팅방 ID"),
+                                fieldWithPath("data.id").description("채팅방 ID"),
                                 fieldWithPath("data.name").description("채팅방 이름"),
                                 fieldWithPath("data.userInfos[].userId").description("유저 ID"),
                                 fieldWithPath("data.userInfos[].role").description("유저 역할 (ADMIN | MANAGER | MEMBER)"),
-                                fieldWithPath("data.userInfos[].imageUrl").description("유저 이미지 URL"))));
+                                fieldWithPath("data.userInfos[].imageUrl").description("유저 프로필 이미지 URL"),
+                                fieldWithPath("data.cursor[].userId").description("해당 커서가 가리키는 유저 ID"),
+                                fieldWithPath("data.cursor[].chatId").description("해당 유저가 마지막으로 읽은 채팅 ID"),
+                                fieldWithPath("data.logs[].id").description("채팅 ID"),
+                                fieldWithPath("data.logs[].type").description("채팅 타입 (예: TEXT)"),
+                                fieldWithPath("data.logs[].message").description("채팅 메시지 내용"),
+                                fieldWithPath("data.logs[].sender").description("메시지 보낸 유저 ID"))));
     }
 }

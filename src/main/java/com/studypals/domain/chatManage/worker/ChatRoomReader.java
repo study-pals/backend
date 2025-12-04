@@ -1,13 +1,16 @@
 package com.studypals.domain.chatManage.worker;
 
 import java.util.List;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
 import com.studypals.domain.chatManage.dao.ChatRoomRepository;
+import com.studypals.domain.chatManage.dao.UserLastReadMessageRepository;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.entity.ChatRoomMember;
+import com.studypals.domain.chatManage.entity.UserLastReadMessage;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
@@ -28,6 +31,7 @@ public class ChatRoomReader {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
+    private final UserLastReadMessageRepository userLastReadMessageRepository;
 
     /**
      * 채팅방 엔티티를 채팅방 id를 통해 가져옵니다. 예외가 정의되어 있습니다.
@@ -69,5 +73,15 @@ public class ChatRoomReader {
      */
     public List<ChatRoomMember> findChatRoomMembers(Member member) {
         return chatRoomMemberRepository.findAllByMemberId(member.getId());
+    }
+
+    /**
+     * 캐시된 사용자의 메시지 커서 기록을 반환합니다. redis 에 저장된 데이터를 호출하며, 오래된 데이터는 없을 수 있습니다.
+     * 따라서, 완전한 데이터를 위해서는 영속화된 데이터와의 비교가 필요합니다.
+     * @param roomId 검색할 채팅방 아이디
+     * @return 해당 채팅방에 대한 정보
+     */
+    public UserLastReadMessage getCachedCursor(String roomId) {
+        return userLastReadMessageRepository.findById(roomId).orElse(new UserLastReadMessage(roomId, Map.of()));
     }
 }
