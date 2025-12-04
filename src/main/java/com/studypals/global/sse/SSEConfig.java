@@ -24,8 +24,8 @@ public class SSEConfig implements WebMvcConfigurer {
     public ThreadPoolTaskExecutor sseTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setThreadNamePrefix("sse-");
-        executor.setCorePoolSize(10);
-        executor.setMaxPoolSize(100);
+        executor.setCorePoolSize(8);
+        executor.setMaxPoolSize(60);
         executor.setQueueCapacity(10_000);
         executor.initialize();
         return executor;
