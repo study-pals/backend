@@ -141,6 +141,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
         // given
         List<GetCategoryRes> response = List.of(
                 GetCategoryRes.builder()
+                        .id(10L)
                         .studyType(StudyType.PERSONAL)
                         .typeId(1L)
                         .dateType(DateType.DAILY)
@@ -151,6 +152,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                         .description("description")
                         .build(),
                 GetCategoryRes.builder()
+                        .id(11L)
                         .studyType(StudyType.GROUP)
                         .typeId(15L)
                         .dateType(DateType.DAILY)
@@ -161,6 +163,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                         .description("description2")
                         .build(),
                 GetCategoryRes.builder()
+                        .id(13L)
                         .studyType(StudyType.REMOVED)
                         .typeId(1L)
                         .dateType(DateType.DAILY)
@@ -185,6 +188,7 @@ class CategoryControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("code").description("U03-05"),
                                 fieldWithPath("status").description("응답 상태(예: success or failed"),
                                 fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("data[].id").description("해당 카테고리의 아이디"),
                                 fieldWithPath("data[].studyType")
                                         .description("해당 카테고리의 타입(PERSONAL, GROUP, REMOVED...)"),
                                 fieldWithPath("data[].typeId").description("studyType 에 대한 id"),

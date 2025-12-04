@@ -13,6 +13,7 @@ import com.studypals.domain.studyManage.entity.StudyType;
  */
 @Builder
 public record GetCategoryRes(
+        Long id,
         StudyType studyType,
         Long typeId,
         DateType dateType,
