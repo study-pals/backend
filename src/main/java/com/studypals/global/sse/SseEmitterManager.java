@@ -88,6 +88,7 @@ public class SseEmitterManager {
      * @param dto 메시지 내용(타입 및 데이터)
      */
     public void sendMessageAsync(Long userId, SseSendDto dto) {
+        if (!userSessions.containsKey(userId)) return;
         taskExecutor.execute(() -> sendMessageInternal(userId, dto));
     }
 

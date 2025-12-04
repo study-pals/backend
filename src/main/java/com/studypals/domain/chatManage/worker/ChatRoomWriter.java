@@ -1,10 +1,13 @@
 package com.studypals.domain.chatManage.worker;
 
+import org.springframework.cache.annotation.CacheEvict;
+
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
 import com.studypals.domain.chatManage.dao.ChatRoomRepository;
 import com.studypals.domain.chatManage.dto.CreateChatRoomDto;
+import com.studypals.domain.chatManage.entity.ChatCacheValue;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.entity.ChatRoomMember;
 import com.studypals.domain.chatManage.entity.ChatRoomRole;
@@ -56,6 +59,7 @@ public class ChatRoomWriter {
      * @param member 참가할 멤버
      * @throws ChatException CHAT_ROOM_JOIN_FAIL / 채팅방 참여가 실패
      */
+    @CacheEvict(value = ChatCacheValue.JOINED_MEMBER, key = "#member.id")
     public void joinAsAdmin(ChatRoom chatRoom, Member member) {
         internalJoin(chatRoom, member, ChatRoomRole.ADMIN);
     }
@@ -66,6 +70,7 @@ public class ChatRoomWriter {
      * @param member 참가할 멤버
      * @throws ChatException CHAT_ROOM_JOIN_FAIL / 채팅방 참여가 실패
      */
+    @CacheEvict(value = ChatCacheValue.JOINED_MEMBER, key = "#member.id")
     public void join(ChatRoom chatRoom, Member member) {
         internalJoin(chatRoom, member, ChatRoomRole.MEMBER);
     }
@@ -77,6 +82,7 @@ public class ChatRoomWriter {
      * @throws ChatException CHAT_ROOM_NOT_FOUND / 해당 member 가 속한 chatroom 을 찾을 수 없음(속해있지 않거나,id가 잘못됨)
      * @throws ChatException CHAT_ROOM_ADMIN_LEAVE / admin 이 채팅방 탈퇴를 시도하는 경우
      */
+    @CacheEvict(value = ChatCacheValue.JOINED_MEMBER, key = "#member.id")
     public void leave(ChatRoom chatRoom, Member member) {
         ChatRoomMember chatRoomMember = chatRoomMemberRepository
                 .findByChatRoomIdAndMemberId(chatRoom.getId(), member.getId())

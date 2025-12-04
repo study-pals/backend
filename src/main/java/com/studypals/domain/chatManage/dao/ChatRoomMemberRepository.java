@@ -67,6 +67,14 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, 
      */
     List<ChatRoomMember> findAllByMemberId(Long memberId);
 
+    @Query(
+            value =
+                    """
+            SELECT crm.member.id FROM ChatRoomMember crm
+            WHERE crm.chatRoom.id = :roomId
+            """)
+    List<Long> findMemberIdsByRoomId(@Param("roomId") String roomId);
+
     /**
      * 특정 채팅방에 특정 유저가 참여 중인지 조회합니다.
      *

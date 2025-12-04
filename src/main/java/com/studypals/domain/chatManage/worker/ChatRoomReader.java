@@ -3,11 +3,14 @@ package com.studypals.domain.chatManage.worker;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cache.annotation.Cacheable;
+
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
 import com.studypals.domain.chatManage.dao.ChatRoomRepository;
 import com.studypals.domain.chatManage.dao.UserLastReadMessageRepository;
+import com.studypals.domain.chatManage.entity.ChatCacheValue;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.entity.ChatRoomMember;
 import com.studypals.domain.chatManage.entity.UserLastReadMessage;
@@ -83,5 +86,17 @@ public class ChatRoomReader {
      */
     public UserLastReadMessage getCachedCursor(String roomId) {
         return userLastReadMessageRepository.findById(roomId).orElse(new UserLastReadMessage(roomId, Map.of()));
+    }
+
+    /**
+     * 현재 채팅방에 소속된 member 의 id 를 추출하여 리스트로 받습니다. redis cache 로 캐싱된 메서드 이기에
+     * 파라미터와 반환타입을 primitive 혹은 그에 준한 타입으로 사용하였습니다.
+     * @param chatRoomId 채팅방 아이디
+     * @return 해당 채팅방에 소속된 member id
+     * @Cacheable {@link ChatCacheValue}
+     */
+    @Cacheable(value = ChatCacheValue.JOINED_MEMBER, key = "#chatRoomId")
+    public List<Long> findJoinedMemberId(String chatRoomId) {
+        return chatRoomMemberRepository.findMemberIdsByRoomId(chatRoomId);
     }
 }
