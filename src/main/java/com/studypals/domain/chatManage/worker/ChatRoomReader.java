@@ -2,6 +2,7 @@ package com.studypals.domain.chatManage.worker;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.Cacheable;
 
@@ -70,7 +71,7 @@ public class ChatRoomReader {
     }
 
     /**
-     * 해당 유저가 소속한 chatRoomMember 엔티티 리스트를 반환합니다. 어쩌면 fetch join 타입으로 가져와야 할 수 도 있습니다.
+     * 해당 유저가 소속한 chatRoomMember 엔티티 리스트를 반환합니다. ChatRoom 이 FECTH JOIN 된 결과를 반환합니다.
      * @param member 검색할 멤버 엔티티
      * @return chatRoomMember 엔티티 리스트
      */
@@ -86,6 +87,12 @@ public class ChatRoomReader {
      */
     public UserLastReadMessage getCachedCursor(String roomId) {
         return userLastReadMessageRepository.findById(roomId).orElse(new UserLastReadMessage(roomId, Map.of()));
+    }
+
+    public Map<String, Map<String, String>> getEachUserCursor(Long userId, List<String> roomIds) {
+        Map<String, List<String>> param =
+                roomIds.stream().collect(Collectors.toMap(t -> t, t -> List.of(userId.toString())));
+        return userLastReadMessageRepository.findHashFieldsById(param);
     }
 
     /**

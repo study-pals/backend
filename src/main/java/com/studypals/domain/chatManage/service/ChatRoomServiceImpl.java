@@ -1,23 +1,22 @@
 package com.studypals.domain.chatManage.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.chatManage.dto.ChatCursorRes;
-import com.studypals.domain.chatManage.dto.ChatRoomInfoRes;
-import com.studypals.domain.chatManage.dto.OutgoingMessage;
+import com.studypals.domain.chatManage.dto.*;
 import com.studypals.domain.chatManage.dto.mapper.ChatMessageMapper;
 import com.studypals.domain.chatManage.dto.mapper.ChatRoomMapper;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.entity.ChatRoomMember;
 import com.studypals.domain.chatManage.worker.ChatMessageReader;
 import com.studypals.domain.chatManage.worker.ChatRoomReader;
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.ChatException;
 
@@ -52,6 +51,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomMapper chatRoomMapper;
     private final ChatMessageMapper chatMessageMapper;
     private final ChatMessageReader chatMessageReader;
+    private final MemberReader memberReader;
 
     /**
      * 특정 유저가 특정 채팅방에 입장할 때 필요한 전체 정보를 조회합니다.
@@ -116,5 +116,71 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .cursor(chatCursorRes)
                 .logs(logs)
                 .build();
+    }
+
+    /**
+     * 사용자가 참여 중인 채팅방 목록을 조회한다.
+     *
+     * 과정:
+     * 1) 사용자의 ChatRoomMember 목록 조회
+     * 2) 채팅방별 마지막 읽은 메시지 ID(cursor) 생성
+     * 3) cursor 기반으로 언리드 메시지 개수와 마지막 메시지 정보 조회
+     * 4) 채팅방 정보와 최신 메시지 정보를 합쳐 응답 객체로 변환
+     *
+     * @param userId 조회 대상 사용자 ID
+     * @return 채팅방 목록 및 최신 메시지 정보를 담은 응답 객체
+     */
+    @Override
+    public ChatRoomListRes getChatRoomList(Long userId) {
+        // 1. 유저 기준으로 참여 채팅방 조회
+        Member memberRef = memberReader.getRef(userId);
+        List<ChatRoomMember> chatRoomMembers = chatRoomReader.findChatRoomMembers(memberRef);
+
+        if (chatRoomMembers.isEmpty()) {
+            return new ChatRoomListRes(Collections.emptyList());
+        }
+
+        // 2. 채팅방 ID -> 마지막 읽은 메시지 ID 매핑
+        Map<String, String> cursor = chatRoomMembers.stream()
+                .collect(Collectors.toMap(crm -> crm.getChatRoom().getId(), ChatRoomMember::getLastReadMessage));
+
+        // 3. 채팅방별 언리드 카운트 및 마지막 메시지 조회
+        Map<String, ChatroomLatestInfo> latestInfos = chatMessageReader.getLatestInfo(cursor);
+
+        // 4. 응답 DTO 구성
+        List<ChatRoomListRes.ChatRoomInfo> infos = chatRoomMembers.stream()
+                .map(crm -> toChatRoomInfo(crm, latestInfos))
+                .toList();
+
+        return new ChatRoomListRes(infos);
+    }
+
+    /**
+     * 단일 ChatRoomMember 객체와 최신 메시지 조회 결과를 기반으로
+     * ChatRoomInfo DTO를 생성한다.
+     * info 가 없으면 언리드 개수는 -1, 메시지/보낸이는 null 로 설정한다.
+     *
+     * @param chatRoomMember 사용자가 참여한 채팅방 정보
+     * @param latestInfos 채팅방별 최신 메시지 및 언리드 정보
+     * @return ChatRoomListRes.ChatRoomInfo 변환 결과
+     */
+    private ChatRoomListRes.ChatRoomInfo toChatRoomInfo(
+            ChatRoomMember chatRoomMember, Map<String, ChatroomLatestInfo> latestInfos) {
+        String chatRoomId = chatRoomMember.getChatRoom().getId();
+        ChatroomLatestInfo info = latestInfos.get(chatRoomId);
+
+        long unreadCount = (info != null) ? info.getCnt() : -1;
+        String lastMessage = (info != null) ? info.getMessage() : null;
+        Long lastSender = (info != null) ? info.getSender() : null;
+
+        return new ChatRoomListRes.ChatRoomInfo(
+                chatRoomId,
+                chatRoomMember.getChatRoom().getName(),
+                chatRoomMember.getChatRoom().getImageUrl(),
+                chatRoomMember.getChatRoom().getJoined(),
+                unreadCount,
+                lastMessage,
+                lastMessage,
+                lastSender);
     }
 }

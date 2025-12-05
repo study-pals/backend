@@ -1,13 +1,12 @@
 package com.studypals.domain.chatManage.worker;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dao.ChatMessageCacheRepository;
 import com.studypals.domain.chatManage.dao.ChatMessageRepository;
+import com.studypals.domain.chatManage.dto.ChatroomLatestInfo;
 import com.studypals.domain.chatManage.entity.ChatMessage;
 import com.studypals.global.annotations.Worker;
 
@@ -84,9 +83,96 @@ public class ChatMessageReader {
 
         // 기준 ID가 캐시 범위보다 더 과거라면 → 더 이전 데이터를 DB에서 조회해 반환
         List<ChatMessage> savedMessage = messageRepository.findRange(roomId, chatId, oldestId);
+
+        if (!savedMessage.isEmpty() && cachedMessage.size() < maxLen) {}
+
         List<ChatMessage> merged = new ArrayList<>();
         merged.addAll(cachedMessage);
         merged.addAll(savedMessage);
+
+        // 만약 캐시에 100개 이하의 데이터가 들어있고, 실제 채팅 내역은 그 이상일 때, 캐시를 전부 채워줌
+        if (!savedMessage.isEmpty() && cachedMessage.size() < maxLen) {
+            rebuildCacheFromRecent(roomId, merged, maxLen);
+        }
         return merged;
+    }
+
+    /**
+     *
+     * @param cursor 채팅방 별 마지막 메시지, 모두 유효한 값을 가지고 와야한다.
+     * @return 각 채팅방에 대한 언리드 카운트, 최신 메시지 정보
+     */
+    public Map<String, ChatroomLatestInfo> getLatestInfo(Map<String, String> cursor) {
+        Map<String, ChatroomLatestInfo> result = cacheRepository.countAllToLatest(cursor);
+
+        for (Map.Entry<String, ChatroomLatestInfo> r : result.entrySet()) {
+            if (r.getValue() == null) continue;
+            // 만약 캐시에 존재하지 않는 경우 - 오래되서 삭제, 혹은 오류, 혹은 메시지가 아직 발행되지 않음
+            if (r.getValue().getCnt() < 0) {
+                Optional<ChatMessage> latestMessageOp = messageRepository.findTopByRoomOrderByIdDesc(r.getKey());
+
+                // DB 에서도 마지막 메시지가 없으면 - 아직 메시지 없음
+                if (latestMessageOp.isEmpty()) {
+                    result.remove(r.getKey());
+                    continue;
+                }
+                // DB 에는 메시지가 있는 경우
+                ChatMessage message = latestMessageOp.get();
+
+                // DB에서 가져온 데이터를 반환
+                result.put(
+                        r.getKey(),
+                        new ChatroomLatestInfo(
+                                0, message.getId(), message.getType(), message.getMessage(), message.getSender()));
+
+                // DB에서의 마지막 메시지와 검색하고자 하는 채팅 ID 가 동일한 경우
+                if (message.getId().equals(r.getValue().getId())) {
+                    cacheRepository.save(message);
+                } else {
+                    List<ChatMessage> messages = messageRepository.findTop100ByRoomOrderByIdDesc(r.getKey());
+                    Collections.reverse(messages);
+                    cacheRepository.saveAll(messages);
+                }
+            } else {
+                long cnt = r.getValue().getCnt();
+                cnt = cnt > 100 ? 100 : cnt;
+                result.put(
+                        r.getKey(),
+                        new ChatroomLatestInfo(
+                                cnt,
+                                r.getValue().getId(),
+                                r.getValue().getType(),
+                                r.getValue().getMessage(),
+                                r.getValue().getSender()));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 캐시에 데이터가 올바르지 않게 들어가 있는 경우, 캐시 내역을 삭제하고, 데이터를 집어 넣습니다.
+     * @param roomId 초기화 및 정상화 할 캐시 key
+     * @param source 정상화 시 넣을 데이터
+     * @param maxLen 캐시 최대 길이
+     */
+    private void rebuildCacheFromRecent(String roomId, List<ChatMessage> source, int maxLen) {
+        if (source == null || source.isEmpty()) {
+            cacheRepository.clear(roomId); // 방 캐시 전체 삭제 (필요하면 구현)
+            return;
+        }
+
+        // 원본 merged 를 건드리지 않도록 복사본 생성
+        List<ChatMessage> copy = new ArrayList<>(source);
+
+        // id 기준 오름차순 정렬 (id 가 시간 순서를 반영한다고 가정)
+        copy.sort(Comparator.comparing(ChatMessage::getId));
+
+        // 최신 maxLen 개만 남기기
+        int size = copy.size();
+        List<ChatMessage> forCache = new ArrayList<>(copy.subList(Math.max(size - maxLen, 0), size));
+
+        // 기존 캐시 초기화 후 재저장
+        cacheRepository.clear(roomId);
+        cacheRepository.saveAll(forCache);
     }
 }

@@ -40,4 +40,10 @@ public class ChatRoom {
     @Column(name = "created_date")
     @CreatedDate
     private LocalDate createdDate;
+
+    @Column(name = "image_url", nullable = true)
+    private String imageUrl;
+
+    @Column(name = "joined", nullable = false)
+    private Long joined;
 }

@@ -184,7 +184,6 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     @SuppressWarnings("unchecked")
     public Map<String, ChatroomLatestInfo> countAllToLatest(Map<String, String> readInfos) {
         Map<String, ChatroomLatestInfo> result = new HashMap<>(readInfos.size());
-        StreamOperations<String, String, String> ops = redisTemplate.opsForStream();
         List<String> rooms = new ArrayList<>(readInfos.keySet());
         List<String> streamKeys = rooms.stream().map(id -> KEY_PREFIX + id).toList();
 
@@ -273,6 +272,12 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         if (result == null || result.isEmpty()) return List.of();
 
         return result.stream().map(this::toEntity).toList();
+    }
+
+    @Override
+    public void clear(String roomId) {
+        String streamKey = KEY_PREFIX + roomId;
+        redisTemplate.delete(streamKey);
     }
 
     /**
