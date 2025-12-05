@@ -1,6 +1,9 @@
 package com.studypals.domain.chatManage.dao;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.chatManage.entity.ChatRoom;
@@ -33,4 +36,22 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
      * @return 존재하면 true, 아니면 false
      */
     Boolean existsByName(String name);
+
+    @Modifying
+    @Query(
+            """
+        UPDATE ChatRoom cm
+        SET cm.totalMember = cm.totalMember + 1
+        WHERE cm.id = :chatRoomId
+    """)
+    int increaseChatMember(@Param("chatRoomId") String chatRoomId);
+
+    @Modifying
+    @Query(
+            """
+        UPDATE ChatRoom cm
+        SET cm.totalMember = cm.totalMember - 1
+        WHERE cm.id = :chatRoomId AND cm.totalMember > 0
+    """)
+    int decreaseChatMember(@Param("chatRoomId") String chatRoomId);
 }

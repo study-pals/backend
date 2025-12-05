@@ -42,7 +42,12 @@ public class ChatRoomWriter {
     public ChatRoom create(CreateChatRoomDto dto) {
         String chatRoomId = RandomUtils.createUUID();
 
-        ChatRoom chatRoom = ChatRoom.builder().id(chatRoomId).name(dto.name()).build();
+        ChatRoom chatRoom = ChatRoom.builder()
+                .id(chatRoomId)
+                .name(dto.name())
+                .imageUrl(dto.imageUrl())
+                .totalMember(0)
+                .build();
 
         try {
             chatRoomRepository.save(chatRoom);
@@ -84,6 +89,12 @@ public class ChatRoomWriter {
      */
     @CacheEvict(value = ChatCacheValue.JOINED_MEMBER, key = "#member.id")
     public void leave(ChatRoom chatRoom, Member member) {
+        int updated = chatRoomRepository.decreaseChatMember(chatRoom.getId());
+        if (updated == 0) {
+            throw new ChatException(
+                    ChatErrorCode.CHAT_ROOM_LEAVE, "[ChatRoomWriter#leave] cannot decrease total member");
+        }
+
         ChatRoomMember chatRoomMember = chatRoomMemberRepository
                 .findByChatRoomIdAndMemberId(chatRoom.getId(), member.getId())
                 .orElseThrow(() -> new ChatException(
@@ -107,6 +118,14 @@ public class ChatRoomWriter {
      * @throws ChatException CHAT_ROOM_JOIN_FAIL / 채팅방 참여가 실패
      */
     private void internalJoin(ChatRoom chatRoom, Member member, ChatRoomRole roomRole) {
+
+        // total member 증가 로직
+        int updated = chatRoomRepository.increaseChatMember(chatRoom.getId());
+        if (updated == 0) {
+            throw new ChatException(
+                    ChatErrorCode.CHAT_ROOM_JOIN_FAIL, "[ChatRoomWriter#internalJoin] increate totalnumber fail");
+        }
+
         ChatRoomMember chatRoomMember = ChatRoomMember.builder()
                 .chatRoom(chatRoom)
                 .member(member)
@@ -115,8 +134,10 @@ public class ChatRoomWriter {
 
         try {
             chatRoomMemberRepository.save(chatRoomMember);
+
         } catch (Exception e) {
-            throw new ChatException(ChatErrorCode.CHAT_ROOM_JOIN_FAIL, "[ChatRoomWriter#joinAsAdmin]" + e.getMessage());
+            throw new ChatException(
+                    ChatErrorCode.CHAT_ROOM_JOIN_FAIL, "[ChatRoomWriter#internalJoin]" + e.getMessage());
         }
     }
 }

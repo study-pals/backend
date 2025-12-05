@@ -12,7 +12,7 @@ public record ChatRoomListRes(List<ChatRoomInfo> rooms) {
             String chatRoomId,
             String chatRoomName,
             String chatRoomUrl,
-            Long joined,
+            Integer totalMember,
             Long unread,
             String lastMessage,
             String messageId,

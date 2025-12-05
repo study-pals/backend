@@ -44,6 +44,6 @@ public class ChatRoom {
     @Column(name = "image_url", nullable = true)
     private String imageUrl;
 
-    @Column(name = "joined", nullable = false)
-    private Long joined;
+    @Column(name = "totalMember", nullable = false, columnDefinition = "INTEGER DEFAULT 1")
+    private Integer totalMember;
 }

@@ -169,7 +169,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         String chatRoomId = chatRoomMember.getChatRoom().getId();
         ChatroomLatestInfo info = latestInfos.get(chatRoomId);
 
-        long unreadCount = (info != null) ? info.getCnt() : -1;
+        Long unreadCount = (info != null) ? info.getCnt() : -1;
         String lastMessage = (info != null) ? info.getMessage() : null;
         Long lastSender = (info != null) ? info.getSender() : null;
 
@@ -177,7 +177,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 chatRoomId,
                 chatRoomMember.getChatRoom().getName(),
                 chatRoomMember.getChatRoom().getImageUrl(),
-                chatRoomMember.getChatRoom().getJoined(),
+                chatRoomMember.getChatRoom().getTotalMember(),
                 unreadCount,
                 lastMessage,
                 lastMessage,
