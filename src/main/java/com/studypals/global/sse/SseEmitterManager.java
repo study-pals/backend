@@ -3,7 +3,7 @@ package com.studypals.global.sse;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -32,10 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 public class SseEmitterManager {
 
     /** 유저ID → 세션ID 집합 */
-    private final Map<Long, Set<String>> userSessions = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, Set<String>> userSessions = new ConcurrentHashMap<>();
 
     /** 세션ID → SseEmitter */
-    private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     private final ThreadPoolTaskExecutor taskExecutor;
 
@@ -52,7 +52,7 @@ public class SseEmitterManager {
      */
     public SseEmitter createEmitter(Long userId) {
         String sessionId = UUID.randomUUID().toString();
-        SseEmitter emitter = new SseEmitter(0L); // timeout=0 → 무제한 유지
+        SseEmitter emitter = new SseEmitter(0L);
 
         // 유저별 세션 집합에 sessionId 추가
         userSessions.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(sessionId);
@@ -111,28 +111,42 @@ public class SseEmitterManager {
      * @param dto 메시지 내용(타입 및 데이터)
      */
     private void sendMessageInternal(Long userId, SseSendDto dto) {
-        if (!userSessions.containsKey(userId)) return;
-
         Set<String> ids = userSessions.get(userId);
-        if (ids.isEmpty()) {
+        if (ids == null || ids.isEmpty()) {
             userSessions.remove(userId);
             return;
         }
 
-        // sessionId → emitter 매핑
-        Map<String, SseEmitter> emitterMap = ids.stream().collect(Collectors.toMap(id -> id, emitters::get));
+        List<String> toRemove = null; // 실제로 정리할 게 생길 때만 생성
 
-        // 각 emitter로 이벤트 전송
-        for (Map.Entry<String, SseEmitter> entry : emitterMap.entrySet()) {
+        for (String sessionId : ids) {
+            SseEmitter emitter = emitters.get(sessionId);
+            if (emitter == null) {
+                // 이미 콜백 등으로 정리된 세션
+                if (toRemove == null) toRemove = new ArrayList<>();
+                toRemove.add(sessionId);
+                continue;
+            }
+
             try {
-                entry.getValue()
-                        .send(SseEmitter.event()
-                                .name(dto.type())
-                                .id(entry.getKey()) // 클라이언트가 sessionId 필요할 때 사용가능
-                                .data(dto.content()));
+                emitter.send(SseEmitter.event().name(dto.type()).id(sessionId).data(dto.content()));
             } catch (IOException e) {
-                log.warn("fail to send message userId={}", userId);
-                // 실패해도 remove는 emitter 콜백(onError/onCompletion)이 자동 처리
+                // 거의 100% 클라이언트 연결 끊김
+                log.debug("SSE send failed. userId={}, sessionId={}", userId, sessionId, e);
+
+                try {
+                    emitter.completeWithError(e);
+                } catch (Exception ignored) {
+                }
+
+                if (toRemove == null) toRemove = new ArrayList<>();
+                toRemove.add(sessionId);
+            }
+        }
+
+        if (toRemove != null) {
+            for (String sid : toRemove) {
+                remove(userId, sid);
             }
         }
     }

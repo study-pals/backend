@@ -29,5 +29,10 @@ public interface ChatRoomService {
      */
     ChatRoomInfoRes getChatRoomInfo(Long userId, String chatRoomId, String chatId);
 
+    /**
+     * 해당 사용자가 소속된 채팅방에 대한, 각 채팅방 정보, 언리드 카운트, 마지막 메시지 데이터 등을 리스트로 반환합니다.
+     * @param userId 검색할 사용자의 userId
+     * @return 소속된 채팅방 리스트 데이터
+     */
     ChatRoomListRes getChatRoomList(Long userId);
 }

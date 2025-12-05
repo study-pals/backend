@@ -119,7 +119,7 @@ public class ChatRoomWriter {
      */
     private void internalJoin(ChatRoom chatRoom, Member member, ChatRoomRole roomRole) {
 
-        // total member 증가 로직
+        // total member 증가 로직 - 원자적 실행 및 갱신 실패 시 오류 반환
         int updated = chatRoomRepository.increaseChatMember(chatRoom.getId());
         if (updated == 0) {
             throw new ChatException(

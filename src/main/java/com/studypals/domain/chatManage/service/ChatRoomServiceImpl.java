@@ -120,34 +120,48 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     /**
      * 사용자가 참여 중인 채팅방 목록을 조회한다.
-     *
+     * <pre>
      * 과정:
-     * 1) 사용자의 ChatRoomMember 목록 조회
-     * 2) 채팅방별 마지막 읽은 메시지 ID(cursor) 생성
-     * 3) cursor 기반으로 언리드 메시지 개수와 마지막 메시지 정보 조회
-     * 4) 채팅방 정보와 최신 메시지 정보를 합쳐 응답 객체로 변환
+     * 사용자의 ChatRoomMember 목록 조회
+     * 채팅방별 마지막 읽은 메시지 ID(cursor) 생성
+     * cursor 기반으로 언리드 메시지 개수와 마지막 메시지 정보 조회
+     * 채팅방 정보와 최신 메시지 정보를 합쳐 응답 객체로 변환
+     * </pre>
      *
      * @param userId 조회 대상 사용자 ID
      * @return 채팅방 목록 및 최신 메시지 정보를 담은 응답 객체
      */
     @Override
     public ChatRoomListRes getChatRoomList(Long userId) {
-        // 1. 유저 기준으로 참여 채팅방 조회
+        // 유저 기준으로 참여 채팅방 조회
         Member memberRef = memberReader.getRef(userId);
         List<ChatRoomMember> chatRoomMembers = chatRoomReader.findChatRoomMembers(memberRef);
+        List<String> roomIds =
+                chatRoomMembers.stream().map(t -> t.getChatRoom().getId()).toList();
 
         if (chatRoomMembers.isEmpty()) {
             return new ChatRoomListRes(Collections.emptyList());
         }
 
-        // 2. 채팅방 ID -> 마지막 읽은 메시지 ID 매핑
+        // 채팅방 ID -> 마지막 읽은 메시지 ID 매핑
         Map<String, String> cursor = chatRoomMembers.stream()
-                .collect(Collectors.toMap(crm -> crm.getChatRoom().getId(), ChatRoomMember::getLastReadMessage));
+                .collect(Collectors.toMap(
+                        crm -> crm.getChatRoom().getId(),
+                        crm -> crm.getLastReadMessage() == null ? "0" : crm.getLastReadMessage()));
 
-        // 3. 채팅방별 언리드 카운트 및 마지막 메시지 조회
+        // redis 에 저장된 최신 데이터 가져오기
+        Map<String, String> recentCursor = chatRoomReader.getEachUserCursor(userId, roomIds);
+
+        // 오래된 데이터(mysql 에 저장된)와 최신 데이터(redis 에 저장된) 을 합침
+        for (String key : cursor.keySet()) {
+            if (recentCursor.containsKey(key)) {
+                cursor.put(key, recentCursor.get(key));
+            }
+        }
+
         Map<String, ChatroomLatestInfo> latestInfos = chatMessageReader.getLatestInfo(cursor);
 
-        // 4. 응답 DTO 구성
+        // 응답 DTO 구성
         List<ChatRoomListRes.ChatRoomInfo> infos = chatRoomMembers.stream()
                 .map(crm -> toChatRoomInfo(crm, latestInfos))
                 .toList();
@@ -171,6 +185,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         Long unreadCount = (info != null) ? info.getCnt() : -1;
         String lastMessage = (info != null) ? info.getMessage() : null;
+        String messageId = (info != null) ? info.getId() : null;
         Long lastSender = (info != null) ? info.getSender() : null;
 
         return new ChatRoomListRes.ChatRoomInfo(
@@ -180,7 +195,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 chatRoomMember.getChatRoom().getTotalMember(),
                 unreadCount,
                 lastMessage,
-                lastMessage,
+                messageId,
                 lastSender);
     }
 }

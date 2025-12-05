@@ -37,6 +37,12 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
      */
     Boolean existsByName(String name);
 
+    /**
+     * 채팅방의 total_member 칼럼을 원자적으로 1 증가시킴으로서 동시성 문제를 방지한다 <br>
+     * Modifying 및 UPDATE 쿼리는 트랜잭션 내에서 실행 시, 해당 row 에 대한 lock 을 걸기에, race condition 을 방지할 수 있다.
+     * @param chatRoomId 채팅방 id, 해당 row 에 대한 쓰기락이 DB 단계에서 생성된다.
+     * @return 변경된 줄 수: 일반적으로 1 -> 갱신 성공, 0 -> 갱신 실패 이다.
+     */
     @Modifying
     @Query(
             """
@@ -46,6 +52,12 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
     """)
     int increaseChatMember(@Param("chatRoomId") String chatRoomId);
 
+    /**
+     * 채팅방의 total_member 칼럼을 원자적으로 1 증가시킴으로서 동시성 문제를 방지한다 <br>
+     * Modifying 및 UPDATE 쿼리는 트랜잭션 내에서 실행 시, 해당 row 에 대한 lock 을 걸기에, race condition 을 방지할 수 있다.
+     * @param chatRoomId 채팅방 id, 해당 row 에 대한 쓰기락이 DB 단계에서 생성된다.
+     * @return 변경된 줄 수: 일반적으로 1 -> 갱신 성공, 0 -> 갱신 실패 이다.
+     */
     @Modifying
     @Query(
             """

@@ -83,9 +83,6 @@ public class ChatMessageReader {
 
         // 기준 ID가 캐시 범위보다 더 과거라면 → 더 이전 데이터를 DB에서 조회해 반환
         List<ChatMessage> savedMessage = messageRepository.findRange(roomId, chatId, oldestId);
-
-        if (!savedMessage.isEmpty() && cachedMessage.size() < maxLen) {}
-
         List<ChatMessage> merged = new ArrayList<>();
         merged.addAll(cachedMessage);
         merged.addAll(savedMessage);
@@ -125,12 +122,14 @@ public class ChatMessageReader {
                         new ChatroomLatestInfo(
                                 0, message.getId(), message.getType(), message.getMessage(), message.getSender()));
 
-                // DB에서의 마지막 메시지와 검색하고자 하는 채팅 ID 가 동일한 경우
+                // DB에서의 마지막 메시지와 검색하고자 하는 채팅 ID 가 동일한 경우 - 최신 메시지 1개만 저장(리스트 표시용)
                 if (message.getId().equals(r.getValue().getId())) {
                     cacheRepository.save(message);
                 } else {
+                    // DB 의 마지막 메시지와, 검색하고자 하는 채팅ID 가 다른 경우 - 모두 저장(아직 특정 메시지를 안 읽은 유저가 있다)
                     List<ChatMessage> messages = messageRepository.findTop100ByRoomOrderByIdDesc(r.getKey());
                     Collections.reverse(messages);
+                    cacheRepository.clear(message.getRoom());
                     cacheRepository.saveAll(messages);
                 }
             } else {

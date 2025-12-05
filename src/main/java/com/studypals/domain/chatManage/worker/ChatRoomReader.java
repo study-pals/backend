@@ -1,5 +1,6 @@
 package com.studypals.domain.chatManage.worker;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -89,10 +90,34 @@ public class ChatRoomReader {
         return userLastReadMessageRepository.findById(roomId).orElse(new UserLastReadMessage(roomId, Map.of()));
     }
 
-    public Map<String, Map<String, String>> getEachUserCursor(Long userId, List<String> roomIds) {
+    /**
+     * 각 채팅방에 대해, 유저가 읽은 최신 메시지 아이디를 정리해서 반환하는 메서드
+     * @param userId 검색하고자 하는 유저 아이디
+     * @param roomIds 검색하고자 하는, 유저가 소속된 채팅방 아이디
+     * @return 유저 당, 각 채팅방에서 가장 마지막으로 읽은 메시지 아이디의 map
+     */
+    public Map<String, String> getEachUserCursor(Long userId, List<String> roomIds) {
+        // findHashFieldsByMap 에 들어갈 파라미터 구성 - hashKey 에 대해 내부에서 검색할 (field key) 리스트
         Map<String, List<String>> param =
                 roomIds.stream().collect(Collectors.toMap(t -> t, t -> List.of(userId.toString())));
-        return userLastReadMessageRepository.findHashFieldsById(param);
+        Map<String, Map<String, String>> result = userLastReadMessageRepository.findHashFieldsById(param);
+        // 반환할 데이터
+        Map<String, String> roomToChatId = new HashMap<>();
+
+        String target = String.valueOf(userId);
+
+        // 반환된 데이터가 Map<[채팅방 아이디], Map<[유저 아이디], [채팅 아이디]>> 인데, 이걸 Map<[채팅방 아이디],[채팅 아이디]> 로 변환
+        // 유저 아이디는 항상 입력된 값(userId) 거나, map 에 존재하지 않음(캐싱되지 않음)
+        for (Map.Entry<String, Map<String, String>> entry : result.entrySet()) {
+            String roomId = entry.getKey();
+            Map<String, String> userMap = entry.getValue();
+
+            String chatId = userMap.get(target);
+            if (chatId != null) {
+                roomToChatId.put(roomId, chatId);
+            }
+        }
+        return roomToChatId;
     }
 
     /**
