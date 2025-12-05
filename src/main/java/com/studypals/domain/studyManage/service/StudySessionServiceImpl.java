@@ -19,6 +19,7 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
+import com.studypals.domain.studyManage.dto.StudyStatusRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
@@ -142,6 +143,17 @@ public class StudySessionServiceImpl implements StudySessionService {
         }
 
         return totalTime;
+    }
+
+    /**
+     * 사용자의 공부상태를 반환합니다.
+     * @param userId
+     * @return true/false
+     */
+    @Override
+    public StudyStatusRes checkStudyStatus(Long userId) {
+        boolean studying = studyStatusWorker.isStudying(userId);
+        return mapper.toDto(studying);
     }
 
     /**
