@@ -146,14 +146,28 @@ public class StudySessionServiceImpl implements StudySessionService {
     }
 
     /**
-     * 사용자의 공부상태를 반환합니다.
+     * 사용자의 공부 상태를 반환합니다.
+     * 공부하고 있다면 해당 공부에 대한 정보를 반환하고, 아니면 단순 false 값만 담아 반환합니다.
      * @param userId
-     * @return true/false
+     * @return StudyStatusRes
      */
     @Override
     public StudyStatusRes checkStudyStatus(Long userId) {
-        Boolean studying = studyStatusWorker.isStudying(userId);
-        return mapper.toDto(studying);
+        Optional<StudyStatus> optionalStatus = studyStatusWorker.find(userId);
+
+        // redis에 공부 정보가 없다면 false 반환
+        if (optionalStatus.isEmpty()) {
+            return mapper.toStudyStatusDto(false);
+        }
+
+        StudyStatus studyStatus = optionalStatus.get();
+
+        // 공부 정보가 있는데, 공부 중은 아니라면 false 반환
+        if (!studyStatus.isStudying()) {
+            return mapper.toStudyStatusDto(false);
+        }
+
+        return mapper.toStudyStatusDto(studyStatus);
     }
 
     /**

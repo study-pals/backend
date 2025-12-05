@@ -1,3 +1,6 @@
 package com.studypals.domain.studyManage.dto;
 
-public record StudyStatusRes(boolean studying) {}
+/**
+ * 공부 상태 반환
+ */
+public interface StudyStatusRes {}
