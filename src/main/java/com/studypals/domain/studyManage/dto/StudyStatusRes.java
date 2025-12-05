@@ -1,6 +1,9 @@
 package com.studypals.domain.studyManage.dto;
 
-/**
- * 공부 상태 반환
- */
-public interface StudyStatusRes {}
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record StudyStatusRes(
+        boolean studying, LocalDateTime startTime, Long studyTime, Long categoryId, String name, Long goal) {}
