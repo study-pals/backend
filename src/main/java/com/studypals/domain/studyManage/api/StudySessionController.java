@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import com.studypals.domain.studyManage.dto.EndStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
+import com.studypals.domain.studyManage.dto.StudyStatusRes;
 import com.studypals.domain.studyManage.service.StudySessionService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -24,6 +26,7 @@ import com.studypals.global.responses.ResponseCode;
  * 내부 구현 원리는 문서를 참조해 주시기 바랍니다. <br>
  * 담당하는 엔드포인트는 다음과 같습니다.
  * <pre>
+ *     - GET  /studies/sessions/check        : 공부 상태 확인
  *     - POST /studies/sessions/start        : 공부 시작
  *     - POST /studies/sessions/end          : 공부 끝
  * </pre>
@@ -37,6 +40,13 @@ import com.studypals.global.responses.ResponseCode;
 public class StudySessionController {
 
     private final StudySessionService studySessionService;
+
+    @GetMapping("/check")
+    public ResponseEntity<Response<StudyStatusRes>> check(@AuthenticationPrincipal Long userId) {
+        StudyStatusRes response = studySessionService.checkStudyStatus(userId);
+
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.STUDY_STATUS_CHECK, response, "success check"));
+    }
 
     @PostMapping("/start")
     public ResponseEntity<Response<StartStudyRes>> start(

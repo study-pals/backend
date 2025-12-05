@@ -29,4 +29,9 @@ public interface StudyTimeMapper {
 
     @Mapping(target = "startDateTime", source = "startDateTime")
     StartStudyDto toDto(StartStudyReq req, LocalDateTime startDateTime);
+
+    NotStudyingStatusRes toStudyStatusDto(Boolean studying);
+
+    @Mapping(target = "studyTime", source = "studyTime")
+    StudyingStatusRes toStudyStatusDto(StudyStatus entity, Long studyTime);
 }
