@@ -152,7 +152,7 @@ public class StudySessionServiceImpl implements StudySessionService {
      */
     @Override
     public StudyStatusRes checkStudyStatus(Long userId) {
-        boolean studying = studyStatusWorker.isStudying(userId);
+        Boolean studying = studyStatusWorker.isStudying(userId);
         return mapper.toDto(studying);
     }
 
