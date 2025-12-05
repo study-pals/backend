@@ -32,5 +32,6 @@ public interface StudyTimeMapper {
 
     NotStudyingStatusRes toStudyStatusDto(Boolean studying);
 
-    StudyingStatusRes toStudyStatusDto(StudyStatus entity);
+    @Mapping(target = "studyTime", source = "studyTime")
+    StudyingStatusRes toStudyStatusDto(StudyStatus entity, Long studyTime);
 }

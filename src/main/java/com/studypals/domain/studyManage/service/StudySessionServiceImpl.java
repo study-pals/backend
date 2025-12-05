@@ -27,6 +27,7 @@ import com.studypals.domain.studyManage.worker.DailyInfoWriter;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
+import com.studypals.domain.studyManage.worker.StudyTimeReader;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
 import com.studypals.global.utils.TimeUtils;
@@ -58,6 +59,7 @@ public class StudySessionServiceImpl implements StudySessionService {
     private final MemberReader memberReader;
 
     private static final int SECS_PER_DAY = 24 * 60 * 60;
+    private final StudyTimeReader studyTimeReader;
 
     @Override
     @Transactional
@@ -167,7 +169,11 @@ public class StudySessionServiceImpl implements StudySessionService {
             return mapper.toStudyStatusDto(false);
         }
 
-        return mapper.toStudyStatusDto(studyStatus);
+        // 현재 StudyStatus 엔티티의 studyTime 값은 사용하지 않는 값으로 무조건 0이다. 따라서 StudyTime에서 따로 가져와야 한다.
+        Long studyTime = studyTimeReader.findByCategoryId(
+                userId, LocalDate.from(studyStatus.getStartTime()), studyStatus.getCategoryId());
+
+        return mapper.toStudyStatusDto(studyStatus, studyTime);
     }
 
     /**
