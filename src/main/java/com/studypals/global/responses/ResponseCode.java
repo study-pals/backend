@@ -51,6 +51,7 @@ public enum ResponseCode {
     STUDY_CATEGORY_ADD("U03-06"),
     STUDY_CATEGORY_DELETE("U03-07"),
     STUDY_CATEGORY_UPDATE("U03-08"),
+    STUDY_STATUS_CHECK("U03-09"),
 
     // I01 - Image
     IMAGE_UPLOAD("I01-00"),
