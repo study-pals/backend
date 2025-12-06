@@ -1,6 +1,7 @@
 package com.studypals.domain.chatManage.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -57,4 +58,19 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
      */
     @Query(value = "{ 'room': ?0, 'id': { $gte: ?1, $lt: ?2 } }", sort = "{ 'id' :  -1 }")
     List<ChatMessage> findRange(String roomId, String from, String to);
+
+    /**
+     * 특정 채팅방에서 최신 메시지 100개를 조회하여 가져옵니다.
+     * <p>
+     * @param roomId 조회할 채팅방 아이디
+     * @return 채팅 메시지 리스트(내림차순)
+     */
+    List<ChatMessage> findTop100ByRoomOrderByIdDesc(String roomId);
+
+    /**
+     * 특정 채팅방에서 최신 메시지 1개를 조회하여 가져옵니다.
+     * @param roomId 조회할 채팅방 아이디
+     * @return 가장 최신 메시지 1개
+     */
+    Optional<ChatMessage> findTopByRoomOrderByIdDesc(String roomId);
 }

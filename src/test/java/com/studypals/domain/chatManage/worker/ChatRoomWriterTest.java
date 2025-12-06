@@ -52,7 +52,7 @@ class ChatRoomWriterTest {
     @Test
     void create_success() {
         // given
-        CreateChatRoomDto dto = new CreateChatRoomDto("chatRoom");
+        CreateChatRoomDto dto = new CreateChatRoomDto("chatRoom", "example.com");
         given(chatRoomRepository.save(any())).willReturn(mockChatRoom);
 
         // when
@@ -73,6 +73,7 @@ class ChatRoomWriterTest {
         given(chatRoomMemberRepository.findByChatRoomIdAndMemberId(chatRoomId, userId))
                 .willReturn(Optional.of(mockCrm));
         given(mockCrm.isAdmin()).willReturn(true);
+        given(chatRoomRepository.decreaseChatMember(chatRoomId)).willReturn(1);
 
         // when & then
         assertThatThrownBy(() -> chatRoomWriter.leave(mockChatRoom, mockMember))

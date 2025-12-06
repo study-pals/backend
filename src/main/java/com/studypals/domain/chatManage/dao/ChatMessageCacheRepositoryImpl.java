@@ -184,7 +184,6 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     @SuppressWarnings("unchecked")
     public Map<String, ChatroomLatestInfo> countAllToLatest(Map<String, String> readInfos) {
         Map<String, ChatroomLatestInfo> result = new HashMap<>(readInfos.size());
-        StreamOperations<String, String, String> ops = redisTemplate.opsForStream();
         List<String> rooms = new ArrayList<>(readInfos.keySet());
         List<String> streamKeys = rooms.stream().map(id -> KEY_PREFIX + id).toList();
 
@@ -194,11 +193,15 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         List<RoomMeta> needRange = new ArrayList<>();
         for (List<Object> raw : raws) {
             RoomMeta meta = new RoomMeta(raw);
-            meta.targetId = encode(readInfos.get(meta.roomId)).getValue();
+            // meta 에 검색할 targetId 를 삽입
+            String rawId = readInfos.get(meta.roomId);
+            meta.targetId = encode(rawId).getValue();
 
             switch (meta.position()) {
+                    // 변경 - 최근 메시지가 target 인 경우에도, 최신 메시지 정보 반환
                 case BEFORE_OLDEST -> result.put(meta.roomId, toLatestInfo(meta.length, meta.latestChat));
-                case AT_NEWEST, AFTER_NEWEST -> result.put(meta.roomId, createEmptyInfo(meta.position().def));
+                case AFTER_NEWEST -> result.put(meta.roomId, createEmptyInfo(meta.position().def));
+                case AT_NEWEST -> result.put(meta.roomId, toLatestInfo(0, meta.latestChat));
                 case BETWEEN_OLDEST_AND_NEWEST -> needRange.add(meta);
             }
         }
@@ -273,6 +276,12 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         if (result == null || result.isEmpty()) return List.of();
 
         return result.stream().map(this::toEntity).toList();
+    }
+
+    @Override
+    public void clear(String roomId) {
+        String streamKey = KEY_PREFIX + roomId;
+        redisTemplate.delete(streamKey);
     }
 
     /**

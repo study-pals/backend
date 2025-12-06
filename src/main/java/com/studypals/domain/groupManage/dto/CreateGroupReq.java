@@ -22,4 +22,6 @@ public record CreateGroupReq(
         @NotBlank String tag,
         @Min(10) @Max(100) Integer maxMember,
         Boolean isOpen,
-        Boolean isApprovalRequired) {}
+        Boolean isApprovalRequired,
+        // since 12-05 sanghyeok
+        String imageUrl) {}

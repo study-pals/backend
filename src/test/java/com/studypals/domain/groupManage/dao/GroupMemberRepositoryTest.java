@@ -24,11 +24,13 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
     private GroupMemberRepository groupMemberRepository;
 
     private ChatRoom insertChatRoom(String id) {
-        return em.persist(ChatRoom.builder().id(id).name("name" + id).build());
+        return em.persist(
+                ChatRoom.builder().id(id).name("name" + id).totalMember(1).build());
     }
 
     private Group insertGroup(ChatRoom chatRoom) {
         return em.persist(Group.builder()
+                .totalMember(1)
                 .name("group")
                 .tag("tag")
                 .totalMember(2)

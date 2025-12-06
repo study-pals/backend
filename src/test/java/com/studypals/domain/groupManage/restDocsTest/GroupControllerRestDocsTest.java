@@ -74,7 +74,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
     void createGroup_success() throws Exception {
 
         // given
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
+        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
 
         given(groupService.createGroup(any(), any())).willReturn(1L);
 
@@ -90,6 +90,9 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         httpResponse(),
                         requestFields(
                                 fieldWithPath("name").description("그룹명").attributes(constraints("not null")),
+                                fieldWithPath("imageUrl")
+                                        .description("그룹 이미지 주소")
+                                        .attributes(constraints("nullable - null 인 경우 클라이언트 자체적인 이미지 사용")),
                                 fieldWithPath("tag").description("그룹 태그").attributes(constraints("not null")),
                                 fieldWithPath("maxMember")
                                         .description("그룹 최대 인원수 / Default 100")

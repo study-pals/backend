@@ -43,6 +43,8 @@ class ChatRoomMemberRepositoryTest extends DataJpaSupport {
         return em.persist(ChatRoom.builder()
                 .id(id)
                 .name("chatroom" + id)
+                .imageUrl("image.example.com")
+                .totalMember(0)
                 .createdDate(LocalDate.of(2025, 4, 1))
                 .build());
     }

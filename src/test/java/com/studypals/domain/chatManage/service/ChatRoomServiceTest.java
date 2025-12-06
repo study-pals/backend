@@ -23,6 +23,7 @@ import com.studypals.domain.chatManage.entity.*;
 import com.studypals.domain.chatManage.worker.ChatMessageReader;
 import com.studypals.domain.chatManage.worker.ChatRoomReader;
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
 
 /**
  * {@link ChatRoomService} 에 대한 테스트코드
@@ -54,13 +55,17 @@ class ChatRoomServiceTest {
     @Mock
     private ChatMessageReader chatMessageReader;
 
+    @Mock
+    private MemberReader memberReader;
+
     private ChatRoomServiceImpl chatRoomService;
 
     private final ChatMessageMapper chatMessageMapper = Mappers.getMapper(ChatMessageMapper.class);
 
     @BeforeEach
     void setup() {
-        chatRoomService = new ChatRoomServiceImpl(chatRoomReader, chatRoomMapper, chatMessageMapper, chatMessageReader);
+        chatRoomService = new ChatRoomServiceImpl(
+                chatRoomReader, chatRoomMapper, chatMessageMapper, chatMessageReader, memberReader);
     }
 
     @Test
