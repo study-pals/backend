@@ -48,7 +48,7 @@ public class GroupWriterTest {
     @Test
     void create_success() {
         // given
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
+        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
 
         given(groupMapper.toEntity(req)).willReturn(mockGroup);
         given(groupTagRepository.existsById(req.tag())).willReturn(true);
@@ -64,7 +64,7 @@ public class GroupWriterTest {
     void create_fail_tagNotFound() {
         // given
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
+        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
 
         given(groupMapper.toEntity(req)).willReturn(mockGroup);
         given(groupTagRepository.existsById(req.tag())).willReturn(false);
@@ -80,7 +80,7 @@ public class GroupWriterTest {
     void create_fail_whileSave() {
         // given
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
+        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
 
         given(groupMapper.toEntity(req)).willReturn(mockGroup);
         given(groupTagRepository.existsById(req.tag())).willReturn(true);

@@ -21,7 +21,7 @@ import com.studypals.global.exceptions.exception.BaseException;
  * @since 2025-12-05
  */
 @Slf4j
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.global.sse")
 @Order(0)
 public class SseExceptionHandler {
 

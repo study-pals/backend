@@ -152,7 +152,8 @@ class ChatMessageCacheRepositoryTest extends TestEnvironment {
                 })
                 .hasEntrySatisfying(roomIds.get(2), msg -> {
                     assertThat(msg.getCnt()).isEqualTo(0);
-                    assertThat(msg.getId()).isNull();
+                    assertThat(msg.getId())
+                            .isEqualTo(third.get(third.size() - 1).getId());
                 })
                 .hasEntrySatisfying(roomIds.get(3), msg -> {
                     assertThat(msg.getCnt()).isEqualTo(40);

@@ -51,8 +51,6 @@ public class ChatRoomController {
      * SSE 기반의 채팅 리스트 반환 API 입니다. 사용자가 해당 uri 를 이용해 요청을 보내는 경우,
      * {@link SseEmitterManager} 에서 관리하는 emitter 를 통해 메시지를 비동기적으로 보낼 수 있습니다. <br>
      * 해당 메서드에서는 최초 1회에 대해 init-message 타입으로 초기 채팅방 데이터를 전송합니다.  <br>
-     * @param userId
-     * @return
      */
     @GetMapping("/list")
     public SseEmitter getList(@AuthenticationPrincipal Long userId) {

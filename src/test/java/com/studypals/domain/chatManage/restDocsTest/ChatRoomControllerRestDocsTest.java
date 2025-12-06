@@ -30,6 +30,7 @@ import com.studypals.domain.chatManage.service.ChatRoomService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
+import com.studypals.global.sse.SseEmitterManager;
 import com.studypals.testModules.testSupport.RestDocsSupport;
 
 /**
@@ -43,6 +44,9 @@ class ChatRoomControllerRestDocsTest extends RestDocsSupport {
 
     @MockitoBean
     private ChatRoomService chatRoomService;
+
+    @MockitoBean
+    private SseEmitterManager sseEmitterManager;
 
     @Test
     @WithMockUser
