@@ -140,16 +140,6 @@ public class GroupEntryServiceImpl implements GroupEntryService {
         entryRequestWriter.closeRequest(entryRequest);
     }
 
-    @Override
-    @Transactional(readOnly = true) // 붙이는게 이득일까?
-    public List<GetGroupsRes> getGroups(Long userId) {
-        // 유효한 userId인지 검사를 할까?
-        List<GroupSummaryDto> groups = groupMemberReader.getGroups(userId);
-
-        // mapper 적용?
-        return groups.stream().map(GetGroupsRes::from).toList();
-    }
-
     // 그룹 참여 시 공통 로직을 private 으로 분리
     private Long internalJoinGroup(Member member, Group group) {
         Long joinId = groupMemberWriter.createMember(member, group).getId();

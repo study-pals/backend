@@ -38,6 +38,7 @@ public class GroupServiceImpl implements GroupService {
     private final MemberReader memberReader;
     private final GroupWriter groupWriter;
     private final GroupReader groupReader;
+    private final GroupMemberReader groupMemberReader;
     private final GroupMemberWriter groupMemberWriter;
     private final GroupMapper groupMapper;
 
@@ -64,5 +65,14 @@ public class GroupServiceImpl implements GroupService {
         group.setChatRoom(chatRoom);
 
         return group.getId();
+    }
+
+    @Override
+    @Transactional(readOnly = true) // 붙이는게 이득일까?
+    public List<GetGroupsRes> getGroups(Long userId) {
+        // 유효한 userId인지 검사를 할까?
+        List<GroupSummaryDto> groups = groupMemberReader.getGroups(userId);
+
+        return groups.stream().map(GetGroupsRes::from).toList();
     }
 }

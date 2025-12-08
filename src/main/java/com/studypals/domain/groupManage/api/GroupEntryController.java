@@ -1,7 +1,6 @@
 package com.studypals.domain.groupManage.api;
 
 import java.net.URI;
-import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -104,11 +103,5 @@ public class GroupEntryController {
         groupEntryService.refuseEntryRequest(userId, requestId);
 
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping
-    public ResponseEntity<Response<List<GetGroupsRes>>> getGroups(@AuthenticationPrincipal Long userId) {
-        List<GetGroupsRes> response = groupEntryService.getGroups(userId);
-        return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_LIST, response));
     }
 }

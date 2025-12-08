@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
+import com.studypals.domain.groupManage.dto.GetGroupsRes;
 import com.studypals.domain.groupManage.service.GroupService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -52,5 +53,11 @@ public class GroupController {
         Long groupId = groupService.createGroup(userId, request);
 
         return ResponseEntity.created(URI.create("/groups/" + groupId)).build();
+    }
+
+    @GetMapping
+    public ResponseEntity<Response<List<GetGroupsRes>>> getGroups(@AuthenticationPrincipal Long userId) {
+        List<GetGroupsRes> response = groupService.getGroups(userId);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_LIST, response));
     }
 }
