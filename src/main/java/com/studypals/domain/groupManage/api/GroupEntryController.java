@@ -1,6 +1,7 @@
 package com.studypals.domain.groupManage.api;
 
 import java.net.URI;
+import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -31,6 +32,9 @@ import com.studypals.global.responses.ResponseCode;
  *     - GET /groups/{groupId}/entry-requests : 그룹 가입 요청 목록 조회
  *     - POST /groups/entry-requests/{requestId}/accept : 그룹 가입 요청 승인
  *     - DELETE /groups/entry-requests/{requestId} : 그룹 가입 요청 거절
+ *
+ *     - GET /groups : 멤버가 속한 그룹 정보 요청
+ *     - GET /groups/{groupId} : 멤버가 속한 특정 그룹에 대한 정보 요청
  * </pre>
  *
  * @author s0o0bn
@@ -100,5 +104,11 @@ public class GroupEntryController {
         groupEntryService.refuseEntryRequest(userId, requestId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<Response<List<GetGroupsRes>>> getGroups(@AuthenticationPrincipal Long userId) {
+        List<GetGroupsRes> response = groupEntryService.getGroups(userId);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_LIST, response));
     }
 }

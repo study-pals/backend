@@ -40,6 +40,7 @@ public enum ResponseCode {
     GROUP_CATEGORY("U02-14"),
     GROUP_ENTRY_REQUEST("U02-15"),
     GROUP_ENTRY_REQUEST_LIST("U02-16"),
+    GROUP_LIST("U02-17"),
 
     // U03 - User Study & Time
     STUDY_TIME_ALL("U03-00"),

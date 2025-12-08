@@ -1,5 +1,7 @@
 package com.studypals.domain.groupManage.service;
 
+import java.util.List;
+
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.global.request.Cursor;
 import com.studypals.global.responses.CursorResponse;
@@ -89,4 +91,11 @@ public interface GroupEntryService {
      * @param requestId 거절할 가입 요청 ID
      */
     void refuseEntryRequest(Long userId, Long requestId);
+
+    /**
+     * 요청을 보낸 사용자가 속한 그룹의 정보를 조회합니다.
+     * @param userId 요청을 보낸 사용자
+     * @return 그룹 정보들
+     */
+    List<GetGroupsRes> getGroups(Long userId);
 }
