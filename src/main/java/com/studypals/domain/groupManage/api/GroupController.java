@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.dto.GetGroupDetailRes;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
 import com.studypals.domain.groupManage.dto.GetGroupsRes;
 import com.studypals.domain.groupManage.service.GroupService;
@@ -59,5 +61,13 @@ public class GroupController {
     public ResponseEntity<Response<List<GetGroupsRes>>> getGroups(@AuthenticationPrincipal Long userId) {
         List<GetGroupsRes> response = groupService.getGroups(userId);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_LIST, response));
+    }
+
+    // 오늘의 목표 정보도 포함시켜야함
+    @GetMapping("/{groupId}")
+    public ResponseEntity<Response<GetGroupDetailRes>> getGroupDetail(
+            @AuthenticationPrincipal Long userId, @PathVariable Long groupId) {
+        GetGroupDetailRes response = groupService.getGroupDetails(userId, groupId);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_DETAIL, response));
     }
 }

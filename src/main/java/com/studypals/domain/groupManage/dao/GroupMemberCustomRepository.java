@@ -29,4 +29,11 @@ public interface GroupMemberCustomRepository {
      * @see GroupMemberProfileDto
      */
     List<GroupMemberProfileDto> findTopNMemberByJoinedAt(Long groupId, int limit);
+
+    /**
+     * 그룹에 속한 모든 멤버를 조회합니다.
+     * @param groupId 조회할 그룹 ID
+     * @return 멤버 프로필 리스트
+     */
+    List<GroupMemberProfileDto> findAllMemberProfiles(Long groupId);
 }

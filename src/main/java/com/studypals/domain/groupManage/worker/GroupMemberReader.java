@@ -35,6 +35,10 @@ public class GroupMemberReader {
         return groupMemberRepository.findTopNMemberByJoinedAt(group.getId(), limit);
     }
 
+    public List<GroupMemberProfileDto> getAllMemberProfiles(Group group) {
+        return groupMemberRepository.findAllMemberProfiles(group.getId());
+    }
+
     public List<GroupSummaryDto> getGroups(Long userId) {
         return groupMemberRepository.findGroupsByMemberId(userId);
     }

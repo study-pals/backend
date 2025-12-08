@@ -3,6 +3,7 @@ package com.studypals.domain.groupManage.service;
 import java.util.List;
 
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.dto.GetGroupDetailRes;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
 import com.studypals.domain.groupManage.dto.GetGroupsRes;
 
@@ -43,4 +44,12 @@ public interface GroupService {
      * @return 그룹 정보들
      */
     List<GetGroupsRes> getGroups(Long userId);
+
+    /**
+     * 요청을 보낸 사용자가 속한 1개 그룹의 자세한 정보를 조회합니다. (멤버 프로필 포함)
+     * @param userId 요청을 보낸 사용자
+     * @param groupId 조회하고자 하는 그룹
+     * @return 자세한 그룹 정보
+     */
+    GetGroupDetailRes getGroupDetails(Long userId, Long groupId);
 }
