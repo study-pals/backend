@@ -173,6 +173,9 @@ public class StudySessionServiceImpl implements StudySessionService {
         Long studyTime = studyTimeReader.findByCategoryId(
                 userId, LocalDate.from(studyStatus.getStartTime()), studyStatus.getCategoryId());
 
+        // null이면 공부 시간을 0으로 반환합니다.
+        studyTime = studyTime == null ? 0 : studyTime;
+
         return mapper.toStudyStatusDto(studyStatus, studyTime);
     }
 
