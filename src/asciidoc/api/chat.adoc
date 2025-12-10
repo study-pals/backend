@@ -65,12 +65,13 @@ include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_succe
 include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_success/response-fields.adoc[]
 include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_success/http-response.adoc[]
 
-''''
+'''
+'''
 
 === 채팅
-''''
 
-==== CONNECT frame
+'''
+==== - CONNECT frame
 
 클라이언트 -> 서버
 [source,stomp]
@@ -83,9 +84,10 @@ Authorization:Bearer {ACCESS_TOKEN}
 ^@
 ----
 [NOTE]
-`{ACCESS_TOEKN}` 은 로그인부터 발급받은 토큰을 사용합니다.
+`{ACCESS_TOKEN}` 은 로그인부터 발급받은 토큰을 사용합니다.
 
-==== SUBSCRIBE frame (채팅방 구독)
+'''
+==== - SUBSCRIBE frame (채팅방 구독)
 
 클라이언트 → 서버
 
@@ -101,8 +103,8 @@ destination:/sub/chat/room/{chatRoomId}
 서버는 이후 `/sub/chat/room/{chatRoomId}` 로 전달되는 MESSAGE 프레임을
 해당 세션으로 push 해야합니다.
 
-
-==== SEND frame (채팅 메시지 전송)
+'''
+==== - SEND frame (채팅 메시지 전송)
 
 [WARNING]
 클라이언트에서는 메시지를 보낼 때, 다음과 같은 방식으로 보내야 합니다. 단, SEND 시 사용되는 chatRoomId 는,
@@ -145,8 +147,9 @@ message-id:msg-15
 ^@
 ----
 
+'''
 
-==== SEND frame (읽음 처리)
+==== - SEND frame (읽음 처리)
 
 클라이언트는 메시지를 읽으면, 가장 마지막으로 읽은 메시지를 서버로 보내야 합니다.
 이는 필수적인 과정이며 클라이언트 측에서 어느정도 최적화를 하면 서버 측의 부담이 줄어들 여지가 있습니다.
@@ -172,8 +175,8 @@ content-type:application/json
 }
 ^@
 ----
-
-==== SUBSCRIBE frame (유저 개인 큐 구독)
+'''
+==== - SUBSCRIBE frame (유저 개인 큐 구독)
 
 /user/queue 는 특정 유저에게만 전달되는 개인용 메시지를 받기 위한 채널입니다.
 클라이언트는 다음과 같이 단순히 구독만 하면 됩니다.
@@ -195,8 +198,8 @@ destination:/user/queue/notifications
 
 이후 해당 유저에게 전달되는 개인 메시지가 모두 이 채널로 도착합니다.
 
-
-==== USER QUEUE MESSAGE frame (개인 메시지)
+'''
+==== - USER QUEUE MESSAGE frame (개인 메시지)
 
 서버 → 클라이언트
 
@@ -215,3 +218,152 @@ message-id:user-msg-1
 ----
 [NOTE]
 단, 개인 메시지의 형식은 아직 정의되지 않았습니다.
+
+'''
+'''
+
+=== 채팅방 리스트(SSE)
+`/sse/chat/room/list`
+
+클라이언트는 SSE 를 통해 유저가 속한 채팅방 리스트를 받아올 수 있습니다. 현재까지 구현된 바에 따르면, 데이터는 총 2가지 타입이 존재합니다.
+
+최초 연결 후 보내지는 메시지는 연결 시점의 채팅방 리스트 및 각 채팅방의 데이터가 포함됩니다.
+
+- 채팅방 아이디
+- 채팅방 이름
+- 채팅방 이미지 URL
+- 참여자 수
+- 안 읽은 메시지 카운트
+- 가장 마지막 메시지
+- 가장 마지막 메시지 아이디
+- 가장 마지막 메시지 sender id
+
+이후 보내지는 메시지는 초기 메시지 이후 발행되는 새로운 메시지에 대한 정보입니다. 각 사용자가 메시지를 보내게 되면 접속 중인 SSE 세션으로
+해당 메시지 정보가 전송됩니다. 이때의 데이터는 채팅방에서 받는 새로운 채팅 데이터와 동일합니다.
+
+- 채팅방 아이디
+- 채팅 아이디
+- 채팅 내용
+- 채팅 타입
+- sender id
+
+[NOTE]
+모든 SSE 메시지는 type - body 로 구성됩니다. type 은 해당 메시지의 종류, body 는 실제 데이터입니다.
+
+[NOTE]
+SSE 연결 후, 채팅방 리스트를 받기 전 `connect` type 의 메시지가 먼저 보내집니다. 이는 채팅방 리스트 API 뿐 만 아니라, SSE 연결
+모두에 적용됩니다. body 는 없습니다. `(empty)`
+
+'''
+
+==== - [init-message]
+다음은 SSE 초기 메시지(`init-message`)로 전달되는 채팅방 목록 응답의 필드 설명이다.
+
+
+|===
+| Path | Type | Description
+
+| rooms | Array | 사용자가 가입한 채팅방 목록
+
+| rooms[].chatRoomId
+| String
+| 채팅방 ID (UUID)
+
+| rooms[].chatRoomName
+| String
+| 채팅방 이름
+
+| rooms[].chatRoomUrl
+| String or null
+| 채팅방 대표 이미지 URL. 없으면 null
+
+| rooms[].totalMember
+| Number
+| 현재 채팅방 총 멤버 수
+
+| rooms[].unread
+| Number
+| 사용자가 읽지 않은 메시지 수
+`-1`이면 최근 메시지 없음 (아직 채팅방에 채팅이 존재하지 않음)
+
+| rooms[].lastMessage
+| String or null
+| 마지막 메시지 내용. 메시지가 없으면 null
+
+| rooms[].messageId
+| String or null
+| 마지막 메시지 ID. 메시지가 없으면 null
+
+| rooms[].sender
+| Number or null
+| 마지막 메시지를 보낸 사용자 ID. 없으면 null
+|===
+
+[source,json]
+----
+{
+    "rooms": [
+        {
+            "chatRoomId": "3ff392ab-a606-468b-8330-60f3c0d6edf3",
+            "chatRoomName": "group1",
+            "chatRoomUrl": null,
+            "totalMember": 1,
+            "unread": 1,
+            "lastMessage": "hello world",
+            "messageId": "1418e71356571000",
+            "sender": 1
+        },
+        {
+            "chatRoomId": "9c5ff7dc-5cbe-4b58-b6cf-89ff79d895a9",
+            "chatRoomName": "group",
+            "chatRoomUrl": null,
+            "totalMember": 1,
+            "unread": -1,
+            "lastMessage": null,
+            "messageId": null,
+            "sender": null
+        }
+    ]
+}
+----
+
+'''
+==== - [new-message]
+다음은 SSE 실시간 메시지(new-message)로 전달되는 새로운 채팅 데이터에 대한 필드 설명이다.
+
+|===
+| Path | Type | Description
+
+| id
+| String
+| 메시지 ID. 64비트 기반 커스텀 ID (정렬·정합성 확보용)
+
+| room
+| String
+| 메시지가 속한 채팅방 ID (UUID)
+
+| type
+| String
+| 메시지 타입
+예: `TEXT`, `IMAGE`, `JOIN`, `LEAVE` 등
+
+| message
+| String
+| 메시지 본문. 텍스트 메시지가 아닌 경우 다른 필드와 조합해 사용될 수 있음
+
+| sender
+| Number
+| 메시지를 보낸 사용자 ID
+|===
+
+
+[source,json]
+----
+{
+    "id": "1418e7ad87971000",
+    "room": "3ff392ab-a606-468b-8330-60f3c0d6edf3",
+    "type": "TEXT",
+    "message": "hello world",
+    "sender": 1
+}
+----
