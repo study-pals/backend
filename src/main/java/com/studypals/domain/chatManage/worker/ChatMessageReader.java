@@ -123,20 +123,35 @@ public class ChatMessageReader {
 
                 ChatMessage message = latestMessageOp.get();
 
-                // 새 값은 entry.setValue 로 교체 (구조 변경 아님)
-                ChatroomLatestInfo newInfo = new ChatroomLatestInfo(
-                        0, message.getId(), message.getType(), message.getMessage(), message.getSender());
-                entry.setValue(newInfo);
+                String roomId = entry.getKey();
+                String baseId = cursor.get(roomId);
 
-                // 비교는 "원래 캐시값" 기준으로 해야 함
-                if (message.getId().equals(cached.getId())) {
+                if (message.getId().equals(baseId)) {
+                    // 기준 ID == 최신 ID → unread = 0, 메시지 1개만 캐시에
                     cacheRepository.save(message);
+                    entry.setValue(new ChatroomLatestInfo(
+                            0, message.getId(), message.getType(), message.getMessage(), message.getSender()));
                 } else {
                     List<ChatMessage> messages =
-                            new ArrayList<>(messageRepository.findTop100ByRoomOrderByIdDesc(entry.getKey()));
+                            new ArrayList<>(messageRepository.findTop100ByRoomOrderByIdDesc(roomId));
                     Collections.reverse(messages);
-                    cacheRepository.clear(message.getRoom());
+                    cacheRepository.clear(roomId);
                     cacheRepository.saveAll(messages);
+
+                    long unread = 0L;
+                    if (baseId == null || "0".equals(baseId)) {
+                        unread = messages.size();
+                    } else {
+                        for (ChatMessage m : messages) {
+                            if (m.getId().compareTo(baseId) > 0) {
+                                unread++;
+                            }
+                        }
+                    }
+                    if (unread > 100) unread = 100;
+
+                    entry.setValue(new ChatroomLatestInfo(
+                            unread, message.getId(), message.getType(), message.getMessage(), message.getSender()));
                 }
             } else {
                 long cnt = cached.getCnt();
@@ -159,15 +174,15 @@ public class ChatMessageReader {
      * @param maxLen 캐시 최대 길이
      */
     private void rebuildCacheFromRecent(String roomId, List<ChatMessage> source, int maxLen) {
+
         if (source == null || source.isEmpty()) {
-            cacheRepository.clear(roomId); // 방 캐시 전체 삭제 (필요하면 구현)
+            cacheRepository.clear(roomId); // 방 캐시 전체 삭제
             return;
         }
 
-        // 원본 merged 를 건드리지 않도록 복사본 생성
+        // 복사본 생성
         List<ChatMessage> copy = new ArrayList<>(source);
 
-        // id 기준 오름차순 정렬 (id 가 시간 순서를 반영한다고 가정)
         copy.sort(Comparator.comparing(ChatMessage::getId));
 
         // 최신 maxLen 개만 남기기

@@ -386,12 +386,22 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     private ChatMessage toEntity(MapRecord<String, String, String> r) {
         Map<String, String> value = r.getValue();
 
+        String fullKey = r.getStream();
+        String roomId = stripPrefix(fullKey);
+
         return new ChatMessage(
                 decode(value.get(ID_FIELD)),
                 ChatType.valueOf(value.get(TYPE_FIELD)),
-                r.getStream(),
+                roomId,
                 Long.parseLong(value.get(SENDER_FIELD)),
                 value.get(MESSAGE_FIELD));
+    }
+
+    private String stripPrefix(String fullKey) {
+        if (fullKey != null && fullKey.startsWith(KEY_PREFIX)) {
+            return fullKey.substring(KEY_PREFIX.length());
+        }
+        return fullKey;
     }
 
     /**
