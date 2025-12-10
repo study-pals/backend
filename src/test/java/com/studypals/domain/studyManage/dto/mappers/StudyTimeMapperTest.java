@@ -1,7 +1,9 @@
 package com.studypals.domain.studyManage.dto.mappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.map;
 
+import com.studypals.domain.studyManage.dto.StudyStatusRes;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -70,5 +72,35 @@ class StudyTimeMapperTest {
         // then
         assertThat(dto.name()).isEqualTo("temp");
         assertThat(dto.time()).isEqualTo(80L);
+    }
+
+    @Test
+    void toStudyStatusDto_success_fromBoolean() {
+        StudyStatusRes res = mapper.toStudyStatusDto(Boolean.FALSE);
+
+        assertThat(res.studying()).isFalse();
+        assertThat(res.name()).isNull();
+        assertThat(res.categoryId()).isNull();
+        assertThat(res.startTime()).isNull();
+        assertThat(res.goal()).isNull();
+    }
+
+    @Test
+    void toStudyStatusDto_success_fromEntity() {
+        StudyStatus entity = StudyStatus.builder()
+                .id(1L)
+                .studying(true)
+                .startTime(LocalDateTime.now())
+                .categoryId(1L)
+                .goal(20L)
+                .build();
+        Long studyTime = 20L;
+
+        StudyStatusRes res = mapper.toStudyStatusDto(entity, studyTime);
+
+        assertThat(res.studying()).isTrue();
+        assertThat(res.startTime()).isEqualTo(entity.getStartTime());
+        assertThat(res.name()).isEqualTo(entity.getName());
+        assertThat(res.goal()).isEqualTo(entity.getGoal());
     }
 }
