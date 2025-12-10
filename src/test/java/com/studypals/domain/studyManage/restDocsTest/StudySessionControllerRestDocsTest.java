@@ -10,7 +10,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.studypals.domain.studyManage.dto.StudyStatusRes;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -25,6 +24,7 @@ import com.studypals.domain.studyManage.api.StudySessionController;
 import com.studypals.domain.studyManage.dto.EndStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
+import com.studypals.domain.studyManage.dto.StudyStatusRes;
 import com.studypals.domain.studyManage.service.StudySessionService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -118,12 +118,12 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
     void check_success_is_study() throws Exception {
         LocalDateTime now = LocalDateTime.now();
         StudyStatusRes res = new StudyStatusRes(true, now, 10L, 1L, "targetCategory", 20L);
-        Response<StudyStatusRes> expected = CommonResponse.success(ResponseCode.STUDY_STATUS_CHECK, res, "success check");
+        Response<StudyStatusRes> expected =
+                CommonResponse.success(ResponseCode.STUDY_STATUS_CHECK, res, "success check");
 
         given(studySessionService.checkStudyStatus(any())).willReturn(res);
 
-        mockMvc.perform(get("/studies/sessions/check")
-                .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/studies/sessions/check").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(hasKey(expected))
                 .andDo(restDocs.document(
@@ -138,19 +138,18 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data.studyTime").description("현재까지 누적 공부 시간"),
                                 fieldWithPath("data.categoryId").description("공부 중인 카테고리 아이디"),
                                 fieldWithPath("data.name").description("공부 중인 임시 카테고리 이름"),
-                                fieldWithPath("data.goal").description("공부 중인 카테고리의 목표 시간")
-                        )));
+                                fieldWithPath("data.goal").description("공부 중인 카테고리의 목표 시간"))));
     }
 
     @Test
     void check_success_is_notStudy() throws Exception {
         StudyStatusRes res = new StudyStatusRes(false, null, null, null, null, null);
-        Response<StudyStatusRes> expected = CommonResponse.success(ResponseCode.STUDY_STATUS_CHECK, res, "success check");
+        Response<StudyStatusRes> expected =
+                CommonResponse.success(ResponseCode.STUDY_STATUS_CHECK, res, "success check");
 
         given(studySessionService.checkStudyStatus(any())).willReturn(res);
 
-        mockMvc.perform(get("/studies/sessions/check")
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/studies/sessions/check").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(hasKey(expected))
                 .andDo(restDocs.document(
@@ -160,8 +159,6 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("code").description("U03-09 고정"),
                                 fieldWithPath("status").description("응답 상태 (예: success 또는 fail)"),
                                 fieldWithPath("message").description("응답 메시지"),
-                                fieldWithPath("data.studying").description("공부 중 여부")
-                        )));
+                                fieldWithPath("data.studying").description("공부 중 여부"))));
     }
-
 }

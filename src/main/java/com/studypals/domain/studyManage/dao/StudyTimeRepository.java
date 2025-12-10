@@ -87,12 +87,12 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
     @Query(
             value =
                     """
-        SELECT st.time FROM study_time st
-        WHERE st.member_id = :memberId
-        AND st.studied_date = :studiedDate
-        AND st.study_category_id = :categoryId
-    """,
-            nativeQuery = true)
+            SELECT st.time
+            FROM StudyTime st
+            WHERE st.member.id = :memberId
+            AND st.studiedDate = :studiedDate
+            AND st.studyCategory.id = :categoryId
+        """)
     Long findTimeByCategoryAndDate(
             @Param("memberId") Long memberId,
             @Param("studiedDate") LocalDate studiedDate,

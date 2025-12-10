@@ -127,4 +127,25 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
         // then
         assertThat(results).isEmpty();
     }
+
+    @Test
+    void findTimeByCategoryAndDate() {
+        Long expectedTime = 100L;
+        Member member = insertMember();
+        StudyCategory studyCategory = insertCategory(member.getId(), 1);
+        ;
+        LocalDate date = LocalDate.of(2024, 4, 10);
+
+        em.persist(make(member, studyCategory, date, expectedTime));
+        em.persist(make(member, "temp4", date.plusDays(1), 100L)); // 다른 날
+
+        em.flush();
+        em.clear();
+
+        // when
+        Long result = studyTimeRepository.findTimeByCategoryAndDate(member.getId(), date, studyCategory.getId());
+
+        // then
+        assertThat(result).isEqualTo(expectedTime);
+    }
 }

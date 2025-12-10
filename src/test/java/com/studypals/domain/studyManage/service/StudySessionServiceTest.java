@@ -1,11 +1,8 @@
 package com.studypals.domain.studyManage.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
 
-import com.studypals.domain.studyManage.dto.StudyStatusRes;
-import com.studypals.domain.studyManage.worker.StudyTimeReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,6 +21,7 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
+import com.studypals.domain.studyManage.dto.StudyStatusRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
@@ -32,6 +30,7 @@ import com.studypals.domain.studyManage.worker.DailyInfoWriter;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
+import com.studypals.domain.studyManage.worker.StudyTimeReader;
 import com.studypals.global.utils.TimeUtils;
 
 /**
