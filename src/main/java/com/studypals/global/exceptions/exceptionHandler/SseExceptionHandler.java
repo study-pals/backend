@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import lombok.extern.slf4j.Slf4j;
 
 import com.google.common.net.HttpHeaders;
+import com.studypals.domain.chatManage.api.SseChatRoomController;
 import com.studypals.global.exceptions.exception.BaseException;
 
 /**
@@ -21,7 +22,7 @@ import com.studypals.global.exceptions.exception.BaseException;
  * @since 2025-12-05
  */
 @Slf4j
-@RestControllerAdvice(basePackages = "com.global.sse")
+@RestControllerAdvice(basePackages = "com.studypals.global.sse", basePackageClasses = SseChatRoomController.class)
 @Order(0)
 public class SseExceptionHandler {
 

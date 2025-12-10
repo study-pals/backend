@@ -92,7 +92,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         // DB 에 저장된 각 멤버의 마지막 읽은 메시지 ID를 기반으로 기본 커서 맵 구성
         Map<Long, String> cursorData = new HashMap<>();
         for (ChatRoomMember chatRoomMember : members) {
-            cursorData.put(chatRoomMember.getId(), chatRoomMember.getLastReadMessage());
+            cursorData.put(chatRoomMember.getMember().getId(), chatRoomMember.getLastReadMessage());
         }
 
         // 캐시에 저장된 최신 커서 정보로 덮어쓰기 (실시간 갱신분 반영)
@@ -104,8 +104,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .toList();
 
         // 기준 chatId 이후의 채팅 로그를 조회하고, 전송용 OutgoingMessage DTO 리스트로 변환
-        List<OutgoingMessage> logs = chatMessageReader.getChatLog(chatRoomId, chatId).stream()
-                .map(chatMessageMapper::toOutMessage)
+        List<LoggingMessage> logs = chatMessageReader.getChatLog(chatRoomId, chatId).stream()
+                .map(chatMessageMapper::toLoggingMessage)
                 .toList();
 
         // 채팅방 정보, 유저 정보, 커서, 채팅 로그를 모두 조합하여 최종 응답 생성

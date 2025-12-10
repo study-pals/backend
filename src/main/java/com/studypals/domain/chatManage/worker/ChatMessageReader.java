@@ -102,49 +102,53 @@ public class ChatMessageReader {
     public Map<String, ChatroomLatestInfo> getLatestInfo(Map<String, String> cursor) {
         Map<String, ChatroomLatestInfo> result = cacheRepository.countAllToLatest(cursor);
 
-        for (Map.Entry<String, ChatroomLatestInfo> r : result.entrySet()) {
-            if (r.getValue() == null) continue;
-            // 만약 캐시에 존재하지 않는 경우 - 오래되서 삭제, 혹은 오류, 혹은 메시지가 아직 발행되지 않음
-            if (r.getValue().getCnt() < 0) {
-                Optional<ChatMessage> latestMessageOp = messageRepository.findTopByRoomOrderByIdDesc(r.getKey());
+        Iterator<Map.Entry<String, ChatroomLatestInfo>> it = result.entrySet().iterator();
 
-                // DB 에서도 마지막 메시지가 없으면 - 아직 메시지 없음
+        while (it.hasNext()) {
+            Map.Entry<String, ChatroomLatestInfo> entry = it.next();
+            ChatroomLatestInfo cached = entry.getValue();
+
+            if (cached == null) {
+                it.remove();
+                continue;
+            }
+
+            if (cached.getCnt() < 0) {
+                Optional<ChatMessage> latestMessageOp = messageRepository.findTopByRoomOrderByIdDesc(entry.getKey());
+
                 if (latestMessageOp.isEmpty()) {
-                    result.remove(r.getKey());
+                    it.remove();
                     continue;
                 }
-                // DB 에는 메시지가 있는 경우
+
                 ChatMessage message = latestMessageOp.get();
 
-                // DB에서 가져온 데이터를 반환
-                result.put(
-                        r.getKey(),
-                        new ChatroomLatestInfo(
-                                0, message.getId(), message.getType(), message.getMessage(), message.getSender()));
+                // 새 값은 entry.setValue 로 교체 (구조 변경 아님)
+                ChatroomLatestInfo newInfo = new ChatroomLatestInfo(
+                        0, message.getId(), message.getType(), message.getMessage(), message.getSender());
+                entry.setValue(newInfo);
 
-                // DB에서의 마지막 메시지와 검색하고자 하는 채팅 ID 가 동일한 경우 - 최신 메시지 1개만 저장(리스트 표시용)
-                if (message.getId().equals(r.getValue().getId())) {
+                // 비교는 "원래 캐시값" 기준으로 해야 함
+                if (message.getId().equals(cached.getId())) {
                     cacheRepository.save(message);
                 } else {
-                    // DB 의 마지막 메시지와, 검색하고자 하는 채팅ID 가 다른 경우 - 모두 저장(아직 특정 메시지를 안 읽은 유저가 있다)
-                    List<ChatMessage> messages = messageRepository.findTop100ByRoomOrderByIdDesc(r.getKey());
+                    List<ChatMessage> messages =
+                            new ArrayList<>(messageRepository.findTop100ByRoomOrderByIdDesc(entry.getKey()));
                     Collections.reverse(messages);
                     cacheRepository.clear(message.getRoom());
                     cacheRepository.saveAll(messages);
                 }
             } else {
-                long cnt = r.getValue().getCnt();
+                long cnt = cached.getCnt();
                 cnt = cnt > 100 ? 100 : cnt;
-                result.put(
-                        r.getKey(),
-                        new ChatroomLatestInfo(
-                                cnt,
-                                r.getValue().getId(),
-                                r.getValue().getType(),
-                                r.getValue().getMessage(),
-                                r.getValue().getSender()));
+
+                ChatroomLatestInfo capped = new ChatroomLatestInfo(
+                        cnt, cached.getId(), cached.getType(), cached.getMessage(), cached.getSender());
+
+                entry.setValue(capped); // 구조 변경 없이 value만 교체
             }
         }
+
         return result;
     }
 
