@@ -1,5 +1,6 @@
 package com.studypals.domain.chatManage.api;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +31,7 @@ public class SseChatRoomController {
     private final ChatRoomService chatRoomService;
     private final SseEmitterManager sseManager;
 
-    @GetMapping("/list")
+    @GetMapping(value = "/list", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter getList(@AuthenticationPrincipal Long userId) {
         SseEmitter emitter = sseManager.createEmitter(userId);
         ChatRoomListRes res = chatRoomService.getChatRoomList(userId);

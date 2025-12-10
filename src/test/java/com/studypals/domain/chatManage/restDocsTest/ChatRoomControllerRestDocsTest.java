@@ -21,16 +21,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.chatManage.api.ChatRoomController;
-import com.studypals.domain.chatManage.dto.ChatCursorRes;
-import com.studypals.domain.chatManage.dto.ChatRoomInfoRes;
-import com.studypals.domain.chatManage.dto.ChatType;
-import com.studypals.domain.chatManage.dto.OutgoingMessage;
+import com.studypals.domain.chatManage.dto.*;
 import com.studypals.domain.chatManage.entity.ChatRoomRole;
 import com.studypals.domain.chatManage.service.ChatRoomService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
-import com.studypals.global.sse.SseEmitterManager;
 import com.studypals.testModules.testSupport.RestDocsSupport;
 
 /**
@@ -44,9 +40,6 @@ class ChatRoomControllerRestDocsTest extends RestDocsSupport {
 
     @MockitoBean
     private ChatRoomService chatRoomService;
-
-    @MockitoBean
-    private SseEmitterManager sseEmitterManager;
 
     @Test
     @WithMockUser
@@ -75,19 +68,19 @@ class ChatRoomControllerRestDocsTest extends RestDocsSupport {
                                 .build()))
                 .cursor(List.of(new ChatCursorRes(1L, "15"), new ChatCursorRes(2L, "14"), new ChatCursorRes(3L, "15")))
                 .logs(List.of(
-                        OutgoingMessage.builder()
+                        LoggingMessage.builder()
                                 .id("15")
                                 .type(ChatType.TEXT)
                                 .message("내일 10시에 회의할까요?")
                                 .sender(1L)
                                 .build(),
-                        OutgoingMessage.builder()
+                        LoggingMessage.builder()
                                 .id("14")
                                 .type(ChatType.TEXT)
                                 .message("네, 가능합니다.")
                                 .sender(2L)
                                 .build(),
-                        OutgoingMessage.builder()
+                        LoggingMessage.builder()
                                 .id("13")
                                 .type(ChatType.TEXT)
                                 .message("저도 참석할게요.")

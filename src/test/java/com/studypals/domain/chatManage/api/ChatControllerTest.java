@@ -37,7 +37,7 @@ class ChatControllerTest extends WebsocketStompSupport {
         Long userId = 1L;
         int expected = 1;
         IncomingMessage message = new IncomingMessage(ChatType.TEXT, "payload message", room1);
-        OutgoingMessage outMessage = new OutgoingMessage(null, ChatType.TEXT, "payload message", userId);
+        OutgoingMessage outMessage = new OutgoingMessage(null, room1, ChatType.TEXT, "payload message", userId);
         verifyToken(userId, true);
         verifyRoom(room1, userId, true);
         verifySend();
