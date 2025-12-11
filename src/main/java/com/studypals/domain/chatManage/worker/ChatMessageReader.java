@@ -114,7 +114,7 @@ public class ChatMessageReader {
             }
 
             if (cached.getCnt() < 0) {
-                Optional<ChatMessage> latestMessageOp = messageRepository.findTopByRoomOrderByIdDesc(entry.getKey());
+                Optional<ChatMessage> latestMessageOp = messageRepository.findTopByRoomIdOrderByIdDesc(entry.getKey());
 
                 if (latestMessageOp.isEmpty()) {
                     it.remove();
@@ -130,10 +130,10 @@ public class ChatMessageReader {
                     // 기준 ID == 최신 ID → unread = 0, 메시지 1개만 캐시에
                     cacheRepository.save(message);
                     entry.setValue(new ChatroomLatestInfo(
-                            0, message.getId(), message.getType(), message.getMessage(), message.getSender()));
+                            0, message.getId(), message.getType(), message.getContent(), message.getSender()));
                 } else {
                     List<ChatMessage> messages =
-                            new ArrayList<>(messageRepository.findTop100ByRoomOrderByIdDesc(roomId));
+                            new ArrayList<>(messageRepository.findTop100ByRoomIdOrderByIdDesc(roomId));
                     Collections.reverse(messages);
                     cacheRepository.clear(roomId);
                     cacheRepository.saveAll(messages);
@@ -151,14 +151,14 @@ public class ChatMessageReader {
                     if (unread > 100) unread = 100;
 
                     entry.setValue(new ChatroomLatestInfo(
-                            unread, message.getId(), message.getType(), message.getMessage(), message.getSender()));
+                            unread, message.getId(), message.getType(), message.getContent(), message.getSender()));
                 }
             } else {
                 long cnt = cached.getCnt();
                 cnt = cnt > 100 ? 100 : cnt;
 
                 ChatroomLatestInfo capped = new ChatroomLatestInfo(
-                        cnt, cached.getId(), cached.getType(), cached.getMessage(), cached.getSender());
+                        cnt, cached.getId(), cached.getType(), cached.getContent(), cached.getSender());
 
                 entry.setValue(capped); // 구조 변경 없이 value만 교체
             }

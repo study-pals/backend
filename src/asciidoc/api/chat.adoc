@@ -265,15 +265,15 @@ SSE 연결 후, 채팅방 리스트를 받기 전 `connect` type 의 메시지�
 
 | rooms | Array | 사용자가 가입한 채팅방 목록
 
-| rooms[].chatRoomId
+| rooms[].roomId
 | String
 | 채팅방 ID (UUID)
 
-| rooms[].chatRoomName
+| rooms[].name
 | String
 | 채팅방 이름
 
-| rooms[].chatRoomUrl
+| rooms[].url
 | String or null
 | 채팅방 대표 이미지 URL. 없으면 null
 
@@ -286,11 +286,11 @@ SSE 연결 후, 채팅방 리스트를 받기 전 `connect` type 의 메시지�
 | 사용자가 읽지 않은 메시지 수
 `-1`이면 최근 메시지 없음 (아직 채팅방에 채팅이 존재하지 않음)
 
-| rooms[].lastMessage
+| rooms[].content
 | String or null
 | 마지막 메시지 내용. 메시지가 없으면 null
 
-| rooms[].messageId
+| rooms[].chatId
 | String or null
 | 마지막 메시지 ID. 메시지가 없으면 null
 
@@ -304,23 +304,23 @@ SSE 연결 후, 채팅방 리스트를 받기 전 `connect` type 의 메시지�
 {
     "rooms": [
         {
-            "chatRoomId": "3ff392ab-a606-468b-8330-60f3c0d6edf3",
-            "chatRoomName": "group1",
-            "chatRoomUrl": null,
+            "roomId": "3ff392ab-a606-468b-8330-60f3c0d6edf3",
+            "name": "group1",
+            "url": null,
             "totalMember": 1,
             "unread": 1,
-            "lastMessage": "hello world",
-            "messageId": "1418e71356571000",
+            "content": "hello world",
+            "chatId": "1418e71356571000",
             "sender": 1
         },
         {
-            "chatRoomId": "9c5ff7dc-5cbe-4b58-b6cf-89ff79d895a9",
-            "chatRoomName": "group",
-            "chatRoomUrl": null,
+            "roomId": "9c5ff7dc-5cbe-4b58-b6cf-89ff79d895a9",
+            "name": "group",
+            "url": null,
             "totalMember": 1,
             "unread": -1,
-            "lastMessage": null,
-            "messageId": null,
+            "content": null,
+            "chatId": null,
             "sender": null
         }
     ]
@@ -338,7 +338,7 @@ SSE 연결 후, 채팅방 리스트를 받기 전 `connect` type 의 메시지�
 | String
 | 메시지 ID. 64비트 기반 커스텀 ID (정렬·정합성 확보용)
 
-| room
+| roomId
 | String
 | 메시지가 속한 채팅방 ID (UUID)
 
@@ -361,7 +361,7 @@ SSE 연결 후, 채팅방 리스트를 받기 전 `connect` type 의 메시지�
 ----
 {
     "id": "1418e7ad87971000",
-    "room": "3ff392ab-a606-468b-8330-60f3c0d6edf3",
+    "roomId": "3ff392ab-a606-468b-8330-60f3c0d6edf3",
     "type": "TEXT",
     "message": "hello world",
     "sender": 1

@@ -94,13 +94,13 @@ public class ChatRoomIntegrationTest extends IntegrationSupport {
             logs.add(LoggingMessage.builder()
                     .id(String.valueOf(i))
                     .type(ChatType.TEXT)
-                    .message("message")
+                    .content("message")
                     .sender(user1.getUserId())
                     .build());
         }
 
         ChatRoomInfoRes responseData = ChatRoomInfoRes.builder()
-                .id(chatRoomId)
+                .roomId(chatRoomId)
                 .name("chatRoom")
                 .userInfos(List.of(
                         ChatRoomInfoRes.UserInfo.builder()

@@ -109,7 +109,7 @@ class ChatRoomServiceTest {
         ChatRoomInfoRes result = chatRoomService.getChatRoomInfo(userId, chatRoomId, "0");
 
         // then
-        assertThat(result.id()).isEqualTo(chatRoomId);
+        assertThat(result.roomId()).isEqualTo(chatRoomId);
         assertThat(result.userInfos()).hasSize(2);
         assertThat(result.cursor()).hasSize(2);
         assertThat(result.cursor().get(0).chatId()).isEqualTo("2");
@@ -120,10 +120,10 @@ class ChatRoomServiceTest {
     ChatMessage createChat(String id, String roomId) {
         return ChatMessage.builder()
                 .id(id)
-                .room(roomId)
+                .roomId(roomId)
                 .type(ChatType.TEXT)
                 .sender(1L)
-                .message("message")
+                .content("message")
                 .build();
     }
 
@@ -132,15 +132,22 @@ class ChatRoomServiceTest {
         // given
         Long userId = 1L;
 
+        ChatRoomListRes.ChatRoomInfo mappedInfo = new ChatRoomListRes.ChatRoomInfo(
+                "chat-room",
+                "테스트 채팅방",
+                "https://example.com/chat-room",
+                5,
+                10L,
+                "message",
+                "last_read_message_recent",
+                2L);
+
         given(memberReader.getRef(userId)).willReturn(mockMember1);
         given(chatRoomReader.findChatRoomMembers(mockMember1)).willReturn(List.of(mockCrm1));
 
         given(mockCrm1.getChatRoom()).willReturn(mockChatRoom);
         given(mockChatRoom.getId()).willReturn("chat-room");
         // 필요하면 이름, URL, 인원 수도 스텁
-        given(mockChatRoom.getName()).willReturn("테스트 채팅방");
-        given(mockChatRoom.getImageUrl()).willReturn("https://example.com/chat-room");
-        given(mockChatRoom.getTotalMember()).willReturn(5);
 
         // DB 기준 마지막 읽은 메시지
         given(mockCrm1.getLastReadMessage()).willReturn("last_read_message");
@@ -154,6 +161,8 @@ class ChatRoomServiceTest {
                 .willReturn(Map.of(
                         "chat-room",
                         new ChatroomLatestInfo(10L, "last_read_message_recent", ChatType.TEXT, "message", 2L)));
+
+        given(chatRoomMapper.toChatRoomInfo(any(ChatRoomMember.class), any())).willReturn(mappedInfo);
 
         // when
         ChatRoomListRes result = chatRoomService.getChatRoomList(userId);
@@ -170,13 +179,13 @@ class ChatRoomServiceTest {
         assertThat(result.rooms()).hasSize(1);
         ChatRoomListRes.ChatRoomInfo info = result.rooms().get(0);
 
-        assertThat(info.chatRoomId()).isEqualTo("chat-room");
-        assertThat(info.chatRoomName()).isEqualTo("테스트 채팅방");
-        assertThat(info.chatRoomUrl()).isEqualTo("https://example.com/chat-room");
+        assertThat(info.roomId()).isEqualTo("chat-room");
+        assertThat(info.name()).isEqualTo("테스트 채팅방");
+        assertThat(info.url()).isEqualTo("https://example.com/chat-room");
         assertThat(info.totalMember()).isEqualTo(5);
         assertThat(info.unread()).isEqualTo(10L);
-        assertThat(info.lastMessage()).isEqualTo("message");
-        assertThat(info.messageId()).isEqualTo("last_read_message_recent");
+        assertThat(info.content()).isEqualTo("message");
+        assertThat(info.chatId()).isEqualTo("last_read_message_recent");
         assertThat(info.sender()).isEqualTo(2L);
 
         // then 3) 기본 호출 관계 검증 (선택)

@@ -73,10 +73,10 @@ public class ChatServiceImpl implements ChatService {
         outgoingMessage.setId(id);
 
         // STOMP 브로커로 해당 채팅방 구독자에게 브로드캐스트
-        template.convertAndSend(DESTINATION_PREFIX + message.getRoom(), outgoingMessage);
+        template.convertAndSend(DESTINATION_PREFIX + message.getRoomId(), outgoingMessage);
 
         // 소속 멤버를 찾아, SSE 로 메시지 전송
-        List<Long> memberIds = chatRoomReader.findJoinedMemberId(message.getRoom());
+        List<Long> memberIds = chatRoomReader.findJoinedMemberId(message.getRoomId());
         memberIds.forEach(t -> sseManager.sendMessageAsync(t, new SseSendDto("new-message", outgoingMessage)));
         // 영속화용 엔티티로 변환 후 비동기 저장 파이프라인에 위임
         ChatMessage entity = chatMessageMapper.toEntity(message, id, userId);
@@ -95,7 +95,7 @@ public class ChatServiceImpl implements ChatService {
     public void readMessage(Long userId, IncomingMessage message) {
         // READ 타입인 경우에만 읽음 커서 업데이트 수행
         if (message.getType().equals(ChatType.READ)) {
-            chatStateUpdater.update(new ChatUpdateDto(message.getRoom(), userId, message.getMessage()));
+            chatStateUpdater.update(new ChatUpdateDto(message.getRoomId(), userId, message.getContent()));
         }
     }
 

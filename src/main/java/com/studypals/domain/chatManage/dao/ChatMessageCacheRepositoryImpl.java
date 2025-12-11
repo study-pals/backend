@@ -307,7 +307,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
      */
     private ChatroomLatestInfo toLatestInfo(long cnt, ChatMessage chatMessage) {
         return new ChatroomLatestInfo(
-                cnt, chatMessage.getId(), chatMessage.getType(), chatMessage.getMessage(), chatMessage.getSender());
+                cnt, chatMessage.getId(), chatMessage.getType(), chatMessage.getContent(), chatMessage.getSender());
     }
 
     /**
@@ -360,7 +360,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
      * @return Stream key 및 recordId 가 설정된 MapRecord
      */
     private MapRecord<String, String, String> recordBuilder(ChatMessage message) {
-        String streamKey = KEY_PREFIX + message.getRoom();
+        String streamKey = KEY_PREFIX + message.getRoomId();
         RecordId recordId = encode(message.getId());
 
         // stream body 에 저장할 필드 구성 (필드 값이 null 인 경우 빈 문자열로 치환)
@@ -368,7 +368,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         body.put(ID_FIELD, Objects.toString(recordId.getValue(), ""));
         body.put(TYPE_FIELD, Objects.toString(message.getType().toString(), ""));
         body.put(SENDER_FIELD, Objects.toString(message.getSender(), ""));
-        body.put(MESSAGE_FIELD, message.getMessage());
+        body.put(MESSAGE_FIELD, message.getContent());
 
         return StreamRecords.<String, String, String>mapBacked(body)
                 .withStreamKey(streamKey)
@@ -447,7 +447,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
                     .id(decode(cast(data.get(4))))
                     .type(ChatType.from(cast(data.get(5))))
                     .sender(senderStr == null ? -1L : Long.parseLong(senderStr))
-                    .message(cast(data.get(7)))
+                    .content(cast(data.get(7)))
                     .build();
             this.roomId = streamKey.substring(KEY_PREFIX.length());
         }

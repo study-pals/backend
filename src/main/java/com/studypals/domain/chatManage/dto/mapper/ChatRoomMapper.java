@@ -45,7 +45,7 @@ public interface ChatRoomMapper {
                 chatRoomMember.getChatRoom().getImageUrl(),
                 chatRoomMember.getChatRoom().getTotalMember(),
                 info != null ? info.getCnt() : -1,
-                info != null ? info.getMessage() : null,
+                info != null ? info.getContent() : null,
                 info != null ? info.getId() : null,
                 info != null ? info.getSender() : null);
     }

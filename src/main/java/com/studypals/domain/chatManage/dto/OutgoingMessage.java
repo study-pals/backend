@@ -18,8 +18,8 @@ public class OutgoingMessage {
     @Setter
     private String id;
 
-    private String room;
+    private String roomId;
     private ChatType type;
-    private String message;
+    private String content;
     private Long sender;
 }

@@ -18,6 +18,6 @@ public class LoggingMessage {
     private String id;
 
     private ChatType type;
-    private String message;
+    private String content;
     private Long sender;
 }

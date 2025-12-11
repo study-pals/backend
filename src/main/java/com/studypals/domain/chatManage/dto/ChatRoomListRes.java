@@ -9,12 +9,12 @@ import java.util.List;
  */
 public record ChatRoomListRes(List<ChatRoomInfo> rooms) {
     public record ChatRoomInfo(
-            String chatRoomId,
-            String chatRoomName,
-            String chatRoomUrl,
+            String roomId,
+            String name,
+            String url,
             Integer totalMember,
             Long unread,
-            String lastMessage,
-            String messageId,
+            String content,
+            String chatId,
             Long sender) {}
 }

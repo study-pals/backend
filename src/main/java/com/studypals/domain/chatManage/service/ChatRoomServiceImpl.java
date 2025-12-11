@@ -110,7 +110,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         // 채팅방 정보, 유저 정보, 커서, 채팅 로그를 모두 조합하여 최종 응답 생성
         return ChatRoomInfoRes.builder()
-                .id(chatRoomId)
+                .roomId(chatRoomId)
                 .name(chatRoom.getName())
                 .userInfos(members.stream().map(chatRoomMapper::toDto).toList())
                 .cursor(chatCursorRes)

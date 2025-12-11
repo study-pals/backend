@@ -125,7 +125,7 @@ class ChatMessageReaderTest {
         cacheResult.put("room1", new ChatroomLatestInfo(-1L, "cursor", ChatType.TEXT, "cached", 1L));
 
         given(cacheRepository.countAllToLatest(cursor)).willReturn(cacheResult);
-        given(messageRepository.findTopByRoomOrderByIdDesc("room1")).willReturn(Optional.empty());
+        given(messageRepository.findTopByRoomIdOrderByIdDesc("room1")).willReturn(Optional.empty());
 
         // when
         Map<String, ChatroomLatestInfo> result = chatMessageReader.getLatestInfo(cursor);
@@ -133,7 +133,7 @@ class ChatMessageReaderTest {
         // then
         assertThat(result).isEmpty();
         then(cacheRepository).should().countAllToLatest(cursor);
-        then(messageRepository).should().findTopByRoomOrderByIdDesc("room1");
+        then(messageRepository).should().findTopByRoomIdOrderByIdDesc("room1");
         then(cacheRepository).should(never()).save(any());
         then(cacheRepository).should(never()).saveAll(any());
     }
@@ -154,13 +154,13 @@ class ChatMessageReaderTest {
         ChatMessage latestMessage = ChatMessage.builder()
                 .id("cursor-id")
                 .type(ChatType.TEXT)
-                .room("room1")
+                .roomId("room1")
                 .sender(10L)
-                .message("latest-message")
+                .content("latest-message")
                 .build();
 
         given(cacheRepository.countAllToLatest(cursor)).willReturn(cacheResult);
-        given(messageRepository.findTopByRoomOrderByIdDesc("room1")).willReturn(Optional.of(latestMessage));
+        given(messageRepository.findTopByRoomIdOrderByIdDesc("room1")).willReturn(Optional.of(latestMessage));
 
         // when
         Map<String, ChatroomLatestInfo> result = chatMessageReader.getLatestInfo(cursor);
@@ -172,7 +172,7 @@ class ChatMessageReaderTest {
         assertThat(info.getCnt()).isEqualTo(0L);
         assertThat(info.getId()).isEqualTo("cursor-id");
         assertThat(info.getType()).isEqualTo(ChatType.TEXT);
-        assertThat(info.getMessage()).isEqualTo("latest-message");
+        assertThat(info.getContent()).isEqualTo("latest-message");
         assertThat(info.getSender()).isEqualTo(10L);
 
         then(cacheRepository).should().save(latestMessage);
@@ -197,43 +197,43 @@ class ChatMessageReaderTest {
         ChatMessage latestMessage = ChatMessage.builder()
                 .id("new-id")
                 .type(ChatType.TEXT)
-                .room("room1")
+                .roomId("room1")
                 .sender(20L)
-                .message("new-message")
+                .content("new-message")
                 .build();
 
         // findTopByRoomOrderByIdDesc -> latestMessage
         given(cacheRepository.countAllToLatest(cursor)).willReturn(cacheResult);
-        given(messageRepository.findTopByRoomOrderByIdDesc("room1")).willReturn(Optional.of(latestMessage));
+        given(messageRepository.findTopByRoomIdOrderByIdDesc("room1")).willReturn(Optional.of(latestMessage));
 
         // findTop100ByRoomOrderByIdDesc -> 여러 메시지 (내림차순 가정)
         ChatMessage msg3 = ChatMessage.builder()
                 .id("id3")
                 .type(ChatType.TEXT)
-                .room("room1")
+                .roomId("room1")
                 .sender(1L)
-                .message("m3")
+                .content("m3")
                 .build();
         ChatMessage msg2 = ChatMessage.builder()
                 .id("id2")
                 .type(ChatType.TEXT)
-                .room("room1")
+                .roomId("room1")
                 .sender(1L)
-                .message("m2")
+                .content("m2")
                 .build();
         ChatMessage msg1 = ChatMessage.builder()
                 .id("id1")
                 .type(ChatType.TEXT)
-                .room("room1")
+                .roomId("room1")
                 .sender(1L)
-                .message("m1")
+                .content("m1")
                 .build();
 
         List<ChatMessage> messages = new ArrayList<>();
         messages.add(msg3);
         messages.add(msg2);
         messages.add(msg1);
-        given(messageRepository.findTop100ByRoomOrderByIdDesc("room1")).willReturn(messages); // 내림차순
+        given(messageRepository.findTop100ByRoomIdOrderByIdDesc("room1")).willReturn(messages); // 내림차순
 
         // when
         Map<String, ChatroomLatestInfo> result = chatMessageReader.getLatestInfo(cursor);
@@ -245,7 +245,7 @@ class ChatMessageReaderTest {
         assertThat(info.getCnt()).isEqualTo(0L);
         assertThat(info.getId()).isEqualTo("new-id");
         assertThat(info.getType()).isEqualTo(ChatType.TEXT);
-        assertThat(info.getMessage()).isEqualTo("new-message");
+        assertThat(info.getContent()).isEqualTo("new-message");
         assertThat(info.getSender()).isEqualTo(20L);
 
         // 캐시 재구성 호출 검증
@@ -284,11 +284,11 @@ class ChatMessageReaderTest {
         assertThat(info.getCnt()).isEqualTo(100L); // cap
         assertThat(info.getId()).isEqualTo("cursor");
         assertThat(info.getType()).isEqualTo(ChatType.TEXT);
-        assertThat(info.getMessage()).isEqualTo("cached");
+        assertThat(info.getContent()).isEqualTo("cached");
         assertThat(info.getSender()).isEqualTo(1L);
 
-        then(messageRepository).should(never()).findTopByRoomOrderByIdDesc(any());
-        then(messageRepository).should(never()).findTop100ByRoomOrderByIdDesc(any());
+        then(messageRepository).should(never()).findTopByRoomIdOrderByIdDesc(any());
+        then(messageRepository).should(never()).findTop100ByRoomIdOrderByIdDesc(any());
         then(cacheRepository).should(never()).clear(any());
         then(cacheRepository).should(never()).save(any());
         then(cacheRepository).should(never()).saveAll(any());
