@@ -23,7 +23,7 @@ import com.studypals.global.exceptions.exception.BaseException;
  */
 @Slf4j
 @RestControllerAdvice(basePackages = "com.studypals.global.sse", basePackageClasses = SseChatRoomController.class)
-@Order(0)
+@Order(ExceptionHandlerOrder.SSE_EXCEPTION_HANDLER)
 public class SseExceptionHandler {
 
     private boolean isSseRequest(HttpServletRequest request) {
@@ -50,9 +50,8 @@ public class SseExceptionHandler {
 
         log.warn("SSE business error: code={}, message={}", ex.getErrorCode(), ex.getMessage());
 
-        response.resetBuffer(); // 혹시 쓰던 버퍼 있으면 비움
+        response.resetBuffer();
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        // body 없이 끝냄 → HttpMessageConverter 안 타서 CommonResponse 문제 없음
         response.flushBuffer();
     }
 
