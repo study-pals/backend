@@ -170,8 +170,9 @@ public class StudySessionServiceImpl implements StudySessionService {
         }
 
         // 현재 StudyStatus 엔티티의 studyTime 값은 사용하지 않는 값으로 무조건 0이다. 따라서 StudyTime에서 따로 가져와야 한다.
-        Long studyTime = studyTimeReader.findByCategoryId(
-                userId, LocalDate.from(studyStatus.getStartTime()), studyStatus.getCategoryId()).orElse(0L);
+        Long studyTime = studyTimeReader
+                .findByCategoryId(userId, LocalDate.from(studyStatus.getStartTime()), studyStatus.getCategoryId())
+                .orElse(0L);
 
         return mapper.toStudyStatusDto(studyStatus, studyTime);
     }
