@@ -3,6 +3,7 @@ package com.studypals.domain.studyManage.worker;
 import java.time.LocalDate;
 import java.util.List;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
@@ -54,7 +55,7 @@ public class StudyTimeReader {
      * @param categoryId 검색하고자 하는 카테고리 id
      * @return 총 공부 시간
      */
-    public Long findByCategoryId(Long userId, LocalDate date, Long categoryId) {
+    public Optional<Long> findByCategoryId(Long userId, LocalDate date, Long categoryId) {
         return studyTimeRepository.findTimeByCategoryAndDate(userId, date, categoryId);
     }
 }

@@ -53,9 +53,9 @@ public interface StudySessionService {
     Long endStudy(Long userId, LocalTime endTime);
 
     /**
-     * 사용자가 학습 중인지 확인하는 메서드입니다. 학습하고 있다면 true를 반환하고, 학습하고 있지 않다면 false를 반환합니다.
-     * @param userId
-     * @return true/false
+     * 사용자가 학습 중인지 확인합니다.
+     * @param userId 요청을 보낸 사용자 id
+     * @return 학습 정보
      */
     StudyStatusRes checkStudyStatus(Long userId);
 }

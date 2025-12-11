@@ -235,7 +235,7 @@ class StudySessionServiceTest {
 
         given(studyStatusWorker.find(userId)).willReturn(optionalMockStatus);
         given(mockStudyStatus.isStudying()).willReturn(true);
-        given(mockStudyTimeReader.findByCategoryId(any(), any(), any())).willReturn(studyTime);
+        given(mockStudyTimeReader.findByCategoryId(any(), any(), any())).willReturn(Optional.of(studyTime));
         given(mockStudyStatus.getStartTime()).willReturn(LocalDateTime.now());
         given(mapper.toStudyStatusDto(mockStudyStatus, studyTime)).willReturn(expected);
 
@@ -244,7 +244,7 @@ class StudySessionServiceTest {
     }
 
     @Test
-    void checkStudyStatus_fail_not_in_redis() {
+    void checkStudyStatus_success_not_in_redis() {
         Long userId = -1L;
         StudyStatusRes expected = new StudyStatusRes(false, null, null, null, null, null);
 
@@ -257,7 +257,7 @@ class StudySessionServiceTest {
     }
 
     @Test
-    void checkStudyStatus_fail_not_studying() {
+    void checkStudyStatus_success_not_studying() {
         Long userId = -1L;
         Optional<StudyStatus> optionalMockStatus = Optional.of(mockStudyStatus);
         StudyStatusRes expected = new StudyStatusRes(false, null, null, null, null, null);

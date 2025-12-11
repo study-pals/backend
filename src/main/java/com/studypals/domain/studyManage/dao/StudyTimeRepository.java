@@ -93,7 +93,7 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
             AND st.studiedDate = :studiedDate
             AND st.studyCategory.id = :categoryId
         """)
-    Long findTimeByCategoryAndDate(
+    Optional<Long> findTimeByCategoryAndDate(
             @Param("memberId") Long memberId,
             @Param("studiedDate") LocalDate studiedDate,
             @Param("categoryId") Long categoryId);
