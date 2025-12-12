@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import com.studypals.domain.chatManage.worker.ChatRoomWriter;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
@@ -51,7 +53,16 @@ public class GroupServiceTest {
     private GroupMemberWriter groupMemberWriter;
 
     @Mock
+    private GroupMemberReader groupMemberReader;
+
+    @Mock
+    private GroupAuthorityValidator groupAuthorityValidator;
+
+    @Mock
     private GroupMapper groupMapper;
+
+    @Mock
+    private GroupGoalCalculator groupGoalCalculator;
 
     @Mock
     private ChatRoomWriter chatRoomWriter;
@@ -136,5 +147,77 @@ public class GroupServiceTest {
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
+    }
+
+    @Test
+    void getGroups_success() {
+        Long userId = 1L;
+        List<GroupSummaryDto> groups = List.of(
+                new GroupSummaryDto(
+                        101L,
+                        "CS 전공 지식 뿌시기",
+                        "취업준비",
+                        "chat_cs001",
+                        true, // 공개 그룹
+                        false, // 승인 불필요
+                        LocalDate.of(2025, 11, 15)),
+                new GroupSummaryDto(
+                        205L,
+                        "자바 스터디 (Spring Boot)",
+                        "백엔드개발",
+                        "chat_java05",
+                        false, // 비공개 그룹
+                        true, // 승인 필요
+                        LocalDate.of(2025, 10, 20)),
+                new GroupSummaryDto(
+                        312L,
+                        "알고리즘 코딩 테스트",
+                        "면접준비",
+                        "chat_algo_test",
+                        true, // 공개 그룹
+                        true, // 승인 필요
+                        LocalDate.of(2025, 12, 1)));
+
+        given(memberReader.get(userId)).willReturn(mockMember);
+        given(groupMemberReader.getGroups(userId)).willReturn(groups);
+
+        List<GetGroupsRes> result = groupService.getGroups(userId);
+
+        assertThat(result.size()).isEqualTo(groups.size());
+        assertThat(result.get(0).groupName()).isEqualTo("CS 전공 지식 뿌시기");
+        assertThat(result.get(1).groupName()).isEqualTo("자바 스터디 (Spring Boot)");
+        assertThat(result.get(2).groupName()).isEqualTo("알고리즘 코딩 테스트");
+    }
+
+    @Test
+    void getGroupDetails_success() {
+        Long userId = 1L;
+        Long groupId = 1L;
+        List<GroupMemberProfileDto> profiles = List.of(
+                new GroupMemberProfileDto(1L, "개발자A", "https://example.com/img/profile_a.png", GroupRole.LEADER),
+                new GroupMemberProfileDto(2L, "열공학생B", "https://example.com/img/profile_b.png", GroupRole.MEMBER),
+                new GroupMemberProfileDto(3L, "스터디봇C", "https://example.com/img/profile_c.png", GroupRole.MEMBER));
+        List<GroupCategoryGoalDto> userGoals = List.of(
+                new GroupCategoryGoalDto(
+                        501L, // CS 공부 카테고리 ID
+                        75 // 75% 달성
+                        ),
+                new GroupCategoryGoalDto(
+                        502L, // 알고리즘 카테고리 ID
+                        100 // 100% 달성
+                        ),
+                new GroupCategoryGoalDto(
+                        503L, // 면접 준비 카테고리 ID
+                        40 // 40% 달성
+                        ));
+
+        given(groupReader.getById(groupId)).willReturn(mockGroup);
+        given(groupMemberReader.getAllMemberProfiles(mockGroup)).willReturn(profiles);
+        given(groupGoalCalculator.calculateGroupGoals(groupId, profiles)).willReturn(userGoals);
+
+        GetGroupDetailRes result = groupService.getGroupDetails(userId, groupId);
+
+        assertThat(result.profiles().size()).isEqualTo(profiles.size());
+        assertThat(result.userGoals().size()).isEqualTo(userGoals.size());
     }
 }
