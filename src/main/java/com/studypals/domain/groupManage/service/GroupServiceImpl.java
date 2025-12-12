@@ -42,6 +42,7 @@ public class GroupServiceImpl implements GroupService {
     private final GroupMemberWriter groupMemberWriter;
     private final GroupAuthorityValidator validator;
     private final GroupMapper groupMapper;
+    private final GroupGoalCalculator groupGoalCalculator;
 
     // chat room worker class
     private final ChatRoomWriter chatRoomWriter;
@@ -87,8 +88,12 @@ public class GroupServiceImpl implements GroupService {
 
         Group group = groupReader.getById(groupId);
 
+        // 그룹에 속한 유저들 프로필
         List<GroupMemberProfileDto> profiles = groupMemberReader.getAllMemberProfiles(group);
 
-        return GetGroupDetailRes.of(group, profiles);
+        // 그룹에 속한 유저들의 목표 달성률 계산
+        List<GroupCategoryGoalDto> userGoals = groupGoalCalculator.calculateGroupGoals(groupId, profiles);
+
+        return GetGroupDetailRes.of(group, profiles, userGoals);
     }
 }

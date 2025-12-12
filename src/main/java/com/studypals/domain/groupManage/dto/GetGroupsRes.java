@@ -3,12 +3,12 @@ package com.studypals.domain.groupManage.dto;
 import java.time.LocalDate;
 
 public record GetGroupsRes(
-        Long id,
-        String name,
-        String tag,
+        Long groupId,
+        String groupName,
+        String groupTag,
         String chatRoomId,
-        boolean open,
-        boolean approvalRequired,
+        boolean isOpen,
+        boolean isApprovalRequired,
         LocalDate createdDate) {
     public static GetGroupsRes from(GroupSummaryDto dto) {
         return new GetGroupsRes(
