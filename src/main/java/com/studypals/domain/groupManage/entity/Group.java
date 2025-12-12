@@ -52,7 +52,7 @@ public class Group {
 
     @Builder.Default
     @Column(name = "total_member", nullable = false, columnDefinition = "INTEGER DEFAULT 1")
-    private Integer totalMember = 1;
+    private Integer totalMember = 1; // join을 하더라도 현재 따로 초기화하는 코드가 없어 보임.
 
     @Builder.Default
     @Column(name = "is_open", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")

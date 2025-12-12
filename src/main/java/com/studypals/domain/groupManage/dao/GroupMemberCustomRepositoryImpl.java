@@ -47,6 +47,19 @@ public class GroupMemberCustomRepositoryImpl implements GroupMemberCustomReposit
                 .fetch();
     }
 
+    @Override
+    public List<GroupMemberProfileDto> findAllMemberProfiles(Long groupId) {
+        return queryFactory
+                .select(Projections.constructor(
+                        GroupMemberProfileDto.class, member.id, member.nickname, member.imageUrl, groupMember.role))
+                .from(groupMember)
+                .join(member)
+                .on(groupMember.member.id.eq(member.id))
+                .where(groupMember.group.id.eq(groupId))
+                .orderBy(orderByLeaderPriority(), groupMember.joinedAt.desc())
+                .fetch();
+    }
+
     private OrderSpecifier<Integer> orderByLeaderPriority() {
         return new CaseBuilder()
                 .when(groupMember.role.eq(GroupRole.LEADER))

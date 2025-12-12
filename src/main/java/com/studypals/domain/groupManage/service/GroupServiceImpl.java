@@ -38,7 +38,9 @@ public class GroupServiceImpl implements GroupService {
     private final MemberReader memberReader;
     private final GroupWriter groupWriter;
     private final GroupReader groupReader;
+    private final GroupMemberReader groupMemberReader;
     private final GroupMemberWriter groupMemberWriter;
+    private final GroupAuthorityValidator validator;
     private final GroupMapper groupMapper;
 
     // chat room worker class
@@ -64,5 +66,29 @@ public class GroupServiceImpl implements GroupService {
         group.setChatRoom(chatRoom);
 
         return group.getId();
+    }
+
+    @Override
+    @Transactional(readOnly = true) // 붙이는게 이득일까?
+    public List<GetGroupsRes> getGroups(Long userId) {
+        // 유효한 userId인지 검사
+        memberReader.get(userId);
+
+        List<GroupSummaryDto> groups = groupMemberReader.getGroups(userId);
+
+        return groups.stream().map(GetGroupsRes::from).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetGroupDetailRes getGroupDetails(Long userId, Long groupId) {
+        // 해당 유저가 속한 그룹인가?
+        validator.isMemberOfGroup(userId, groupId);
+
+        Group group = groupReader.getById(groupId);
+
+        List<GroupMemberProfileDto> profiles = groupMemberReader.getAllMemberProfiles(group);
+
+        return GetGroupDetailRes.of(group, profiles);
     }
 }
