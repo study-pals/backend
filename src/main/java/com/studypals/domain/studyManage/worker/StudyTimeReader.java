@@ -2,6 +2,7 @@ package com.studypals.domain.studyManage.worker;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,11 +40,22 @@ public class StudyTimeReader {
 
     /**
      * 사용자 아이디와, 특정 기간에 대해, 해당 유저가 공부한 기록에 대한 리스트를 반환합니다.
-     * @param userId 검새갛조가 하는 user id
+     * @param userId 검색하려는 user id
      * @param periodDto 기간에 대한 dto
      * @return StudyTime 에 대한 리스트
      */
     public List<StudyTime> findByUserIdAndPeriod(Long userId, PeriodDto periodDto) {
         return studyTimeRepository.findAllByMemberIdAndStudiedDateBetween(userId, periodDto.start(), periodDto.end());
+    }
+
+    /**
+     * 해당 날짜에 특정 카테고리를 학습한 총 시간을 반환합니다.
+     * @param userId 검색하고자 하는 사용자 id
+     * @param date 검색하고자 하는 날짜
+     * @param categoryId 검색하고자 하는 카테고리 id
+     * @return 총 공부 시간
+     */
+    public Optional<Long> findByCategoryId(Long userId, LocalDate date, Long categoryId) {
+        return studyTimeRepository.findTimeByCategoryAndDate(userId, date, categoryId);
     }
 }

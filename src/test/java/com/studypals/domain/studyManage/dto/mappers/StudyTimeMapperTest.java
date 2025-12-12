@@ -12,6 +12,7 @@ import org.mapstruct.factory.Mappers;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
+import com.studypals.domain.studyManage.dto.StudyStatusRes;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
@@ -70,5 +71,35 @@ class StudyTimeMapperTest {
         // then
         assertThat(dto.name()).isEqualTo("temp");
         assertThat(dto.time()).isEqualTo(80L);
+    }
+
+    @Test
+    void toStudyStatusDto_success_fromBoolean() {
+        StudyStatusRes res = mapper.toStudyStatusDto(Boolean.FALSE);
+
+        assertThat(res.studying()).isFalse();
+        assertThat(res.name()).isNull();
+        assertThat(res.categoryId()).isNull();
+        assertThat(res.startTime()).isNull();
+        assertThat(res.goal()).isNull();
+    }
+
+    @Test
+    void toStudyStatusDto_success_fromEntity() {
+        StudyStatus entity = StudyStatus.builder()
+                .id(1L)
+                .studying(true)
+                .startTime(LocalDateTime.now())
+                .categoryId(1L)
+                .goal(20L)
+                .build();
+        Long studyTime = 20L;
+
+        StudyStatusRes res = mapper.toStudyStatusDto(entity, studyTime);
+
+        assertThat(res.studying()).isTrue();
+        assertThat(res.startTime()).isEqualTo(entity.getStartTime());
+        assertThat(res.name()).isEqualTo(entity.getName());
+        assertThat(res.goal()).isEqualTo(entity.getGoal());
     }
 }
