@@ -4,21 +4,19 @@ import lombok.*;
 
 /**
  * server -> client 로의 메시지 형식을 정의합니다.
- * incomingMessage 에 대해, 일부 정보를 서버에서 추가하여 반환합니다.
+ * OutgoingMessage 에서, roomId 를 제거하여, 그룹화된 채팅 로그 반환 시 필요없는 정보를 제외했습니다.
  *
  * @author jack8
- * @see IncomingMessage
- * @since 2025-06-19
+ * @see OutgoingMessage
+ * @since 2025-12-10
  */
 @Builder
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OutgoingMessage {
-    @Setter
+public class LoggingMessage {
     private String id;
 
-    private String roomId;
     private ChatType type;
     private String content;
     private Long sender;

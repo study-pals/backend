@@ -86,7 +86,7 @@ public class ReactiveChatSaveWorker {
 
             // 채팅방에 대해 - 가장 마지막 메시지를 저장합니다. 모든 메시지에 대해, 크기 비교를 통해 더 큰 값이(최신값) 들어옵니다.
             for (ChatMessage msg : savedMessages) {
-                latestByRoom.merge(msg.getRoom(), msg, (a, b) -> a.getId().compareTo(b.getId()) < 0 ? b : a);
+                latestByRoom.merge(msg.getRoomId(), msg, (a, b) -> a.getId().compareTo(b.getId()) < 0 ? b : a);
             }
             cacheRepository.saveAll(savedMessages); // 캐시에 해당 데이터를 전부 저장합니다.
 

@@ -80,9 +80,9 @@ class ChatMessageRepositoryTest extends TestEnvironment {
         return ChatMessage.builder()
                 .id(Long.toHexString(snowflake.nextId()))
                 .type(ChatType.TEXT)
-                .room(roomId)
+                .roomId(roomId)
                 .sender(1L)
-                .message("message")
+                .content("message")
                 .build();
     }
 }

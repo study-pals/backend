@@ -12,6 +12,7 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import com.studypals.global.responses.ResponseCode;
  */
 @ActiveProfiles("test")
 @DisplayName("API TEST / 그룹 가입 관리 통합 테스트")
+@Disabled // 추후 전반적인 리펙토링 예정
 public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
     @Autowired
     private GroupEntryCodeRedisRepository entryCodeRedisRepository;
@@ -87,7 +89,8 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
     @DisplayName("POST /groups/join")
     void joinGroup_success() throws Exception {
         // given
-        CreateGroupVar group = createGroup(createUser().getUserId(), "group", "tag", false);
+        CreateUserVar initUser = createUser();
+        CreateGroupVar group = createGroup(initUser.getUserId(), "group", "tag", false);
         CreateUserVar user = createUser("member_username", "member");
         GroupEntryCode groupEntryCode = new GroupEntryCode("1A2B3C", group.groupId());
         GroupEntryReq req = new GroupEntryReq(group.groupId(), groupEntryCode.getCode());

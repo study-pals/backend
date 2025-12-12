@@ -30,9 +30,9 @@ public class ChatMessage {
     private String id;
 
     private ChatType type;
-    private String room;
+    private String roomId;
     private Long sender;
-    private String message;
+    private String content;
 
     @RequiredArgsConstructor
     @Getter

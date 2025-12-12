@@ -45,9 +45,9 @@ class ChatMessagePipelineTest {
     ChatMessage createChat(String id, String roomId) {
         return ChatMessage.builder()
                 .id(id)
-                .room(roomId)
+                .roomId(roomId)
                 .sender(1L)
-                .message("message")
+                .content("message")
                 .type(ChatType.TEXT)
                 .build();
     }

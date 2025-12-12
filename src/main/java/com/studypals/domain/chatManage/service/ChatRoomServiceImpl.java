@@ -1,23 +1,22 @@
 package com.studypals.domain.chatManage.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.chatManage.dto.ChatCursorRes;
-import com.studypals.domain.chatManage.dto.ChatRoomInfoRes;
-import com.studypals.domain.chatManage.dto.OutgoingMessage;
+import com.studypals.domain.chatManage.dto.*;
 import com.studypals.domain.chatManage.dto.mapper.ChatMessageMapper;
 import com.studypals.domain.chatManage.dto.mapper.ChatRoomMapper;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.entity.ChatRoomMember;
 import com.studypals.domain.chatManage.worker.ChatMessageReader;
 import com.studypals.domain.chatManage.worker.ChatRoomReader;
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.ChatException;
 
@@ -52,6 +51,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomMapper chatRoomMapper;
     private final ChatMessageMapper chatMessageMapper;
     private final ChatMessageReader chatMessageReader;
+    private final MemberReader memberReader;
 
     /**
      * 특정 유저가 특정 채팅방에 입장할 때 필요한 전체 정보를 조회합니다.
@@ -92,7 +92,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         // DB 에 저장된 각 멤버의 마지막 읽은 메시지 ID를 기반으로 기본 커서 맵 구성
         Map<Long, String> cursorData = new HashMap<>();
         for (ChatRoomMember chatRoomMember : members) {
-            cursorData.put(chatRoomMember.getId(), chatRoomMember.getLastReadMessage());
+            cursorData.put(chatRoomMember.getMember().getId(), chatRoomMember.getLastReadMessage());
         }
 
         // 캐시에 저장된 최신 커서 정보로 덮어쓰기 (실시간 갱신분 반영)
@@ -104,17 +104,68 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .toList();
 
         // 기준 chatId 이후의 채팅 로그를 조회하고, 전송용 OutgoingMessage DTO 리스트로 변환
-        List<OutgoingMessage> logs = chatMessageReader.getChatLog(chatRoomId, chatId).stream()
-                .map(chatMessageMapper::toOutMessage)
+        List<LoggingMessage> logs = chatMessageReader.getChatLog(chatRoomId, chatId).stream()
+                .map(chatMessageMapper::toLoggingMessage)
                 .toList();
 
         // 채팅방 정보, 유저 정보, 커서, 채팅 로그를 모두 조합하여 최종 응답 생성
         return ChatRoomInfoRes.builder()
-                .id(chatRoomId)
+                .roomId(chatRoomId)
                 .name(chatRoom.getName())
                 .userInfos(members.stream().map(chatRoomMapper::toDto).toList())
                 .cursor(chatCursorRes)
                 .logs(logs)
                 .build();
+    }
+
+    /**
+     * 사용자가 참여 중인 채팅방 목록을 조회한다.
+     * <pre>
+     * 과정:
+     * 사용자의 ChatRoomMember 목록 조회
+     * 채팅방별 마지막 읽은 메시지 ID(cursor) 생성
+     * cursor 기반으로 언리드 메시지 개수와 마지막 메시지 정보 조회
+     * 채팅방 정보와 최신 메시지 정보를 합쳐 응답 객체로 변환
+     * </pre>
+     *
+     * @param userId 조회 대상 사용자 ID
+     * @return 채팅방 목록 및 최신 메시지 정보를 담은 응답 객체
+     */
+    @Override
+    public ChatRoomListRes getChatRoomList(Long userId) {
+        // 유저 기준으로 참여 채팅방 조회
+        Member memberRef = memberReader.getRef(userId);
+        List<ChatRoomMember> chatRoomMembers = chatRoomReader.findChatRoomMembers(memberRef);
+        List<String> roomIds =
+                chatRoomMembers.stream().map(t -> t.getChatRoom().getId()).toList();
+
+        if (chatRoomMembers.isEmpty()) {
+            return new ChatRoomListRes(Collections.emptyList());
+        }
+
+        // 채팅방 ID -> 마지막 읽은 메시지 ID 매핑
+        Map<String, String> cursor = chatRoomMembers.stream()
+                .collect(Collectors.toMap(
+                        crm -> crm.getChatRoom().getId(),
+                        crm -> crm.getLastReadMessage() == null ? "0" : crm.getLastReadMessage()));
+
+        // redis 에 저장된 최신 데이터 가져오기
+        Map<String, String> recentCursor = chatRoomReader.getEachUserCursor(userId, roomIds);
+
+        // 오래된 데이터(mysql 에 저장된)와 최신 데이터(redis 에 저장된) 을 합침
+        for (String key : cursor.keySet()) {
+            if (recentCursor.containsKey(key)) {
+                cursor.put(key, recentCursor.get(key));
+            }
+        }
+
+        Map<String, ChatroomLatestInfo> latestInfos = chatMessageReader.getLatestInfo(cursor);
+
+        // 응답 DTO 구성
+        List<ChatRoomListRes.ChatRoomInfo> infos = chatRoomMembers.stream()
+                .map(crm -> chatRoomMapper.toChatRoomInfo(crm, latestInfos))
+                .toList();
+
+        return new ChatRoomListRes(infos);
     }
 }

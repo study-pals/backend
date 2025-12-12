@@ -16,6 +16,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class IncomingMessage {
     private ChatType type;
-    private String message;
-    private String room;
+    private String content;
+    private String roomId;
 }

@@ -56,7 +56,7 @@ public class GroupIntegrationTest extends AbstractGroupIntegrationTest {
         // given
         CreateUserVar user = createUser();
         createGroupTag("group tag");
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false);
+        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
 
         // when
         ResultActions result = mockMvc.perform(post("/groups")

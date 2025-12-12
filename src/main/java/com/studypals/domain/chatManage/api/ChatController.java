@@ -37,7 +37,7 @@ public class ChatController {
         Long userId = Long.parseLong(principal.getName());
 
         // 유저가 송신하는 목적지가 가능한 값인지 검증(채팅방에 속해 있는지)
-        chatService.sendDestinationValidate(sessionId, message.getRoom());
+        chatService.sendDestinationValidate(sessionId, message.getRoomId());
         // 메시지를 전송
         chatService.sendMessage(userId, message);
     }

@@ -1,13 +1,18 @@
 package com.studypals.domain.chatManage.worker;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.cache.annotation.Cacheable;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
 import com.studypals.domain.chatManage.dao.ChatRoomRepository;
 import com.studypals.domain.chatManage.dao.UserLastReadMessageRepository;
+import com.studypals.domain.chatManage.entity.ChatCacheValue;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.entity.ChatRoomMember;
 import com.studypals.domain.chatManage.entity.UserLastReadMessage;
@@ -67,7 +72,7 @@ public class ChatRoomReader {
     }
 
     /**
-     * 해당 유저가 소속한 chatRoomMember 엔티티 리스트를 반환합니다. 어쩌면 fetch join 타입으로 가져와야 할 수 도 있습니다.
+     * 해당 유저가 소속한 chatRoomMember 엔티티 리스트를 반환합니다. ChatRoom 이 FECTH JOIN 된 결과를 반환합니다.
      * @param member 검색할 멤버 엔티티
      * @return chatRoomMember 엔티티 리스트
      */
@@ -83,5 +88,47 @@ public class ChatRoomReader {
      */
     public UserLastReadMessage getCachedCursor(String roomId) {
         return userLastReadMessageRepository.findById(roomId).orElse(new UserLastReadMessage(roomId, Map.of()));
+    }
+
+    /**
+     * 각 채팅방에 대해, 유저가 읽은 최신 메시지 아이디를 정리해서 반환하는 메서드
+     * @param userId 검색하고자 하는 유저 아이디
+     * @param roomIds 검색하고자 하는, 유저가 소속된 채팅방 아이디
+     * @return 유저 당, 각 채팅방에서 가장 마지막으로 읽은 메시지 아이디의 map
+     */
+    public Map<String, String> getEachUserCursor(Long userId, List<String> roomIds) {
+        // findHashFieldsByMap 에 들어갈 파라미터 구성 - hashKey 에 대해 내부에서 검색할 (field key) 리스트
+        Map<String, List<String>> param =
+                roomIds.stream().collect(Collectors.toMap(t -> t, t -> List.of(userId.toString())));
+        Map<String, Map<String, String>> result = userLastReadMessageRepository.findHashFieldsById(param);
+        // 반환할 데이터
+        Map<String, String> roomToChatId = new HashMap<>();
+
+        String target = String.valueOf(userId);
+
+        // 반환된 데이터가 Map<[채팅방 아이디], Map<[유저 아이디], [채팅 아이디]>> 인데, 이걸 Map<[채팅방 아이디],[채팅 아이디]> 로 변환
+        // 유저 아이디는 항상 입력된 값(userId) 거나, map 에 존재하지 않음(캐싱되지 않음)
+        for (Map.Entry<String, Map<String, String>> entry : result.entrySet()) {
+            String roomId = entry.getKey();
+            Map<String, String> userMap = entry.getValue();
+
+            String chatId = userMap.get(target);
+            if (chatId != null) {
+                roomToChatId.put(roomId, chatId);
+            }
+        }
+        return roomToChatId;
+    }
+
+    /**
+     * 현재 채팅방에 소속된 member 의 id 를 추출하여 리스트로 받습니다. redis cache 로 캐싱된 메서드 이기에
+     * 파라미터와 반환타입을 primitive 혹은 그에 준한 타입으로 사용하였습니다.
+     * @param chatRoomId 채팅방 아이디
+     * @return 해당 채팅방에 소속된 member id
+     * @Cacheable {@link ChatCacheValue}
+     */
+    @Cacheable(value = ChatCacheValue.JOINED_MEMBER, key = "#chatRoomId")
+    public List<Long> findJoinedMemberId(String chatRoomId) {
+        return chatRoomMemberRepository.findMemberIdsByRoomId(chatRoomId);
     }
 }

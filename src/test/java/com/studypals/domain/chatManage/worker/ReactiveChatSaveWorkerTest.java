@@ -48,16 +48,16 @@ class ReactiveChatSaveWorkerTest {
         // given
         ChatMessage msg1 = ChatMessage.builder()
                 .id("1-0")
-                .room("room1")
+                .roomId("room1")
                 .sender(1L)
-                .message("hello")
+                .content("hello")
                 .build();
 
         ChatMessage msg2 = ChatMessage.builder()
                 .id("2-0")
-                .room("room1")
+                .roomId("room1")
                 .sender(2L)
-                .message("world")
+                .content("world")
                 .build();
 
         List<ChatMessage> input = List.of(msg1, msg2);

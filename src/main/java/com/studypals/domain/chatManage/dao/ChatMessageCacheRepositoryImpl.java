@@ -184,7 +184,6 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     @SuppressWarnings("unchecked")
     public Map<String, ChatroomLatestInfo> countAllToLatest(Map<String, String> readInfos) {
         Map<String, ChatroomLatestInfo> result = new HashMap<>(readInfos.size());
-        StreamOperations<String, String, String> ops = redisTemplate.opsForStream();
         List<String> rooms = new ArrayList<>(readInfos.keySet());
         List<String> streamKeys = rooms.stream().map(id -> KEY_PREFIX + id).toList();
 
@@ -194,11 +193,15 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         List<RoomMeta> needRange = new ArrayList<>();
         for (List<Object> raw : raws) {
             RoomMeta meta = new RoomMeta(raw);
-            meta.targetId = encode(readInfos.get(meta.roomId)).getValue();
+            // meta 에 검색할 targetId 를 삽입
+            String rawId = readInfos.get(meta.roomId);
+            meta.targetId = encode(rawId).getValue();
 
             switch (meta.position()) {
+                    // 변경 - 최근 메시지가 target 인 경우에도, 최신 메시지 정보 반환
                 case BEFORE_OLDEST -> result.put(meta.roomId, toLatestInfo(meta.length, meta.latestChat));
-                case AT_NEWEST, AFTER_NEWEST -> result.put(meta.roomId, createEmptyInfo(meta.position().def));
+                case AFTER_NEWEST -> result.put(meta.roomId, createEmptyInfo(meta.position().def));
+                case AT_NEWEST -> result.put(meta.roomId, toLatestInfo(0, meta.latestChat));
                 case BETWEEN_OLDEST_AND_NEWEST -> needRange.add(meta);
             }
         }
@@ -275,6 +278,12 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         return result.stream().map(this::toEntity).toList();
     }
 
+    @Override
+    public void clear(String roomId) {
+        String streamKey = KEY_PREFIX + roomId;
+        redisTemplate.delete(streamKey);
+    }
+
     /**
      * 기준 이후 메시지 개수만 채워진 빈 ChatroomLatestInfo 를 생성합니다.
      *
@@ -298,7 +307,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
      */
     private ChatroomLatestInfo toLatestInfo(long cnt, ChatMessage chatMessage) {
         return new ChatroomLatestInfo(
-                cnt, chatMessage.getId(), chatMessage.getType(), chatMessage.getMessage(), chatMessage.getSender());
+                cnt, chatMessage.getId(), chatMessage.getType(), chatMessage.getContent(), chatMessage.getSender());
     }
 
     /**
@@ -351,7 +360,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
      * @return Stream key 및 recordId 가 설정된 MapRecord
      */
     private MapRecord<String, String, String> recordBuilder(ChatMessage message) {
-        String streamKey = KEY_PREFIX + message.getRoom();
+        String streamKey = KEY_PREFIX + message.getRoomId();
         RecordId recordId = encode(message.getId());
 
         // stream body 에 저장할 필드 구성 (필드 값이 null 인 경우 빈 문자열로 치환)
@@ -359,7 +368,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
         body.put(ID_FIELD, Objects.toString(recordId.getValue(), ""));
         body.put(TYPE_FIELD, Objects.toString(message.getType().toString(), ""));
         body.put(SENDER_FIELD, Objects.toString(message.getSender(), ""));
-        body.put(MESSAGE_FIELD, message.getMessage());
+        body.put(MESSAGE_FIELD, message.getContent());
 
         return StreamRecords.<String, String, String>mapBacked(body)
                 .withStreamKey(streamKey)
@@ -377,12 +386,22 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
     private ChatMessage toEntity(MapRecord<String, String, String> r) {
         Map<String, String> value = r.getValue();
 
+        String fullKey = r.getStream();
+        String roomId = stripPrefix(fullKey);
+
         return new ChatMessage(
                 decode(value.get(ID_FIELD)),
                 ChatType.valueOf(value.get(TYPE_FIELD)),
-                r.getStream(),
+                roomId,
                 Long.parseLong(value.get(SENDER_FIELD)),
                 value.get(MESSAGE_FIELD));
+    }
+
+    private String stripPrefix(String fullKey) {
+        if (fullKey != null && fullKey.startsWith(KEY_PREFIX)) {
+            return fullKey.substring(KEY_PREFIX.length());
+        }
+        return fullKey;
     }
 
     /**
@@ -428,7 +447,7 @@ public class ChatMessageCacheRepositoryImpl implements ChatMessageCacheRepositor
                     .id(decode(cast(data.get(4))))
                     .type(ChatType.from(cast(data.get(5))))
                     .sender(senderStr == null ? -1L : Long.parseLong(senderStr))
-                    .message(cast(data.get(7)))
+                    .content(cast(data.get(7)))
                     .build();
             this.roomId = streamKey.substring(KEY_PREFIX.length());
         }

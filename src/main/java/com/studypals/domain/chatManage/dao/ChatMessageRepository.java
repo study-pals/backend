@@ -1,6 +1,7 @@
 package com.studypals.domain.chatManage.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -41,7 +42,7 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
      * @param idFrom 기준 메시지 ID (포함)
      * @return 메시지 목록 (ID 내림차순)
      */
-    @Query(value = "{ 'room': ?0, 'id': { $gte: ?1 } }", sort = "{ 'id': -1 }")
+    @Query(value = "{ 'roomId': ?0, 'id': { $gte: ?1 } }", sort = "{ 'id': -1 }")
     List<ChatMessage> findRecent(String roomId, String idFrom);
 
     /**
@@ -55,6 +56,21 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
      * @param to     미포함(upper bound) 기준 메시지 ID
      * @return 범위 내 메시지 목록
      */
-    @Query(value = "{ 'room': ?0, 'id': { $gte: ?1, $lt: ?2 } }", sort = "{ 'id' :  -1 }")
+    @Query(value = "{ 'roomId': ?0, 'id': { $gte: ?1, $lt: ?2 } }", sort = "{ 'id' :  -1 }")
     List<ChatMessage> findRange(String roomId, String from, String to);
+
+    /**
+     * 특정 채팅방에서 최신 메시지 100개를 조회하여 가져옵니다.
+     * <p>
+     * @param roomId 조회할 채팅방 아이디
+     * @return 채팅 메시지 리스트(내림차순)
+     */
+    List<ChatMessage> findTop100ByRoomIdOrderByIdDesc(String roomId);
+
+    /**
+     * 특정 채팅방에서 최신 메시지 1개를 조회하여 가져옵니다.
+     * @param roomId 조회할 채팅방 아이디
+     * @return 가장 최신 메시지 1개
+     */
+    Optional<ChatMessage> findTopByRoomIdOrderByIdDesc(String roomId);
 }

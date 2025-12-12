@@ -9,6 +9,7 @@ package com.studypals.global.exceptions.exceptionHandler;
  * @since 2025-04-01
  */
 public class ExceptionHandlerOrder {
+    public static final int SSE_EXCEPTION_HANDLER = 0;
     public static final int DEFAULT_EXCEPTION_HANDLER = 1;
     public static final int GLOBAL_EXCEPTION_HANDLER = 2;
 }
