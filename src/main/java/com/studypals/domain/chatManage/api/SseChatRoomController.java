@@ -10,6 +10,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dto.ChatRoomListRes;
+import com.studypals.domain.chatManage.entity.ChatSseType;
 import com.studypals.domain.chatManage.service.ChatRoomService;
 import com.studypals.global.sse.SseEmitterManager;
 import com.studypals.global.sse.SseSendDto;
@@ -35,7 +36,7 @@ public class SseChatRoomController {
     public SseEmitter getList(@AuthenticationPrincipal Long userId) {
         SseEmitter emitter = sseManager.createEmitter(userId);
         ChatRoomListRes res = chatRoomService.getChatRoomList(userId);
-        sseManager.sendMessageAsync(userId, new SseSendDto("init-message", res));
+        sseManager.sendMessageAsync(userId, new SseSendDto(ChatSseType.INIT_MESSAGE.name(), res));
 
         return emitter;
     }

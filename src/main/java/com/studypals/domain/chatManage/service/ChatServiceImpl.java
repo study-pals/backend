@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.studypals.domain.chatManage.dto.*;
 import com.studypals.domain.chatManage.dto.mapper.ChatMessageMapper;
 import com.studypals.domain.chatManage.entity.ChatMessage;
+import com.studypals.domain.chatManage.entity.ChatSseType;
 import com.studypals.domain.chatManage.worker.*;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.ChatException;
@@ -77,7 +78,8 @@ public class ChatServiceImpl implements ChatService {
 
         // 소속 멤버를 찾아, SSE 로 메시지 전송
         List<Long> memberIds = chatRoomReader.findJoinedMemberId(message.getRoomId());
-        memberIds.forEach(t -> sseManager.sendMessageAsync(t, new SseSendDto("new-message", outgoingMessage)));
+        memberIds.forEach(
+                t -> sseManager.sendMessageAsync(t, new SseSendDto(ChatSseType.NEW_MESSAGE.name(), outgoingMessage)));
         // 영속화용 엔티티로 변환 후 비동기 저장 파이프라인에 위임
         ChatMessage entity = chatMessageMapper.toEntity(message, id, userId);
         chatMessagePipeline.publish(entity);
