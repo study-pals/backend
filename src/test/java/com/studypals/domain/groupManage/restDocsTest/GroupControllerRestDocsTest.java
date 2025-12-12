@@ -143,6 +143,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
         result.andExpect(status().isOk())
                 .andExpect(hasKey(expected))
                 .andDo(restDocs.document(
+                        httpRequest(),
                         httpResponse(),
                         responseFields(
                                 fieldWithPath("code").description("U02-17"),
