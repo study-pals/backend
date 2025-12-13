@@ -197,27 +197,49 @@ public class GroupServiceTest {
                 new GroupMemberProfileDto(1L, "개발자A", "https://example.com/img/profile_a.png", GroupRole.LEADER),
                 new GroupMemberProfileDto(2L, "열공학생B", "https://example.com/img/profile_b.png", GroupRole.MEMBER),
                 new GroupMemberProfileDto(3L, "스터디봇C", "https://example.com/img/profile_c.png", GroupRole.MEMBER));
-        List<GroupCategoryGoalDto> userGoals = List.of(
-                new GroupCategoryGoalDto(
-                        501L, // CS 공부 카테고리 ID
-                        75 // 75% 달성
-                        ),
-                new GroupCategoryGoalDto(
-                        502L, // 알고리즘 카테고리 ID
-                        100 // 100% 달성
-                        ),
-                new GroupCategoryGoalDto(
-                        503L, // 면접 준비 카테고리 ID
-                        40 // 40% 달성
-                        ));
 
+        // 1. GroupCategoryGoalDto 목록 생성
+        List<GroupCategoryGoalDto> categoryGoals = List.of(
+                new GroupCategoryGoalDto(
+                        501L, // categoryId (CS 공부)
+                        1000L, // categoryGoal (목표량)
+                        "CS 공부", // categoryName
+                        75 // achievementPercent (75% 달성)
+                ),
+                new GroupCategoryGoalDto(
+                        502L, // categoryId (알고리즘)
+                        50L, // categoryGoal (목표량)
+                        "알고리즘", // categoryName
+                        100 // achievementPercent (100% 달성)
+                ),
+                new GroupCategoryGoalDto(
+                        503L, // categoryId (면접 준비)
+                        200L, // categoryGoal (목표량)
+                        "면접 준비", // categoryName
+                        40 // achievementPercent (40% 달성)
+                ));
+
+        // 2. GroupTotalGoalDto 생성 (평균 71% 가정: (75 + 100 + 40) / 3 = 71.66... -> 71 (버림))
+        GroupTotalGoalDto totalGoals = new GroupTotalGoalDto(categoryGoals, 71);
+
+        // 3. Mocking 설정 변경: List<GroupCategoryGoalDto> -> GroupTotalGoalDto
         given(groupReader.getById(groupId)).willReturn(mockGroup);
         given(groupMemberReader.getAllMemberProfiles(mockGroup)).willReturn(profiles);
-        given(groupGoalCalculator.calculateGroupGoals(groupId, profiles)).willReturn(userGoals);
+        given(groupGoalCalculator.calculateGroupGoals(groupId, profiles)).willReturn(totalGoals);
 
+        // When
         GetGroupDetailRes result = groupService.getGroupDetails(userId, groupId);
 
+        // Then
         assertThat(result.profiles().size()).isEqualTo(profiles.size());
-        assertThat(result.userGoals().size()).isEqualTo(userGoals.size());
+
+        // GroupTotalGoalDto 객체의 userGoals 리스트를 검증합니다.
+        assertThat(result.groupGoals().categoryGoals().size()).isEqualTo(categoryGoals.size());
+
+        // 평균 달성률 확인 (선택 사항)
+        assertThat(result.groupGoals().overallAveragePercent()).isEqualTo(71);
+
+        // 카테고리별 목표 중 첫 번째 항목의 categoryName이 올바른지 확인
+        assertThat(result.groupGoals().categoryGoals().get(0).categoryName()).isEqualTo("CS 공부");
     }
 }

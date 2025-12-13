@@ -12,9 +12,9 @@ public record GetGroupDetailRes(
         int totalMemberCount,
         int currentMemberCount,
         List<GroupMemberProfileDto> profiles,
-        List<GroupCategoryGoalDto> userGoals) {
+        GroupTotalGoalDto groupGoals) {
     public static GetGroupDetailRes of(
-            Group group, List<GroupMemberProfileDto> profiles, List<GroupCategoryGoalDto> userGoals) {
+            Group group, List<GroupMemberProfileDto> profiles, GroupTotalGoalDto goals) {
         return new GetGroupDetailRes(
                 group.getId(),
                 group.getName(),
@@ -23,6 +23,6 @@ public record GetGroupDetailRes(
                 group.getMaxMember(),
                 group.getTotalMember(),
                 profiles,
-                userGoals);
+                goals);
     }
 }

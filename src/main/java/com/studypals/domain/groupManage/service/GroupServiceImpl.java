@@ -92,7 +92,7 @@ public class GroupServiceImpl implements GroupService {
         List<GroupMemberProfileDto> profiles = groupMemberReader.getAllMemberProfiles(group);
 
         // 그룹에 속한 유저들의 목표 달성률 계산
-        List<GroupCategoryGoalDto> userGoals = groupGoalCalculator.calculateGroupGoals(groupId, profiles);
+        GroupTotalGoalDto userGoals = groupGoalCalculator.calculateGroupGoals(groupId, profiles);
 
         return GetGroupDetailRes.of(group, profiles, userGoals);
     }

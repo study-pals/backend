@@ -1,5 +1,6 @@
 package com.studypals.domain.groupManage.worker;
 
+import com.studypals.domain.groupManage.dto.GroupTotalGoalDto;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -31,9 +32,9 @@ public class GroupGoalCalculator {
     private final StudyCategoryRepository studyCategoryRepository;
     private final TimeUtils timeUtils;
 
-    public List<GroupCategoryGoalDto> calculateGroupGoals(Long groupId, List<GroupMemberProfileDto> profiles) {
+    public GroupTotalGoalDto calculateGroupGoals(Long groupId, List<GroupMemberProfileDto> profiles) {
 
-        // 1. 필요한 모든 ID 및 날짜 수집
+        // 필요한 모든 ID 및 날짜 수집
         List<Long> memberIds = profiles.stream().map(GroupMemberProfileDto::id).toList();
 
         LocalDate today = timeUtils.getToday();
@@ -45,19 +46,21 @@ public class GroupGoalCalculator {
         List<Long> categoryIds =
                 groupStudyCategories.stream().map(StudyCategory::getId).toList();
 
-        // 2. 모든 StudyTime 데이터를 단일 쿼리로 가져오기
+        // 모든 StudyTime 데이터를 단일 쿼리로 가져오기
         List<StudyTime> allStudyTimes =
                 studyTimeRepository.findByMemberIdInAndDateAndCategoryIdIn(memberIds, today, categoryIds);
 
-        // 3. 메모리 상에서 Map으로 변환하여 조회 효율 높이기
+        // 메모리 상에서 Map으로 변환하여 조회 효율 높이기
         // (Map<categoryId, Map<memberId, StudyTime>>)
         Map<Long, Map<Long, Long>> studyTimeMap = allStudyTimes.stream()
                 .collect(Collectors.groupingBy(
                         (StudyTime st) -> st.getStudyCategory().getId(),
                         Collectors.toMap(studyTime -> studyTime.getMember().getId(), StudyTime::getTime, Long::sum)));
 
-        // 4. 결과를 계산하고 반환
+        // 결과를 계산하고 반환
         List<GroupCategoryGoalDto> userGoals = new ArrayList<>();
+        // 전체 평균 계산
+        int totalPercentageSum = 0;
 
         for (StudyCategory category : groupStudyCategories) {
             final long categoryGoal = category.getGoal();
@@ -73,41 +76,48 @@ public class GroupGoalCalculator {
                 sum += studyTime;
             }
 
-            final int finalPercentage = getPercentage(memberIds, sum, categoryGoal);
+            int finalPercentage = getPercentage(memberIds, sum, categoryGoal);
 
-            userGoals.add(new GroupCategoryGoalDto(categoryId, finalPercentage));
+            // 달성률 합계에 추가
+            totalPercentageSum += finalPercentage;
+
+            userGoals.add(new GroupCategoryGoalDto(categoryId, categoryGoal, category.getName(), finalPercentage));
         }
 
-        return userGoals;
+        // 전체 평균 달성률 계산 (int 타입으로 소수점 버림)
+        int overallAveragePercent = 0;
+
+        // 0으로 나누는 것을 방지
+        if (!userGoals.isEmpty()) {
+            double rawAverage = (double) totalPercentageSum / userGoals.size();
+
+            // int로 캐스팅하여 소수점 이하를 버림
+            overallAveragePercent = (int) rawAverage;
+        }
+
+        return new GroupTotalGoalDto(userGoals, overallAveragePercent);
     }
 
     private int getPercentage(List<Long> memberIds, long sum, long categoryGoal) {
-        int memberCount = memberIds.size();
+        long memberCount = memberIds.size();
 
-        // BigDecimal을 사용해 소수점 정밀 계산
-        BigDecimal SUM = BigDecimal.valueOf(sum);
-        BigDecimal MEMBER_COUNT = BigDecimal.valueOf(memberCount);
-        BigDecimal CATEGORY_GOAL = BigDecimal.valueOf(categoryGoal);
-        BigDecimal HUNDRED = BigDecimal.valueOf(100);
+        long denominator = memberCount * categoryGoal; // 분모
 
-        // 분모 (Denominator): 총 인원 수 * 카테고리 목표 시간
-        BigDecimal denominator = MEMBER_COUNT.multiply(CATEGORY_GOAL);
-        BigDecimal achievementPercentage;
-
-        // 분모가 0인지 체크
-        if (denominator.compareTo(BigDecimal.ZERO) == 0) {
-            achievementPercentage = BigDecimal.ZERO;
-        } else {
-            // 1. (SUM / DENOMINATOR) 계산 (중간 계산 정밀도: 소수점 4자리, HALF_UP으로 반올림)
-            // 나누기 연산 시 정밀도와 반올림 모드 지정이 필수
-            achievementPercentage =
-                    SUM.divide(denominator, 4, RoundingMode.HALF_UP).multiply(HUNDRED); // 2. * 100
+        if (denominator == 0) {
+            return 0;
         }
 
-        // 3. 100%를 넘을 수 없음
-        achievementPercentage = achievementPercentage.min(HUNDRED);
+        // 분자: 실제 달성 시간 * 100 (백분율을 구하기 위해 100을 먼저 곱함)
+        long numerator = sum * 100;
 
-        // 4. 최종 결과를 정수(int)로 변환
-        return achievementPercentage.intValue();
+        double rawPercentage = (double) numerator / denominator;
+
+        // 100%를 초과하지 않도록 제한
+        if (rawPercentage > 100) {
+            return 100;
+        }
+
+        // 최종 결과 반환
+        return (int) rawPercentage;
     }
 }

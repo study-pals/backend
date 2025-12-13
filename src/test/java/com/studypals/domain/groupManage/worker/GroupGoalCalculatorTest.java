@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.groupManage.dto.GroupCategoryGoalDto;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupTotalGoalDto;
 import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
@@ -50,9 +51,9 @@ class GroupGoalCalculatorTest {
     private List<GroupMemberProfileDto> profiles;
     private List<StudyCategory> categories;
     private List<Long> memberIds;
-    private Long categoryId1 = 1L;
-    private Long categoryId2 = 2L;
-    private Long categoryId3 = 3L;
+    private final Long categoryId1 = 1L;
+    private final Long categoryId2 = 2L;
+    private final Long categoryId3 = 3L;
 
     @BeforeEach
     void setUp() {
@@ -87,15 +88,6 @@ class GroupGoalCalculatorTest {
                 .thenReturn(categories);
     }
 
-    /**
-     * Case 1: 정상적인 달성률 계산 (두 카테고리 모두 100% 미만)
-     * CS Study (목표 60분): A(20분) + B(10분) = 30분
-     * - 분모: 2명 * 60분 = 120
-     * - 달성률: 30 / 120 * 100 = 25.0% -> 25
-     * Algorithm (목표 120분): A(100분) + B(100분) = 200분
-     * - 분모: 2명 * 120분 = 240
-     * - 달성률: 200 / 240 * 100 = 83.333...% -> 83
-     */
     @Test
     @DisplayName("성공 케이스: 모든 StudyTime을 가져와 정확한 달성률을 계산하고 반환한다")
     void calculateGroupGoals_ShouldReturnAccuratePercentages() throws Exception {
@@ -150,31 +142,29 @@ class GroupGoalCalculatorTest {
                 .thenReturn(studyTimes);
 
         // When
-        List<GroupCategoryGoalDto> results = groupGoalCalculator.calculateGroupGoals(GROUP_ID, profiles);
+        // ✨ 반환 타입 변경: GroupTotalGoalDto
+        GroupTotalGoalDto result = groupGoalCalculator.calculateGroupGoals(GROUP_ID, profiles);
+        List<GroupCategoryGoalDto> results = result.categoryGoals();
 
         // Then
         assertThat(results).hasSize(3);
 
         // Category 1 검증 (25%)
-        assertThat(results).contains(new GroupCategoryGoalDto(categoryId1, 25));
+        assertThat(results).contains(new GroupCategoryGoalDto(categoryId1, 60L, "CS Study", 25));
 
         // Category 2 검증 (83%)
-        assertThat(results).contains(new GroupCategoryGoalDto(categoryId2, 83));
+        assertThat(results).contains(new GroupCategoryGoalDto(categoryId2, 120L, "Algorithm", 83));
+
+        // Category 3 검증 (목표 0L, 달성 0L -> 0%)
+        assertThat(results).contains(new GroupCategoryGoalDto(categoryId3, 0L, "FailCategory", 0));
+
+        // ✨ 전체 평균 검증 (36%)
+        assertThat(result.overallAveragePercent()).isEqualTo(36);
     }
 
-    /**
-     * Case 2: 100% 초과 및 분모가 0인 경우 검증
-     * CS Study (목표 60분): A(100분) + B(100분) = 200분
-     * - 분모: 2명 * 60분 = 120
-     * - 달성률: 200 / 120 * 100 = 166.666...% -> 100%로 제한
-     * Algorithm (목표 0분): A(100분) + B(100분) = 200분 (분모 0 테스트)
-     * - 분모: 2명 * 0분 = 0
-     * - 달성률: 0%로 반환
-     */
     @Test
     @DisplayName("엣지 케이스: 달성률이 100% 초과하거나 목표 시간이 0일 때 올바르게 처리한다")
     void calculateGroupGoals_ShouldHandleOver100PercentAndZeroGoal() {
-        // 목표 시간 변경 (Algorithm 카테고리의 목표 시간을 0으로 설정)
         Member member1 = Member.builder()
                 .id(10L)
                 .username("username1")
@@ -190,28 +180,37 @@ class GroupGoalCalculatorTest {
 
         // Given - StudyTime 데이터 설정
         List<StudyTime> studyTimes = List.of(
-                // Category 1 (CS Study) - 100% 초과 상황 유도
+                // Category 1 (CS Study) - 100% 초과 상황 유도 (200%)
                 StudyTime.builder()
                         .id(1001L)
                         .member(member1)
-                        .time(9999L)
+                        .time(120L)
                         .studyCategory(categories.get(0))
                         .studiedDate(TODAY)
                         .build(),
                 StudyTime.builder()
                         .id(1002L)
                         .member(member2)
-                        .time(9999L)
+                        .time(120L)
                         .studyCategory(categories.get(0))
                         .studiedDate(TODAY)
                         .build(),
 
-                // Category 2 (Algorithm) - 분모 0 상황 유도
+                // Category 2 (Algorithm) - 41% 달성 유도
                 StudyTime.builder()
                         .id(2001L)
                         .member(member1)
-                        .time(100L)
-                        .studyCategory(categories.get(2))
+                        .time(100L) // A: 100분
+                        .studyCategory(categories.get(1)) // 카테고리 2
+                        .studiedDate(TODAY)
+                        .build(),
+
+                // Category 3 (FailCategory, 목표 0L) - 분모 0 상황 유도
+                StudyTime.builder()
+                        .id(3001L)
+                        .member(member1)
+                        .time(100L) // 실제 공부 시간은 있으나 목표가 0
+                        .studyCategory(categories.get(2)) // 카테고리 3
                         .studiedDate(TODAY)
                         .build());
 
@@ -220,16 +219,24 @@ class GroupGoalCalculatorTest {
                 .thenReturn(studyTimes);
 
         // When
-        List<GroupCategoryGoalDto> results = groupGoalCalculator.calculateGroupGoals(GROUP_ID, profiles);
+        // ✨ 반환 타입 변경: GroupTotalGoalDto
+        GroupTotalGoalDto result = groupGoalCalculator.calculateGroupGoals(GROUP_ID, profiles);
+        List<GroupCategoryGoalDto> results = result.categoryGoals();
 
         // Then
         assertThat(results).hasSize(3);
 
-        // Category 1 검증 (166% -> 100% 제한)
-        assertThat(results).contains(new GroupCategoryGoalDto(categoryId1, 100));
+        // Category 1 검증 (240 / 60 * 2 = 200% -> 100% 제한)
+        assertThat(results).contains(new GroupCategoryGoalDto(categoryId1, 60L, "CS Study", 100));
 
-        // Category 2 검증 (분모 0 -> 0% 반환)
-        assertThat(results).contains(new GroupCategoryGoalDto(categoryId2, 0));
+        // Category 2 검증 (100 / 240 * 100 = 41.66...% -> 41 가정)
+        assertThat(results).contains(new GroupCategoryGoalDto(categoryId2, 120L, "Algorithm", 41));
+
+        // Category 3 검증 (분모 0 -> 0% 반환)
+        assertThat(results).contains(new GroupCategoryGoalDto(categoryId3, 0L, "FailCategory", 0));
+
+        // ✨ 전체 평균 검증 (47%)
+        assertThat(result.overallAveragePercent()).isEqualTo(47);
     }
 
     /**
@@ -244,14 +251,19 @@ class GroupGoalCalculatorTest {
                 .thenReturn(Collections.emptyList());
 
         // When
-        List<GroupCategoryGoalDto> results = groupGoalCalculator.calculateGroupGoals(GROUP_ID, profiles);
+        // ✨ 반환 타입 변경: GroupTotalGoalDto
+        GroupTotalGoalDto result = groupGoalCalculator.calculateGroupGoals(GROUP_ID, profiles);
+        List<GroupCategoryGoalDto> results = result.categoryGoals();
 
         // Then
         assertThat(results).hasSize(3);
         assertThat(results)
-                .containsExactly(
-                        new GroupCategoryGoalDto(categoryId1, 0),
-                        new GroupCategoryGoalDto(categoryId2, 0),
-                        new GroupCategoryGoalDto(categoryId3, 0));
+                .containsExactlyInAnyOrder( // 순서에 상관없이 포함 여부 확인 (혹시 모를 정렬 이슈 방지)
+                        new GroupCategoryGoalDto(categoryId1, 60L, "CS Study", 0),
+                        new GroupCategoryGoalDto(categoryId2, 120L, "Algorithm", 0),
+                        new GroupCategoryGoalDto(categoryId3, 0L, "FailCategory", 0));
+
+        // ✨ 전체 평균 검증 (0%)
+        assertThat(result.overallAveragePercent()).isEqualTo(0);
     }
 }
