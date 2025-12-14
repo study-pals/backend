@@ -1,8 +1,5 @@
 package com.studypals.domain.groupManage.worker;
 
-import com.studypals.domain.groupManage.dto.GroupTotalGoalDto;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dto.GroupCategoryGoalDto;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupTotalGoalDto;
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
 import com.studypals.domain.studyManage.entity.StudyCategory;

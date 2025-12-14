@@ -169,7 +169,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
         List<GroupCategoryGoalDto> categoryGoals = List.of(
                 new GroupCategoryGoalDto(501L, 1000L, "CS 공부", 75), // CS 공부: 목표 1000 대비 75% 달성
                 new GroupCategoryGoalDto(502L, 50L, "알고리즘", 100) // 알고리즘: 목표 50 대비 100% 달성
-        );
+                );
 
         // 2. GroupTotalGoalDto 객체로 묶기
         GroupTotalGoalDto totalGoals = new GroupTotalGoalDto(categoryGoals, 88); // 평균 88% 가정
@@ -224,9 +224,12 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                                 // userGoals.userGoals 배열 필드 (GroupCategoryGoalDto 목록)
                                 fieldWithPath("data.groupGoals.categoryGoals")
                                         .description("그룹 카테고리별 달성률 목록 (List<GroupCategoryGoalDto>)"),
-                                fieldWithPath("data.groupGoals.categoryGoals[].categoryId").description("스터디 카테고리의 고유 ID"),
-                                fieldWithPath("data.groupGoals.categoryGoals[].categoryGoal").description("카테고리의 그룹 목표량"),
-                                fieldWithPath("data.groupGoals.categoryGoals[].categoryName").description("카테고리 이름"),
+                                fieldWithPath("data.groupGoals.categoryGoals[].categoryId")
+                                        .description("스터디 카테고리의 고유 ID"),
+                                fieldWithPath("data.groupGoals.categoryGoals[].categoryGoal")
+                                        .description("카테고리의 그룹 목표량"),
+                                fieldWithPath("data.groupGoals.categoryGoals[].categoryName")
+                                        .description("카테고리 이름"),
                                 fieldWithPath("data.groupGoals.categoryGoals[].achievementPercent")
                                         .description("그룹 목표 대비 카테고리 달성률 (%)"))));
     }

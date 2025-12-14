@@ -13,8 +13,7 @@ public record GetGroupDetailRes(
         int currentMemberCount,
         List<GroupMemberProfileDto> profiles,
         GroupTotalGoalDto groupGoals) {
-    public static GetGroupDetailRes of(
-            Group group, List<GroupMemberProfileDto> profiles, GroupTotalGoalDto goals) {
+    public static GetGroupDetailRes of(Group group, List<GroupMemberProfileDto> profiles, GroupTotalGoalDto goals) {
         return new GetGroupDetailRes(
                 group.getId(),
                 group.getName(),

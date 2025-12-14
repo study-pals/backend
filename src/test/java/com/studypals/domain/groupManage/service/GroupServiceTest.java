@@ -205,19 +205,19 @@ public class GroupServiceTest {
                         1000L, // categoryGoal (목표량)
                         "CS 공부", // categoryName
                         75 // achievementPercent (75% 달성)
-                ),
+                        ),
                 new GroupCategoryGoalDto(
                         502L, // categoryId (알고리즘)
                         50L, // categoryGoal (목표량)
                         "알고리즘", // categoryName
                         100 // achievementPercent (100% 달성)
-                ),
+                        ),
                 new GroupCategoryGoalDto(
                         503L, // categoryId (면접 준비)
                         200L, // categoryGoal (목표량)
                         "면접 준비", // categoryName
                         40 // achievementPercent (40% 달성)
-                ));
+                        ));
 
         // 2. GroupTotalGoalDto 생성 (평균 71% 가정: (75 + 100 + 40) / 3 = 71.66... -> 71 (버림))
         GroupTotalGoalDto totalGoals = new GroupTotalGoalDto(categoryGoals, 71);
