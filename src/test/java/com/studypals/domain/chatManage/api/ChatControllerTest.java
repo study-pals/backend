@@ -37,7 +37,7 @@ class ChatControllerTest extends WebsocketStompSupport {
         Long userId = 1L;
         int expected = 1;
         IncomingMessage message = new IncomingMessage(ChatType.TEXT, "payload message", room1);
-        OutgoingMessage outMessage = new OutgoingMessage(null, ChatType.TEXT, "payload message", userId);
+        OutgoingMessage outMessage = new OutgoingMessage(null, room1, ChatType.TEXT, "payload message", userId);
         verifyToken(userId, true);
         verifyRoom(room1, userId, true);
         verifySend();
@@ -52,7 +52,7 @@ class ChatControllerTest extends WebsocketStompSupport {
 
         // then
         OutgoingMessage received = res.getMessages().get(0);
-        assertThat(received.getMessage()).isEqualTo("payload message");
+        assertThat(received.getContent()).isEqualTo("payload message");
         assertThat(received.getType()).isEqualTo(ChatType.TEXT);
         assertThat(received.getSender()).isEqualTo(userId);
     }
@@ -75,7 +75,7 @@ class ChatControllerTest extends WebsocketStompSupport {
         res.await();
 
         assertThat(res.getMessages().size()).isEqualTo(1);
-        assertThat(res.getMessages().get(0).getMessage()).isEqualTo("{\"1\":\"1111\"}");
+        assertThat(res.getMessages().get(0).getContent()).isEqualTo("{\"1\":\"1111\"}");
     }
 
     @Test

@@ -1,5 +1,7 @@
 package com.studypals.domain.chatManage.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
@@ -10,12 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import com.studypals.domain.chatManage.dto.*;
 import com.studypals.domain.chatManage.dto.mapper.ChatMessageMapper;
 import com.studypals.domain.chatManage.entity.ChatMessage;
-import com.studypals.domain.chatManage.worker.ChatMessagePipeline;
-import com.studypals.domain.chatManage.worker.ChatMessageReader;
-import com.studypals.domain.chatManage.worker.ChatSendValidator;
-import com.studypals.domain.chatManage.worker.ChatStateUpdater;
+import com.studypals.domain.chatManage.entity.ChatSseType;
+import com.studypals.domain.chatManage.worker.*;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.ChatException;
+import com.studypals.global.sse.SseEmitterManager;
+import com.studypals.global.sse.SseSendDto;
 import com.studypals.global.utils.Snowflake;
 
 /**
@@ -47,7 +49,8 @@ public class ChatServiceImpl implements ChatService {
     private final ChatSendValidator chatSendValidator;
     private final Snowflake snowflake;
     private final ChatStateUpdater chatStateUpdater;
-    private final ChatMessageReader chatMessageReader;
+    private final ChatRoomReader chatRoomReader;
+    private final SseEmitterManager sseManager;
 
     @Value("${chat.subscribe.address.default}")
     private String DESTINATION_PREFIX;
@@ -71,8 +74,12 @@ public class ChatServiceImpl implements ChatService {
         outgoingMessage.setId(id);
 
         // STOMP 브로커로 해당 채팅방 구독자에게 브로드캐스트
-        template.convertAndSend(DESTINATION_PREFIX + message.getRoom(), outgoingMessage);
+        template.convertAndSend(DESTINATION_PREFIX + message.getRoomId(), outgoingMessage);
 
+        // 소속 멤버를 찾아, SSE 로 메시지 전송
+        List<Long> memberIds = chatRoomReader.findJoinedMemberId(message.getRoomId());
+        memberIds.forEach(
+                t -> sseManager.sendMessageAsync(t, new SseSendDto(ChatSseType.NEW_MESSAGE.name(), outgoingMessage)));
         // 영속화용 엔티티로 변환 후 비동기 저장 파이프라인에 위임
         ChatMessage entity = chatMessageMapper.toEntity(message, id, userId);
         chatMessagePipeline.publish(entity);
@@ -90,7 +97,7 @@ public class ChatServiceImpl implements ChatService {
     public void readMessage(Long userId, IncomingMessage message) {
         // READ 타입인 경우에만 읽음 커서 업데이트 수행
         if (message.getType().equals(ChatType.READ)) {
-            chatStateUpdater.update(new ChatUpdateDto(message.getRoom(), userId, message.getMessage()));
+            chatStateUpdater.update(new ChatUpdateDto(message.getRoomId(), userId, message.getContent()));
         }
     }
 

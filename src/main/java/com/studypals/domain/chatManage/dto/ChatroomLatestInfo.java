@@ -49,7 +49,7 @@ public class ChatroomLatestInfo {
     /**
      * 최신 메시지의 본문 내용.
      */
-    private String message;
+    private String content;
 
     /**
      * 최신 메시지를 보낸 사용자의 ID.

@@ -16,10 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.chatManage.api.ChatRoomController;
-import com.studypals.domain.chatManage.dto.ChatCursorRes;
-import com.studypals.domain.chatManage.dto.ChatRoomInfoRes;
-import com.studypals.domain.chatManage.dto.ChatType;
-import com.studypals.domain.chatManage.dto.OutgoingMessage;
+import com.studypals.domain.chatManage.dto.*;
 import com.studypals.domain.chatManage.entity.ChatMessage;
 import com.studypals.domain.chatManage.entity.ChatRoomRole;
 import com.studypals.global.responses.CommonResponse;
@@ -92,18 +89,18 @@ public class ChatRoomIntegrationTest extends IntegrationSupport {
                 new ChatCursorRes(user3.getUserId(), "15"));
 
         // logs: id 15 ~ 1, 모두 TEXT / "message" / sender = user1
-        List<OutgoingMessage> logs = new ArrayList<>();
+        List<LoggingMessage> logs = new ArrayList<>();
         for (int i = 15; i >= 1; i--) {
-            logs.add(OutgoingMessage.builder()
+            logs.add(LoggingMessage.builder()
                     .id(String.valueOf(i))
                     .type(ChatType.TEXT)
-                    .message("message")
+                    .content("message")
                     .sender(user1.getUserId())
                     .build());
         }
 
         ChatRoomInfoRes responseData = ChatRoomInfoRes.builder()
-                .id(chatRoomId)
+                .roomId(chatRoomId)
                 .name("chatRoom")
                 .userInfos(List.of(
                         ChatRoomInfoRes.UserInfo.builder()

@@ -106,12 +106,12 @@ class StudySessionControllerRestDocsTest extends RestDocsSupport {
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
-                        requestFields(fieldWithPath("endTime").description("공부 종료 시간 - HH:mm 형식")),
+                        requestFields(fieldWithPath("endTime").description("공부 종료 시간 - HH:mm:ss 형식")),
                         responseFields(
                                 fieldWithPath("code").description("U03-03 고정"),
                                 fieldWithPath("status").description("응답 상태 (예: success 또는 fail)"),
                                 fieldWithPath("message").description("응답 메시지"),
-                                fieldWithPath("data").description("총 공부 시간(분)"))));
+                                fieldWithPath("data").description("총 공부 시간(초)"))));
     }
 
     @Test

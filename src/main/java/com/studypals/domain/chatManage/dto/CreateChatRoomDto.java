@@ -10,4 +10,4 @@ import jakarta.validation.constraints.NotBlank;
  * @author jack8
  * @since 2025-05-10
  */
-public record CreateChatRoomDto(@NotBlank String name) {}
+public record CreateChatRoomDto(@NotBlank String name, String imageUrl) {}

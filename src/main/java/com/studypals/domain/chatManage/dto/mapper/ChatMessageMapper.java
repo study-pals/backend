@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import com.studypals.domain.chatManage.dto.IncomingMessage;
+import com.studypals.domain.chatManage.dto.LoggingMessage;
 import com.studypals.domain.chatManage.dto.OutgoingMessage;
 import com.studypals.domain.chatManage.entity.ChatMessage;
 
@@ -20,6 +21,8 @@ public interface ChatMessageMapper {
     OutgoingMessage toOutMessage(IncomingMessage message, Long sender);
 
     OutgoingMessage toOutMessage(ChatMessage message);
+
+    LoggingMessage toLoggingMessage(ChatMessage message);
 
     ChatMessage toEntity(IncomingMessage message, String id, Long sender);
 }
