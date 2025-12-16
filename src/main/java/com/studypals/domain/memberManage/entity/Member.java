@@ -67,6 +67,7 @@ public class Member {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
+        this.token = 0L;
     }
 
     public void updateProfile(LocalDate birthday, String position, String imageUrl) {

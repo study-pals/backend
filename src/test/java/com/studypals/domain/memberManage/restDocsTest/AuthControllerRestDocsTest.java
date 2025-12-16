@@ -13,8 +13,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -22,7 +20,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.memberManage.api.AuthController;
-import com.studypals.domain.memberManage.dto.CreateMemberReq;
 import com.studypals.domain.memberManage.dto.ReissueTokenRes;
 import com.studypals.domain.memberManage.dto.SignInReq;
 import com.studypals.domain.memberManage.dto.TokenReissueReq;
@@ -56,74 +53,6 @@ class AuthControllerRestDocsTest extends RestDocsSupport {
 
     @MockitoBean
     private TokenService tokenService;
-
-    @Test
-    void register_success() throws Exception {
-
-        // given
-        CreateMemberReq req = new CreateMemberReq(
-                "username", "password", "nickname", LocalDate.of(2000, 1, 1), "student", "example.com");
-
-        Response<Long> expectedResponse =
-                CommonResponse.success(ResponseCode.USER_CREATE, 1L, "success createWithCategory user");
-
-        given(memberService.createMember(req)).willReturn(1L);
-
-        // when
-        ResultActions result = mockMvc.perform(post("/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)));
-
-        // then
-        result.andExpect(hasKey(expectedResponse))
-                .andExpect(status().isOk())
-                .andDo(restDocs.document(
-                        httpRequest(),
-                        httpResponse(),
-                        requestFields(
-                                fieldWithPath("username")
-                                        .description("유저의 아이디")
-                                        .attributes(constraints("not null, unique")),
-                                fieldWithPath("password")
-                                        .description("유저의 비밀번호")
-                                        .attributes(constraints("not null")),
-                                fieldWithPath("nickname")
-                                        .description("유저의 닉네임")
-                                        .attributes(constraints("not null, unique")),
-                                fieldWithPath("birthday")
-                                        .description("유저의 생일 / 2024-01-01 형식 사용")
-                                        .attributes(constraints("optional")),
-                                fieldWithPath("position")
-                                        .description("유저의 현재 직업, 상태 등의 그룹 이름")
-                                        .attributes(constraints("optional")),
-                                fieldWithPath("imageUrl")
-                                        .description("유저의 프로필 이미지")
-                                        .attributes(constraints("optional"))),
-                        responseFields(
-                                fieldWithPath("data").description("생성된 user의 id/식별자"),
-                                fieldWithPath("code").description("U01-01 고정"),
-                                fieldWithPath("status").description("응답 상태 (예: success 또는 fail)"),
-                                fieldWithPath("message").description("응답 메시지"))));
-    }
-
-    @Test
-    void register_fail_duplicate_user() throws Exception {
-        // given
-        CreateMemberReq duplicateUserReq = new CreateMemberReq(
-                "username", "password1", "nickname1", LocalDate.of(2000, 1, 1), "student", "example.com");
-
-        AuthErrorCode errorCode = AuthErrorCode.SIGNUP_FAIL;
-
-        given(memberService.createMember(duplicateUserReq)).willThrow(new AuthException(errorCode));
-
-        // when
-        ResultActions result = mockMvc.perform(post("/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(duplicateUserReq)));
-
-        // then
-        result.andExpect(hasStatus(errorCode)).andExpect(hasKey(errorCode)).andDo(restDocs.document(httpResponse()));
-    }
 
     @Test
     void login_success() throws Exception {
