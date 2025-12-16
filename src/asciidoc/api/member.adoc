@@ -39,15 +39,15 @@
 
 '''
 
-include::{snippets}/auth-controller-rest-docs-test/register_success/request-fields.adoc[]
-include::{snippets}/auth-controller-rest-docs-test/register_success/http-request.adoc[]
+include::{snippets}/member-controller-rest-docs-test/register_success/request-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/register_success/http-request.adoc[]
 
 *RESPONSE* +
 
 '''
 
-include::{snippets}/auth-controller-rest-docs-test/register_success/response-fields.adoc[]
-include::{snippets}/auth-controller-rest-docs-test/register_success/http-response.adoc[]
+include::{snippets}/member-controller-rest-docs-test/register_success/response-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/register_success/http-response.adoc[]
 
 ==== 2. 로그인
 *Description* +
@@ -98,6 +98,52 @@ include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/request
 include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/response-fields.adoc[]
 include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/http-response.adoc[]
 
+==== 4. 프로필 정보 입력/수정
+*Description* +
+
+'''
+
+회원가입 시 필요한 부가 정보(프로필 정보)를 삽입/수정합니다. 최초 회원가입 직후 빈 프로필 데이터 삽입 및, 추후
+새로운 데이터를 입력해야되는 경우 사용합니다.
+
+[NOTE]
+null 값을 입력하면, 갱신이 안되는 것이 아닌 실제로 null 값이 들어가게 됩니다. 따라서, 기존 데이터를 유지하고 싶은 경우 기존 데이터를
+그대로 넣어줘야 합니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/update-profile_success/request-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/update-profile_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/update-profile_success/response-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/update-profile_success/http-response.adoc[]
+
+==== 5. 본인 프로필 조회
+*Description* +
+
+'''
+
+사용자 본인의 프로필을 조회합니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/get-profile_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/get-profile_success/response-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/get-profile_success/http-response.adoc[]
+
 
 == ⛔ 예외 출력
 
@@ -116,7 +162,7 @@ include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/http-re
 
 '''
 
-include::{snippets}/auth-controller-rest-docs-test/register_fail_duplicate_user/http-response.adoc[]
+include::{snippets}/member-controller-rest-docs-test/register_fail_duplicate_user/http-response.adoc[]
 
 ==== 2. 로그인 시
 
