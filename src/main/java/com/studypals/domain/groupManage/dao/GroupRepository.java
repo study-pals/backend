@@ -31,4 +31,13 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
         WHERE g.id = :groupId AND g.totalMember < g.maxMember
     """)
     int increaseGroupMember(@Param("groupId") Long groupId);
+
+    @Modifying
+    @Query(
+            """
+        UPDATE Group g
+        SET g.totalMember = g.totalMember - 1
+        WHERE g.id = :groupId AND g.totalMember > 0
+    """)
+    int decreaseGroupMember(@Param("groupId") Long groupId);
 }

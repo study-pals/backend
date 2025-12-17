@@ -51,9 +51,9 @@ class ChatMessageCacheRepositoryTest extends TestEnvironment {
         String chatId = Long.toHexString(snowflake.nextId());
         ChatMessage chatMessage = ChatMessage.builder()
                 .id(chatId)
-                .message("example message")
+                .content("example message")
                 .sender(1L)
-                .room(roomId)
+                .roomId(roomId)
                 .type(ChatType.TEXT)
                 .build();
 
@@ -79,8 +79,8 @@ class ChatMessageCacheRepositoryTest extends TestEnvironment {
             messages.add(ChatMessage.builder()
                     .id(Long.toHexString(snowflake.nextId()))
                     .type(ChatType.TEXT)
-                    .message("example message " + i)
-                    .room(roomId)
+                    .content("example message " + i)
+                    .roomId(roomId)
                     .sender(1L)
                     .build());
         }
@@ -152,7 +152,8 @@ class ChatMessageCacheRepositoryTest extends TestEnvironment {
                 })
                 .hasEntrySatisfying(roomIds.get(2), msg -> {
                     assertThat(msg.getCnt()).isEqualTo(0);
-                    assertThat(msg.getId()).isNull();
+                    assertThat(msg.getId())
+                            .isEqualTo(third.get(third.size() - 1).getId());
                 })
                 .hasEntrySatisfying(roomIds.get(3), msg -> {
                     assertThat(msg.getCnt()).isEqualTo(40);
@@ -210,9 +211,9 @@ class ChatMessageCacheRepositoryTest extends TestEnvironment {
         return ChatMessage.builder()
                 .id(Long.toHexString(snowflake.nextId()))
                 .type(ChatType.TEXT)
-                .message("test message")
+                .content("test message")
                 .sender(1L)
-                .room(roomId)
+                .roomId(roomId)
                 .build();
     }
 }

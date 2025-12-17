@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -126,5 +127,27 @@ class StudyTimeRepositoryTest extends DataJpaSupport {
 
         // then
         assertThat(results).isEmpty();
+    }
+
+    @Test
+    void findTimeByCategoryAndDate() {
+        Long expectedTime = 100L;
+        Member member = insertMember();
+        StudyCategory studyCategory = insertCategory(member.getId(), 1);
+
+        LocalDate date = LocalDate.of(2024, 4, 10);
+
+        em.persist(make(member, studyCategory, date, expectedTime));
+        em.persist(make(member, "temp4", date.plusDays(1), 100L)); // 다른 날
+
+        em.flush();
+        em.clear();
+
+        Optional<Long> optionalResult =
+                studyTimeRepository.findTimeByCategoryAndDate(member.getId(), date, studyCategory.getId());
+        assertThat(optionalResult).isNotEmpty();
+
+        Long result = optionalResult.get();
+        assertThat(result).isEqualTo(expectedTime);
     }
 }

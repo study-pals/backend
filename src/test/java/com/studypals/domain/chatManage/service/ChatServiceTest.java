@@ -9,7 +9,6 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 
 import com.studypals.domain.chatManage.dto.ChatType;
 import com.studypals.domain.chatManage.dto.IncomingMessage;
-import com.studypals.domain.chatManage.dto.OutgoingMessage;
 import com.studypals.domain.chatManage.dto.mapper.ChatMessageMapper;
 
 /**
@@ -34,14 +33,9 @@ class ChatServiceTest {
         return new IncomingMessage(ChatType.TEXT, "test message", "room-id");
     }
 
-    private OutgoingMessage createOutgoing(Long userId) {
-        return new OutgoingMessage(null, ChatType.TEXT, "text message", userId);
-    }
-
     @Test
     void sendMessage_success() {
         // given
-        OutgoingMessage outgoingMessage = createOutgoing(1L);
         // given(chatMessageMapper.toOutMessage(any(), any(), any())).willReturn(outgoingMessage);
         // willDoNothing().given(template).convertAndSend(any(String.class), any(Object.class));
     }

@@ -91,4 +91,10 @@ public interface ChatMessageCacheRepository {
      * @return 기준 ID를 포함한 이후 구간의 메시지 목록
      */
     List<ChatMessage> fetchFromId(String roomId, String chatId);
+
+    /**
+     * 해당 캐시 내역을 완전히 삭제한다.
+     * @param roomId 삭제할 캐시의 key
+     */
+    void clear(String roomId);
 }

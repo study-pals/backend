@@ -61,7 +61,7 @@ public class GroupServiceImpl implements GroupService {
         groupMemberWriter.createLeader(member, group);
 
         // 채팅방 생성
-        CreateChatRoomDto createChatRoomDto = new CreateChatRoomDto(dto.name());
+        CreateChatRoomDto createChatRoomDto = new CreateChatRoomDto(dto.name(), dto.imageUrl());
         ChatRoom chatRoom = chatRoomWriter.create(createChatRoomDto);
         chatRoomWriter.joinAsAdmin(chatRoom, member);
         group.setChatRoom(chatRoom);
