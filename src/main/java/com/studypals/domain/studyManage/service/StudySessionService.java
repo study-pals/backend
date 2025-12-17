@@ -4,6 +4,7 @@ import java.time.LocalTime;
 
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
+import com.studypals.domain.studyManage.dto.StudyStatusRes;
 
 /**
  * 공부 시간 시작/종료 등 세션에 대한 관리를 담당합니다.
@@ -50,4 +51,11 @@ public interface StudySessionService {
      * @return 이번 시간동안 공부한 총 양
      */
     Long endStudy(Long userId, LocalTime endTime);
+
+    /**
+     * 사용자가 학습 중인지 확인합니다.
+     * @param userId 요청을 보낸 사용자 id
+     * @return 학습 정보
+     */
+    StudyStatusRes checkStudyStatus(Long userId);
 }

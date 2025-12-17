@@ -7,4 +7,4 @@ package com.studypals.domain.chatManage.dto;
  * @see com.studypals.domain.chatManage.api.ChatController ChatController
  * @since 2025-11-20
  */
-public record SendChatLogReq(String room, String chat) {}
+public record SendChatLogReq(String roomId, String chatId) {}

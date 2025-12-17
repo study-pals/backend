@@ -1,5 +1,7 @@
 package com.studypals.global.security.config;
 
+import jakarta.servlet.DispatcherType;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,6 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.DispatcherTypeRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,6 +46,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtUtils jwtUtils) throws Exception {
         http.httpBasic(AbstractHttpConfigurer::disable)
+                .securityMatcher(new NegatedRequestMatcher(new DispatcherTypeRequestMatcher(DispatcherType.ASYNC)))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((auth) -> {

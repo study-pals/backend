@@ -1,10 +1,13 @@
 package com.studypals.domain.chatManage.worker;
 
+import org.springframework.cache.annotation.CacheEvict;
+
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
 import com.studypals.domain.chatManage.dao.ChatRoomRepository;
 import com.studypals.domain.chatManage.dto.CreateChatRoomDto;
+import com.studypals.domain.chatManage.entity.ChatCacheValue;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.entity.ChatRoomMember;
 import com.studypals.domain.chatManage.entity.ChatRoomRole;
@@ -39,7 +42,12 @@ public class ChatRoomWriter {
     public ChatRoom create(CreateChatRoomDto dto) {
         String chatRoomId = RandomUtils.createUUID();
 
-        ChatRoom chatRoom = ChatRoom.builder().id(chatRoomId).name(dto.name()).build();
+        ChatRoom chatRoom = ChatRoom.builder()
+                .id(chatRoomId)
+                .name(dto.name())
+                .imageUrl(dto.imageUrl())
+                .totalMember(0)
+                .build();
 
         try {
             chatRoomRepository.save(chatRoom);
@@ -56,6 +64,7 @@ public class ChatRoomWriter {
      * @param member 참가할 멤버
      * @throws ChatException CHAT_ROOM_JOIN_FAIL / 채팅방 참여가 실패
      */
+    @CacheEvict(value = ChatCacheValue.JOINED_MEMBER, key = "#member.id")
     public void joinAsAdmin(ChatRoom chatRoom, Member member) {
         internalJoin(chatRoom, member, ChatRoomRole.ADMIN);
     }
@@ -66,6 +75,7 @@ public class ChatRoomWriter {
      * @param member 참가할 멤버
      * @throws ChatException CHAT_ROOM_JOIN_FAIL / 채팅방 참여가 실패
      */
+    @CacheEvict(value = ChatCacheValue.JOINED_MEMBER, key = "#member.id")
     public void join(ChatRoom chatRoom, Member member) {
         internalJoin(chatRoom, member, ChatRoomRole.MEMBER);
     }
@@ -77,7 +87,14 @@ public class ChatRoomWriter {
      * @throws ChatException CHAT_ROOM_NOT_FOUND / 해당 member 가 속한 chatroom 을 찾을 수 없음(속해있지 않거나,id가 잘못됨)
      * @throws ChatException CHAT_ROOM_ADMIN_LEAVE / admin 이 채팅방 탈퇴를 시도하는 경우
      */
+    @CacheEvict(value = ChatCacheValue.JOINED_MEMBER, key = "#member.id")
     public void leave(ChatRoom chatRoom, Member member) {
+        int updated = chatRoomRepository.decreaseChatMember(chatRoom.getId());
+        if (updated == 0) {
+            throw new ChatException(
+                    ChatErrorCode.CHAT_ROOM_LEAVE, "[ChatRoomWriter#leave] cannot decrease total member");
+        }
+
         ChatRoomMember chatRoomMember = chatRoomMemberRepository
                 .findByChatRoomIdAndMemberId(chatRoom.getId(), member.getId())
                 .orElseThrow(() -> new ChatException(
@@ -101,6 +118,14 @@ public class ChatRoomWriter {
      * @throws ChatException CHAT_ROOM_JOIN_FAIL / 채팅방 참여가 실패
      */
     private void internalJoin(ChatRoom chatRoom, Member member, ChatRoomRole roomRole) {
+
+        // total member 증가 로직 - 원자적 실행 및 갱신 실패 시 오류 반환
+        int updated = chatRoomRepository.increaseChatMember(chatRoom.getId());
+        if (updated == 0) {
+            throw new ChatException(
+                    ChatErrorCode.CHAT_ROOM_JOIN_FAIL, "[ChatRoomWriter#internalJoin] increate totalnumber fail");
+        }
+
         ChatRoomMember chatRoomMember = ChatRoomMember.builder()
                 .chatRoom(chatRoom)
                 .member(member)
@@ -109,8 +134,10 @@ public class ChatRoomWriter {
 
         try {
             chatRoomMemberRepository.save(chatRoomMember);
+
         } catch (Exception e) {
-            throw new ChatException(ChatErrorCode.CHAT_ROOM_JOIN_FAIL, "[ChatRoomWriter#joinAsAdmin]" + e.getMessage());
+            throw new ChatException(
+                    ChatErrorCode.CHAT_ROOM_JOIN_FAIL, "[ChatRoomWriter#internalJoin]" + e.getMessage());
         }
     }
 }

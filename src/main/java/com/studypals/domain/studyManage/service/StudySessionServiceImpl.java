@@ -19,6 +19,7 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
+import com.studypals.domain.studyManage.dto.StudyStatusRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
@@ -26,6 +27,7 @@ import com.studypals.domain.studyManage.worker.DailyInfoWriter;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
+import com.studypals.domain.studyManage.worker.StudyTimeReader;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
 import com.studypals.global.utils.TimeUtils;
@@ -57,6 +59,7 @@ public class StudySessionServiceImpl implements StudySessionService {
     private final MemberReader memberReader;
 
     private static final int SECS_PER_DAY = 24 * 60 * 60;
+    private final StudyTimeReader studyTimeReader;
 
     @Override
     @Transactional
@@ -142,6 +145,36 @@ public class StudySessionServiceImpl implements StudySessionService {
         }
 
         return totalTime;
+    }
+
+    /**
+     * 사용자의 공부 상태를 반환합니다.
+     * 공부하고 있다면 해당 공부에 대한 정보를 반환하고, 아니면 단순 false 값만 담아 반환합니다.
+     * @param userId
+     * @return StudyStatusRes
+     */
+    @Override
+    public StudyStatusRes checkStudyStatus(Long userId) {
+        Optional<StudyStatus> optionalStatus = studyStatusWorker.find(userId);
+
+        // redis에 공부 정보가 없다면 false 반환
+        if (optionalStatus.isEmpty()) {
+            return mapper.toStudyStatusDto(false);
+        }
+
+        StudyStatus studyStatus = optionalStatus.get();
+
+        // 공부 정보가 있는데, 공부 중은 아니라면 false 반환
+        if (!studyStatus.isStudying()) {
+            return mapper.toStudyStatusDto(false);
+        }
+
+        // 현재 StudyStatus 엔티티의 studyTime 값은 사용하지 않는 값으로 무조건 0이다. 따라서 StudyTime에서 따로 가져와야 한다.
+        Long studyTime = studyTimeReader
+                .findByCategoryId(userId, LocalDate.from(studyStatus.getStartTime()), studyStatus.getCategoryId())
+                .orElse(0L);
+
+        return mapper.toStudyStatusDto(studyStatus, studyTime);
     }
 
     /**

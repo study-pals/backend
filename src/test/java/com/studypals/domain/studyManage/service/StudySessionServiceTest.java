@@ -21,6 +21,7 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyReq;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
+import com.studypals.domain.studyManage.dto.StudyStatusRes;
 import com.studypals.domain.studyManage.dto.mappers.StudyTimeMapper;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
@@ -29,6 +30,7 @@ import com.studypals.domain.studyManage.worker.DailyInfoWriter;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.domain.studyManage.worker.StudySessionWorker;
 import com.studypals.domain.studyManage.worker.StudyStatusWorker;
+import com.studypals.domain.studyManage.worker.StudyTimeReader;
 import com.studypals.global.utils.TimeUtils;
 
 /**
@@ -75,6 +77,9 @@ class StudySessionServiceTest {
 
     @Mock
     private StudyTime mockStudyTime;
+
+    @Mock
+    private StudyTimeReader mockStudyTimeReader;
 
     @InjectMocks
     private StudySessionServiceImpl studySessionService;
@@ -219,5 +224,50 @@ class StudySessionServiceTest {
 
         assertThat(beforeDateDurationCaptor.getValue()).isEqualTo(3600 * 3);
         assertThat(afterDateDurationCaptor.getValue()).isEqualTo(3600 * 2);
+    }
+
+    @Test
+    void checkStudyStatus_success() {
+        Long userId = 1L;
+        Long studyTime = 10L;
+        Optional<StudyStatus> optionalMockStatus = Optional.of(mockStudyStatus);
+        StudyStatusRes expected = new StudyStatusRes(true, LocalDateTime.now(), studyTime, 1L, "target", 20L);
+
+        given(studyStatusWorker.find(userId)).willReturn(optionalMockStatus);
+        given(mockStudyStatus.isStudying()).willReturn(true);
+        given(mockStudyTimeReader.findByCategoryId(any(), any(), any())).willReturn(Optional.of(studyTime));
+        given(mockStudyStatus.getStartTime()).willReturn(LocalDateTime.now());
+        given(mapper.toStudyStatusDto(mockStudyStatus, studyTime)).willReturn(expected);
+
+        StudyStatusRes result = studySessionService.checkStudyStatus(userId);
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void checkStudyStatus_success_not_in_redis() {
+        Long userId = -1L;
+        StudyStatusRes expected = new StudyStatusRes(false, null, null, null, null, null);
+
+        given(studyStatusWorker.find(userId)).willReturn(Optional.empty());
+        given(mapper.toStudyStatusDto(false)).willReturn(expected);
+
+        StudyStatusRes result = studySessionService.checkStudyStatus(userId);
+
+        assertThat(result.studying()).isFalse();
+    }
+
+    @Test
+    void checkStudyStatus_success_not_studying() {
+        Long userId = -1L;
+        Optional<StudyStatus> optionalMockStatus = Optional.of(mockStudyStatus);
+        StudyStatusRes expected = new StudyStatusRes(false, null, null, null, null, null);
+
+        given(studyStatusWorker.find(userId)).willReturn(optionalMockStatus);
+        given(mockStudyStatus.isStudying()).willReturn(false);
+        given(mapper.toStudyStatusDto(false)).willReturn(expected);
+
+        StudyStatusRes result = studySessionService.checkStudyStatus(userId);
+
+        assertThat(result.studying()).isFalse();
     }
 }
