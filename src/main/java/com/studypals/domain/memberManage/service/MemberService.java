@@ -25,4 +25,8 @@ public interface MemberService {
     Long updateProfile(Long userId, UpdateProfileReq dto);
 
     MemberDetailsRes getProfile(Long userId);
+
+    boolean isUsernameDuplicate(String username);
+
+    boolean isNicknameDuplicate(String nickname);
 }

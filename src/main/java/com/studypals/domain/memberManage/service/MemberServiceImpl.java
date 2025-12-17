@@ -74,4 +74,16 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberReader.get(userId);
         return memberMapper.toRes(member);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isUsernameDuplicate(String username) {
+        return !memberReader.existsByUsername(username);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isNicknameDuplicate(String nickname) {
+        return !memberReader.existsByNickname(nickname);
+    }
 }
