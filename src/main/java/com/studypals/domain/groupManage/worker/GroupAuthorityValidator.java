@@ -26,14 +26,22 @@ public class GroupAuthorityValidator {
     private final GroupMemberRepository groupMemberRepository;
 
     public void validateLeaderAuthority(Long memberId, Long groupId) {
-        GroupMember member = groupMemberRepository
-                .findByMemberIdAndGroupId(memberId, groupId)
-                .orElseThrow(() -> {
-                    String message = String.format("member %d not found in group %d", memberId, groupId);
-                    return new GroupException(GroupErrorCode.GROUP_MEMBER_NOT_FOUND, message);
-                });
+        GroupMember member = findByMemberIdAndGroupId(memberId, groupId);
         if (!member.isLeader()) {
             throw new GroupException(GroupErrorCode.GROUP_FORBIDDEN);
         }
+    }
+
+    public void isMemberOfGroup(Long memberId, Long groupId) {
+        if (!groupMemberRepository.existsByMemberIdAndGroupId(memberId, groupId)) {
+            throw new GroupException(GroupErrorCode.GROUP_MEMBER_NOT_FOUND);
+        }
+    }
+
+    private GroupMember findByMemberIdAndGroupId(Long memberId, Long groupId) {
+        return groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).orElseThrow(() -> {
+            String message = String.format("member %d not found in group %d", memberId, groupId);
+            return new GroupException(GroupErrorCode.GROUP_MEMBER_NOT_FOUND, message);
+        });
     }
 }
