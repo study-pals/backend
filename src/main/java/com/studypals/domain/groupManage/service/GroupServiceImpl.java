@@ -70,11 +70,9 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    @Transactional(readOnly = true) // 붙이는게 이득일까?
+    @Transactional(readOnly = true)
     public List<GetGroupsRes> getGroups(Long userId) {
-        // 유효한 userId인지 검사
-        memberReader.get(userId);
-
+        // jwt filter 에서 주입한 userId이므로 DB에 존재하는지 체크하지 않음
         List<GroupSummaryDto> groups = groupMemberReader.getGroups(userId);
 
         return groups.stream().map(GetGroupsRes::from).toList();

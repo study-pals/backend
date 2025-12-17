@@ -178,7 +178,6 @@ public class GroupServiceTest {
                         true, // 승인 필요
                         LocalDate.of(2025, 12, 1)));
 
-        given(memberReader.get(userId)).willReturn(mockMember);
         given(groupMemberReader.getGroups(userId)).willReturn(groups);
 
         List<GetGroupsRes> result = groupService.getGroups(userId);

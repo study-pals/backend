@@ -33,7 +33,9 @@ public class GroupAuthorityValidator {
     }
 
     public void isMemberOfGroup(Long memberId, Long groupId) {
-        findByMemberIdAndGroupId(memberId, groupId);
+        if (!groupMemberRepository.existsByMemberIdAndGroupId(memberId, groupId)) {
+            throw new GroupException(GroupErrorCode.GROUP_MEMBER_NOT_FOUND);
+        }
     }
 
     private GroupMember findByMemberIdAndGroupId(Long memberId, Long groupId) {

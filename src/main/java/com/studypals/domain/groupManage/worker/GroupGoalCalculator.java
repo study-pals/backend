@@ -22,6 +22,14 @@ import com.studypals.global.utils.TimeUtils;
 
 /**
  * 그룹에 속한 유저들의 달성 수준을 계산하는 클래스입니다.
+ * <p>
+ * 코드에 대한 작동 원리 등을 적습니다.
+ *
+ * <p><b>빈 관리:</b><br>
+ * Worker
+ *
+ * @author sleephoon
+ * @since 2025-12-16
  */
 @Worker
 @RequiredArgsConstructor
@@ -52,7 +60,7 @@ public class GroupGoalCalculator {
         // (Map<categoryId, Map<memberId, StudyTime>>)
         Map<Long, Map<Long, Long>> studyTimeMap = allStudyTimes.stream()
                 .collect(Collectors.groupingBy(
-                        (StudyTime st) -> st.getStudyCategory().getId(),
+                        st -> st.getStudyCategory().getId(),
                         Collectors.toMap(studyTime -> studyTime.getMember().getId(), StudyTime::getTime, Long::sum)));
 
         // 결과를 계산하고 반환
@@ -71,7 +79,7 @@ public class GroupGoalCalculator {
             for (Long memberId : memberIds) {
                 // 해당 멤버가 해당 카테고리를 공부한 시간을 Map에서 가져오기
                 final Long studyTime = memberStudyTimes.getOrDefault(memberId, 0L);
-                sum += studyTime;
+                sum += Math.min(categoryGoal, studyTime);
             }
 
             int finalPercentage = getPercentage(memberIds, sum, categoryGoal);
