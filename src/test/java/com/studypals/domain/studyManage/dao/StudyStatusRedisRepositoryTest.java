@@ -42,7 +42,6 @@ class StudyStatusRedisRepositoryTest {
         StudyStatus status = StudyStatus.builder()
                 .id(1L)
                 .startTime(LocalDateTime.of(2025, 8, 20, 10, 0))
-                .studyTime(120L)
                 .expiration(1L)
                 .build();
 
@@ -52,7 +51,6 @@ class StudyStatusRedisRepositoryTest {
 
         // then
         assertThat(result).isPresent();
-        assertThat(result.get().getStudyTime()).isEqualTo(120L);
     }
 
     @Test
@@ -61,7 +59,6 @@ class StudyStatusRedisRepositoryTest {
         StudyStatus status = StudyStatus.builder()
                 .id(2L)
                 .startTime(LocalDateTime.of(2025, 8, 20, 12, 0))
-                .studyTime(90L)
                 .expiration(1L)
                 .build();
         studyStatusRedisRepository.save(status);

@@ -109,7 +109,7 @@ class StudySessionServiceTest {
         given(studyStatusWorker.find(userId)).willReturn(Optional.empty());
         given(studyStatusWorker.startStatus(mockMember, dto)).willReturn(status);
         given(studyCategoryReader.getById(categoryId)).willReturn(mockStudyCategory);
-        given(mapper.toDto(status)).willReturn(expected);
+        given(mapper.toDto(status, 0L)).willReturn(expected);
 
         given(mockStudyCategory.getGoal()).willReturn(3600L);
 
@@ -127,26 +127,28 @@ class StudySessionServiceTest {
         Long userId = 1L;
         Long categoryId = 2L;
         LocalDate today = LocalDate.of(2025, 8, 20);
-        LocalTime time = LocalTime.of(10, 30);
-        LocalDateTime dateTime = LocalDateTime.of(today, time);
+        LocalTime reqTime = LocalTime.of(10, 30);
+        LocalDateTime startDateTime = LocalDateTime.of(today, reqTime);
 
-        StartStudyReq req = new StartStudyReq(categoryId, null, time);
-        StartStudyDto dto = new StartStudyDto(categoryId, null, dateTime);
+        // 가상의 기존 공부 시작 시간 (1시간 전부터 공부 중이었다고 가정)
+        LocalDateTime existingStartTime = startDateTime.minusHours(1);
+        long expectedDiff = 3600L; // 1시간 차이
 
-        StartStudyRes expected = new StartStudyRes(true, dateTime, 0L, categoryId, null, 3600L);
+        StartStudyReq req = new StartStudyReq(categoryId, null, reqTime);
+        StartStudyRes expected = new StartStudyRes(true, existingStartTime, expectedDiff, categoryId, null, 3600L);
 
-        given(timeUtils.getToday(eq(time))).willReturn(today);
-        given(mapper.toDto(eq(req), eq(dateTime))).willReturn(dto);
-        given(memberReader.getRef(userId)).willReturn(mockMember);
-        given(studyStatusWorker.find(userId)).willReturn(Optional.of(mockStudyStatus));
+        // 기존에 공부 중이던 상태 객체 설정
         given(mockStudyStatus.isStudying()).willReturn(true);
-        given(mapper.toDto(mockStudyStatus)).willReturn(expected);
+        given(timeUtils.getToday(eq(reqTime))).willReturn(today);
+        given(studyStatusWorker.find(userId)).willReturn(Optional.of(mockStudyStatus));
+        given(mapper.toDto(eq(mockStudyStatus), anyLong())).willReturn(expected);
 
         // when
         StartStudyRes res = studySessionService.startStudy(userId, req);
 
         // then
         assertThat(res).isEqualTo(expected);
+        assertThat(res.studyTime()).isEqualTo(expectedDiff);
     }
 
     @Test

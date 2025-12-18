@@ -11,6 +11,7 @@ import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 공부 상태를 나타내는 studyStatus 의 저장/조회 및, 해당 객체의 생성 등을 담당합니다.
@@ -22,6 +23,7 @@ import com.studypals.global.exceptions.exception.StudyException;
  * @see StudyStatus
  * @since 2025-04-15
  */
+@Slf4j
 @Worker
 @RequiredArgsConstructor
 public class StudyStatusWorker {
@@ -39,7 +41,7 @@ public class StudyStatusWorker {
 
     /**
      * id 에 대해 studyStatus 를 검색하고, 이를 삭제합니다.
-     * @param id 검새갛고자 하는 id(userId)
+     * @param id 검색하고자 하는 id(userId)
      * @return Optional - study status
      */
     public Optional<StudyStatus> findAndDelete(Long id) {
@@ -53,20 +55,20 @@ public class StudyStatusWorker {
     }
 
     /**
-     * StudyStatus 를 생성하고 적절한 값을 넣어 반환 <br>
+     * id로 StudyStatus 을 찾아보고, 존재하면 그대로 반환하고, 존재하지 않으면 새로운 객체를 만들어 반환합니다. <br>
      * @param dto 공부 데이터
      * @return 만들어진 객체
      */
     public StudyStatus startStatus(Member member, StartStudyDto dto) {
-
-        // 새로운 studyStatus 를 생성하여 반환
-        return StudyStatus.builder()
+        Optional<StudyStatus> optionalStudyStatus = find(member.getId());
+        // 새로운 optionalStudyStatus 를 생성하여 반환
+        return optionalStudyStatus.orElseGet(() -> StudyStatus.builder()
                 .id(member.getId())
                 .categoryId(dto.categoryId())
                 .studying(true)
                 .startTime(dto.startDateTime())
                 .name(dto.temporaryName())
-                .build();
+                .build());
     }
 
     /**
@@ -118,4 +120,18 @@ public class StudyStatusWorker {
             throw new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL, "save fail");
         }
     }
+//
+//    /**
+//     * 공부를 마무리하고, studyStatus.studyTime 을 time 만큼 증가시킵니다.
+//     * @param status 유저의 공부 상태
+//     * @param time 유저가 공부한 시간
+//     */
+//    public void addStudyTimeAndSave(StudyStatus status, Long time) {
+//        StudyStatus updatedStatus = status.update()
+//                .studying(false)
+//                .studyTime(status.getStudyTime() + time)
+//                .build();
+//        log.info("updatedStatus id = {}", updatedStatus.getId());
+//        saveStatus(updatedStatus);
+//    }
 }

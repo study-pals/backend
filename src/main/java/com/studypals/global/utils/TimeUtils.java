@@ -45,6 +45,11 @@ public class TimeUtils {
         }
     }
 
+    public LocalTime getTime() {
+        LocalDateTime now = LocalDateTime.now(clock);
+        return now.toLocalTime();
+    }
+
     public LocalDate getToday() {
         LocalDateTime now = LocalDateTime.now(clock);
 

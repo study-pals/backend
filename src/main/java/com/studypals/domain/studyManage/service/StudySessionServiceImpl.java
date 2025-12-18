@@ -1,5 +1,6 @@
 package com.studypals.domain.studyManage.service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -7,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -47,6 +49,7 @@ import com.studypals.global.utils.TimeUtils;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StudySessionServiceImpl implements StudySessionService {
 
     private final StudyTimeMapper mapper;
@@ -66,13 +69,23 @@ public class StudySessionServiceImpl implements StudySessionService {
     public StartStudyRes startStudy(Long userId, StartStudyReq req) {
         LocalDate today = timeUtils.getToday(req.startTime());
         LocalDateTime startDateTime = LocalDateTime.of(today, req.startTime());
-        StartStudyDto dto = mapper.toDto(req, startDateTime);
+        log.info("today : {}", today);
+        log.info("startDateTime : {}", startDateTime);
 
-        Member member = memberReader.getRef(userId);
         Optional<StudyStatus> status = studyStatusWorker.find(userId);
 
         // 만약 이미 공부 중인 경우, 공부를 시작하는 대신 현재 공부 상태를 반환함
-        if (status.isPresent() && status.get().isStudying()) return mapper.toDto(status.get());
+        if (status.isPresent() && status.get().isStudying()) {
+            // 사용자가 이미 공부하고 있으므로, (현재 서버 시간 - 최초 시작 시간) 은 현재 유저의 공부 시간입니다.
+            // 이때 현재 서버 시간의 경우 비즈니스 날짜 (새벽 6시 기준 날짜)가 아닌 실제 날짜/시간을 사용해야 합니다.
+            long diff = getTimeDuration(status.get().getStartTime().toLocalTime(),
+                    timeUtils.getTime());
+            log.info("diff : {}", diff);
+            return mapper.toDto(status.get(), diff);
+        }
+
+        StartStudyDto dto = mapper.toDto(req, startDateTime);
+        Member member = memberReader.getRef(userId);
 
         // 공부 중이 아닌 경우, 새로운 redis에 저장할 공부 상태 객체 생성
         StudyStatus startStatus = studyStatusWorker.startStatus(member, dto);
@@ -86,7 +99,7 @@ public class StudySessionServiceImpl implements StudySessionService {
         // 공부 상태 저장
         studyStatusWorker.saveStatus(startStatus);
 
-        return mapper.toDto(startStatus);
+        return mapper.toDto(startStatus, 0L);
     }
 
     @Override
@@ -112,7 +125,8 @@ public class StudySessionServiceImpl implements StudySessionService {
 
             long durationInSec = getTimeDuration(startTime, endTime);
             timeSaveInfoMap.put(today, new TimeSaveInfo(member, startTime, endTime));
-            studySessionWorker.upsert(member, status, today, durationInSec);
+            studySessionWorker.upsert(member, status, today, durationInSec); // studyTime update
+//            studyStatusWorker.addStudyTimeAndSave(status, durationInSec); // studyStatus update
             totalTime += durationInSec;
 
         } else if (startDate.plusDays(1).isEqual(today)) {
@@ -123,8 +137,17 @@ public class StudySessionServiceImpl implements StudySessionService {
             timeSaveInfoMap.put(startDate, new TimeSaveInfo(member, startTime, pointTime));
             timeSaveInfoMap.put(today, new TimeSaveInfo(member, pointTime, endTime));
 
+            // 오전 6시 전에는 studyStatus가 존재한다. 기존의 것을 그대로 이용한다.
+            // 어제자 dailyInfo는 밑에 saveDailyInfo에서 처리한다.
             studySessionWorker.upsert(member, status, startDate, day1DurationInSec);
+//            studyStatusWorker.addStudyTimeAndSave(status, day1DurationInSec);
+
+            // 오전 6시 이후에는 studyStatus가 존재하지 않는다. 새로 만들어야 한다.
+//            LocalDateTime tomorrow = LocalDateTime.of(today, pointTime);
             studySessionWorker.upsert(member, status, today, day2DurationInSec);
+//            StudyStatus tomorrowStudyStatus = studyStatusWorker.startStatus(
+//                    member, new StartStudyDto(status.getCategoryId(), status.getName(), tomorrow));
+//            studyStatusWorker.addStudyTimeAndSave(tomorrowStudyStatus, day2DurationInSec);
 
             totalTime += day1DurationInSec + day2DurationInSec;
         } else {
@@ -169,7 +192,9 @@ public class StudySessionServiceImpl implements StudySessionService {
             return mapper.toStudyStatusDto(false);
         }
 
-        // 현재 StudyStatus 엔티티의 studyTime 값은 사용하지 않는 값으로 무조건 0이다. 따라서 StudyTime에서 따로 가져와야 한다.
+        // StudyStatus 엔티티의 studyTime 값은 사용하지 않는 값으로 무조건 0이다. 따라서 StudyTime에서 따로 가져와야 한다.
+        // 이거는 해당 카테고리를 오늘 공부한 총 시간을 가져오는 쿼리이다.
+        // TODO: mysql의 StudyTime에서 가져오고 있지만 추후에는 StudyStatus에 유의미한 time 값을 사용해 반환해야 한다.
         Long studyTime = studyTimeReader
                 .findByCategoryId(userId, LocalDate.from(studyStatus.getStartTime()), studyStatus.getCategoryId())
                 .orElse(0L);
