@@ -83,33 +83,6 @@ public class StudySessionServiceImpl implements StudySessionService {
         return mapper.toDto(newStatus, 0L);
     }
 
-    /**
-     * 이미 공부 중인 경우의 로직을 처리합니다.
-     */
-    private StartStudyRes handleAlreadyStudying(StudyStatus status) {
-        long durationSeconds = timeUtils.getTimeDuration(status.getStartTime().toLocalTime(), timeUtils.getTime());
-
-        if (timeUtils.exceeds24Hours(durationSeconds)) {
-            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL);
-        }
-
-        return mapper.toDto(status, durationSeconds);
-    }
-
-    /**
-     * 새로운 StudyStatus 객체를 생성하고 카테고리 목표를 설정합니다.
-     */
-    private StudyStatus createNewStudyStatus(Member member, StartStudyDto dto, Long categoryId) {
-        StudyStatus status = studyStatusWorker.startStatus(member, dto);
-
-        if (categoryId != null) {
-            StudyCategory category = studyCategoryReader.getById(categoryId);
-            status.setGoal(category.getGoal());
-        }
-
-        return status;
-    }
-
     @Override
     @Transactional
     public Long endStudy(Long userId, LocalTime endTime) {
@@ -196,6 +169,34 @@ public class StudySessionServiceImpl implements StudySessionService {
                 .orElse(0L);
 
         return mapper.toStudyStatusDto(studyStatus, studyTime);
+    }
+
+    /**
+     * 이미 공부 중인 경우의 로직을 처리합니다.
+     */
+    private StartStudyRes handleAlreadyStudying(StudyStatus status) {
+        long durationSeconds = timeUtils.getTimeDuration(status.getStartTime().toLocalTime(), timeUtils.getTime());
+
+        // 공부 시작을 하고, 24시간 후에 다시 공부 시작을 하는 경우 예외 발생
+        if (timeUtils.exceeds24Hours(durationSeconds)) {
+            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL);
+        }
+
+        return mapper.toDto(status, durationSeconds);
+    }
+
+    /**
+     * 새로운 StudyStatus 객체를 생성하고 카테고리 목표를 설정합니다.
+     */
+    private StudyStatus createNewStudyStatus(Member member, StartStudyDto dto, Long categoryId) {
+        StudyStatus status = studyStatusWorker.startStatus(member, dto);
+
+        if (categoryId != null) {
+            StudyCategory category = studyCategoryReader.getById(categoryId);
+            status.setGoal(category.getGoal());
+        }
+
+        return status;
     }
 
     /**
