@@ -3,7 +3,6 @@ package com.studypals.domain.studyManage.worker;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
@@ -23,7 +22,6 @@ import com.studypals.global.exceptions.exception.StudyException;
  * @see StudyStatus
  * @since 2025-04-15
  */
-@Slf4j
 @Worker
 @RequiredArgsConstructor
 public class StudyStatusWorker {
@@ -55,20 +53,19 @@ public class StudyStatusWorker {
     }
 
     /**
-     * id로 StudyStatus 을 찾아보고, 존재하면 그대로 반환하고, 존재하지 않으면 새로운 객체를 만들어 반환합니다. <br>
+     * StudyStatus 를 생성하고 적절한 값을 넣어 반환 <br>
      * @param dto 공부 데이터
      * @return 만들어진 객체
      */
     public StudyStatus startStatus(Member member, StartStudyDto dto) {
-        Optional<StudyStatus> optionalStudyStatus = find(member.getId());
         // 새로운 optionalStudyStatus 를 생성하여 반환
-        return optionalStudyStatus.orElseGet(() -> StudyStatus.builder()
+        return StudyStatus.builder()
                 .id(member.getId())
                 .categoryId(dto.categoryId())
                 .studying(true)
                 .startTime(dto.startDateTime())
                 .name(dto.temporaryName())
-                .build());
+                .build();
     }
 
     /**
@@ -120,18 +117,4 @@ public class StudyStatusWorker {
             throw new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL, "save fail");
         }
     }
-    //
-    //    /**
-    //     * 공부를 마무리하고, studyStatus.studyTime 을 time 만큼 증가시킵니다.
-    //     * @param status 유저의 공부 상태
-    //     * @param time 유저가 공부한 시간
-    //     */
-    //    public void addStudyTimeAndSave(StudyStatus status, Long time) {
-    //        StudyStatus updatedStatus = status.update()
-    //                .studying(false)
-    //                .studyTime(status.getStudyTime() + time)
-    //                .build();
-    //        log.info("updatedStatus id = {}", updatedStatus.getId());
-    //        saveStatus(updatedStatus);
-    //    }
 }
