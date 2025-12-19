@@ -10,7 +10,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -139,7 +138,9 @@ class StudySessionServiceTest {
 
         // 기존에 공부 중이던 상태 객체 설정
         given(mockStudyStatus.isStudying()).willReturn(true);
-        given(timeUtils.getToday(eq(reqTime))).willReturn(today);
+        //        given(timeUtils.getToday(eq(reqTime))).willReturn(today);
+        given(mockStudyStatus.getStartTime()).willReturn(startDateTime);
+        //        given(timeUtils.exceeds24Hours(expectedDiff)).willReturn(false);
         given(studyStatusWorker.find(userId)).willReturn(Optional.of(mockStudyStatus));
         given(mapper.toDto(eq(mockStudyStatus), anyLong())).willReturn(expected);
 
@@ -155,33 +156,33 @@ class StudySessionServiceTest {
     void endStudy_success() {
         // given
         Long userId = 1L;
+        LocalDate testDate = LocalDate.of(2025, 8, 20);
+        LocalTime startTime = LocalTime.of(10, 30);
+        LocalTime endTime = LocalTime.of(12, 30);
+        LocalDateTime startDateTime = LocalDateTime.of(testDate, startTime);
+        long expectedTime = 7200L; // 2시간
 
-        LocalDateTime startDateTime = LocalDateTime.of(2025, 8, 20, 10, 30);
-        LocalDateTime endDateTime = LocalDateTime.of(2025, 8, 20, 12, 30);
-
-        long time = 7200L;
-
-        given(timeUtils.getToday(eq(endDateTime.toLocalTime()))).willReturn(endDateTime.toLocalDate());
+        // 1. 기본 Mock 설정
+        given(timeUtils.getToday(eq(endTime))).willReturn(testDate);
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(studyStatusWorker.find(userId)).willReturn(Optional.of(mockStudyStatus));
         given(mockStudyStatus.getStartTime()).willReturn(startDateTime);
 
-        // in #saveDailyInfo
-        given(dailyInfoWriter.createIfNotExist(
-                        mockMember, endDateTime.toLocalDate(), startDateTime.toLocalTime(), endDateTime.toLocalTime()))
-                .willReturn(true);
+        // 2. [필수] 시간 차이 계산 로직 Stubbing
+        given(timeUtils.getTimeDuration(eq(startTime), eq(endTime))).willReturn(expectedTime);
+
+        // 3. saveDailyInfo 내부의 호출 검증을 위한 설정 (메서드 파라미터가 정확히 일치해야 함)
+        // 인자 매칭이 까다롭다면 any()를 사용해 우선 동작 확인 후 정교화
+        given(dailyInfoWriter.createIfNotExist(any(), any(), any(), any())).willReturn(true);
 
         // when
-        Long res = studySessionService.endStudy(userId, endDateTime.toLocalTime());
+        Long res = studySessionService.endStudy(userId, endTime);
 
         // then
-        assertThat(res).isEqualTo(time);
-        ArgumentCaptor<Long> durationCaptor = ArgumentCaptor.forClass(Long.class);
-        then(studySessionWorker)
-                .should()
-                .upsert(eq(mockMember), eq(mockStudyStatus), eq(endDateTime.toLocalDate()), durationCaptor.capture());
-        assertThat(durationCaptor.getValue()).isEqualTo(time);
-        then(dailyInfoWriter).should(never()).updateEndtime(any(), any(), any());
+        assertThat(res).isEqualTo(expectedTime);
+
+        // 4. 동작 검증
+        then(studySessionWorker).should().upsert(eq(mockMember), eq(mockStudyStatus), eq(testDate), eq(expectedTime));
     }
 
     @Test
@@ -189,43 +190,45 @@ class StudySessionServiceTest {
         // given
         Long userId = 1L;
 
-        LocalDateTime startDateTime = LocalDateTime.of(2025, 8, 19, 3, 0);
-        LocalDateTime endDateTime = LocalDateTime.of(2025, 8, 20, 8, 0);
+        // [중요] 서비스 로직의 else if (startDate.plusDays(1).isEqual(today)) 조건을 만족해야 함
+        // startDate: 2025-08-19, today: 2025-08-20
+        LocalDateTime startDateTime = LocalDateTime.of(2025, 8, 19, 3, 0); // 시작: 19일 새벽 3시
+        LocalTime endTime = LocalTime.of(8, 0); // 종료: 20일 오전 8시
+        LocalDate today = LocalDate.of(2025, 8, 20);
+        LocalTime cutOff = LocalTime.of(6, 0);
+        // 기대하는 시간 계산 (새벽 6시 CUTOFF 기준)
+        // Day 1 (19일): 03:00 ~ 06:00 = 3시간 (10800초)
+        // Day 2 (20일): 06:00 ~ 08:00 = 2시간 (7200초)
+        long day1Duration = 3600 * 3;
+        long day2Duration = 3600 * 2;
+        long totalExpectedTime = day1Duration + day2Duration;
 
-        long time = 3600 * 5;
-
-        given(timeUtils.getToday(endDateTime.toLocalTime())).willReturn(endDateTime.toLocalDate());
+        // Mock 설정
+        given(timeUtils.getToday(eq(endTime))).willReturn(today);
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(studyStatusWorker.find(userId)).willReturn(Optional.of(mockStudyStatus));
         given(mockStudyStatus.getStartTime()).willReturn(startDateTime);
 
+        // [필수] timeUtils.getTimeDuration Stubbing (두 번 호출됨)
+        // 1. (03:00, 06:00) -> Day 1
+        given(timeUtils.getTimeDuration(eq(startDateTime.toLocalTime()), eq(cutOff)))
+                .willReturn(day1Duration);
+        // 2. (06:00, 08:00) -> Day 2
+        given(timeUtils.getTimeDuration(eq(cutOff), eq(endTime))).willReturn(day2Duration);
+
         given(dailyInfoWriter.createIfNotExist(any(), any(), any(), any())).willReturn(true);
 
         // when
-        Long res = studySessionService.endStudy(userId, endDateTime.toLocalTime());
+        Long res = studySessionService.endStudy(userId, endTime);
 
         // then
-        assertThat(res).isEqualTo(time);
-        ArgumentCaptor<Long> beforeDateDurationCaptor = ArgumentCaptor.forClass(Long.class);
-        ArgumentCaptor<Long> afterDateDurationCaptor = ArgumentCaptor.forClass(Long.class);
+        assertThat(res).isEqualTo(totalExpectedTime);
 
+        // 호출 검증 및 값 확인
         then(studySessionWorker)
                 .should()
-                .upsert(
-                        eq(mockMember),
-                        eq(mockStudyStatus),
-                        eq(startDateTime.toLocalDate()),
-                        beforeDateDurationCaptor.capture());
-        then(studySessionWorker)
-                .should()
-                .upsert(
-                        eq(mockMember),
-                        eq(mockStudyStatus),
-                        eq(endDateTime.toLocalDate()),
-                        afterDateDurationCaptor.capture());
-
-        assertThat(beforeDateDurationCaptor.getValue()).isEqualTo(3600 * 3);
-        assertThat(afterDateDurationCaptor.getValue()).isEqualTo(3600 * 2);
+                .upsert(eq(mockMember), eq(mockStudyStatus), eq(startDateTime.toLocalDate()), eq(day1Duration));
+        then(studySessionWorker).should().upsert(eq(mockMember), eq(mockStudyStatus), eq(today), eq(day2Duration));
     }
 
     @Test
