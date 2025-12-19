@@ -179,7 +179,9 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         // 공부 시작을 하고, 24시간 후에 다시 공부 시작을 하는 경우 예외 발생
         if (timeUtils.exceeds24Hours(durationSeconds)) {
-            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL);
+            throw new StudyException(
+                    StudyErrorCode.STUDY_TIME_START_FAIL,
+                    "[StudySessionServiceImpl#startStudy] over 1 day pass is invalid");
         }
 
         return mapper.toDto(status, durationSeconds);

@@ -53,12 +53,12 @@ public class StudyStatusWorker {
     }
 
     /**
-     * StudyStatus 를 생성하고 적절한 값을 넣어 반환 <br>
+     * StudyStatus 를 생성하고 반환 <br>
      * @param dto 공부 데이터
      * @return 만들어진 객체
      */
     public StudyStatus startStatus(Member member, StartStudyDto dto) {
-        // 새로운 optionalStudyStatus 를 생성하여 반환
+        // 새로운 StudyStatus 생성 후 반환
         return StudyStatus.builder()
                 .id(member.getId())
                 .categoryId(dto.categoryId())
