@@ -62,41 +62,52 @@ public class StudySessionServiceImpl implements StudySessionService {
     @Override
     @Transactional
     public StartStudyRes startStudy(Long userId, StartStudyReq req) {
-        LocalDate today = timeUtils.getToday(req.startTime());
-        LocalDateTime startDateTime = LocalDateTime.of(today, req.startTime());
-
-        Optional<StudyStatus> status = studyStatusWorker.find(userId);
-
-        // 만약 이미 공부 중인 경우, 공부를 시작하는 대신 현재 공부 상태를 반환함
-        if (status.isPresent() && status.get().isStudying()) {
-            // 사용자가 이미 공부하고 있으므로, 현재 유저의 공부 시간은 (현재 서버 시간 - 최초 시작 시간)
-            // 현재 서버 시간의 경우 비즈니스 날짜 (새벽 6시 기준 날짜)가 아닌 실제 날짜/시간을 사용해야함.
-            long diff = timeUtils.getTimeDuration(status.get().getStartTime().toLocalTime(), timeUtils.getTime());
-
-            // 공부를 다시 시작하려고 하는데 이미 공부 시간이 24시간이 지난 경우에는 예외가 발생함.
-            if (timeUtils.exceeds24Hours(diff)) {
-                throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL);
-            }
-
-            return mapper.toDto(status.get(), diff);
+        // 1. 기존 상태 확인 및 처리 (Early Return)
+        Optional<StudyStatus> optionalStudyStatus = studyStatusWorker.find(userId);
+        if (optionalStudyStatus.isPresent() && optionalStudyStatus.get().isStudying()) {
+            return handleAlreadyStudying(optionalStudyStatus.get());
         }
 
+        // 2. 새로운 공부 세션 데이터 준비
+        LocalDate today = timeUtils.getToday(req.startTime());
+        LocalDateTime startDateTime = LocalDateTime.of(today, req.startTime());
         StartStudyDto dto = mapper.toDto(req, startDateTime);
         Member member = memberReader.getRef(userId);
 
-        // 공부 중이 아닌 경우, 새로운 redis에 저장할 공부 상태 객체 생성
-        StudyStatus startStatus = studyStatusWorker.startStatus(member, dto);
+        // 3. 도메인 로직 수행 (기록 생성 및 상태 설정)
         dailyInfoWriter.createIfNotExist(member, today, req.startTime());
+        StudyStatus newStatus = createNewStudyStatus(member, dto, req.categoryId());
 
-        if (req.categoryId() != null) { // 만약 졍규 카테고리에 대한 공부라면
-            StudyCategory category = studyCategoryReader.getById(req.categoryId());
-            startStatus.setGoal(category.getGoal());
+        // 4. 저장 및 응답
+        studyStatusWorker.saveStatus(newStatus);
+        return mapper.toDto(newStatus, 0L);
+    }
+
+    /**
+     * 이미 공부 중인 경우의 로직을 처리합니다.
+     */
+    private StartStudyRes handleAlreadyStudying(StudyStatus status) {
+        long durationSeconds = timeUtils.getTimeDuration(status.getStartTime().toLocalTime(), timeUtils.getTime());
+
+        if (timeUtils.exceeds24Hours(durationSeconds)) {
+            throw new StudyException(StudyErrorCode.STUDY_TIME_START_FAIL);
         }
 
-        // 공부 상태 저장
-        studyStatusWorker.saveStatus(startStatus);
+        return mapper.toDto(status, durationSeconds);
+    }
 
-        return mapper.toDto(startStatus, 0L);
+    /**
+     * 새로운 StudyStatus 객체를 생성하고 카테고리 목표를 설정합니다.
+     */
+    private StudyStatus createNewStudyStatus(Member member, StartStudyDto dto, Long categoryId) {
+        StudyStatus status = studyStatusWorker.startStatus(member, dto);
+
+        if (categoryId != null) {
+            StudyCategory category = studyCategoryReader.getById(categoryId);
+            status.setGoal(category.getGoal());
+        }
+
+        return status;
     }
 
     @Override
@@ -127,11 +138,10 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         } else if (startDate.plusDays(1).isEqual(today)) {
 
-            LocalTime pointTime = LocalTime.of(6, 0); // to static var
-            long day1DurationInSec = timeUtils.getTimeDuration(startTime, pointTime);
-            long day2DurationInSec = timeUtils.getTimeDuration(pointTime, endTime);
-            timeSaveInfoMap.put(startDate, new TimeSaveInfo(member, startTime, pointTime));
-            timeSaveInfoMap.put(today, new TimeSaveInfo(member, pointTime, endTime));
+            long day1DurationInSec = timeUtils.getTimeDuration(startTime, TimeUtils.CUTOFF);
+            long day2DurationInSec = timeUtils.getTimeDuration(TimeUtils.CUTOFF, endTime);
+            timeSaveInfoMap.put(startDate, new TimeSaveInfo(member, startTime, TimeUtils.CUTOFF));
+            timeSaveInfoMap.put(today, new TimeSaveInfo(member, TimeUtils.CUTOFF, endTime));
 
             studySessionWorker.upsert(member, status, startDate, day1DurationInSec);
             studySessionWorker.upsert(member, status, today, day2DurationInSec);

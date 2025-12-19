@@ -30,7 +30,7 @@ public class TimeUtils {
     private final Clock clock;
     private final StringRedisTemplate redisTemplate;
 
-    private static final LocalTime CUTOFF = LocalTime.of(6, 0);
+    public static final LocalTime CUTOFF = LocalTime.of(6, 0);
     private static final int SECS_PER_DAY = 24 * 60 * 60;
 
     private static final String OVERRIDE_KEY = "timeutils:override:now";
