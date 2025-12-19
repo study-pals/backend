@@ -100,8 +100,7 @@ class StudyStatusWorkerTest {
     @Test
     void validStatus_fail_whenInvalidStudyState() {
         // given
-        StudyStatus invalid =
-                StudyStatus.builder().id(1L).studying(false).build();
+        StudyStatus invalid = StudyStatus.builder().id(1L).studying(false).build();
 
         // when & then
         assertThatThrownBy(() -> studyStatusWorker.validStatus(invalid))

@@ -31,6 +31,7 @@ public class TimeUtils {
     private final StringRedisTemplate redisTemplate;
 
     private static final LocalTime CUTOFF = LocalTime.of(6, 0);
+    private static final int SECS_PER_DAY = 24 * 60 * 60;
 
     private static final String OVERRIDE_KEY = "timeutils:override:now";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd:HH:mm:ss");
@@ -48,6 +49,24 @@ public class TimeUtils {
     public LocalTime getTime() {
         LocalDateTime now = LocalDateTime.now(clock);
         return now.toLocalTime();
+    }
+
+    /**
+     * 시작 시간과 종료 시간에 대해 second로 반환하는 메서드.
+     * 00:00 을 기점으로 계산 로직이 달라진다.
+     * @param start 공부 시작 시간
+     * @param end 공부 종료 시간
+     * @return 초 단위 공부 시간
+     */
+    public long getTimeDuration(LocalTime start, LocalTime end) {
+        int s = start.toSecondOfDay();
+        int e = end.toSecondOfDay();
+        if (s == e) return 0L;
+        return (e >= s) ? (e - s) : (SECS_PER_DAY - s) + e;
+    }
+
+    public boolean exceeds24Hours(Long seconds) {
+        return seconds > SECS_PER_DAY;
     }
 
     public LocalDate getToday() {

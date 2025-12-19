@@ -3,6 +3,7 @@ package com.studypals.domain.studyManage.worker;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
@@ -11,7 +12,6 @@ import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.StudyErrorCode;
 import com.studypals.global.exceptions.exception.StudyException;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 공부 상태를 나타내는 studyStatus 의 저장/조회 및, 해당 객체의 생성 등을 담당합니다.
@@ -120,18 +120,18 @@ public class StudyStatusWorker {
             throw new StudyException(StudyErrorCode.STUDY_TIME_END_FAIL, "save fail");
         }
     }
-//
-//    /**
-//     * 공부를 마무리하고, studyStatus.studyTime 을 time 만큼 증가시킵니다.
-//     * @param status 유저의 공부 상태
-//     * @param time 유저가 공부한 시간
-//     */
-//    public void addStudyTimeAndSave(StudyStatus status, Long time) {
-//        StudyStatus updatedStatus = status.update()
-//                .studying(false)
-//                .studyTime(status.getStudyTime() + time)
-//                .build();
-//        log.info("updatedStatus id = {}", updatedStatus.getId());
-//        saveStatus(updatedStatus);
-//    }
+    //
+    //    /**
+    //     * 공부를 마무리하고, studyStatus.studyTime 을 time 만큼 증가시킵니다.
+    //     * @param status 유저의 공부 상태
+    //     * @param time 유저가 공부한 시간
+    //     */
+    //    public void addStudyTimeAndSave(StudyStatus status, Long time) {
+    //        StudyStatus updatedStatus = status.update()
+    //                .studying(false)
+    //                .studyTime(status.getStudyTime() + time)
+    //                .build();
+    //        log.info("updatedStatus id = {}", updatedStatus.getId());
+    //        saveStatus(updatedStatus);
+    //    }
 }

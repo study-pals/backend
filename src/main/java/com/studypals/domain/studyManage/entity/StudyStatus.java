@@ -46,8 +46,8 @@ public class StudyStatus {
 
     private LocalDateTime startTime;
 
-//    @Builder.Default
-//    private Long studyTime = 0L; // 이번 pr에서 유효한 값으로 만들어야함
+    //    @Builder.Default
+    //    private Long studyTime = 0L; // 이번 pr에서 유효한 값으로 만들어야함
 
     private Long categoryId;
 

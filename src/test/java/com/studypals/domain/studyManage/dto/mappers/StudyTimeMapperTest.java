@@ -2,7 +2,6 @@ package com.studypals.domain.studyManage.dto.mappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -14,7 +13,6 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.StudyStatusRes;
-import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
 
