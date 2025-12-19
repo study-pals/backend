@@ -10,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.memberManage.dto.*;
 import com.studypals.domain.memberManage.service.MemberService;
-import com.studypals.global.exceptions.errorCode.AuthErrorCode;
-import com.studypals.global.exceptions.exception.AuthException;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
@@ -59,18 +57,8 @@ public class MemberController {
     @GetMapping("/register/check")
     public ResponseEntity<Response<Boolean>> checkAvailability(
             @RequestParam(required = false) String username, @RequestParam(required = false) String nickname) {
-        boolean hasUsername = username != null && !username.isBlank();
-        boolean hasNickname = nickname != null && !nickname.isBlank();
 
-        if (hasUsername == hasNickname) {
-            throw new AuthException(
-                    AuthErrorCode.SIGNUP_FAIL,
-                    "username 혹은 nickname 중 하나는 필수입니다.",
-                    "[MemberController#checkAvailability] username & nickname both blank");
-        }
-
-        boolean duplicated =
-                hasUsername ? memberService.isUsernameDuplicate(username) : memberService.isNicknameDuplicate(nickname);
+        boolean duplicated = memberService.duplicateCheck(new CheckDuplicateDto(username, nickname));
 
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.USER_SEARCH, duplicated));
     }

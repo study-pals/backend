@@ -1,5 +1,6 @@
 package com.studypals.domain.memberManage.service;
 
+import com.studypals.domain.memberManage.dto.CheckDuplicateDto;
 import com.studypals.domain.memberManage.dto.CreateMemberReq;
 import com.studypals.domain.memberManage.dto.MemberDetailsRes;
 import com.studypals.domain.memberManage.dto.UpdateProfileReq;
@@ -26,7 +27,5 @@ public interface MemberService {
 
     MemberDetailsRes getProfile(Long userId);
 
-    boolean isUsernameDuplicate(String username);
-
-    boolean isNicknameDuplicate(String nickname);
+    boolean duplicateCheck(CheckDuplicateDto dto);
 }
