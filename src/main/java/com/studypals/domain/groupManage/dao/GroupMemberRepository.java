@@ -34,7 +34,7 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
      * @param memberId 사용자 아이디
      * @return GroupMember 에 대한 List
      */
-    List<GroupMember> findAllByMemberId(Long memberId); // 실험을 해보자.
+    List<GroupMember> findAllByMemberId(Long memberId);
 
     @Query(
             """

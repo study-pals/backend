@@ -1,5 +1,6 @@
 package com.studypals.domain.groupManage.dao;
 
+import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -31,9 +32,16 @@ public interface GroupMemberCustomRepository {
     List<GroupMemberProfileDto> findTopNMemberByJoinedAt(Long groupId, int limit);
 
     /**
-     * 그룹에 속한 모든 멤버를 조회합니다.
+     * 그룹에 속한 모든 멤버 정보 (id,nickname,imageUrl,role)를 조회합니다.
      * @param groupId 조회할 그룹 ID
-     * @return 멤버 프로필 리스트
+     * @return 멤버 정보 리스트
      */
     List<GroupMemberProfileDto> findAllMemberProfiles(Long groupId);
+
+    /**
+     * 여러 그룹에 속한 모든 멤버의 간략한 정보(id,imageUrl,role)를 한번에 조회합니다.
+     * @param groupIds
+     * @return
+     */
+    List<GroupMemberProfileDto> findAllMembersInGroupIds(List<Long> groupIds);
 }

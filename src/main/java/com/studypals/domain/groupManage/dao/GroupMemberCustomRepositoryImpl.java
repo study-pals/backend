@@ -3,6 +3,7 @@ package com.studypals.domain.groupManage.dao;
 import static com.studypals.domain.groupManage.entity.QGroupMember.groupMember;
 import static com.studypals.domain.memberManage.entity.QMember.member;
 
+import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,19 @@ public class GroupMemberCustomRepositoryImpl implements GroupMemberCustomReposit
                 .join(member)
                 .on(groupMember.member.id.eq(member.id))
                 .where(groupMember.group.id.eq(groupId))
+                .orderBy(orderByLeaderPriority(), groupMember.joinedAt.desc())
+                .fetch();
+    }
+
+    @Override
+    public List<GroupMemberProfileDto> findAllMembersInGroupIds(List<Long> groupIds) {
+        return queryFactory
+                .select(Projections.constructor(
+                        GroupMemberProfileDto.class, member.id, member.nickname, member.imageUrl, groupMember.role))
+                .from(groupMember)
+                .join(member)
+                .on(groupMember.member.id.eq(member.id))
+                .where(groupMember.group.id.in(groupIds))
                 .orderBy(orderByLeaderPriority(), groupMember.joinedAt.desc())
                 .fetch();
     }

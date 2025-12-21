@@ -1,5 +1,6 @@
 package com.studypals.domain.groupManage.worker;
 
+import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,10 @@ public class GroupMemberReader {
 
     public List<GroupMemberProfileDto> getAllMemberProfiles(Group group) {
         return groupMemberRepository.findAllMemberProfiles(group.getId());
+    }
+
+    public List<GroupMemberProfileDto> getAllMemberProfileImages(List<Long> groupIds) {
+        return groupMemberRepository.findAllMembersInGroupIds(groupIds);
     }
 
     public List<GroupSummaryDto> getGroups(Long userId) {

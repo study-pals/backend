@@ -1,6 +1,8 @@
 package com.studypals.domain.groupManage.dto;
 
+import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 import java.time.LocalDate;
+import java.util.List;
 
 public record GetGroupsRes(
         Long groupId,
@@ -9,8 +11,10 @@ public record GetGroupsRes(
         String chatRoomId,
         boolean isOpen,
         boolean isApprovalRequired,
-        LocalDate createdDate) {
-    public static GetGroupsRes from(GroupSummaryDto dto) {
+        LocalDate createdDate,
+        List<GroupMemberProfileDto> profiles,
+        List<Long> categoryIds) {
+    public static GetGroupsRes of(GroupSummaryDto dto, List<GroupMemberProfileDto> profiles, List<GroupCategoryDto> categoryIds) {
         return new GetGroupsRes(
                 dto.id(),
                 dto.name(),
@@ -18,6 +22,8 @@ public record GetGroupsRes(
                 dto.chatRoomId(),
                 dto.open(),
                 dto.approvalRequired(),
-                dto.createdDate());
+                dto.createdDate(),
+                profiles,
+                categoryIds.stream().map(GroupCategoryDto::categoryId).toList());
     }
 }
