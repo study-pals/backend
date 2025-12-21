@@ -6,9 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 
-import com.studypals.domain.studyManage.dto.GroupCategoryDto;
-import com.studypals.domain.studyManage.entity.StudyType;
-import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,6 +25,9 @@ import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
+import com.studypals.domain.studyManage.dto.GroupCategoryDto;
+import com.studypals.domain.studyManage.entity.StudyType;
+import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
@@ -160,29 +160,26 @@ public class GroupServiceTest {
         // 1. Given: 그룹 요약 데이터 준비
         Long userId = 1L;
         List<GroupSummaryDto> groups = List.of(
-                new GroupSummaryDto(101L, "CS 전공 지식 뿌시기", "취업준비", "chat_cs001", true, false, LocalDate.of(2025, 11, 15)),
-                new GroupSummaryDto(205L, "자바 스터디 (Spring Boot)", "백엔드개발", "chat_java05", false, true, LocalDate.of(2025, 10, 20))
-        );
+                new GroupSummaryDto(
+                        101L, "CS 전공 지식 뿌시기", "취업준비", "chat_cs001", true, false, LocalDate.of(2025, 11, 15)),
+                new GroupSummaryDto(
+                        205L, "자바 스터디 (Spring Boot)", "백엔드개발", "chat_java05", false, true, LocalDate.of(2025, 10, 20)));
         List<Long> groupIds = List.of(101L, 205L);
 
         given(groupMemberReader.getGroups(userId)).willReturn(groups);
 
         // 2. Given: 멤버 프로필 데이터 준비 (groupId가 포함된 DTO여야 함)
-        List<GroupMemberProfileDto> profiles = List.of(
-                new GroupMemberProfileDto(101L, "코딩왕", "https://img.com/1", GroupRole.LEADER),
-                new GroupMemberProfileDto(205L,  "백엔드곰", "https://img.com/2", GroupRole.MEMBER)
-        );
-        // 서비스 로직에서 ProfileDto::id로 groupingBy를 하므로,
-        // 여기서 id가 groupId 역할을 하거나 서비스 로직을 GroupMemberProfileDto::groupId로 수정해야 함
+        List<GroupMemberProfileMappingDto> profiles = List.of(
+                new GroupMemberProfileMappingDto(101L, 1L, "코딩왕", "https://img.com/1", GroupRole.LEADER),
+                new GroupMemberProfileMappingDto(205L, 2L, "백엔드곰", "https://img.com/2", GroupRole.MEMBER));
+
         given(groupMemberReader.getAllMemberProfileImages(groupIds)).willReturn(profiles);
 
         // 3. Given: 카테고리 데이터 준비
-        List<GroupCategoryDto> categories = List.of(
-                new GroupCategoryDto(101L, 1L),
-                new GroupCategoryDto(101L, 2L),
-                new GroupCategoryDto(205L, 3L)
-        );
-        given(studyCategoryReader.findByStudyTypeAndTypeId(StudyType.GROUP, groupIds)).willReturn(categories);
+        List<GroupCategoryDto> categories =
+                List.of(new GroupCategoryDto(101L, 1L), new GroupCategoryDto(101L, 2L), new GroupCategoryDto(205L, 3L));
+        given(studyCategoryReader.findByStudyTypeAndTypeId(StudyType.GROUP, groupIds))
+                .willReturn(categories);
 
         // When
         List<GetGroupsRes> result = groupService.getGroups(userId);
@@ -234,7 +231,6 @@ public class GroupServiceTest {
         // 2. GroupTotalGoalDto 생성 (평균 71% 가정: (75 + 100 + 40) / 3 = 71.66... -> 71 (버림))
         GroupTotalGoalDto totalGoals = new GroupTotalGoalDto(categoryGoals, 71);
 
-        // 3. Mocking 설정 변경: List<GroupCategoryGoalDto> -> GroupTotalGoalDto
         given(groupReader.getById(groupId)).willReturn(mockGroup);
         given(groupMemberReader.getAllMemberProfiles(mockGroup)).willReturn(profiles);
         given(groupGoalCalculator.calculateGroupGoals(groupId, profiles)).willReturn(totalGoals);

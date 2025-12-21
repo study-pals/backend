@@ -3,7 +3,6 @@ package com.studypals.domain.groupManage.dao;
 import static com.studypals.domain.groupManage.entity.QGroupMember.groupMember;
 import static com.studypals.domain.memberManage.entity.QMember.member;
 
-import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -13,6 +12,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 import com.studypals.domain.groupManage.entity.GroupRole;
 
 /**
@@ -62,10 +62,15 @@ public class GroupMemberCustomRepositoryImpl implements GroupMemberCustomReposit
     }
 
     @Override
-    public List<GroupMemberProfileDto> findAllMembersInGroupIds(List<Long> groupIds) {
+    public List<GroupMemberProfileMappingDto> findAllMembersInGroupIds(List<Long> groupIds) {
         return queryFactory
                 .select(Projections.constructor(
-                        GroupMemberProfileDto.class, member.id, member.nickname, member.imageUrl, groupMember.role))
+                        GroupMemberProfileMappingDto.class,
+                        groupMember.group.id,
+                        member.id,
+                        member.nickname,
+                        member.imageUrl,
+                        groupMember.role))
                 .from(groupMember)
                 .join(member)
                 .on(groupMember.member.id.eq(member.id))

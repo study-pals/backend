@@ -1,6 +1,5 @@
 package com.studypals.domain.studyManage.dao;
 
-import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyType;
 
@@ -30,10 +30,13 @@ public interface StudyCategoryRepository extends JpaRepository<StudyCategory, Lo
 
     List<StudyCategory> findByStudyTypeAndTypeId(StudyType studyType, Long typeId);
 
-    @Query(value = """
+    @Query(
+            value =
+                    """
         SELECT new com.studypals.domain.studyManage.dto.GroupCategoryDto(sc.typeId, sc.id)
         FROM study_category sc
         WHERE sc.studyType =:studyType AND sc.typeId IN :typeIds
     """)
-    List<GroupCategoryDto> findByStudyTypeAndTypeIds(@Param("studyType") StudyType studyType, @Param("typeIds") List<Long> typeIds);
+    List<GroupCategoryDto> findByStudyTypeAndTypeIds(
+            @Param("studyType") StudyType studyType, @Param("typeIds") List<Long> typeIds);
 }

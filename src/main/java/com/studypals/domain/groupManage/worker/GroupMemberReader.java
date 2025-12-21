@@ -1,12 +1,12 @@
 package com.studypals.domain.groupManage.worker;
 
-import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 import com.studypals.domain.groupManage.dto.GroupSummaryDto;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.global.annotations.Worker;
@@ -40,7 +40,7 @@ public class GroupMemberReader {
         return groupMemberRepository.findAllMemberProfiles(group.getId());
     }
 
-    public List<GroupMemberProfileDto> getAllMemberProfileImages(List<Long> groupIds) {
+    public List<GroupMemberProfileMappingDto> getAllMemberProfileImages(List<Long> groupIds) {
         return groupMemberRepository.findAllMembersInGroupIds(groupIds);
     }
 

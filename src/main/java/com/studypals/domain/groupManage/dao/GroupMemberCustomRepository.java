@@ -1,11 +1,11 @@
 package com.studypals.domain.groupManage.dao;
 
-import com.studypals.domain.groupManage.dto.GroupMemberProfileImageDto;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 
 /**
  * {@link com.studypals.domain.groupManage.entity.GroupMember} 엔티티에 대한 커스텀 dao 클래스입니다.
@@ -39,9 +39,9 @@ public interface GroupMemberCustomRepository {
     List<GroupMemberProfileDto> findAllMemberProfiles(Long groupId);
 
     /**
-     * 여러 그룹에 속한 모든 멤버의 간략한 정보(id,imageUrl,role)를 한번에 조회합니다.
+     * 여러 그룹에 속한 모든 멤버의 정보(id,nickname,imageUrl,role)를 한번에 조회합니다.
      * @param groupIds
      * @return
      */
-    List<GroupMemberProfileDto> findAllMembersInGroupIds(List<Long> groupIds);
+    List<GroupMemberProfileMappingDto> findAllMembersInGroupIds(List<Long> groupIds);
 }

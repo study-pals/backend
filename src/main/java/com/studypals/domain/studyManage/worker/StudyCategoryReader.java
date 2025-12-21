@@ -1,12 +1,12 @@
 package com.studypals.domain.studyManage.worker;
 
-import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 import java.util.List;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
+import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.global.annotations.Worker;

@@ -21,6 +21,4 @@ package com.studypals.domain.studyManage.dto;
  * @see
  * @since 2025-12-21
  */
-public record GroupCategoryDto(Long groupId, Long categoryId) {
-
-}
+public record GroupCategoryDto(Long groupId, Long categoryId) {}

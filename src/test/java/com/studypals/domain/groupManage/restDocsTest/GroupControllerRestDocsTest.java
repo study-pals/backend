@@ -15,7 +15,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -123,8 +122,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         false,
                         LocalDate.of(2025, 12, 1),
                         List.of(new GroupMemberProfileDto(1L, "코딩왕", "https://exam.com/user1.png", GroupRole.LEADER)),
-                        List.of(1L, 2L)
-                ),
+                        List.of(1L, 2L)),
                 new GetGroupsRes(
                         205L,
                         "프론트엔드 리액트 스터디",
@@ -135,11 +133,8 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         LocalDate.of(2025, 10, 25),
                         List.of(
                                 new GroupMemberProfileDto(2L, "리액트장인", "https://exam.com/user2.png", GroupRole.LEADER),
-                                new GroupMemberProfileDto(3L, "뉴비열공", "https://exam.com/user3.png", GroupRole.MEMBER)
-                        ),
-                        List.of(3L, 4L)
-                )
-        );
+                                new GroupMemberProfileDto(3L, "뉴비열공", "https://exam.com/user3.png", GroupRole.MEMBER)),
+                        List.of(3L, 4L)));
         Response<List<GetGroupsRes>> expected = CommonResponse.success(ResponseCode.GROUP_LIST, list);
 
         given(groupService.getGroups(any())).willReturn(list);
@@ -173,8 +168,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data[].profiles[].role").description("그룹 내 역할 (LEADER, MEMBER)"),
 
                                 // 카테고리 정보
-                                fieldWithPath("data[].categoryIds[]").description("그룹 카테고리 ID 목록")
-                        )));
+                                fieldWithPath("data[].categoryIds[]").description("그룹 카테고리 ID 목록"))));
     }
 
     @Test

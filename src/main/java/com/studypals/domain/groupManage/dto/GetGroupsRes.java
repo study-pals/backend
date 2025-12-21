@@ -1,8 +1,9 @@
 package com.studypals.domain.groupManage.dto;
 
-import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 import java.time.LocalDate;
 import java.util.List;
+
+import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 
 public record GetGroupsRes(
         Long groupId,
@@ -14,7 +15,8 @@ public record GetGroupsRes(
         LocalDate createdDate,
         List<GroupMemberProfileDto> profiles,
         List<Long> categoryIds) {
-    public static GetGroupsRes of(GroupSummaryDto dto, List<GroupMemberProfileDto> profiles, List<GroupCategoryDto> categoryIds) {
+    public static GetGroupsRes of(
+            GroupSummaryDto dto, List<GroupMemberProfileMappingDto> rawProfiles, List<GroupCategoryDto> categoryIds) {
         return new GetGroupsRes(
                 dto.id(),
                 dto.name(),
@@ -23,7 +25,9 @@ public record GetGroupsRes(
                 dto.open(),
                 dto.approvalRequired(),
                 dto.createdDate(),
-                profiles,
+                rawProfiles.stream()
+                        .map(rp -> new GroupMemberProfileDto(rp.userId(), rp.nickname(), rp.imageUrl(), rp.role()))
+                        .toList(),
                 categoryIds.stream().map(GroupCategoryDto::categoryId).toList());
     }
 }
