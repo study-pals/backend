@@ -2,7 +2,6 @@ package com.studypals.domain.groupManage.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRole;
@@ -116,11 +116,15 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
 
         // MappingDto에 groupId가 정확히 매칭되었는지 검증 (가장 중요)
         GroupMemberProfileMappingDto mapping1 = result.stream()
-                .filter(r -> r.groupId().equals(g1.getId())).findFirst().get();
+                .filter(r -> r.groupId().equals(g1.getId()))
+                .findFirst()
+                .get();
         assertThat(mapping1.nickname()).isEqualTo("그룹1리더");
 
         GroupMemberProfileMappingDto mapping2 = result.stream()
-                .filter(r -> r.groupId().equals(g2.getId())).findFirst().get();
+                .filter(r -> r.groupId().equals(g2.getId()))
+                .findFirst()
+                .get();
         assertThat(mapping2.nickname()).isEqualTo("그룹2리더");
     }
 }
