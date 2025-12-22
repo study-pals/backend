@@ -40,7 +40,7 @@ class StudyStatusWorkerTest {
     void find_AndDelete_success() {
         // given
         Long userId = 1L;
-        StudyStatus status = StudyStatus.builder().id(userId).studyTime(120L).build();
+        StudyStatus status = StudyStatus.builder().id(userId).build();
         given(studyStatusRedisRepository.findById(userId)).willReturn(Optional.of(status));
 
         // when
@@ -100,8 +100,7 @@ class StudyStatusWorkerTest {
     @Test
     void validStatus_fail_whenInvalidStudyState() {
         // given
-        StudyStatus invalid =
-                StudyStatus.builder().id(1L).studying(false).studyTime(60L).build();
+        StudyStatus invalid = StudyStatus.builder().id(1L).studying(false).build();
 
         // when & then
         assertThatThrownBy(() -> studyStatusWorker.validStatus(invalid))

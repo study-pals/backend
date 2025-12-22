@@ -57,36 +57,30 @@ public class StudySessionServiceImpl implements StudySessionService {
     private final StudyCategoryReader studyCategoryReader;
     private final DailyInfoWriter dailyInfoWriter;
     private final MemberReader memberReader;
-
-    private static final int SECS_PER_DAY = 24 * 60 * 60;
     private final StudyTimeReader studyTimeReader;
 
     @Override
     @Transactional
     public StartStudyRes startStudy(Long userId, StartStudyReq req) {
+        // 1. 기존 상태 확인 및 처리 (Early Return)
+        Optional<StudyStatus> optionalStudyStatus = studyStatusWorker.find(userId);
+        if (optionalStudyStatus.isPresent() && optionalStudyStatus.get().isStudying()) {
+            return handleAlreadyStudying(optionalStudyStatus.get());
+        }
+
+        // 2. 새로운 공부 세션 데이터 준비
         LocalDate today = timeUtils.getToday(req.startTime());
         LocalDateTime startDateTime = LocalDateTime.of(today, req.startTime());
         StartStudyDto dto = mapper.toDto(req, startDateTime);
-
         Member member = memberReader.getRef(userId);
-        Optional<StudyStatus> status = studyStatusWorker.find(userId);
 
-        // 만약 이미 공부 중인 경우, 공부를 시작하는 대신 현재 공부 상태를 반환함
-        if (status.isPresent() && status.get().isStudying()) return mapper.toDto(status.get());
-
-        // 공부 중이 아닌 경우, 새로운 redis에 저장할 공부 상태 객체 생성
-        StudyStatus startStatus = studyStatusWorker.startStatus(member, dto);
+        // 3. 도메인 로직 수행 (기록 생성 및 상태 설정)
         dailyInfoWriter.createIfNotExist(member, today, req.startTime());
+        StudyStatus newStatus = createNewStudyStatus(member, dto, req.categoryId());
 
-        if (req.categoryId() != null) { // 만약 졍규 카테고리에 대한 공부라면
-            StudyCategory category = studyCategoryReader.getById(req.categoryId());
-            startStatus.setGoal(category.getGoal());
-        }
-
-        // 공부 상태 저장
-        studyStatusWorker.saveStatus(startStatus);
-
-        return mapper.toDto(startStatus);
+        // 4. 저장 및 응답
+        studyStatusWorker.saveStatus(newStatus);
+        return mapper.toDto(newStatus, 0L);
     }
 
     @Override
@@ -110,18 +104,17 @@ public class StudySessionServiceImpl implements StudySessionService {
         Map<LocalDate, TimeSaveInfo> timeSaveInfoMap = new HashMap<>();
         if (startDate.isEqual(today)) {
 
-            long durationInSec = getTimeDuration(startTime, endTime);
+            long durationInSec = timeUtils.getTimeDuration(startTime, endTime);
             timeSaveInfoMap.put(today, new TimeSaveInfo(member, startTime, endTime));
             studySessionWorker.upsert(member, status, today, durationInSec);
             totalTime += durationInSec;
 
         } else if (startDate.plusDays(1).isEqual(today)) {
 
-            LocalTime pointTime = LocalTime.of(6, 0); // to static var
-            long day1DurationInSec = getTimeDuration(startTime, pointTime);
-            long day2DurationInSec = getTimeDuration(pointTime, endTime);
-            timeSaveInfoMap.put(startDate, new TimeSaveInfo(member, startTime, pointTime));
-            timeSaveInfoMap.put(today, new TimeSaveInfo(member, pointTime, endTime));
+            long day1DurationInSec = timeUtils.getTimeDuration(startTime, TimeUtils.CUTOFF);
+            long day2DurationInSec = timeUtils.getTimeDuration(TimeUtils.CUTOFF, endTime);
+            timeSaveInfoMap.put(startDate, new TimeSaveInfo(member, startTime, TimeUtils.CUTOFF));
+            timeSaveInfoMap.put(today, new TimeSaveInfo(member, TimeUtils.CUTOFF, endTime));
 
             studySessionWorker.upsert(member, status, startDate, day1DurationInSec);
             studySessionWorker.upsert(member, status, today, day2DurationInSec);
@@ -169,12 +162,43 @@ public class StudySessionServiceImpl implements StudySessionService {
             return mapper.toStudyStatusDto(false);
         }
 
-        // 현재 StudyStatus 엔티티의 studyTime 값은 사용하지 않는 값으로 무조건 0이다. 따라서 StudyTime에서 따로 가져와야 한다.
+        // StudyStatus 엔티티의 studyTime 값은 사용하지 않는 값으로 무조건 0이다. 따라서 StudyTime에서 따로 가져와야 한다.
+        // 해당 카테고리를 오늘 공부한 총 시간을 가져오는 쿼리임.
         Long studyTime = studyTimeReader
                 .findByCategoryId(userId, LocalDate.from(studyStatus.getStartTime()), studyStatus.getCategoryId())
                 .orElse(0L);
 
         return mapper.toStudyStatusDto(studyStatus, studyTime);
+    }
+
+    /**
+     * 이미 공부 중인 경우의 로직을 처리합니다.
+     */
+    private StartStudyRes handleAlreadyStudying(StudyStatus status) {
+        long durationSeconds = timeUtils.getTimeDuration(status.getStartTime().toLocalTime(), timeUtils.getTime());
+
+        // 공부 시작을 하고, 24시간 후에 다시 공부 시작을 하는 경우 예외 발생
+        if (timeUtils.exceeds24Hours(durationSeconds)) {
+            throw new StudyException(
+                    StudyErrorCode.STUDY_TIME_START_FAIL,
+                    "[StudySessionServiceImpl#startStudy] over 1 day pass is invalid");
+        }
+
+        return mapper.toDto(status, durationSeconds);
+    }
+
+    /**
+     * 새로운 StudyStatus 객체를 생성하고 카테고리 목표를 설정합니다.
+     */
+    private StudyStatus createNewStudyStatus(Member member, StartStudyDto dto, Long categoryId) {
+        StudyStatus status = studyStatusWorker.startStatus(member, dto);
+
+        if (categoryId != null) {
+            StudyCategory category = studyCategoryReader.getById(categoryId);
+            status.setGoal(category.getGoal());
+        }
+
+        return status;
     }
 
     /**
@@ -195,19 +219,5 @@ public class StudySessionServiceImpl implements StudySessionService {
                 dailyInfoWriter.updateEndtime(info.member, date, info.end);
             }
         }
-    }
-
-    /**
-     * 시작 시간과 종료 시간에 대해 second로 반환하는 메서드.
-     * 00:00 을 기점으로 계산 로직이 달라진다.
-     * @param start 공부 시작 시간
-     * @param end 공부 종료 시간
-     * @return 초 단위 공부 시간
-     */
-    private long getTimeDuration(LocalTime start, LocalTime end) {
-        int s = start.toSecondOfDay();
-        int e = end.toSecondOfDay();
-        if (s == e) return 0L;
-        return (e >= s) ? (e - s) : (SECS_PER_DAY - s) + e;
     }
 }
