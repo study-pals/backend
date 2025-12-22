@@ -23,6 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.memberManage.api.MemberController;
+import com.studypals.domain.memberManage.dto.CheckDuplicateDto;
 import com.studypals.domain.memberManage.dto.CreateMemberReq;
 import com.studypals.domain.memberManage.dto.MemberDetailsRes;
 import com.studypals.domain.memberManage.dto.UpdateProfileReq;
@@ -218,7 +219,8 @@ public class MemberControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void checkAvailability_success_with_username() throws Exception {
         // given
-        given(memberService.isUsernameDuplicate("username@example.com")).willReturn(false);
+        given(memberService.duplicateCheck(new CheckDuplicateDto("username@example.com", null)))
+                .willReturn(false);
 
         Response<Boolean> response = CommonResponse.success(ResponseCode.USER_SEARCH, false);
 
@@ -249,7 +251,8 @@ public class MemberControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void checkAvailability_success_with_nickname() throws Exception {
         // given
-        given(memberService.isNicknameDuplicate("nickname")).willReturn(true);
+        given(memberService.duplicateCheck(new CheckDuplicateDto(null, "nickname")))
+                .willReturn(true);
 
         Response<Boolean> response = CommonResponse.success(ResponseCode.USER_SEARCH, true);
 
