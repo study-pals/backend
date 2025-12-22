@@ -5,8 +5,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
-import com.studypals.domain.memberManage.dto.CreateMemberReq;
 import com.studypals.domain.memberManage.dto.SignInReq;
 import com.studypals.domain.memberManage.dto.TokenReissueReq;
 import com.studypals.domain.memberManage.entity.RefreshToken;
@@ -57,25 +54,6 @@ public class AuthIntegrationTest extends IntegrationSupport {
                 .andExpect(jsonPath("$.data.refreshToken").exists())
                 .andExpect(jsonPath("$.data.accessToken").exists())
                 .andExpect(jsonPath("$.data.grantType").exists());
-    }
-
-    @Test
-    @DisplayName("POST /register")
-    void register_success() throws Exception {
-        // given
-        CreateMemberReq req = new CreateMemberReq(
-                "username", "password", "nickname", LocalDate.of(2000, 1, 1), "student", "example.com");
-
-        // when
-        ResultActions response = mockMvc.perform(post("/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)));
-
-        // then
-        response.andExpect(status().isOk())
-                .andExpect(hasKey("code", ResponseCode.USER_CREATE.getCode()))
-                .andExpect(hasKey("message", "success createWithCategory user"))
-                .andExpect(jsonPath("$.data").exists());
     }
 
     @Test

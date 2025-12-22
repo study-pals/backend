@@ -75,6 +75,14 @@ public class JsonFieldResultMatcher implements ResultMatcher {
         return new JsonFieldResultMatcher(matchers);
     }
 
+    public static ResultMatcher hasKey(ErrorCode errorCode, String message) {
+        List<ResultMatcher> matchers = new ArrayList<>();
+        matchers.add(MockMvcResultMatchers.jsonPath("$.code").value(errorCode.getCode()));
+        matchers.add(MockMvcResultMatchers.jsonPath("$.status").value("fail"));
+        matchers.add(MockMvcResultMatchers.jsonPath("$.message").value(message));
+        return new JsonFieldResultMatcher(matchers);
+    }
+
     public static <T> ResultMatcher hasKey(Response<T> response) {
         List<ResultMatcher> matchers = new ArrayList<>();
 

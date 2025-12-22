@@ -20,10 +20,9 @@ import com.studypals.global.responses.ResponseCode;
 import com.studypals.global.security.jwt.JwtToken;
 
 /**
- * 회원가입/로그인 및 기타 권한 , 인증 등에 대한 컨트롤러입니다. 담당하는 엔드포인트는 다음과 같습니다.
+ * 로그인 및 기타 권한 , 인증 등에 대한 컨트롤러입니다. 담당하는 엔드포인트는 다음과 같습니다.
  *
  * <pre>
- *     - POST /register : 회원가입({@link CreateMemberReq})
  *     - POST /sign-in : 로그인({@link SignInReq})
  *     - POST /refresh : 토큰 재발급({@link TokenReissueReq}
  * </pre>
@@ -38,15 +37,6 @@ public class AuthController {
     private final MemberService memberService;
     private final SignInService signInService;
     private final TokenService tokenService;
-
-    @PostMapping("/register")
-    public ResponseEntity<Response<Long>> register(@Valid @RequestBody CreateMemberReq req) {
-        Long id = memberService.createMember(req);
-        Response<Long> response =
-                CommonResponse.success(ResponseCode.USER_CREATE, id, "success createWithCategory user");
-
-        return ResponseEntity.ok(response);
-    }
 
     @PostMapping("/sign-in")
     public ResponseEntity<Response<JwtToken>> signIn(@Valid @RequestBody SignInReq req) {
