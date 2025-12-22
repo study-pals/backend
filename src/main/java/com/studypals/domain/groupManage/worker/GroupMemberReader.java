@@ -40,8 +40,8 @@ public class GroupMemberReader {
         return groupMemberRepository.findAllMemberProfiles(group.getId());
     }
 
-    public List<GroupMemberProfileMappingDto> getAllMemberProfileImages(List<Long> groupIds) {
-        return groupMemberRepository.findAllMembersInGroupIds(groupIds);
+    public List<GroupMemberProfileMappingDto> getTopNMemberProfileImages(List<Long> groupIds, int limit) {
+        return groupMemberRepository.findAllMembersInGroupIds(groupIds, limit);
     }
 
     public List<GroupSummaryDto> getGroups(Long userId) {

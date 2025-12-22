@@ -62,13 +62,11 @@ public class GroupMemberCustomRepositoryImpl implements GroupMemberCustomReposit
     }
 
     @Override
-    public List<GroupMemberProfileMappingDto> findAllMembersInGroupIds(List<Long> groupIds) {
+    public List<GroupMemberProfileMappingDto> findAllMembersInGroupIds(List<Long> groupIds, int limit) {
         return queryFactory
                 .select(Projections.constructor(
                         GroupMemberProfileMappingDto.class,
                         groupMember.group.id,
-                        member.id,
-                        member.nickname,
                         member.imageUrl,
                         groupMember.role))
                 .from(groupMember)
@@ -76,6 +74,7 @@ public class GroupMemberCustomRepositoryImpl implements GroupMemberCustomReposit
                 .on(groupMember.member.id.eq(member.id))
                 .where(groupMember.group.id.in(groupIds))
                 .orderBy(orderByLeaderPriority(), groupMember.joinedAt.desc())
+                .limit(limit)
                 .fetch();
     }
 

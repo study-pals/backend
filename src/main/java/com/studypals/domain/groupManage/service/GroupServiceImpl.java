@@ -1,5 +1,6 @@
 package com.studypals.domain.groupManage.service;
 
+import com.studypals.domain.groupManage.entity.GroupConst;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,8 @@ public class GroupServiceImpl implements GroupService {
         List<Long> groupIds = groups.stream().map(GroupSummaryDto::id).toList();
 
         // 각 그룹에 속한 멤버들 프로필, 역할 조회하기
-        List<GroupMemberProfileMappingDto> profileImages = groupMemberReader.getAllMemberProfileImages(groupIds);
+        List<GroupMemberProfileMappingDto> profileImages = groupMemberReader.getTopNMemberProfileImages(groupIds,
+                GroupConst.GROUP_SUMMARY_MEMBER_COUNT.getValue());
 
         // 그룹id : 속한 멤버들
         Map<Long, List<GroupMemberProfileMappingDto>> membersMap =
