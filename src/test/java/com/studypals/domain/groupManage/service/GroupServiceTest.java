@@ -159,21 +159,22 @@ public class GroupServiceTest {
     void getGroups_success() {
         // 1. Given: 그룹 요약 데이터 준비
         Long userId = 1L;
+        int limit = 4;
         List<GroupSummaryDto> groups = List.of(
                 new GroupSummaryDto(
-                        101L, "CS 전공 지식 뿌시기", "취업준비", "chat_cs001", true, false, LocalDate.of(2025, 11, 15)),
+                        101L, "CS 전공 지식 뿌시기", "취업준비", 10,"chat_cs001", true, false, LocalDate.of(2025, 11, 15)),
                 new GroupSummaryDto(
-                        205L, "자바 스터디 (Spring Boot)", "백엔드개발", "chat_java05", false, true, LocalDate.of(2025, 10, 20)));
+                        205L, "자바 스터디 (Spring Boot)", "백엔드개발", 20,"chat_java05", false, true, LocalDate.of(2025, 10, 20)));
         List<Long> groupIds = List.of(101L, 205L);
 
         given(groupMemberReader.getGroups(userId)).willReturn(groups);
 
         // 2. Given: 멤버 프로필 데이터 준비 (groupId가 포함된 DTO여야 함)
         List<GroupMemberProfileMappingDto> profiles = List.of(
-                new GroupMemberProfileMappingDto(101L, 1L, "코딩왕", "https://img.com/1", GroupRole.LEADER),
-                new GroupMemberProfileMappingDto(205L, 2L, "백엔드곰", "https://img.com/2", GroupRole.MEMBER));
+                new GroupMemberProfileMappingDto(101L, "https://img.com/1", GroupRole.LEADER),
+                new GroupMemberProfileMappingDto(205L, "https://img.com/2", GroupRole.MEMBER));
 
-        given(groupMemberReader.getAllMemberProfileImages(groupIds)).willReturn(profiles);
+        given(groupMemberReader.getTopNMemberProfileImages(groupIds, limit)).willReturn(profiles);
 
         // 3. Given: 카테고리 데이터 준비
         List<GroupCategoryDto> categories =
@@ -190,11 +191,13 @@ public class GroupServiceTest {
         // 첫 번째 그룹 검증
         assertThat(result.get(0).groupId()).isEqualTo(101L);
         assertThat(result.get(0).profiles()).hasSize(1);
-        assertThat(result.get(0).profiles().get(0).nickname()).isEqualTo("코딩왕");
+        assertThat(result.get(0).profiles().get(0).role()).isEqualTo(GroupRole.LEADER);
         assertThat(result.get(0).categoryIds()).containsExactlyInAnyOrder(1L, 2L);
 
         // 두 번째 그룹 검증
         assertThat(result.get(1).groupId()).isEqualTo(205L);
+        assertThat(result.get(1).profiles()).hasSize(1);
+        assertThat(result.get(1).profiles().get(0).role()).isEqualTo(GroupRole.MEMBER);
         assertThat(result.get(1).categoryIds()).containsExactly(3L);
     }
 

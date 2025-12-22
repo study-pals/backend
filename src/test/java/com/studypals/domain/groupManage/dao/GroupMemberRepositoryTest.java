@@ -31,10 +31,10 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
 
     private Group insertGroup(ChatRoom chatRoom) {
         return em.persist(Group.builder()
-                .totalMember(1)
+                .totalMember(2)
                 .name("group")
                 .tag("tag")
-                .totalMember(2)
+                .maxMember(10)
                 .chatRoom(chatRoom)
                 .build());
     }
@@ -95,6 +95,7 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
     @Test
     void findAllMembersInGroupIds_success() {
         // given
+        int limit = 4;
         Member m1 = insertMember("user1", "그룹1리더");
         Member m2 = insertMember("user2", "그룹2리더");
 
@@ -109,7 +110,7 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
         List<Long> groupIds = List.of(g1.getId(), g2.getId());
 
         // when
-        List<GroupMemberProfileMappingDto> result = groupMemberRepository.findAllMembersInGroupIds(groupIds);
+        List<GroupMemberProfileMappingDto> result = groupMemberRepository.findAllMembersInGroupIds(groupIds, limit);
 
         // then
         assertThat(result).hasSize(2);
@@ -119,12 +120,14 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
                 .filter(r -> r.groupId().equals(g1.getId()))
                 .findFirst()
                 .get();
-        assertThat(mapping1.nickname()).isEqualTo("그룹1리더");
+        assertThat(mapping1.groupId()).isEqualTo(g1.getId());
+        assertThat(mapping1.imageUrl()).isEqualTo("imageUrl-url");
 
         GroupMemberProfileMappingDto mapping2 = result.stream()
                 .filter(r -> r.groupId().equals(g2.getId()))
                 .findFirst()
                 .get();
-        assertThat(mapping2.nickname()).isEqualTo("그룹2리더");
+        assertThat(mapping2.groupId()).isEqualTo(g2.getId());
+        assertThat(mapping2.imageUrl()).isEqualTo("imageUrl-url");
     }
 }
