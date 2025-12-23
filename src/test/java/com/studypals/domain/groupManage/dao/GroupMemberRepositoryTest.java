@@ -110,7 +110,7 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
         List<Long> groupIds = List.of(g1.getId(), g2.getId());
 
         // when
-        List<GroupMemberProfileMappingDto> result = groupMemberRepository.findAllMembersInGroupIds(groupIds, limit);
+        List<GroupMemberProfileMappingDto> result = groupMemberRepository.findTopNMemberInGroupIds(groupIds, limit);
 
         // then
         assertThat(result).hasSize(2);

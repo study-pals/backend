@@ -41,7 +41,7 @@ public class GroupMemberReader {
     }
 
     public List<GroupMemberProfileMappingDto> getTopNMemberProfileImages(List<Long> groupIds, int limit) {
-        return groupMemberRepository.findAllMembersInGroupIds(groupIds, limit);
+        return groupMemberRepository.findTopNMemberInGroupIds(groupIds, limit);
     }
 
     public List<GroupSummaryDto> getGroups(Long userId) {

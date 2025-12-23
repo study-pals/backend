@@ -43,5 +43,5 @@ public interface GroupMemberCustomRepository {
      * @param groupIds
      * @return
      */
-    List<GroupMemberProfileMappingDto> findAllMembersInGroupIds(List<Long> groupIds, int limit);
+    List<GroupMemberProfileMappingDto> findTopNMemberInGroupIds(List<Long> groupIds, int limit);
 }
