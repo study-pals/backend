@@ -32,9 +32,9 @@ public class HashTag {
     private String tag;
 
     @Builder.Default
-    @Column(name = "used_count", nullable = false, columnDefinition = "DEFAULT 0")
-    private Long usedCount = 0L;
+    @Column(name = "used_count", nullable = false, columnDefinition = "DEFAULT 1")
+    private Long usedCount = 1L;
 
-    @Column(name = "last_used_date", nullable = true)
-    private LocalDate lastUsedDate;
+    @Column(name = "deleted_at", nullable = true)
+    private LocalDate deletedAt;
 }
