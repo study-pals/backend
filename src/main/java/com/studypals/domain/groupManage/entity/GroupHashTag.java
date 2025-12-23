@@ -34,4 +34,7 @@ public class GroupHashTag {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hash_tag_id")
     private HashTag hashTag;
+
+    @Column(name = "display_tag", nullable = false)
+    private String displayTag;
 }
