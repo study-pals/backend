@@ -1,6 +1,7 @@
 package com.studypals.global.redis.redisHashRepository;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.*;
 
 import org.springframework.data.repository.Repository;
@@ -139,4 +140,6 @@ public interface RedisHashRepository<E, ID> extends Repository<E, ID> {
     boolean unlock(ID id, String token);
 
     boolean refreshLock(ID id, String token, Duration ttl);
+
+    void incrementUserStudyTime(LocalDate date, Long userId, long delta);
 }

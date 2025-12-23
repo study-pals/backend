@@ -2,11 +2,14 @@ package com.studypals.global.redis.redisHashRepository;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.*;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.core.*;
+
+import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 
 /**
  * {@link RedisHashRepository}의 기본 구현체로, Redis Hash 자료구조 기반의 CRUD 기능을 제공합니다.
@@ -326,6 +329,25 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
                         token.getBytes(StandardCharsets.UTF_8),
                         String.valueOf(ttl.toMillis()).getBytes(StandardCharsets.UTF_8)));
         return res != null && res > 0;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void incrementUserStudyTime(LocalDate date, Long userId, long delta) {
+        // keyPrefix로 groupRanking 이 존재하고, 이제 enum 타입을 돌면서 각각 다른 키 값을 만들어야 한다.
+        String field = String.valueOf(userId);
+
+        tpl.executePipelined(new SessionCallback<>() {
+            @Override
+            public Object execute(RedisOperations operations) throws DataAccessException {
+                for (GroupRankingPeriod rankingPeriod : GroupRankingPeriod.values()) {
+                    String key = meta.keyPrefix() + rankingPeriod.getRedisKey(date);
+                    // 기존 시간이 있으면 더하고, 없으면 새로 생성
+                    operations.opsForHash().increment(key, field, delta);
+                }
+                return null;
+            }
+        });
     }
 
     private String lockKeyOf(ID id) {
