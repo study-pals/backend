@@ -1,6 +1,9 @@
 package com.studypals.domain.memberManage.service;
 
+import com.studypals.domain.memberManage.dto.CheckDuplicateDto;
 import com.studypals.domain.memberManage.dto.CreateMemberReq;
+import com.studypals.domain.memberManage.dto.MemberDetailsRes;
+import com.studypals.domain.memberManage.dto.UpdateProfileReq;
 
 /**
  * MemberService 의 인터페이스입니다. 메서드를 정의합니다.
@@ -19,4 +22,10 @@ public interface MemberService {
     Long createMember(CreateMemberReq dto);
 
     Long getMemberIdByUsername(String username);
+
+    Long updateProfile(Long userId, UpdateProfileReq dto);
+
+    MemberDetailsRes getProfile(Long userId);
+
+    boolean duplicateCheck(CheckDuplicateDto dto);
 }

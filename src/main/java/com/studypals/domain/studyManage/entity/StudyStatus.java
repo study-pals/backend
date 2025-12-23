@@ -39,15 +39,12 @@ import lombok.Setter;
 @Getter
 public class StudyStatus {
     @Id
-    private Long id;
+    private Long id; // 해당 공부 상태를 가진 userId
 
     @Builder.Default
     private boolean studying = true;
 
     private LocalDateTime startTime;
-
-    @Builder.Default
-    private Long studyTime = 0L;
 
     private Long categoryId;
 

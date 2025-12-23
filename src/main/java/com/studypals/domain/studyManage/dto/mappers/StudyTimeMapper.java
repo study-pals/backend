@@ -19,7 +19,8 @@ import com.studypals.domain.studyManage.entity.StudyTime;
 @Mapper(componentModel = "spring")
 public interface StudyTimeMapper {
 
-    StartStudyRes toDto(StudyStatus entity);
+    @Mapping(target = "studyTime", source = "studyTime")
+    StartStudyRes toDto(StudyStatus entity, Long studyTime);
 
     @Mapping(target = "categoryId", source = "studyCategory.id")
     GetStudyDto toDto(StudyTime entity);

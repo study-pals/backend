@@ -13,7 +13,6 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dto.GetStudyDto;
 import com.studypals.domain.studyManage.dto.StartStudyRes;
 import com.studypals.domain.studyManage.dto.StudyStatusRes;
-import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyStatus;
 import com.studypals.domain.studyManage.entity.StudyTime;
 
@@ -33,19 +32,17 @@ class StudyTimeMapperTest {
         LocalDateTime startTime = LocalDateTime.of(2025, 8, 20, 10, 30);
         StudyStatus entity = StudyStatus.builder()
                 .id(1L)
-                .studyTime(100L)
                 .startTime(startTime)
                 .categoryId(1L)
                 .name("temp")
                 .build();
-
         // when
-        StartStudyRes dto = mapper.toDto(entity);
+        StartStudyRes dto = mapper.toDto(entity, 120L);
 
         // then
         assertThat(dto.studying()).isTrue();
         assertThat(dto.startTime()).isEqualTo(startTime);
-        assertThat(dto.studyTime()).isEqualTo(100L);
+        assertThat(dto.studyTime()).isEqualTo(120L);
         assertThat(dto.categoryId()).isEqualTo(1L);
         assertThat(dto.name()).isEqualTo("temp");
     }
@@ -54,9 +51,6 @@ class StudyTimeMapperTest {
     @DisplayName("StudyTime → GetStudyDto 매핑 성공")
     void toDto_success_studyTimeToGetStudyDto() {
         // given
-        StudyCategory category =
-                StudyCategory.builder().id(7L).name("algorithm").build();
-
         StudyTime studyTime = StudyTime.builder()
                 .id(1L)
                 .name("temp")

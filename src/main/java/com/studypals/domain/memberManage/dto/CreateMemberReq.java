@@ -1,9 +1,6 @@
 package com.studypals.domain.memberManage.dto;
 
-import java.time.LocalDate;
-
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PastOrPresent;
 
 /**
  * 회원가입 시 사용되는 DTO 입니다.
@@ -13,10 +10,4 @@ import jakarta.validation.constraints.PastOrPresent;
  * @author jack8
  * @since 2025-04-02
  */
-public record CreateMemberReq(
-        @NotBlank String username,
-        @NotBlank String password,
-        @NotBlank String nickname,
-        @PastOrPresent LocalDate birthday,
-        String position,
-        String imageUrl) {}
+public record CreateMemberReq(@NotBlank String username, @NotBlank String password, @NotBlank String nickname) {}

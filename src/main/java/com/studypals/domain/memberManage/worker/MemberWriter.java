@@ -31,8 +31,15 @@ public class MemberWriter {
 
         try {
             memberRepository.save(member);
-        } catch (DataIntegrityViolationException e) {
-            throw new AuthException(AuthErrorCode.SIGNUP_FAIL, "maybe duplicate username or nickname");
+        } catch (DataIntegrityViolationException e) { // client message 수정
+            throw new AuthException(
+                    AuthErrorCode.SIGNUP_FAIL,
+                    "[MemberWriter#save] duplicate | " + getDuplicateLogMessage(member),
+                    "username 혹은 nickname 이 중복되었습니다.");
         }
+    }
+
+    private String getDuplicateLogMessage(Member member) {
+        return "username : " + member.getUsername() + " | nickname : " + member.getNickname();
     }
 }

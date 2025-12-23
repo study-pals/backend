@@ -62,4 +62,17 @@ public class Member {
     public void addToken(Long token) {
         this.token += token;
     }
+
+    public Member(String username, String password, String nickname) {
+        this.username = username;
+        this.password = password;
+        this.nickname = nickname;
+        this.token = 0L;
+    }
+
+    public void updateProfile(LocalDate birthday, String position, String imageUrl) {
+        this.birthday = birthday;
+        this.position = position;
+        this.imageUrl = imageUrl;
+    }
 }

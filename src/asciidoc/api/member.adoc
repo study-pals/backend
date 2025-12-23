@@ -39,15 +39,15 @@
 
 '''
 
-include::{snippets}/auth-controller-rest-docs-test/register_success/request-fields.adoc[]
-include::{snippets}/auth-controller-rest-docs-test/register_success/http-request.adoc[]
+include::{snippets}/member-controller-rest-docs-test/register_success/request-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/register_success/http-request.adoc[]
 
 *RESPONSE* +
 
 '''
 
-include::{snippets}/auth-controller-rest-docs-test/register_success/response-fields.adoc[]
-include::{snippets}/auth-controller-rest-docs-test/register_success/http-response.adoc[]
+include::{snippets}/member-controller-rest-docs-test/register_success/response-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/register_success/http-response.adoc[]
 
 ==== 2. 로그인
 *Description* +
@@ -98,6 +98,82 @@ include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/request
 include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/response-fields.adoc[]
 include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/http-response.adoc[]
 
+==== 4. 프로필 정보 입력/수정
+*Description* +
+
+'''
+
+회원가입 시 필요한 부가 정보(프로필 정보)를 삽입/수정합니다. 최초 회원가입 직후 빈 프로필 데이터 삽입 및, 추후
+새로운 데이터를 입력해야되는 경우 사용합니다.
+
+[NOTE]
+null 값을 입력하면, 갱신이 안되는 것이 아닌 실제로 null 값이 들어가게 됩니다. 따라서, 기존 데이터를 유지하고 싶은 경우 기존 데이터를
+그대로 넣어줘야 합니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/update-profile_success/request-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/update-profile_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/update-profile_success/response-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/update-profile_success/http-response.adoc[]
+
+==== 5. 본인 프로필 조회
+*Description* +
+
+'''
+
+사용자 본인의 프로필을 조회합니다. 일부 값에 null 값이 올 수 있습니다. birthday, position, imageUrl 등은 사용자의 선택에 따라
+입력되지 않을 수 있고, null 값이 올 수 있습니다. 따라서 이에 대한 적절한 가공이 필요합니다.
+
+imageUrl 같은 경우는 null 값이 오게 되면, 클라이언트에서 자체적으로 보유 중인 기본 이미지를 사용하는 것을 권장 드립니다. 이는 프로필
+조회 뿐만 아니라 추후 다른 사용자의 이미지 또한 null 인 경우 기본 이미지를 사용하도록 해야 합니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/get-profile_success/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/get-profile_success/response-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/get-profile_success/http-response.adoc[]
+
+
+==== 6. username/nickname 중복 체크
+*Description* +
+
+'''
+
+입력받은 값에 대해 username 중 중복된 값을 체크합니다. 하나의 API 를 사용하나, 두 값을 동시에 확인할 수 없습니다.
+
+[NOTE]
+일부 동시성 문제를 해결하지 않습니다. 두 유저가 동시에 동일한 username 으로 중복 체크 - 회원가입 시 회원가입이 실패할 수 있습니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_nickname/query-parameters.adoc[]
+include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_nickname/http-request.adoc[]
+include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_username/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_username/response-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_username/http-response.adoc[]
+
 
 == ⛔ 예외 출력
 
@@ -116,7 +192,7 @@ include::{snippets}/auth-controller-rest-docs-test/refresh-token_success/http-re
 
 '''
 
-include::{snippets}/auth-controller-rest-docs-test/register_fail_duplicate_user/http-response.adoc[]
+include::{snippets}/member-controller-rest-docs-test/register_fail_duplicate_user/http-response.adoc[]
 
 ==== 2. 로그인 시
 
