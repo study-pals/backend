@@ -19,7 +19,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         name = "group_hash_tag",
-        indexes = {@Index(name = "idx_grouphashtag_group_id", columnList = "group_id")})
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"group_id", "hash_tag_id"})})
 public class GroupHashTag {
 
     @Id
