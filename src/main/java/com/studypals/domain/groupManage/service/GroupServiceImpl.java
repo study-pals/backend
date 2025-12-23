@@ -44,6 +44,8 @@ public class GroupServiceImpl implements GroupService {
     private final GroupMapper groupMapper;
     private final GroupGoalCalculator groupGoalCalculator;
 
+    private final GroupHashTagWorker groupHashTagWorker;
+
     // chat room worker class
     private final ChatRoomWriter chatRoomWriter;
 
@@ -59,6 +61,9 @@ public class GroupServiceImpl implements GroupService {
         Group group = groupWriter.create(dto);
         Member member = memberReader.getRef(userId);
         groupMemberWriter.createLeader(member, group);
+
+        // 해시태그 삽입 (12-23 #132 sang)
+        groupHashTagWorker.saveTags(group, dto.hashTags());
 
         // 채팅방 생성
         CreateChatRoomDto createChatRoomDto = new CreateChatRoomDto(dto.name(), dto.imageUrl());

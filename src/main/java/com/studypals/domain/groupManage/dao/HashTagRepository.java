@@ -1,5 +1,6 @@
 package com.studypals.domain.groupManage.dao;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +62,21 @@ public interface HashTagRepository extends JpaRepository<HashTag, Long> {
     Long increaseUsedCount(String tag);
 
     /**
+     * usedCount 값을 원자적으로 증가시키는 메서드입니다. 단, 여러 tags 들에 대해 연산을 수행합니다.
+     * @param tags 증가시킬 태그들
+     * @return 변경된 row 수
+     */
+    @Modifying
+    @Query(
+            """
+        UPDATE HashTag t
+          SET t.usedCount = t.usedCount + 1,
+            t.deletedAt = null
+        WHERE t.tag in :tags
+    """)
+    void increaseUsedCountBulk(Collection<String> tags);
+
+    /**
      * usedCount 값을 원자적으로 감소시키는 메서드입니다. 만약 0이 되면,
      * 그때부터 deletedAt 을 현재 시간으로 설정합니다.  n 일 이후 자동 삭제됩니다(최적화, 배치 서버 분리)
      * @param tag 감소시킬 태그
@@ -79,4 +95,11 @@ public interface HashTagRepository extends JpaRepository<HashTag, Long> {
        AND t.usedCount > 0
 """)
     Long decreaseUsedCount(String tag);
+
+    /**
+     * tag 리스트에 대한 전체 조회 반환 메서드입니다.
+     * @param tags 문자열 리스트
+     * @return 파라미터에 대해 정확히 일치하는 hash tag 엔티티 리스트
+     */
+    List<HashTag> findAllByTagIn(Collection<String> tags);
 }

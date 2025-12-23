@@ -1,5 +1,7 @@
 package com.studypals.domain.groupManage.dto;
 
+import java.util.List;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -24,4 +26,6 @@ public record CreateGroupReq(
         Boolean isOpen,
         Boolean isApprovalRequired,
         // since 12-05 sanghyeok
-        String imageUrl) {}
+        String imageUrl,
+        // since 12-23 sanghyeok(#132)
+        List<String> hashTags) {}
