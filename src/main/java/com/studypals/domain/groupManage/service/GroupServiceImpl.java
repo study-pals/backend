@@ -38,8 +38,11 @@ public class GroupServiceImpl implements GroupService {
     private final MemberReader memberReader;
     private final GroupWriter groupWriter;
     private final GroupReader groupReader;
+    private final GroupMemberReader groupMemberReader;
     private final GroupMemberWriter groupMemberWriter;
+    private final GroupAuthorityValidator validator;
     private final GroupMapper groupMapper;
+    private final GroupGoalCalculator groupGoalCalculator;
 
     // chat room worker class
     private final ChatRoomWriter chatRoomWriter;
@@ -64,5 +67,31 @@ public class GroupServiceImpl implements GroupService {
         group.setChatRoom(chatRoom);
 
         return group.getId();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GetGroupsRes> getGroups(Long userId) {
+        // jwt filter 에서 주입한 userId이므로 DB에 존재하는지 체크하지 않음
+        List<GroupSummaryDto> groups = groupMemberReader.getGroups(userId);
+
+        return groups.stream().map(GetGroupsRes::from).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetGroupDetailRes getGroupDetails(Long userId, Long groupId) {
+        // 해당 유저가 속한 그룹인가?
+        validator.isMemberOfGroup(userId, groupId);
+
+        Group group = groupReader.getById(groupId);
+
+        // 그룹에 속한 유저들 프로필
+        List<GroupMemberProfileDto> profiles = groupMemberReader.getAllMemberProfiles(group);
+
+        // 그룹에 속한 유저들의 목표 달성률 계산
+        GroupTotalGoalDto userGoals = groupGoalCalculator.calculateGroupGoals(groupId, profiles);
+
+        return GetGroupDetailRes.of(group, profiles, userGoals);
     }
 }

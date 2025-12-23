@@ -46,4 +46,12 @@ public class MemberReader {
     public List<Member> get(List<Long> userIds) {
         return memberRepository.findAllById(userIds);
     }
+
+    public boolean existsByUsername(String username) {
+        return memberRepository.existsByUsername(username);
+    }
+
+    public boolean existsByNickname(String nickname) {
+        return memberRepository.existsByNickname(nickname);
+    }
 }

@@ -53,4 +53,13 @@ public class MemberController {
 
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.USER_UPDATE, id, "프로필 갱신을 성공하였습니다."));
     }
+
+    @GetMapping("/register/check")
+    public ResponseEntity<Response<Boolean>> checkAvailability(
+            @RequestParam(required = false) String username, @RequestParam(required = false) String nickname) {
+
+        boolean duplicated = memberService.duplicateCheck(new CheckDuplicateDto(username, nickname));
+
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.USER_SEARCH, duplicated));
+    }
 }

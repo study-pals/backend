@@ -9,6 +9,8 @@ import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
@@ -21,6 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.memberManage.api.MemberController;
+import com.studypals.domain.memberManage.dto.CheckDuplicateDto;
 import com.studypals.domain.memberManage.dto.CreateMemberReq;
 import com.studypals.domain.memberManage.dto.MemberDetailsRes;
 import com.studypals.domain.memberManage.dto.UpdateProfileReq;
@@ -174,6 +177,104 @@ public class MemberControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("code").description("응답 코드 (U01-02)"),
                                 fieldWithPath("status").description("응답 상태"),
                                 fieldWithPath("data").description("수정된 회원 ID"),
+                                fieldWithPath("message").description("응답 메시지"))));
+    }
+
+    @Test
+    @WithMockUser
+    void checkAvailability_fail_when_both_username_and_nickname_present() throws Exception {
+        // given
+        AuthErrorCode errorCode = AuthErrorCode.SIGNUP_FAIL;
+
+        // when
+        ResultActions result = mockMvc.perform(get("/register/check")
+                .param("username", "username@example.com")
+                .param("nickname", "nickname")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(hasStatus(errorCode))
+                .andExpect(hasKey(errorCode, "username 혹은 nickname 중 하나는 필수입니다."))
+                .andExpect(status().is4xxClientError())
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        queryParameters(
+                                parameterWithName("username")
+                                        .description("중복 체크할 username")
+                                        .optional(),
+                                parameterWithName("nickname")
+                                        .description("중복 체크할 nickname")
+                                        .optional()),
+                        responseFields(
+                                fieldWithPath("code").description("에러 코드"),
+                                fieldWithPath("status").description("응답 상태"),
+                                fieldWithPath("message").description("에러 메시지"),
+                                fieldWithPath("data")
+                                        .description("에러 상세/추가 데이터")
+                                        .optional())));
+    }
+
+    @Test
+    @WithMockUser
+    void checkAvailability_success_with_username() throws Exception {
+        // given
+        given(memberService.duplicateCheck(new CheckDuplicateDto("username@example.com", null)))
+                .willReturn(false);
+
+        Response<Boolean> response = CommonResponse.success(ResponseCode.USER_SEARCH, false);
+
+        // when
+        ResultActions result = mockMvc.perform(get("/register/check")
+                .param("username", "username@example.com")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(hasKey(response))
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        queryParameters(
+                                parameterWithName("username").description("중복 여부를 확인할 username"),
+                                parameterWithName("nickname")
+                                        .description("중복 여부를 확인할 nickname")
+                                        .optional()),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드 (U01-03)"),
+                                fieldWithPath("status").description("응답 상태"),
+                                fieldWithPath("data").description("중복 여부 (true = 중복)"),
+                                fieldWithPath("message").description("응답 메시지"))));
+    }
+
+    @Test
+    @WithMockUser
+    void checkAvailability_success_with_nickname() throws Exception {
+        // given
+        given(memberService.duplicateCheck(new CheckDuplicateDto(null, "nickname")))
+                .willReturn(true);
+
+        Response<Boolean> response = CommonResponse.success(ResponseCode.USER_SEARCH, true);
+
+        // when
+        ResultActions result = mockMvc.perform(
+                get("/register/check").param("nickname", "nickname").contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(hasKey(response))
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        queryParameters(
+                                parameterWithName("username")
+                                        .description("중복 여부를 확인할 username")
+                                        .optional(),
+                                parameterWithName("nickname").description("중복 여부를 확인할 nickname")),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드 (U01-03)"),
+                                fieldWithPath("status").description("응답 상태"),
+                                fieldWithPath("data").description("중복 여부 (true = 중복)"),
                                 fieldWithPath("message").description("응답 메시지"))));
     }
 }

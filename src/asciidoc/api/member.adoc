@@ -149,6 +149,32 @@ include::{snippets}/member-controller-rest-docs-test/get-profile_success/respons
 include::{snippets}/member-controller-rest-docs-test/get-profile_success/http-response.adoc[]
 
 
+==== 6. username/nickname 중복 체크
+*Description* +
+
+'''
+
+입력받은 값에 대해 username 중 중복된 값을 체크합니다. 하나의 API 를 사용하나, 두 값을 동시에 확인할 수 없습니다.
+
+[NOTE]
+일부 동시성 문제를 해결하지 않습니다. 두 유저가 동시에 동일한 username 으로 중복 체크 - 회원가입 시 회원가입이 실패할 수 있습니다.
+
+*REQUEST* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_nickname/query-parameters.adoc[]
+include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_nickname/http-request.adoc[]
+include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_username/http-request.adoc[]
+
+*RESPONSE* +
+
+'''
+
+include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_username/response-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_username/http-response.adoc[]
+
+
 == ⛔ 예외 출력
 
 === 인증 관련 예외

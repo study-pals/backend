@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.memberManage.dto.CheckDuplicateDto;
 import com.studypals.domain.memberManage.dto.CreateMemberReq;
 import com.studypals.domain.memberManage.dto.MemberDetailsRes;
 import com.studypals.domain.memberManage.dto.UpdateProfileReq;
@@ -13,6 +14,8 @@ import com.studypals.domain.memberManage.dto.mappers.MemberMapper;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.memberManage.worker.MemberWriter;
+import com.studypals.global.exceptions.errorCode.AuthErrorCode;
+import com.studypals.global.exceptions.exception.AuthException;
 
 /**
  * member service 의 구현 클래스입니다.
@@ -73,5 +76,23 @@ public class MemberServiceImpl implements MemberService {
     public MemberDetailsRes getProfile(Long userId) {
         Member member = memberReader.get(userId);
         return memberMapper.toRes(member);
+    }
+
+    @Override
+    public boolean duplicateCheck(CheckDuplicateDto dto) {
+
+        boolean hasUsername = dto.username() != null && !dto.username().isBlank();
+        boolean hasNickname = dto.nickname() != null && !dto.nickname().isBlank();
+
+        if (hasUsername == hasNickname) {
+            throw new AuthException(
+                    AuthErrorCode.SIGNUP_FAIL,
+                    "username 혹은 nickname 중 하나는 필수입니다.",
+                    "[MemberController#checkAvailability] username & nickname both blank");
+        }
+
+        return hasUsername
+                ? memberReader.existsByUsername(dto.username())
+                : memberReader.existsByNickname(dto.nickname());
     }
 }

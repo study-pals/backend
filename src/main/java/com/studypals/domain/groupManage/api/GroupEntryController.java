@@ -31,6 +31,9 @@ import com.studypals.global.responses.ResponseCode;
  *     - GET /groups/{groupId}/entry-requests : 그룹 가입 요청 목록 조회
  *     - POST /groups/entry-requests/{requestId}/accept : 그룹 가입 요청 승인
  *     - DELETE /groups/entry-requests/{requestId} : 그룹 가입 요청 거절
+ *
+ *     - GET /groups : 멤버가 속한 그룹 정보 요청
+ *     - GET /groups/{groupId} : 멤버가 속한 특정 그룹에 대한 정보 요청
  * </pre>
  *
  * @author s0o0bn

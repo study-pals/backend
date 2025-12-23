@@ -3,6 +3,7 @@ package com.studypals.domain.groupManage.restDocsTest;
 import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
@@ -13,6 +14,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -24,6 +26,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.groupManage.api.GroupController;
 import com.studypals.domain.groupManage.dto.*;
+import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.service.GroupService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -104,5 +107,133 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                                         .description("그룹 가입 시 승인 필요 여부 / Default FALSE")
                                         .attributes(constraints("not null"))),
                         responseHeaders(headerWithName("Location").description("추가된 그룹 id"))));
+    }
+
+    @Test
+    @WithMockUser
+    void getGroups_success() throws Exception {
+        List<GetGroupsRes> list = List.of(
+                new GetGroupsRes(
+                        101L,
+                        "알고리즘 코딩 마스터",
+                        "취업준비",
+                        "chat_algo_01",
+                        true, // 공개 (isOpen)
+                        false, // 승인 불필요 (isApprovalRequired)
+                        LocalDate.of(2025, 12, 1)),
+                new GetGroupsRes(
+                        205L,
+                        "프론트엔드 리액트 스터디",
+                        "프론트개발",
+                        "chat_react_fe",
+                        false, // 비공개
+                        true, // 승인 필요
+                        LocalDate.of(2025, 10, 25)),
+                new GetGroupsRes(
+                        312L,
+                        "CS 지식 주간 정리",
+                        "전공시험",
+                        "chat_cs_wk",
+                        true, // 공개
+                        true, // 승인 필요
+                        LocalDate.of(2025, 9, 10)));
+        Response<List<GetGroupsRes>> expected = CommonResponse.success(ResponseCode.GROUP_LIST, list);
+
+        given(groupService.getGroups(any())).willReturn(list);
+
+        ResultActions result = mockMvc.perform(get("/groups"));
+
+        result.andExpect(status().isOk())
+                .andExpect(hasKey(expected))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        responseFields(
+                                fieldWithPath("code").description("U02-17"),
+                                fieldWithPath("status").description("응답 상태(예: success or failed"),
+                                fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("data[].groupId").description("그룹의 고유 ID"),
+                                fieldWithPath("data[].groupName").description("그룹 이름"),
+                                fieldWithPath("data[].groupTag").description("그룹의 태그"),
+                                fieldWithPath("data[].chatRoomId").description("그룹에 연결된 채팅방 ID"),
+                                fieldWithPath("data[].isOpen").description("그룹 공개 여부 (true: 공개, false: 비공개)"),
+                                fieldWithPath("data[].isApprovalRequired")
+                                        .description("그룹 가입 시 승인 필요 여부 (true: 필요, false: 불필요)"),
+                                fieldWithPath("data[].createdDate").description("그룹 생성일"))));
+    }
+
+    @Test
+    void getGroupDetail_success() throws Exception {
+        List<GroupMemberProfileDto> profiles1 = List.of(
+                new GroupMemberProfileDto(10L, "LeaderA", "url_a", GroupRole.LEADER),
+                new GroupMemberProfileDto(11L, "MemberB", "url_b", GroupRole.MEMBER));
+
+        // 1. 카테고리별 목표 목록 생성
+        List<GroupCategoryGoalDto> categoryGoals = List.of(
+                new GroupCategoryGoalDto(501L, 1000L, "CS 공부", 75), // CS 공부: 목표 1000 대비 75% 달성
+                new GroupCategoryGoalDto(502L, 50L, "알고리즘", 100) // 알고리즘: 목표 50 대비 100% 달성
+                );
+
+        // 2. GroupTotalGoalDto 객체로 묶기
+        GroupTotalGoalDto totalGoals = new GroupTotalGoalDto(categoryGoals, 88); // 평균 88% 가정
+
+        GetGroupDetailRes groupDetailRes = new GetGroupDetailRes(
+                100L,
+                "핵심 CS 전공 스터디",
+                true, // 공개
+                false, // 승인 불필요
+                10, // 최대 10명
+                2, // 현재 2명
+                profiles1,
+                totalGoals); // GroupTotalGoalDto 객체 주입
+
+        when(groupService.getGroupDetails(any(), any())).thenReturn(groupDetailRes);
+        Response<GetGroupDetailRes> expected = CommonResponse.success(ResponseCode.GROUP_DETAIL, groupDetailRes);
+
+        ResultActions result = mockMvc.perform(get("/groups/{groupId}", 1L).contentType(MediaType.APPLICATION_JSON));
+        result.andExpect(hasKey(expected))
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        responseFields(
+                                fieldWithPath("code").description("U02-18"),
+                                fieldWithPath("status").description("응답 상태(예: success or failed"),
+                                fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("data").description("그룹 상세 정보 객체"),
+
+                                // GetGroupDetailRes 필드 설명
+                                fieldWithPath("data.id").description("그룹의 고유 ID"),
+                                fieldWithPath("data.name").description("그룹 이름"),
+                                fieldWithPath("data.isOpen").description("그룹 공개 여부 (true: 공개, false: 비공개)"),
+                                fieldWithPath("data.isApprovalRequired")
+                                        .description("그룹 가입 시 승인 필요 여부 (true: 필요, false: 불필요)"),
+                                fieldWithPath("data.totalMemberCount").description("그룹의 최대 멤버 수"),
+                                fieldWithPath("data.currentMemberCount").description("그룹의 현재 멤버 수"),
+
+                                // profiles 배열 필드
+                                fieldWithPath("data.profiles")
+                                        .description("그룹 멤버 프로필 목록 (List<GroupMemberProfileDto>)"),
+                                fieldWithPath("data.profiles[].id").description("멤버의 고유 ID"),
+                                fieldWithPath("data.profiles[].nickname").description("멤버의 닉네임"),
+                                fieldWithPath("data.profiles[].imageUrl").description("멤버 프로필 이미지 URL"),
+                                fieldWithPath("data.profiles[].role").description("그룹 내 멤버 역할 (예: LEADER, MEMBER)"),
+
+                                // userGoals 객체 필드 (GroupTotalGoalDto)
+                                fieldWithPath("data.groupGoals").description("그룹 목표 및 달성률 정보 객체"),
+                                fieldWithPath("data.groupGoals.overallAveragePercent")
+                                        .description("전체 카테고리 목표의 평균 달성률 (%)"),
+
+                                // userGoals.userGoals 배열 필드 (GroupCategoryGoalDto 목록)
+                                fieldWithPath("data.groupGoals.categoryGoals")
+                                        .description("그룹 카테고리별 달성률 목록 (List<GroupCategoryGoalDto>)"),
+                                fieldWithPath("data.groupGoals.categoryGoals[].categoryId")
+                                        .description("스터디 카테고리의 고유 ID"),
+                                fieldWithPath("data.groupGoals.categoryGoals[].categoryGoal")
+                                        .description("카테고리의 그룹 목표량"),
+                                fieldWithPath("data.groupGoals.categoryGoals[].categoryName")
+                                        .description("카테고리 이름"),
+                                fieldWithPath("data.groupGoals.categoryGoals[].achievementPercent")
+                                        .description("그룹 목표 대비 카테고리 달성률 (%)"))));
     }
 }
