@@ -1,6 +1,5 @@
 package com.studypals.domain.groupManage.entity;
 
-import com.studypals.domain.groupManage.service.GroupEntryService;
 import lombok.Getter;
 
 /**
@@ -17,6 +16,7 @@ public enum GroupConst {
     ;
 
     private final int value;
+
     GroupConst(int value) {
         this.value = value;
     }

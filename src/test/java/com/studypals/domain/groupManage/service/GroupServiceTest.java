@@ -162,9 +162,16 @@ public class GroupServiceTest {
         int limit = 4;
         List<GroupSummaryDto> groups = List.of(
                 new GroupSummaryDto(
-                        101L, "CS 전공 지식 뿌시기", "취업준비", 10,"chat_cs001", true, false, LocalDate.of(2025, 11, 15)),
+                        101L, "CS 전공 지식 뿌시기", "취업준비", 10, "chat_cs001", true, false, LocalDate.of(2025, 11, 15)),
                 new GroupSummaryDto(
-                        205L, "자바 스터디 (Spring Boot)", "백엔드개발", 20,"chat_java05", false, true, LocalDate.of(2025, 10, 20)));
+                        205L,
+                        "자바 스터디 (Spring Boot)",
+                        "백엔드개발",
+                        20,
+                        "chat_java05",
+                        false,
+                        true,
+                        LocalDate.of(2025, 10, 20)));
         List<Long> groupIds = List.of(101L, 205L);
 
         given(groupMemberReader.getGroups(userId)).willReturn(groups);

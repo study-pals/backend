@@ -10,5 +10,4 @@ import com.studypals.domain.groupManage.service.GroupService;
  * @see GroupService
  * @since 2025-12-21
  */
-public record GroupMemberProfileMappingDto(
-        Long groupId, String imageUrl, GroupRole role) {}
+public record GroupMemberProfileMappingDto(Long groupId, String imageUrl, GroupRole role) {}
