@@ -65,10 +65,7 @@ public class GroupMemberCustomRepositoryImpl implements GroupMemberCustomReposit
     public List<GroupMemberProfileMappingDto> findTopNMemberInGroupIds(List<Long> groupIds, int limit) {
         return queryFactory
                 .select(Projections.constructor(
-                        GroupMemberProfileMappingDto.class,
-                        groupMember.group.id,
-                        member.imageUrl,
-                        groupMember.role))
+                        GroupMemberProfileMappingDto.class, groupMember.group.id, member.imageUrl, groupMember.role))
                 .from(groupMember)
                 .join(member)
                 .on(groupMember.member.id.eq(member.id))
