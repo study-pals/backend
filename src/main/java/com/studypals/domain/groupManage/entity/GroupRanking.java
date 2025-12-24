@@ -22,5 +22,5 @@ public class GroupRanking {
     private String id;
 
     @RedisHashMapField
-    private Map<Long, Long> userStudyTimes;
+    private Map<String, String> userStudyTimes;
 }

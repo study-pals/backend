@@ -1,5 +1,6 @@
 package com.studypals.global.redis.redisHashRepository;
 
+import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.*;
@@ -142,4 +143,6 @@ public interface RedisHashRepository<E, ID> extends Repository<E, ID> {
     boolean refreshLock(ID id, String token, Duration ttl);
 
     void incrementUserStudyTime(LocalDate date, Long userId, long delta);
+
+    Map<String, String> getGroupRanking(LocalDate date, List<Long> ids, GroupRankingPeriod period);
 }

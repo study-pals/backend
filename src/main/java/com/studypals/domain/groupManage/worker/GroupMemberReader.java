@@ -42,4 +42,8 @@ public class GroupMemberReader {
     public List<GroupSummaryDto> getGroups(Long userId) {
         return groupMemberRepository.findGroupsByMemberId(userId);
     }
+
+    public List<Long> getGroupMemberIds(Long groupId) {
+        return groupMemberRepository.findGroupMemberIdByGroupId(groupId);
+    }
 }

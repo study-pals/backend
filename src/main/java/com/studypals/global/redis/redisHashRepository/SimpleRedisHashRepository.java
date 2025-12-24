@@ -350,6 +350,18 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
         });
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public Map<String, String> getGroupRanking(LocalDate date, List<Long> ids, GroupRankingPeriod period) {
+        String key = meta.keyPrefix() + period.getRedisKey(date);
+
+        List<String> userIds = ids.stream()
+                .map(String::valueOf)
+                .toList();
+
+        return findHashFieldsById((ID) key, userIds);
+    }
+
     private String lockKeyOf(ID id) {
         return meta.lockPrefix() + id.toString();
     }

@@ -31,6 +31,8 @@ import com.studypals.global.responses.ResponseCode;
  * <pre>
  *     - GET /groups/tags : 그룹 태그 조회
  *     - POST /groups : 그룹 생성({@link CreateGroupReq})
+ *     - GET /groups : 유저가 속한 그룹 조회
+ *     - GET /groups/{groupId} : 그룹 정보 조회
  * </pre>
  *
  * @author s0o0bn
