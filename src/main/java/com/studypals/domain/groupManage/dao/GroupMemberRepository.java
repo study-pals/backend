@@ -34,12 +34,12 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
      * @param memberId 사용자 아이디
      * @return GroupMember 에 대한 List
      */
-    List<GroupMember> findAllByMemberId(Long memberId); // 실험을 해보자.
+    List<GroupMember> findAllByMemberId(Long memberId);
 
     @Query(
             """
       SELECT new com.studypals.domain.groupManage.dto.GroupSummaryDto(
-            g.id, g.name, g.tag, g.chatRoom.id, g.isOpen, g.isApprovalRequired, g.createdDate
+            g.id, g.name, g.tag, g.totalMember, g.chatRoom.id, g.isOpen, g.isApprovalRequired, g.createdDate
       )
       FROM GroupMember gm
       JOIN gm.group g

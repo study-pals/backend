@@ -25,6 +25,9 @@ import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
+import com.studypals.domain.studyManage.dto.GroupCategoryDto;
+import com.studypals.domain.studyManage.entity.StudyType;
+import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 
@@ -66,6 +69,9 @@ public class GroupServiceTest {
 
     @Mock
     private ChatRoomWriter chatRoomWriter;
+
+    @Mock
+    private StudyCategoryReader studyCategoryReader;
 
     @Mock
     private Member mockMember;
@@ -151,41 +157,48 @@ public class GroupServiceTest {
 
     @Test
     void getGroups_success() {
+        // 1. Given: 그룹 요약 데이터 준비
         Long userId = 1L;
+        int limit = 4;
         List<GroupSummaryDto> groups = List.of(
                 new GroupSummaryDto(
-                        101L,
-                        "CS 전공 지식 뿌시기",
-                        "취업준비",
-                        "chat_cs001",
-                        true, // 공개 그룹
-                        false, // 승인 불필요
-                        LocalDate.of(2025, 11, 15)),
+                        101L, "CS 전공 지식 뿌시기", "취업준비", 10,"chat_cs001", true, false, LocalDate.of(2025, 11, 15)),
                 new GroupSummaryDto(
-                        205L,
-                        "자바 스터디 (Spring Boot)",
-                        "백엔드개발",
-                        "chat_java05",
-                        false, // 비공개 그룹
-                        true, // 승인 필요
-                        LocalDate.of(2025, 10, 20)),
-                new GroupSummaryDto(
-                        312L,
-                        "알고리즘 코딩 테스트",
-                        "면접준비",
-                        "chat_algo_test",
-                        true, // 공개 그룹
-                        true, // 승인 필요
-                        LocalDate.of(2025, 12, 1)));
+                        205L, "자바 스터디 (Spring Boot)", "백엔드개발", 20,"chat_java05", false, true, LocalDate.of(2025, 10, 20)));
+        List<Long> groupIds = List.of(101L, 205L);
 
         given(groupMemberReader.getGroups(userId)).willReturn(groups);
 
+        // 2. Given: 멤버 프로필 데이터 준비 (groupId가 포함된 DTO여야 함)
+        List<GroupMemberProfileMappingDto> profiles = List.of(
+                new GroupMemberProfileMappingDto(101L, "https://img.com/1", GroupRole.LEADER),
+                new GroupMemberProfileMappingDto(205L, "https://img.com/2", GroupRole.MEMBER));
+
+        given(groupMemberReader.getTopNMemberProfileImages(groupIds, limit)).willReturn(profiles);
+
+        // 3. Given: 카테고리 데이터 준비
+        List<GroupCategoryDto> categories =
+                List.of(new GroupCategoryDto(101L, 1L), new GroupCategoryDto(101L, 2L), new GroupCategoryDto(205L, 3L));
+        given(studyCategoryReader.findByStudyTypeAndTypeId(StudyType.GROUP, groupIds))
+                .willReturn(categories);
+
+        // When
         List<GetGroupsRes> result = groupService.getGroups(userId);
 
-        assertThat(result.size()).isEqualTo(groups.size());
-        assertThat(result.get(0).groupName()).isEqualTo("CS 전공 지식 뿌시기");
-        assertThat(result.get(1).groupName()).isEqualTo("자바 스터디 (Spring Boot)");
-        assertThat(result.get(2).groupName()).isEqualTo("알고리즘 코딩 테스트");
+        // Then
+        assertThat(result).hasSize(2);
+
+        // 첫 번째 그룹 검증
+        assertThat(result.get(0).groupId()).isEqualTo(101L);
+        assertThat(result.get(0).profiles()).hasSize(1);
+        assertThat(result.get(0).profiles().get(0).role()).isEqualTo(GroupRole.LEADER);
+        assertThat(result.get(0).categoryIds()).containsExactlyInAnyOrder(1L, 2L);
+
+        // 두 번째 그룹 검증
+        assertThat(result.get(1).groupId()).isEqualTo(205L);
+        assertThat(result.get(1).profiles()).hasSize(1);
+        assertThat(result.get(1).profiles().get(0).role()).isEqualTo(GroupRole.MEMBER);
+        assertThat(result.get(1).categoryIds()).containsExactly(3L);
     }
 
     @Test
@@ -221,7 +234,6 @@ public class GroupServiceTest {
         // 2. GroupTotalGoalDto 생성 (평균 71% 가정: (75 + 100 + 40) / 3 = 71.66... -> 71 (버림))
         GroupTotalGoalDto totalGoals = new GroupTotalGoalDto(categoryGoals, 71);
 
-        // 3. Mocking 설정 변경: List<GroupCategoryGoalDto> -> GroupTotalGoalDto
         given(groupReader.getById(groupId)).willReturn(mockGroup);
         given(groupMemberReader.getAllMemberProfiles(mockGroup)).willReturn(profiles);
         given(groupGoalCalculator.calculateGroupGoals(groupId, profiles)).willReturn(totalGoals);
