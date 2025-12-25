@@ -1,5 +1,7 @@
 package com.studypals.domain.groupManage.dao;
 
+import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,4 +59,16 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
     """
     )
     List<Long> findGroupMemberIdByGroupId(Long groupId);
+
+    @Query(
+            """
+    SELECT new com.studypals.domain.groupManage.dto.GroupMemberProfileDto(
+        m.id, m.nickname, m.imageUrl, gm.role
+    )
+    FROM GroupMember gm
+    JOIN gm.member m
+    WHERE m.id in :memberIds
+    """
+    )
+    List<GroupMemberProfileDto> findGroupMemberInfoInIds(List<Long> memberIds);
 }
