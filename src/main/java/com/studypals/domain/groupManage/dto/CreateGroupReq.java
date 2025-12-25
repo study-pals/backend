@@ -5,6 +5,7 @@ import java.util.List;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 /**
  * 그룹 생성 시 사용되는 DTO 입니다.
@@ -27,5 +28,4 @@ public record CreateGroupReq(
         Boolean isApprovalRequired,
         // since 12-05 sanghyeok
         String imageUrl,
-        // since 12-23 sanghyeok(#132)
-        List<String> hashTags) {}
+        @Size(max = 10) List<@NotBlank @Size(max = 8) String> hashTags) {}

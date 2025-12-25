@@ -32,7 +32,7 @@ public class HashTag {
     private String tag;
 
     @Builder.Default
-    @Column(name = "used_count", nullable = false, columnDefinition = "DEFAULT 1")
+    @Column(name = "used_count", nullable = false)
     private Long usedCount = 1L;
 
     @Column(name = "deleted_at", nullable = true)

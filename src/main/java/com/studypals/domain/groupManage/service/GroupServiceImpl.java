@@ -62,7 +62,6 @@ public class GroupServiceImpl implements GroupService {
         Member member = memberReader.getRef(userId);
         groupMemberWriter.createLeader(member, group);
 
-        // 해시태그 삽입 (12-23 #132 sang)
         groupHashTagWorker.saveTags(group, dto.hashTags());
 
         // 채팅방 생성

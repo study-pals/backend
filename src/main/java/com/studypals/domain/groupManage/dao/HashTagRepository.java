@@ -4,9 +4,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.groupManage.entity.HashTag;
@@ -32,18 +34,17 @@ public interface HashTagRepository extends JpaRepository<HashTag, Long> {
      * tag 자동완성 시 사용할 메서드. prefix 에 대해 cnt 값 만큼의 자주 사용되는 데이터를 반환합니다.
      *
      * @param prefix 검색할 인자(접두사 / 순서대로)
-     * @param cnt 반환 데이터 최대 개수
+     * @param pageable 반환 개수 지정
      * @return cnt 개수 만큼의, 사용 빈도가 높은 데이터
      */
     @Query(
             """
-        SELECT t.tag
-        FROM HashTag t
-        WHERE t.tag LIKE CONCAT(:prefix, '%')
-        ORDER BY t.usedCount DESC
-        LIMIT :cnt
-    """)
-    List<String> findNamesByPrefix(String prefix, int cnt);
+    SELECT t.tag
+    FROM HashTag t
+    WHERE t.tag LIKE CONCAT(:prefix, '%')
+    ORDER BY t.usedCount DESC
+""")
+    List<String> findNamesByPrefix(@Param("prefix") String prefix, Pageable pageable);
 
     /**
      * usedCount 값을 원자적으로 증가시키는 메서드입니다. 해당 메서드가 실행 되면
@@ -88,7 +89,7 @@ public interface HashTagRepository extends JpaRepository<HashTag, Long> {
     UPDATE HashTag t
        SET t.usedCount = t.usedCount - 1,
            t.deletedAt = CASE
-               WHEN (t.usedCount - 1) = 0 THEN current_timestamp
+               WHEN (t.usedCount - 1) = 0 THEN CURRENT_TIMESTAMP
                ELSE t.deletedAt
            END
     WHERE t.tag = :tag

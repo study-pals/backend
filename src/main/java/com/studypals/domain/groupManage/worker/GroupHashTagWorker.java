@@ -17,25 +17,25 @@ import com.studypals.global.exceptions.exception.GroupException;
 import com.studypals.global.utils.StringUtils;
 
 /**
- * 코드에 대한 전체적인 역할을 적습니다.
+ * 그룹 해시태그 관리를 담당하는 워커 클래스입니다.
  * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
+ * 사용자가 입력한 해시태그 목록을 정규화하여 {@link HashTag} 엔티티로 저장하고,
+ * 이미 존재하는 해시태그의 사용 횟수를 증가시키며,
+ * {@link Group} 과 {@link HashTag} 사이의 관계를 {@link GroupHashTag} 엔티티로 관리합니다.
+ * <p>
+ * 해시태그 저장 시 UNIQUE 제약 조건으로 인한 {@link DataIntegrityViolationException}
+ * (동시성 충돌)을 감지하면, 해당 태그들에 대해 재조회 및 재저장을 수행하여
+ * 동시성 문제를 완화합니다.
  *
- * <p><b>상속 정보:</b><br>
- * 상속 정보를 적습니다.
- *
- * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br>
- * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
- *
- * <p><b>빈 관리:</b><br>
- * 필요 시 빈 관리에 대한 내용을 적습니다.
- *
- * <p><b>외부 모듈:</b><br>
- * 필요 시 외부 모듈에 대한 내용을 적습니다.
+ * <p><b>주요 기능:</b><br>
+ * - 입력 태그 문자열을 저장용 태그와 표시용 태그로 분리 및 정규화<br>
+ * - 존재하는 해시태그의 사용 횟수(usedCount) 증가<br>
+ * - 새 해시태그 생성 시 동시성 충돌 처리 및 재시도<br>
+ * - 그룹과 해시태그 간의 매핑({@link GroupHashTag}) 생성 및 저장<br>
  *
  * @author jack8
- * @see
+ * @see com.studypals.domain.groupManage.dao.GroupHashTagRepository
+ * @see com.studypals.domain.groupManage.dao.HashTagRepository
  * @since 2025-12-23
  */
 @Worker
@@ -74,16 +74,16 @@ public class GroupHashTagWorker {
                 hashTagRepository.saveAll(notExists);
                 hashTagRepository.flush(); // unique 제약 조건 발생용 flush
             } catch (DataIntegrityViolationException e) { // 저장 실패 시 동시성 문제라 생각하고 1회 재시도
-                notExists = retrySave(notExists.stream().map(HashTag::getTag).toList());
+                retrySave(notExists.stream().map(HashTag::getTag).toList());
             }
         }
-        // 모두 저장이 되었으니 exists 로 상태 변경
-        exists.addAll(notExists);
+        // 최종 결과물 재조회
+        exists = hashTagRepository.findAllByTagIn(normalizedTags);
 
         // 저장된 hashtag 를 기반으로 groupHashTag 저장
         List<GroupHashTag> groupHashTags = new ArrayList<>();
         for (HashTag tag : exists) {
-            String val = normalized.get(tag.getTag()) == null ? tag.getTag() : normalized.get(tag.getTag());
+            String val = normalized.getOrDefault(tag.getTag(), tag.getTag());
 
             groupHashTags.add(GroupHashTag.builder()
                     .hashTag(tag)
@@ -101,7 +101,7 @@ public class GroupHashTagWorker {
      * @param failToSave 저장에 실패한 엔티티
      * @return 저장 및 조회 성공 후 영속화되어 있는 엔티티. 즉, 현재 DB 에 모두 존재하는 hashTag
      */
-    private List<HashTag> retrySave(List<String> failToSave) {
+    private void retrySave(List<String> failToSave) {
         List<HashTag> reExists = hashTagRepository.findAllByTagIn(failToSave);
         List<HashTag> reNotExists = notExistTagToCreate(new HashSet<>(failToSave), reExists);
         if (!reExists.isEmpty()) {
@@ -114,12 +114,10 @@ public class GroupHashTagWorker {
                 hashTagRepository.flush(); // unique 제약 조건 발생용 flush
             } catch (DataIntegrityViolationException e) {
                 throw new GroupException(
-                        GroupErrorCode.GROUP_CREATE_FAIL, "[GroupHashTagWorker#retrySave] cannot save hash tag");
+                        GroupErrorCode.GROUP_HASHTAG_FAIL, "[GroupHashTagWorker#retrySave] cannot save hash tag");
             }
         }
         reExists.addAll(reNotExists);
-
-        return reExists;
     }
 
     /**
