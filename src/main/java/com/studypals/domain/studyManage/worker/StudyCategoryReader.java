@@ -6,6 +6,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
+import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 import com.studypals.domain.studyManage.entity.StudyCategory;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.global.annotations.Worker;
@@ -59,5 +60,15 @@ public class StudyCategoryReader {
      */
     public List<StudyCategory> findByStudyTypeAndTypeId(StudyType type, Long typeId) {
         return studyCategoryRepository.findByStudyTypeAndTypeId(type, typeId);
+    }
+
+    /**
+     * type 과 typeId 리스트 안에 존재하는 id에 해당하는 StudyCategory 의 List로 반환합니다. 빈 리스트가 반환될 수도 있습니다.
+     * @param type 검색하고자 할 StudyType
+     * @param typeIds 검색하고자 할 StudyType 에 따른 typeId 리스트
+     * @return
+     */
+    public List<GroupCategoryDto> findByStudyTypeAndTypeId(StudyType type, List<Long> typeIds) {
+        return studyCategoryRepository.findByStudyTypeAndTypeIds(type, typeIds);
     }
 }

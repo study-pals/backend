@@ -12,6 +12,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 import com.studypals.domain.groupManage.entity.GroupRole;
 
 /**
@@ -57,6 +58,20 @@ public class GroupMemberCustomRepositoryImpl implements GroupMemberCustomReposit
                 .on(groupMember.member.id.eq(member.id))
                 .where(groupMember.group.id.eq(groupId))
                 .orderBy(orderByLeaderPriority(), groupMember.joinedAt.desc())
+                .fetch();
+    }
+
+    @Override
+    public List<GroupMemberProfileMappingDto> findTopNMemberInGroupIds(List<Long> groupIds, int limit) {
+        return queryFactory
+                .select(Projections.constructor(
+                        GroupMemberProfileMappingDto.class, groupMember.group.id, member.imageUrl, groupMember.role))
+                .from(groupMember)
+                .join(member)
+                .on(groupMember.member.id.eq(member.id))
+                .where(groupMember.group.id.in(groupIds))
+                .orderBy(orderByLeaderPriority(), groupMember.joinedAt.desc())
+                .limit(limit)
                 .fetch();
     }
 

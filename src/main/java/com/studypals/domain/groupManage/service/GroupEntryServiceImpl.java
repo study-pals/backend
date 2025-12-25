@@ -12,6 +12,7 @@ import com.studypals.domain.chatManage.worker.ChatRoomWriter;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupEntryRequestCustomMapper;
 import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupConst;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
@@ -39,9 +40,6 @@ import com.studypals.global.responses.CursorResponse;
 @Service
 @RequiredArgsConstructor
 public class GroupEntryServiceImpl implements GroupEntryService {
-    /** 그룹 요약 정보 조회 시 포함되는 그룹 멤버 수 */
-    private static final int GROUP_SUMMARY_MEMBER_COUNT = 5;
-
     private final MemberReader memberReader;
     private final GroupReader groupReader;
     private final GroupMemberWriter groupMemberWriter;
@@ -69,7 +67,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
         Long groupId = entryCodeManager.getGroupId(entryCode);
         Group group = groupReader.getById(groupId);
         List<GroupMemberProfileDto> profiles =
-                groupMemberReader.getTopNMemberProfiles(group, GROUP_SUMMARY_MEMBER_COUNT);
+                groupMemberReader.getTopNMemberProfiles(group, GroupConst.GROUP_SUMMARY_MEMBER_COUNT.getValue());
 
         return GroupSummaryRes.of(group, profiles);
     }

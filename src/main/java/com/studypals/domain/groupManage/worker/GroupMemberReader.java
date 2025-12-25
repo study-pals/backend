@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 import com.studypals.domain.groupManage.dto.GroupSummaryDto;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.global.annotations.Worker;
@@ -37,6 +38,10 @@ public class GroupMemberReader {
 
     public List<GroupMemberProfileDto> getAllMemberProfiles(Group group) {
         return groupMemberRepository.findAllMemberProfiles(group.getId());
+    }
+
+    public List<GroupMemberProfileMappingDto> getTopNMemberProfileImages(List<Long> groupIds, int limit) {
+        return groupMemberRepository.findTopNMemberInGroupIds(groupIds, limit);
     }
 
     public List<GroupSummaryDto> getGroups(Long userId) {
