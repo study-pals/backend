@@ -1,30 +1,23 @@
 package com.studypals.domain.groupManage.worker;
 
-import com.studypals.domain.groupManage.dao.GroupMemberRepository;
-import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
-import com.studypals.domain.groupManage.dto.GroupMemberRankingDto;
-import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
-import com.studypals.domain.memberManage.dao.MemberRepository;
-import com.studypals.domain.memberManage.worker.MemberReader;
-import com.studypals.domain.studyManage.dao.StudyTimeRepository;
 import java.time.LocalDate;
-
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupRankingRepository;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupMemberRankingDto;
+import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.utils.TimeUtils;
 
 @Worker
 @RequiredArgsConstructor
 public class GroupRankingWorker {
+
     private final GroupRankingRepository groupRankingRepository;
-    private final StudyTimeRepository studyTimeRepository;
-    private final GroupMemberRepository groupMemberRepository;
     private final TimeUtils timeUtils;
 
     public void updateGroupRankings(Long userId, Long studyTimeSeconds) {
@@ -36,15 +29,14 @@ public class GroupRankingWorker {
         groupRankingRepository.incrementUserStudyTime(today, userId, studyTimeSeconds);
     }
 
-    public List<GroupMemberRankingDto> getGroupRanking(Long userId, List<Long> memberIds, GroupRankingPeriod period) {
+    public List<GroupMemberRankingDto> getGroupRanking(
+            Long userId, List<GroupMemberProfileDto> profiles, GroupRankingPeriod period) {
+        List<Long> groupMemberIds =
+                profiles.stream().map(GroupMemberProfileDto::id).toList();
+
         LocalDate today = timeUtils.getToday();
         // id : studyTime 조회
-        Map<String, String> groupRanking = groupRankingRepository.getGroupRanking(today, memberIds,
-                period);
-
-        // nickname, imageUrl, role 조회해야 함.
-        List<GroupMemberProfileDto> profiles = groupMemberRepository.findGroupMemberInfoInIds(
-                memberIds);
+        Map<String, String> groupRanking = groupRankingRepository.getGroupRanking(today, groupMemberIds, period);
 
         // 데이터 결합 (정렬 작업은 프론트에서 진행)
         return profiles.stream()
@@ -54,23 +46,13 @@ public class GroupRankingWorker {
                     long studySeconds = Long.parseLong(timeStr);
 
                     // 나 자신의 랭킹은 "사용자"로 출력해서 잘 보이도록 ? 하면 좋겠다는 의도
-                    if(profile.id().equals(userId)) {
+                    if (profile.id().equals(userId)) {
                         return new GroupMemberRankingDto(
-                                profile.id(),
-                                "사용자",
-                                profile.imageUrl(),
-                                studySeconds,
-                                profile.role()
-                        );
+                                profile.id(), "사용자", profile.imageUrl(), studySeconds, profile.role());
                     }
 
                     return new GroupMemberRankingDto(
-                            profile.id(),
-                            profile.nickname(),
-                            profile.imageUrl(),
-                            studySeconds,
-                            profile.role()
-                    );
+                            profile.id(), profile.nickname(), profile.imageUrl(), studySeconds, profile.role());
                 })
                 .toList();
     }

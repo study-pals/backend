@@ -1,6 +1,5 @@
 package com.studypals.domain.groupManage.entity;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.IsoFields;
@@ -9,17 +8,22 @@ import java.util.function.Function;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 @Getter
 @RequiredArgsConstructor
 public enum GroupRankingPeriod {
     DAILY("study:daily:", date -> date.format(DateTimeFormatter.ofPattern("yyyyMMdd")), "daily"),
 
-    WEEKLY("study:weekly:", date -> {
-        // ISO-8601 기준 주차 계산
-        int year = date.get(IsoFields.WEEK_BASED_YEAR);
-        int week = date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-        return year + "W" + String.format("%02d", week);
-    }, "weekly"),
+    WEEKLY(
+            "study:weekly:",
+            date -> {
+                // ISO-8601 기준 주차 계산
+                int year = date.get(IsoFields.WEEK_BASED_YEAR);
+                int week = date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+                return year + "W" + String.format("%02d", week);
+            },
+            "weekly"),
 
     MONTHLY("study:monthly:", date -> date.format(DateTimeFormatter.ofPattern("yyyyMM")), "monthly");
 

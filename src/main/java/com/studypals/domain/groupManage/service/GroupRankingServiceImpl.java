@@ -1,12 +1,16 @@
 package com.studypals.domain.groupManage.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
+
+import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.dto.GroupMemberRankingDto;
 import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 import com.studypals.domain.groupManage.worker.GroupMemberReader;
 import com.studypals.domain.groupManage.worker.GroupRankingWorker;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -14,11 +18,10 @@ public class GroupRankingServiceImpl implements GroupRankingService {
     private final GroupRankingWorker groupRankingWorker;
     private final GroupMemberReader groupMemberReader;
 
-    // userId가 나인 경우에는 "사용자"라고 할까?
     @Override
     public List<GroupMemberRankingDto> getGroupRanking(Long userId, Long groupId, GroupRankingPeriod period) {
-        // 그룹 내에 속한 유저들의 id를 모두 가져와야 한다.
-        List<Long> groupMemberIds = groupMemberReader.getGroupMemberIds(groupId);
-        return groupRankingWorker.getGroupRanking(userId, groupMemberIds, period);
+        List<GroupMemberProfileDto> profiles = groupMemberReader.getAllMemberProfiles(groupId);
+
+        return groupRankingWorker.getGroupRanking(userId, profiles, period);
     }
 }

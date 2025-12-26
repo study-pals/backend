@@ -242,7 +242,7 @@ public class GroupServiceTest {
         GroupTotalGoalDto totalGoals = new GroupTotalGoalDto(categoryGoals, 71);
 
         given(groupReader.getById(groupId)).willReturn(mockGroup);
-        given(groupMemberReader.getAllMemberProfiles(mockGroup)).willReturn(profiles);
+        given(groupMemberReader.getAllMemberProfiles(groupId)).willReturn(profiles);
         given(groupGoalCalculator.calculateGroupGoals(groupId, profiles)).willReturn(totalGoals);
 
         // When

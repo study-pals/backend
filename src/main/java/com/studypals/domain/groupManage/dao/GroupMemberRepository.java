@@ -1,7 +1,5 @@
 package com.studypals.domain.groupManage.dao;
 
-import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
-import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.dto.GroupSummaryDto;
 import com.studypals.domain.groupManage.entity.GroupMember;
 
@@ -31,13 +30,9 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
     @Query(value = "SELECT * FROM group_member WHERE member_id = :userId AND group_id = :groupId", nativeQuery = true)
     Optional<GroupMember> findByMemberIdAndGroupId(Long userId, Long groupId);
 
-    /**
-     * 해당 사용자가 속한 그룹에 대한 GroupMember 리스트를 찾습니다.
-     * @param memberId 사용자 아이디
-     * @return GroupMember 에 대한 List
-     */
     List<GroupMember> findAllByMemberId(Long memberId);
 
+    // 추후 GroupRepository로 옮겨도 될듯
     @Query(
             """
       SELECT new com.studypals.domain.groupManage.dto.GroupSummaryDto(
@@ -53,22 +48,12 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
 
     @Query(
             """
-    SELECT gm.id
-    FROM GroupMember gm
-    WHERE gm.group.id =:groupId
-    """
-    )
-    List<Long> findGroupMemberIdByGroupId(Long groupId);
-
-    @Query(
-            """
     SELECT new com.studypals.domain.groupManage.dto.GroupMemberProfileDto(
         m.id, m.nickname, m.imageUrl, gm.role
     )
     FROM GroupMember gm
     JOIN gm.member m
-    WHERE m.id in :memberIds
-    """
-    )
-    List<GroupMemberProfileDto> findGroupMemberInfoInIds(List<Long> memberIds);
+    WHERE gm.group.id = :groupId
+    """)
+    List<GroupMemberProfileDto> findGroupMemberProfiles(@Param("groupId") Long groupId);
 }

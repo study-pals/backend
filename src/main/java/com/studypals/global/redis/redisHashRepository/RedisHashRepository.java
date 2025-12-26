@@ -1,11 +1,12 @@
 package com.studypals.global.redis.redisHashRepository;
 
-import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.*;
 
 import org.springframework.data.repository.Repository;
+
+import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 
 /**
  * Redis Hash 기반 도메인 객체를 저장하고 조회하기 위한 Repository 인터페이스입니다.

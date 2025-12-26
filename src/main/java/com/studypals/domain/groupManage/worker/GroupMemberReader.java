@@ -36,8 +36,8 @@ public class GroupMemberReader {
         return groupMemberRepository.findTopNMemberByJoinedAt(group.getId(), limit);
     }
 
-    public List<GroupMemberProfileDto> getAllMemberProfiles(Group group) {
-        return groupMemberRepository.findAllMemberProfiles(group.getId());
+    public List<GroupMemberProfileDto> getAllMemberProfiles(Long groupId) {
+        return groupMemberRepository.findGroupMemberProfiles(groupId);
     }
 
     public List<GroupMemberProfileMappingDto> getTopNMemberProfileImages(List<Long> groupIds, int limit) {
@@ -46,9 +46,5 @@ public class GroupMemberReader {
 
     public List<GroupSummaryDto> getGroups(Long userId) {
         return groupMemberRepository.findGroupsByMemberId(userId);
-    }
-
-    public List<Long> getGroupMemberIds(Long groupId) {
-        return groupMemberRepository.findGroupMemberIdByGroupId(groupId);
     }
 }

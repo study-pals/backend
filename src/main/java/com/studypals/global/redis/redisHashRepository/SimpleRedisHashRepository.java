@@ -334,7 +334,6 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
     @Override
     @SuppressWarnings("unchecked")
     public void incrementUserStudyTime(LocalDate date, Long userId, long delta) {
-        // keyPrefix로 groupRanking 이 존재하고, 이제 enum 타입을 돌면서 각각 다른 키 값을 만들어야 한다.
         String field = String.valueOf(userId);
 
         tpl.executePipelined(new SessionCallback<>() {
@@ -353,13 +352,11 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, String> getGroupRanking(LocalDate date, List<Long> ids, GroupRankingPeriod period) {
-        String key = meta.keyPrefix() + period.getRedisKey(date);
+        String keyWithoutPrefix = period.getRedisKey(date);
 
-        List<String> userIds = ids.stream()
-                .map(String::valueOf)
-                .toList();
+        List<String> userIds = ids.stream().map(String::valueOf).toList();
 
-        return findHashFieldsById((ID) key, userIds);
+        return findHashFieldsById((ID) keyWithoutPrefix, userIds);
     }
 
     private String lockKeyOf(ID id) {
