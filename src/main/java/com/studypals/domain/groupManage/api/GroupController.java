@@ -65,7 +65,6 @@ public class GroupController {
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_LIST, response));
     }
 
-    // 오늘의 목표 정보도 포함시켜야함
     @GetMapping("/{groupId}")
     public ResponseEntity<Response<GetGroupDetailRes>> getGroupDetail(
             @AuthenticationPrincipal Long userId, @PathVariable Long groupId) {

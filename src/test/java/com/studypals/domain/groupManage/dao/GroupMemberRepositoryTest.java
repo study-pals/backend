@@ -84,7 +84,7 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
         insertGroupMember(group, m1, GroupRole.LEADER); // 리더
 
         // when
-        List<GroupMemberProfileDto> result = groupMemberRepository.findAllMemberProfiles(group.getId());
+        List<GroupMemberProfileDto> result = groupMemberRepository.findGroupMemberProfiles(group.getId());
 
         // then
         assertThat(result).hasSize(2);
