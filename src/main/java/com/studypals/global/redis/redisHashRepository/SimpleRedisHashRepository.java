@@ -8,6 +8,8 @@ import java.util.*;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 
 import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 
@@ -334,19 +336,11 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
     @Override
     @SuppressWarnings("unchecked")
     public void incrementUserStudyTime(LocalDate date, Long userId, long delta) {
-        String field = String.valueOf(userId);
+        List<String> keys = Arrays.stream(GroupRankingPeriod.values())
+                .map(period -> meta.keyPrefix() + period.getRedisKey(date))
+                .toList();
 
-        tpl.executePipelined(new SessionCallback<>() {
-            @Override
-            public Object execute(RedisOperations operations) throws DataAccessException {
-                for (GroupRankingPeriod rankingPeriod : GroupRankingPeriod.values()) {
-                    String key = meta.keyPrefix() + rankingPeriod.getRedisKey(date);
-                    // 기존 시간이 있으면 더하고, 없으면 새로 생성
-                    operations.opsForHash().increment(key, field, delta);
-                }
-                return null;
-            }
-        });
+        tpl.execute(INCREASE_STUDYTIME_LUA, keys, String.valueOf(userId), String.valueOf(delta));
     }
 
     @Override
@@ -375,6 +369,9 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
                     + "  return redis.call('pexpire', KEYS[1], ARGV[2]) "
                     + "else return 0 end")
             .getBytes(StandardCharsets.UTF_8);
+
+    private static final RedisScript<Long> INCREASE_STUDYTIME_LUA = new DefaultRedisScript<>(
+            "for i, key in ipairs(KEYS) do " + "  redis.call('HINCRBY', key, ARGV[1], ARGV[2]) " + "end", Long.class);
 
     /** 현재 토큰 보유자가 TTL을 연장(밀리초 단위). 성공 시 true */
 }
