@@ -18,6 +18,15 @@ import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 
+/**
+ * 그룹 랭킹에 대한 CRUD 엔드포인트입니다.
+ * <pre>
+ *     - GET /groups/rank/{groupId}/{period} : 특정 그룹에 대한 일간/주간/월간 랭킹을 조회합니다. (최대 유저는 99명)
+ * </pre>
+ *
+ * @author sleepyhoon
+ * @since 2025-12-27
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/groups")

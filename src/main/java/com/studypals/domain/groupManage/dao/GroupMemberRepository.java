@@ -32,7 +32,6 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
 
     List<GroupMember> findAllByMemberId(Long memberId);
 
-    // 추후 GroupRepository로 옮겨도 될듯
     @Query(
             """
       SELECT new com.studypals.domain.groupManage.dto.GroupSummaryDto(
