@@ -3,6 +3,7 @@ package com.studypals.global.redis;
 import org.springframework.context.annotation.Configuration;
 
 import com.studypals.domain.chatManage.dao.UserLastReadMessageRepository;
+import com.studypals.domain.groupManage.dao.GroupRankingRepository;
 import com.studypals.domain.groupManage.dao.GroupStudyStatusRepository;
 import com.studypals.global.redis.redisHashRepository.annotations.EnableRedisHashRepositories;
 import com.studypals.global.websocket.subscibeManage.UserSubscribeInfoRepository;
@@ -25,6 +26,7 @@ import com.studypals.global.websocket.subscibeManage.UserSubscribeInfoRepository
         basePackageClasses = {
             UserSubscribeInfoRepository.class,
             UserLastReadMessageRepository.class,
-            GroupStudyStatusRepository.class
+            GroupStudyStatusRepository.class,
+            GroupRankingRepository.class
         })
 public class RedisHashEntityConfig {}
