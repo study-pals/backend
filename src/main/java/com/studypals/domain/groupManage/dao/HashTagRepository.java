@@ -33,7 +33,7 @@ public interface HashTagRepository extends JpaRepository<HashTag, Long> {
     /**
      * tag 자동완성 시 사용할 메서드. prefix 에 대해 cnt 값 만큼의 자주 사용되는 데이터를 반환합니다.
      *
-     * @param prefix 검색할 인자(접두사 / 순서대로)
+     * @param value 검색할 인자(접두사 / 순서대로)
      * @param pageable 반환 개수 지정
      * @return cnt 개수 만큼의, 사용 빈도가 높은 데이터
      */
@@ -41,10 +41,10 @@ public interface HashTagRepository extends JpaRepository<HashTag, Long> {
             """
     SELECT t.tag
     FROM HashTag t
-    WHERE t.tag LIKE CONCAT(:prefix, '%')
+    WHERE t.tag LIKE CONCAT('%', :value, '%')
     ORDER BY t.usedCount DESC
 """)
-    List<String> findNamesByPrefix(@Param("prefix") String prefix, Pageable pageable);
+    List<String> search(@Param("value") String value, Pageable pageable);
 
     /**
      * usedCount 값을 원자적으로 증가시키는 메서드입니다. 해당 메서드가 실행 되면
