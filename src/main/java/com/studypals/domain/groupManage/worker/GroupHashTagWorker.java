@@ -12,8 +12,6 @@ import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupHashTag;
 import com.studypals.domain.groupManage.entity.HashTag;
 import com.studypals.global.annotations.Worker;
-import com.studypals.global.exceptions.errorCode.GroupErrorCode;
-import com.studypals.global.exceptions.exception.GroupException;
 import com.studypals.global.utils.StringUtils;
 
 /**
@@ -70,15 +68,8 @@ public class GroupHashTagWorker {
         }
 
         if (!notExists.isEmpty()) {
-            try {
-                hashTagRepository.saveAll(notExists);
-                hashTagRepository.flush(); // unique 제약 조건 발생용 flush
-            } catch (DataIntegrityViolationException e) { // 저장 실패 시 동시성 문제라 생각하고 1회 재시도
-                retrySave(notExists.stream().map(HashTag::getTag).toList());
-            }
+            exists.addAll(hashTagRepository.saveAll(notExists));
         }
-        // 최종 결과물 재조회
-        exists = hashTagRepository.findAllByTagIn(normalizedTags);
 
         // 저장된 hashtag 를 기반으로 groupHashTag 저장
         List<GroupHashTag> groupHashTags = new ArrayList<>();
@@ -92,32 +83,6 @@ public class GroupHashTagWorker {
                     .build());
         }
         groupHashTagRepository.saveAll(groupHashTags);
-    }
-
-    /**
-     * 저장 재시도 메서드입니다. 새로운 hashtag 를 사용하여 그룹을 생성하는 와중, 조회할 당시에는 없는
-     * 해시태그였으나 그 사이에 다른 세션에서 해시태그를 추가할 경우 unique 제약 조건이 생길 수 있습니다.
-     * 이를 고려하여 단 1회 저장을 재시도하는 메서드입니다.
-     * @param failToSave 저장에 실패한 엔티티
-     * @return 저장 및 조회 성공 후 영속화되어 있는 엔티티. 즉, 현재 DB 에 모두 존재하는 hashTag
-     */
-    private void retrySave(List<String> failToSave) {
-        List<HashTag> reExists = hashTagRepository.findAllByTagIn(failToSave);
-        List<HashTag> reNotExists = notExistTagToCreate(new HashSet<>(failToSave), reExists);
-        if (!reExists.isEmpty()) {
-            hashTagRepository.increaseUsedCountBulk(
-                    reExists.stream().map(HashTag::getTag).toList());
-        }
-        if (!reNotExists.isEmpty()) {
-            try {
-                hashTagRepository.saveAll(reNotExists);
-                hashTagRepository.flush(); // unique 제약 조건 발생용 flush
-            } catch (DataIntegrityViolationException e) {
-                throw new GroupException(
-                        GroupErrorCode.GROUP_HASHTAG_FAIL, "[GroupHashTagWorker#retrySave] cannot save hash tag");
-            }
-        }
-        reExists.addAll(reNotExists);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.studypals.domain.groupManage.service;
 
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
+import com.studypals.global.retry.RetryTx;
 
 /**
  * group service 의 구현 클래스입니다.
@@ -55,7 +57,9 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    @Transactional
+    @RetryTx(
+            maxAttempts = 2,
+            retryFor = {DataIntegrityViolationException.class})
     public Long createGroup(Long userId, CreateGroupReq dto) {
         // 그룹 생성
         Group group = groupWriter.create(dto);
