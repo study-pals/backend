@@ -58,7 +58,7 @@ public class StudyStatusWorker {
      * @return 만들어진 객체
      */
     public StudyStatus startStatus(Member member, StartStudyDto dto) {
-        // 새로운 optionalStudyStatus 를 생성하여 반환
+        // 새로운 StudyStatus 를 생성
         return StudyStatus.builder()
                 .id(member.getId())
                 .categoryId(dto.categoryId())

@@ -20,7 +20,7 @@ import com.studypals.domain.groupManage.worker.GroupMemberReader;
 import com.studypals.domain.groupManage.worker.GroupRankingWorker;
 
 @ExtendWith(MockitoExtension.class)
-class GroupRankingServiceImplTest {
+class GroupRankingServiceTest {
 
     @Mock
     private GroupRankingWorker groupRankingWorker;

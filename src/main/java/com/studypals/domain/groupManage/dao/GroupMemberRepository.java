@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.dto.GroupSummaryDto;
 import com.studypals.domain.groupManage.entity.GroupMember;
 
@@ -45,14 +44,11 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
 
     boolean existsByMemberIdAndGroupId(Long memberId, Long groupId);
 
-    @Query(
-            """
-    SELECT new com.studypals.domain.groupManage.dto.GroupMemberProfileDto(
-        m.id, m.nickname, m.imageUrl, gm.role
-    )
+    @Query("""
+    SELECT gm
     FROM GroupMember gm
-    JOIN gm.member m
+    JOIN FETCH gm.member
     WHERE gm.group.id = :groupId
     """)
-    List<GroupMemberProfileDto> findGroupMemberProfiles(@Param("groupId") Long groupId);
+    List<GroupMember> findGroupMembers(@Param("groupId") Long groupId);
 }

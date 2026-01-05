@@ -9,6 +9,7 @@ import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 import com.studypals.domain.groupManage.dto.GroupSummaryDto;
 import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.global.annotations.Worker;
 
 /**
@@ -36,8 +37,8 @@ public class GroupMemberReader {
         return groupMemberRepository.findTopNMemberByJoinedAt(group.getId(), limit);
     }
 
-    public List<GroupMemberProfileDto> getAllMemberProfiles(Long groupId) {
-        return groupMemberRepository.findGroupMemberProfiles(groupId);
+    public List<GroupMember> getAllMemberProfiles(Long groupId) {
+        return groupMemberRepository.findGroupMembers(groupId);
     }
 
     public List<GroupMemberProfileMappingDto> getTopNMemberProfileImages(List<Long> groupIds, int limit) {

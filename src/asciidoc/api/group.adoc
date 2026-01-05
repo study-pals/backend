@@ -318,7 +318,8 @@ include::{snippets}/group-category-controller-rest-docs-test/create_success/resp
 
 해당하는 그룹의 일간/주간/월간 랭킹을 조회합니다.
 
-일간이라면 DAILY(daily), 주간이라면 WEEKLY(weekly), 월간이라면 MONTHLY(monthly) 를 pathVariable 로 넘겨야합니다.
+일간이라면 DAILY, 주간이라면 WEEKLY, 월간이라면 MONTHLY 값을 pathVariable 로 넘겨야 하며, DAILY, daily, Daily 등 대소문자 구분 없이 모두 가능합니다.
+
 
 *현재 최대 99명의 데이터가 전달되므로 프론트엔드에서 studyTime 필드를 기준으로 내림차순 정렬을 해야 합니다.*
 

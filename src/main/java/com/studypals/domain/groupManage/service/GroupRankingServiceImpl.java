@@ -1,14 +1,16 @@
 package com.studypals.domain.groupManage.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.dto.GroupMemberRankingDto;
+import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
+import com.studypals.domain.groupManage.worker.GroupAuthorityValidator;
 import com.studypals.domain.groupManage.worker.GroupMemberReader;
 import com.studypals.domain.groupManage.worker.GroupRankingWorker;
 
@@ -32,11 +34,31 @@ import com.studypals.domain.groupManage.worker.GroupRankingWorker;
 public class GroupRankingServiceImpl implements GroupRankingService {
     private final GroupRankingWorker groupRankingWorker;
     private final GroupMemberReader groupMemberReader;
+    private final GroupAuthorityValidator validator;
 
     @Override
     public List<GroupMemberRankingDto> getGroupRanking(Long userId, Long groupId, GroupRankingPeriod period) {
-        List<GroupMemberProfileDto> profiles = groupMemberReader.getAllMemberProfiles(groupId);
+        // 해당 유저가 속한 그룹인가?
+        validator.isMemberOfGroup(userId, groupId);
 
-        return groupRankingWorker.getGroupRanking(userId, profiles, period);
+        List<GroupMember> groupMembers = groupMemberReader.getAllMemberProfiles(groupId);
+
+        Map<String, String> groupRanking = groupRankingWorker.getGroupRanking(groupMembers, period);
+
+        return groupMembers.stream()
+                .map(groupMember -> {
+                    // Redis에 값이 없으면 0으로 처리
+                    String timeStr = groupRanking.getOrDefault(
+                            String.valueOf(groupMember.getMember().getId()), "0");
+                    long studySeconds = Long.parseLong(timeStr);
+
+                    return new GroupMemberRankingDto(
+                            groupMember.getMember().getId(),
+                            groupMember.getMember().getNickname(),
+                            groupMember.getMember().getImageUrl(),
+                            studySeconds,
+                            groupMember.getRole());
+                })
+                .toList();
     }
 }

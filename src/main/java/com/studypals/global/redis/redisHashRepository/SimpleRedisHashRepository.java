@@ -371,7 +371,12 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
             .getBytes(StandardCharsets.UTF_8);
 
     private static final RedisScript<Long> INCREASE_STUDYTIME_LUA = new DefaultRedisScript<>(
-            "for i, key in ipairs(KEYS) do " + "  redis.call('HINCRBY', key, ARGV[1], ARGV[2]) " + "end", Long.class);
+            """
+            for i, key in ipairs(KEYS) do
+                redis.call('HINCRBY', key, ARGV[1], ARGV[2])
+            end
+            """,
+            Long.class);
 
     /** 현재 토큰 보유자가 TTL을 연장(밀리초 단위). 성공 시 true */
 }

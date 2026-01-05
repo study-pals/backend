@@ -40,5 +40,5 @@ public class GroupRanking {
      * [userId : 공부 시간] 형식으로 저장합니다.
      */
     @RedisHashMapField
-    private Map<String, String> userStudyTimes;
+    private Map<Long, Long> userStudyTimes;
 }
