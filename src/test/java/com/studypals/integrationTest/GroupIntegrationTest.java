@@ -6,6 +6,8 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +58,8 @@ public class GroupIntegrationTest extends AbstractGroupIntegrationTest {
         // given
         CreateUserVar user = createUser();
         createGroupTag("group tag");
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         // when
         ResultActions result = mockMvc.perform(post("/groups")

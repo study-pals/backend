@@ -60,7 +60,7 @@ public interface HashTagRepository extends JpaRepository<HashTag, Long> {
             t.deletedAt = null
         WHERE t.tag = :tag
     """)
-    Long increaseUsedCount(String tag);
+    Integer increaseUsedCount(String tag);
 
     /**
      * usedCount 값을 원자적으로 증가시키는 메서드입니다. 단, 여러 tags 들에 대해 연산을 수행합니다.

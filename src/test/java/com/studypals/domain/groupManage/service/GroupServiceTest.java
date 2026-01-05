@@ -101,7 +101,8 @@ public class GroupServiceTest {
     void createGroup_success() {
         // given
         Long userId = 1L;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupWriter.create(req)).willReturn(mockGroup);
@@ -120,7 +121,8 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(groupWriter.create(req)).willThrow(new GroupException(errorCode));
 
@@ -136,7 +138,8 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_MEMBER_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupWriter.create(req)).willReturn(mockGroup);

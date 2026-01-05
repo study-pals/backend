@@ -77,7 +77,8 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
     void createGroup_success() throws Exception {
 
         // given
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(groupService.createGroup(any(), any())).willReturn(1L);
 

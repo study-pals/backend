@@ -1,8 +1,12 @@
 package com.studypals.global.retry;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -44,20 +48,32 @@ class RetryTxAspectTest extends TestEnvironment {
 
     @Autowired
     HashTagRepository hashTagRepository;
+
     @Autowired
     RaceConditionHashTagService raceConditionHashTagService;
-Data
 
     @BeforeEach
     void setUp() {
-        hashTagRepository.saveAndFlush(HashTag.builder()
-                .tag("spring")
-                .usedCount(1L)
-                .build());
+        hashTagRepository.saveAndFlush(
+                HashTag.builder().tag("spring").usedCount(1L).build());
     }
 
-    @TestConfiguration
+    @Test
+    void unique_violation_then_retry_success_update_usedCount() {
+        assertThat(AopUtils.isAopProxy(raceConditionHashTagService)).isTrue();
 
+        raceConditionHashTagService.create("spring");
+
+        // retry가 2회 돌았는지
+        assertThat(raceConditionHashTagService.getAttempts()).isEqualTo(2);
+
+        // row는 1개만 존재
+        assertThat(hashTagRepository.count()).isEqualTo(1);
+
+        // usedCount가 증가했는지
+        HashTag tag = hashTagRepository.findByTag("spring").orElseThrow();
+        assertThat(tag.getUsedCount()).isEqualTo(2L);
+    }
 
     @TestConfiguration
     static class Config {
@@ -65,9 +81,7 @@ Data
         RaceConditionHashTagService raceConditionHashTagService(HashTagRepository hashTagRepository) {
             return new RaceConditionHashTagService(hashTagRepository);
         }
-
     }
-
 
     @RequiredArgsConstructor
     public static class RaceConditionHashTagService {
@@ -81,17 +95,13 @@ Data
         @RetryTx(
                 maxAttempts = 2,
                 backoffMs = 0,
-                retryFor = {DataIntegrityViolationException.class}
-        )
+                retryFor = {DataIntegrityViolationException.class})
         public void create(String tag) {
             int attempt = attempts.incrementAndGet();
 
             if (attempt == 1) {
                 // 1회차: insert + flush로 unique 위반 강제
-                hashTagRepository.save(HashTag.builder()
-                        .tag(tag)
-                        .usedCount(1L)
-                        .build());
+                hashTagRepository.save(HashTag.builder().tag(tag).usedCount(1L).build());
                 hashTagRepository.flush(); // 여기서 DataIntegrityViolationException
                 return;
             }
@@ -99,6 +109,5 @@ Data
             // 2회차: 복구 동작 (usedCount 증가)
             hashTagRepository.increaseUsedCount(tag);
         }
-
     }
 }
