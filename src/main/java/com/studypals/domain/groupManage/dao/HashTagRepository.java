@@ -83,7 +83,7 @@ public interface HashTagRepository extends JpaRepository<HashTag, Long> {
      * @param tag 감소시킬 태그
      * @return 변경된 row 수
      */
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query(
             """
     UPDATE HashTag t
