@@ -73,9 +73,9 @@ public interface HashTagRepository extends JpaRepository<HashTag, Long> {
         UPDATE HashTag t
           SET t.usedCount = t.usedCount + 1,
             t.deletedAt = null
-        WHERE t.tag in :tags
+        WHERE t.tag in (:tags)
     """)
-    void increaseUsedCountBulk(Collection<String> tags);
+    void increaseUsedCountBulk(@Param("tags") Collection<String> tags);
 
     /**
      * usedCount 값을 원자적으로 감소시키는 메서드입니다. 만약 0이 되면,

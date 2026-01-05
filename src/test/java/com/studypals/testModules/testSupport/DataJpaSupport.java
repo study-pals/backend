@@ -12,7 +12,7 @@ import com.studypals.global.config.QueryDslTestConfig;
 @DataJpaTest
 @Import(QueryDslTestConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public abstract class DataJpaSupport {
+public abstract class DataJpaSupport extends TestEnvironment {
     @Autowired
     protected TestEntityManager em;
 
