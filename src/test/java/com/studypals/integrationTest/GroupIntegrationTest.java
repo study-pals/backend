@@ -12,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
@@ -28,7 +27,6 @@ import com.studypals.global.responses.ResponseCode;
  * @see AbstractGroupIntegrationTest
  * @since 2025-04-12
  */
-@ActiveProfiles("test")
 @DisplayName("API TEST / 그룹 관리 통합 테스트")
 public class GroupIntegrationTest extends AbstractGroupIntegrationTest {
     @Autowired

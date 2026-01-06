@@ -4,7 +4,6 @@ import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
@@ -15,11 +14,9 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 /**
  *
  * @author jack8
- * @see
  * @since 2025-11-25
  */
 @SuppressWarnings("all")
-@ActiveProfiles("test")
 public abstract class TestEnvironment {
 
     static final MySQLContainer<?> MYSQL;

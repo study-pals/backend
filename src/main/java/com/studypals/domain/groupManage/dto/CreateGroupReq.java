@@ -28,4 +28,4 @@ public record CreateGroupReq(
         Boolean isApprovalRequired,
         // since 12-05 sanghyeok
         String imageUrl,
-        @Size(max = 10) List<@NotBlank @Size(max = 8) String> hashTags) {}
+        @Size(max = 10) List<@NotBlank @Size(max = 20) String> hashTags) {}

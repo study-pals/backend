@@ -184,6 +184,9 @@ public class MemberControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void checkAvailability_fail_when_both_username_and_nickname_present() throws Exception {
         // given
+        given(memberService.duplicateCheck(new CheckDuplicateDto("username@example.com", "nickname")))
+                .willThrow(new AuthException(AuthErrorCode.SIGNUP_FAIL, "username 혹은 nickname 중 하나만 존재해야 합니다.", "log"));
+
         AuthErrorCode errorCode = AuthErrorCode.SIGNUP_FAIL;
 
         // when
@@ -194,7 +197,7 @@ public class MemberControllerRestDocsTest extends RestDocsSupport {
 
         // then
         result.andExpect(hasStatus(errorCode))
-                .andExpect(hasKey(errorCode, "username 혹은 nickname 중 하나는 필수입니다."))
+                .andExpect(hasKey(errorCode, "username 혹은 nickname 중 하나만 존재해야 합니다."))
                 .andExpect(status().is4xxClientError())
                 .andDo(restDocs.document(
                         httpRequest(),

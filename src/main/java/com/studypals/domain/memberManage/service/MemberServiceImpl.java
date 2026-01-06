@@ -84,11 +84,18 @@ public class MemberServiceImpl implements MemberService {
         boolean hasUsername = dto.username() != null && !dto.username().isBlank();
         boolean hasNickname = dto.nickname() != null && !dto.nickname().isBlank();
 
-        if (hasUsername == hasNickname) {
+        if (hasUsername == hasNickname && hasUsername) {
             throw new AuthException(
                     AuthErrorCode.SIGNUP_FAIL,
                     "username 혹은 nickname 중 하나는 필수입니다.",
                     "[MemberController#checkAvailability] username & nickname both blank");
+        }
+
+        if (hasUsername == hasNickname) {
+            throw new AuthException(
+                    AuthErrorCode.SIGNUP_FAIL,
+                    "username 혹은 nickname 중 하나만 존재해야 합니다.",
+                    "[MemberController#checkAvailability] username & nickname both exists");
         }
 
         return hasUsername

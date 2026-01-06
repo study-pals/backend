@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +56,21 @@ class HashTagRepositoryTest extends DataJpaSupport {
         return em.persist(HashTag.builder().tag(tag).build());
     }
 
+    private TransactionTemplate tt;
+
+    @BeforeEach
+    void setUp() {
+        tt = new TransactionTemplate(txManager);
+    }
+
+    @AfterEach
+    void tearDown() {
+        tt.execute(status -> {
+            hashTagRepository.deleteAllInBatch();
+            return null;
+        });
+    }
+
     @Test
     void search_success() {
         List<String> tags = List.of(
@@ -80,7 +97,6 @@ class HashTagRepositoryTest extends DataJpaSupport {
 
     @Test
     void increaseUsedCountBulk_success() throws Exception {
-        TransactionTemplate tt = new TransactionTemplate(txManager);
         List<String> tags = List.of(
                 "apple_pie",
                 "apple_pan",

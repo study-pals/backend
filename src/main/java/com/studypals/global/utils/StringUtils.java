@@ -72,6 +72,9 @@ public class StringUtils {
         // 앞뒤 _ 제거(앞뒤 공백 제거의 효과)
         s = s.replaceAll("^_+|_+$", "");
 
+        s = s.toLowerCase();
+        if (s.isBlank()) return null;
+
         return s;
     }
 }

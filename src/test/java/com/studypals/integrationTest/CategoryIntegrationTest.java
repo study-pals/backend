@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.studyManage.dto.CreateCategoryReq;
@@ -24,7 +23,6 @@ import com.studypals.testModules.testSupport.IntegrationSupport;
  * @see IntegrationSupport
  * @since 2025-04-12
  */
-@ActiveProfiles("test")
 @DisplayName("API TEST / 카테고리 통합 테스트")
 public class CategoryIntegrationTest extends IntegrationSupport {
 
