@@ -1,6 +1,5 @@
 package com.studypals.domain.groupManage.dao;
 
-import com.studypals.domain.groupManage.service.GroupRankingServiceImpl;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
