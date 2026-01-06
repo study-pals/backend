@@ -43,14 +43,13 @@ public class GroupRankingServiceImpl implements GroupRankingService {
 
         List<GroupMember> groupMembers = groupMemberReader.getAllMemberProfiles(groupId);
 
-        Map<String, String> groupRanking = groupRankingWorker.getGroupRanking(groupMembers, period);
+        Map<Long, Long> groupRanking = groupRankingWorker.getGroupRanking(groupMembers, period);
 
         return groupMembers.stream()
                 .map(groupMember -> {
                     // Redis에 값이 없으면 0으로 처리
-                    String timeStr = groupRanking.getOrDefault(
-                            String.valueOf(groupMember.getMember().getId()), "0");
-                    long studySeconds = Long.parseLong(timeStr);
+                    Long studySeconds =
+                            groupRanking.getOrDefault(groupMember.getMember().getId(), 0L);
 
                     return new GroupMemberRankingDto(
                             groupMember.getMember().getId(),

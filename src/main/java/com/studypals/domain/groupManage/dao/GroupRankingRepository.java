@@ -1,9 +1,13 @@
 package com.studypals.domain.groupManage.dao;
 
-import org.springframework.stereotype.Repository;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
-import com.studypals.domain.groupManage.entity.GroupRanking;
-import com.studypals.global.redis.redisHashRepository.RedisHashRepository;
+import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 
-@Repository
-public interface GroupRankingRepository extends RedisHashRepository<GroupRanking, String> {}
+public interface GroupRankingRepository {
+    void incrementUserStudyTime(LocalDate date, Long userId, long delta);
+
+    Map<Long, Long> getGroupRanking(LocalDate date, List<Long> groupMemberIds, GroupRankingPeriod period);
+}

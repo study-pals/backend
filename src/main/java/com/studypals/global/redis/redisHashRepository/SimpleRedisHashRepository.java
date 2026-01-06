@@ -2,16 +2,11 @@ package com.studypals.global.redis.redisHashRepository;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.util.*;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.core.*;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.data.redis.core.script.RedisScript;
-
-import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 
 /**
  * {@link RedisHashRepository}의 기본 구현체로, Redis Hash 자료구조 기반의 CRUD 기능을 제공합니다.
@@ -333,26 +328,6 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
         return res != null && res > 0;
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public void incrementUserStudyTime(LocalDate date, Long userId, long delta) {
-        List<String> keys = Arrays.stream(GroupRankingPeriod.values())
-                .map(period -> meta.keyPrefix() + period.getRedisKey(date))
-                .toList();
-
-        tpl.execute(INCREASE_STUDYTIME_LUA, keys, String.valueOf(userId), String.valueOf(delta));
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Map<String, String> getGroupRanking(LocalDate date, List<Long> ids, GroupRankingPeriod period) {
-        String keyWithoutPrefix = period.getRedisKey(date);
-
-        List<String> userIds = ids.stream().map(String::valueOf).toList();
-
-        return findHashFieldsById((ID) keyWithoutPrefix, userIds);
-    }
-
     private String lockKeyOf(ID id) {
         return meta.lockPrefix() + id.toString();
     }
@@ -369,14 +344,6 @@ public class SimpleRedisHashRepository<E, ID> implements RedisHashRepository<E, 
                     + "  return redis.call('pexpire', KEYS[1], ARGV[2]) "
                     + "else return 0 end")
             .getBytes(StandardCharsets.UTF_8);
-
-    private static final RedisScript<Long> INCREASE_STUDYTIME_LUA = new DefaultRedisScript<>(
-            """
-            for i, key in ipairs(KEYS) do
-                redis.call('HINCRBY', key, ARGV[1], ARGV[2])
-            end
-            """,
-            Long.class);
 
     /** 현재 토큰 보유자가 TTL을 연장(밀리초 단위). 성공 시 true */
 }

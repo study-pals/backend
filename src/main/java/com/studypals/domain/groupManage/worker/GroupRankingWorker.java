@@ -39,12 +39,11 @@ public class GroupRankingWorker {
         groupRankingRepository.incrementUserStudyTime(today, userId, studyTimeSeconds);
     }
 
-    public Map<String, String> getGroupRanking(List<GroupMember> profiles, GroupRankingPeriod period) {
+    public Map<Long, Long> getGroupRanking(List<GroupMember> profiles, GroupRankingPeriod period) {
         List<Long> groupMemberIds =
                 profiles.stream().map(gm -> gm.getMember().getId()).toList();
 
         LocalDate today = timeUtils.getToday();
-        // id : studyTime 조회
         // 만약 redis에 데이터가 없다면? mysql에서 데이터를 가져와야 한다.
         return groupRankingRepository.getGroupRanking(today, groupMemberIds, period);
     }
