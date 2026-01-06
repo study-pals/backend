@@ -139,6 +139,12 @@ tasks.named('test', Test) {
     // REST Docs snippets 출력 디렉터리
     outputs.dir(snippetsDir)
     environment envProps
+    def active =
+            System.getProperty("spring.profiles.active")
+                    ?: System.getenv("SPRING_PROFILES_ACTIVE")
+                    ?: "test"
+
+    systemProperty "spring.profiles.active", active
 
     testLogging {
         events "passed", "skipped", "failed"
