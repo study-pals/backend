@@ -15,10 +15,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.groupManage.dao.GroupRankingRepository;
-import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
-import com.studypals.domain.groupManage.dto.GroupMemberRankingDto;
+import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 import com.studypals.domain.groupManage.entity.GroupRole;
+import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.utils.TimeUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,7 +51,7 @@ class GroupRankingWorkerTest {
     }
 
     @Test
-    @DisplayName("그룹 랭킹 조회 시 본인의 닉네임은 '사용자'로 변경되고, 데이터가 없으면 0으로 초기화된다")
+    @DisplayName("그룹 랭킹 조회 시 공부 데이터가 없으면 0으로 반환한다")
     void getGroupRanking_Transformation_Success() {
         // given
         Long myId = 1L;
@@ -58,31 +59,44 @@ class GroupRankingWorkerTest {
         LocalDate now = LocalDate.of(2025, 12, 26);
         GroupRankingPeriod period = GroupRankingPeriod.WEEKLY;
 
-        List<GroupMemberProfileDto> profiles = List.of(
-                new GroupMemberProfileDto(myId, "내닉네임", "my-url", GroupRole.LEADER),
-                new GroupMemberProfileDto(otherId, "친구닉네임", "other-url", GroupRole.MEMBER));
+        List<GroupMember> profiles = createMockGroupMembers(1L);
 
         given(timeUtils.getToday()).willReturn(now);
         // Redis 결과 Mocking: 내 데이터는 5000초, 친구 데이터는 없음(null 상황 가정)
         given(groupRankingRepository.getGroupRanking(eq(now), anyList(), eq(period)))
-                .willReturn(Map.of(String.valueOf(myId), "5000"));
+                .willReturn(Map.of(1L, 10000L, 2L, 20000L, 3L, 5000L, 4L, 0L));
 
         // when
-        List<GroupMemberRankingDto> result = groupRankingWorker.getGroupRanking(myId, profiles, period);
+        Map<Long, Long> result = groupRankingWorker.getGroupRanking(profiles, period);
 
         // then
-        assertThat(result).hasSize(2);
+        assertThat(result).hasSize(4);
+    }
 
-        // 내 정보 검증 ("사용자" 치환 및 시간 확인)
-        GroupMemberRankingDto myRanking =
-                result.stream().filter(r -> r.id().equals(myId)).findFirst().get();
-        assertThat(myRanking.nickname()).isEqualTo("사용자");
-        assertThat(myRanking.studyTime()).isEqualTo(5000L);
+    // 헬퍼 메서드: GroupMember 엔티티 4명 생성
+    private List<GroupMember> createMockGroupMembers(Long groupId) {
+        Group group = Group.builder().id(groupId).build();
 
-        // 친구 정보 검증 (기존 닉네임 유지 및 0초 처리)
-        GroupMemberRankingDto otherRanking =
-                result.stream().filter(r -> r.id().equals(otherId)).findFirst().get();
-        assertThat(otherRanking.nickname()).isEqualTo("친구닉네임");
-        assertThat(otherRanking.studyTime()).isEqualTo(0L);
+        return List.of(
+                createMember(1L, "개발자A", "img_a", group, GroupRole.LEADER),
+                createMember(2L, "열공학생B", "img_b", group, GroupRole.MEMBER),
+                createMember(3L, "스터디봇C", "img_c", group, GroupRole.MEMBER),
+                createMember(4L, "코딩천재D", "img_d", group, GroupRole.MEMBER));
+    }
+
+    private GroupMember createMember(Long id, String nick, String img, Group group, GroupRole role) {
+        Member member = Member.builder()
+                .id(id)
+                .nickname(nick)
+                .imageUrl("https://example.com/" + img)
+                .build();
+
+        return GroupMember.builder()
+                .id(id + 1000L) // GroupMember 자체의 ID
+                .member(member)
+                .group(group)
+                .role(role)
+                .joinedAt(LocalDate.now())
+                .build();
     }
 }
