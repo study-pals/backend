@@ -92,7 +92,7 @@ class ChatRoomServiceTest {
         given(mockMember1.getId()).willReturn(2L);
 
         given(chatRoomMapper.toDto(any()))
-                .willReturn(new ChatRoomInfoRes.UserInfo(userId, ChatRoomRole.MEMBER, "image"));
+                .willReturn(new ChatRoomInfoRes.UserInfo(userId, "nickname", ChatRoomRole.MEMBER, "image"));
 
         given(mockMember1.getId()).willReturn(userId);
         given(chatRoomReader.getCachedCursor(chatRoomId)).willReturn(u);
