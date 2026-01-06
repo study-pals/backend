@@ -19,6 +19,21 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 
+/**
+ * group ranking custom repository 의 구현 클래스입니다.
+ *
+ * <p>group ranking 관련 데이터를 redis에서 가져옵니다.
+ *
+ * <p><b>상속 정보:</b><br>
+ * {@link GroupRankingRepository} 의 구현 클래스입니다.
+ *
+ * <p><b>빈 관리:</b><br>
+ * Repository
+ *
+ * @author sleepyhoon
+ * @see GroupMemberCustomRepository
+ * @since 2026-01-05
+ */
 @Repository
 @RequiredArgsConstructor
 public class GroupRankingRepositoryImpl implements GroupRankingRepository {
