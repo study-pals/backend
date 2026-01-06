@@ -19,5 +19,5 @@ public record ChatRoomInfoRes(
         String roomId, String name, List<UserInfo> userInfos, List<ChatCursorRes> cursor, List<LoggingMessage> logs) {
 
     @Builder
-    public record UserInfo(Long userId, ChatRoomRole role, String imageUrl) {}
+    public record UserInfo(Long userId, String nickname, ChatRoomRole role, String imageUrl) {}
 }
