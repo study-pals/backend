@@ -2,11 +2,15 @@ package com.studypals.domain.groupManage.worker;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,6 +20,7 @@ import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryCode;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
+import com.studypals.global.utils.TimeUtils;
 
 /**
  * {@link GroupEntryCodeManager} 에 대한 단위 테스트입니다.
@@ -32,21 +37,180 @@ public class GroupEntryCodeManagerTest {
     @Mock
     private GroupEntryCodeRedisRepository entryCodeRepository;
 
+    @Mock
+    private TimeUtils timeUtils;
+
     @InjectMocks
     private GroupEntryCodeManager entryCodeManager;
 
     @Test
-    void generate_success() {
+    void getOrCreateCode_existing_unlimitedTtl_doesNotReset() {
         // given
         Long groupId = 1L;
+        LocalDateTime now = LocalDateTime.of(2026, 1, 8, 12, 0);
+        LocalDateTime threshold = now.plusDays(1);
+
+        given(timeUtils.getRawLocalDateTime()).willReturn(now);
+
+        GroupEntryCode existing = GroupEntryCode.builder()
+                .groupId(groupId)
+                .code("ABC123")
+                .ttl(-1L) // 무제한 표시
+                .expireAt(null) // 무제한이면 null일 가능성
+                .build();
+
+        given(entryCodeRepository.findFirstByGroupId(groupId)).willReturn(Optional.of(existing));
 
         // when
-        String code = entryCodeManager.getOrCreateCode(groupId);
+        GroupEntryCode result = entryCodeManager.getOrCreateCode(groupId);
 
         // then
-        assertThat(code).isNotNull();
-        assertThat(code).hasSize(6);
-        assertThat(code).matches("[A-Z0-9]+");
+        ArgumentCaptor<GroupEntryCode> captor = ArgumentCaptor.forClass(GroupEntryCode.class);
+        verify(entryCodeRepository).save(captor.capture());
+
+        GroupEntryCode saved = captor.getValue();
+        assertThat(result).isSameAs(existing);
+        assertThat(saved.getTtl()).isEqualTo(-1L);
+        assertThat(saved.getExpireAt()).isNull(); // 그대로
+
+        verify(entryCodeRepository).findFirstByGroupId(groupId);
+        verifyNoMoreInteractions(entryCodeRepository);
+    }
+
+    @Test
+    void getOrCreateCode_existing_expireAtAfterThreshold_doesNotReset() {
+        // given
+        Long groupId = 1L;
+        LocalDateTime now = LocalDateTime.of(2026, 1, 8, 12, 0);
+        LocalDateTime threshold = now.plusDays(1);
+
+        given(timeUtils.getRawLocalDateTime()).willReturn(now);
+
+        GroupEntryCode existing = GroupEntryCode.builder()
+                .groupId(groupId)
+                .code("ABC123")
+                .ttl(7L) // 유한
+                .expireAt(threshold.plusDays(3)) // 1일보다 큼(=threshold 이후)
+                .build();
+
+        given(entryCodeRepository.findFirstByGroupId(groupId)).willReturn(Optional.of(existing));
+
+        // when
+        GroupEntryCode result = entryCodeManager.getOrCreateCode(groupId);
+
+        // then
+        ArgumentCaptor<GroupEntryCode> captor = ArgumentCaptor.forClass(GroupEntryCode.class);
+        verify(entryCodeRepository).save(captor.capture());
+
+        GroupEntryCode saved = captor.getValue();
+        assertThat(result).isSameAs(existing);
+        assertThat(saved.getTtl()).isEqualTo(7L);
+        assertThat(saved.getExpireAt()).isEqualTo(threshold.plusDays(3)); // 그대로
+
+        verify(entryCodeRepository).findFirstByGroupId(groupId);
+        verifyNoMoreInteractions(entryCodeRepository);
+    }
+
+    @Test
+    void getOrCreateCode_existing_withinOneDay_resetsToOneDay() {
+        // given
+        Long groupId = 1L;
+        LocalDateTime now = LocalDateTime.of(2026, 1, 8, 12, 0);
+        LocalDateTime threshold = now.plusDays(1);
+
+        given(timeUtils.getRawLocalDateTime()).willReturn(now);
+
+        GroupEntryCode existing = GroupEntryCode.builder()
+                .groupId(groupId)
+                .code("ABC123")
+                .ttl(3L) // 유한
+                .expireAt(now.plusHours(3)) // 1일보다 작음(=threshold 이전)
+                .build();
+
+        given(entryCodeRepository.findFirstByGroupId(groupId)).willReturn(Optional.of(existing));
+
+        // when
+        GroupEntryCode result = entryCodeManager.getOrCreateCode(groupId);
+
+        // then
+        ArgumentCaptor<GroupEntryCode> captor = ArgumentCaptor.forClass(GroupEntryCode.class);
+        verify(entryCodeRepository).save(captor.capture());
+
+        GroupEntryCode saved = captor.getValue();
+        assertThat(result).isSameAs(existing);
+        assertThat(saved.getTtl()).isEqualTo(1L);
+        assertThat(saved.getExpireAt()).isEqualTo(threshold); // 1일로 리셋
+
+        verify(entryCodeRepository).findFirstByGroupId(groupId);
+        verifyNoMoreInteractions(entryCodeRepository);
+    }
+
+    @Test
+    void increaseExpire_success_dayMinusOne() {
+        // given
+        Long groupId = 1L;
+        Long day = -1L;
+
+        LocalDateTime fixedNow = LocalDateTime.of(2026, 1, 8, 12, 0, 0);
+        given(timeUtils.getRawLocalDateTime()).willReturn(fixedNow);
+
+        GroupEntryCode existing = GroupEntryCode.builder()
+                .groupId(groupId)
+                .code("ABC123")
+                .ttl(1L)
+                .expireAt(fixedNow.plusDays(1))
+                .build();
+
+        given(entryCodeRepository.findFirstByGroupId(groupId)).willReturn(Optional.of(existing));
+
+        // when
+        entryCodeManager.increaseExpire(groupId, day);
+
+        // then: save 파라미터 직접 검증
+        ArgumentCaptor<GroupEntryCode> captor = ArgumentCaptor.forClass(GroupEntryCode.class);
+        verify(entryCodeRepository).save(captor.capture());
+
+        GroupEntryCode saved = captor.getValue();
+        assertThat(saved.getGroupId()).isEqualTo(groupId);
+        assertThat(saved.getTtl()).isEqualTo(-1L); // 코드 그대로면 -1 저장
+        assertThat(saved.getExpireAt()).isNull();
+
+        verify(entryCodeRepository).findFirstByGroupId(groupId);
+        verifyNoMoreInteractions(entryCodeRepository);
+    }
+
+    @Test
+    void increaseExpire_success_dayPositive() {
+        // given
+        Long groupId = 1L;
+        Long day = 3L;
+
+        LocalDateTime fixedNow = LocalDateTime.of(2026, 1, 8, 12, 0, 0);
+        given(timeUtils.getRawLocalDateTime()).willReturn(fixedNow);
+
+        GroupEntryCode existing = GroupEntryCode.builder()
+                .groupId(groupId)
+                .code("ABC123")
+                .ttl(1L)
+                .expireAt(fixedNow.plusDays(1))
+                .build();
+
+        given(entryCodeRepository.findFirstByGroupId(groupId)).willReturn(Optional.of(existing));
+
+        // when
+        entryCodeManager.increaseExpire(groupId, day);
+
+        // then: save 파라미터 직접 검증
+        ArgumentCaptor<GroupEntryCode> captor = ArgumentCaptor.forClass(GroupEntryCode.class);
+        verify(entryCodeRepository).save(captor.capture());
+
+        GroupEntryCode saved = captor.getValue();
+        assertThat(saved.getGroupId()).isEqualTo(groupId);
+        assertThat(saved.getTtl()).isEqualTo(3L);
+        assertThat(saved.getExpireAt()).isEqualTo(fixedNow.plusDays(3));
+
+        verify(entryCodeRepository).findFirstByGroupId(groupId);
+        verifyNoMoreInteractions(entryCodeRepository);
     }
 
     @Test
