@@ -85,7 +85,7 @@ public class GroupEntryServiceTest {
         String entryCode = "A1B2C3";
         GroupEntryCodeRes expected = new GroupEntryCodeRes(groupId, entryCode);
 
-        given(entryCodeManager.generate(groupId)).willReturn(entryCode);
+        given(entryCodeManager.getOrCreateCode(groupId)).willReturn(entryCode);
 
         // when
         GroupEntryCodeRes actual = groupEntryService.generateEntryCode(userId, groupId);

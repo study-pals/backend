@@ -84,6 +84,32 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
     }
 
     @Test
+    @WithMockUser
+    void increaseCodeExpire_success() throws Exception {
+        // given
+        Long groupId = 1L;
+        Long day = 7L;
+        UpdateEntryCodeReq req = new UpdateEntryCodeReq(day);
+
+        // when
+        ResultActions result = mockMvc.perform(patch("/groups/{groupId}/entry-code", groupId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)));
+
+        // then
+        result.andExpect(status().isNoContent())
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        pathParameters(parameterWithName("groupId")
+                                .description("초대 코드를 연장할 그룹의 아이디")
+                                .attributes(constraints("not null"))),
+                        requestFields(fieldWithPath("day")
+                                .description("연장할 초대 코드의 그룹 아이디")
+                                .attributes(constraints("not null, min(0), max(7)")))));
+    }
+
+    @Test
     void getGroupSummary_success() throws Exception {
         // given
         String entryCode = "A1B2C3";

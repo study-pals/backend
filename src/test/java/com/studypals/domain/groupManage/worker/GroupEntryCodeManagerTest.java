@@ -41,7 +41,7 @@ public class GroupEntryCodeManagerTest {
         Long groupId = 1L;
 
         // when
-        String code = entryCodeManager.generate(groupId);
+        String code = entryCodeManager.getOrCreateCode(groupId);
 
         // then
         assertThat(code).isNotNull();
@@ -54,7 +54,8 @@ public class GroupEntryCodeManagerTest {
         // given
         Long groupId = 1L;
         String entryCode = "entry code";
-        GroupEntryCode groupEntryCode = new GroupEntryCode(entryCode, groupId);
+        GroupEntryCode groupEntryCode =
+                GroupEntryCode.builder().code(entryCode).groupId(groupId).build();
 
         given(entryCodeRepository.findById(entryCode)).willReturn(Optional.of(groupEntryCode));
 
@@ -85,7 +86,8 @@ public class GroupEntryCodeManagerTest {
         // given
         Group group = Group.builder().id(1L).build();
         String entryCode = "entry code";
-        GroupEntryCode groupEntryCode = new GroupEntryCode(entryCode, group.getId());
+        GroupEntryCode groupEntryCode =
+                GroupEntryCode.builder().code(entryCode).groupId(group.getId()).build();
 
         given(entryCodeRepository.findById(entryCode)).willReturn(Optional.of(groupEntryCode));
 
@@ -99,7 +101,8 @@ public class GroupEntryCodeManagerTest {
         // given
         Group group = Group.builder().id(1L).build();
         String entryCode = "entry code";
-        GroupEntryCode groupEntryCode = new GroupEntryCode(entryCode, 2L);
+        GroupEntryCode groupEntryCode =
+                GroupEntryCode.builder().code(entryCode).groupId(2L).build();
 
         given(entryCodeRepository.findById(entryCode)).willReturn(Optional.of(groupEntryCode));
 
