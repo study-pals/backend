@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.dao.GroupRankingRepository;
+import com.studypals.domain.groupManage.dao.StudyTimeStatsRepository;
 import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 import com.studypals.global.annotations.Worker;
@@ -30,7 +30,7 @@ import com.studypals.global.utils.TimeUtils;
 @RequiredArgsConstructor
 public class GroupRankingWorker {
 
-    private final GroupRankingRepository groupRankingRepository;
+    private final StudyTimeStatsRepository studyTimeStatsRepository;
     private final TimeUtils timeUtils;
 
     /**
@@ -49,7 +49,7 @@ public class GroupRankingWorker {
 
         // 일간/주간/월간 3회를 걸쳐 업데이트
         for (String key : redisKeys) {
-            Map<String, String> userRanking = groupRankingRepository.findHashFieldsById(key, List.of(userIdStr));
+            Map<String, String> userRanking = studyTimeStatsRepository.findHashFieldsById(key, List.of(userIdStr));
             String userStudyTimeStr = userRanking.get(userIdStr);
             Long userStudyTime;
             if (userStudyTimeStr == null) {
@@ -60,7 +60,7 @@ public class GroupRankingWorker {
 
             userStudyTime += studyTimeSeconds;
 
-            groupRankingRepository.saveMapById(key, Map.of(userIdStr, String.valueOf(userStudyTime)));
+            studyTimeStatsRepository.saveMapById(key, Map.of(userIdStr, String.valueOf(userStudyTime)));
         }
     }
 
@@ -80,7 +80,7 @@ public class GroupRankingWorker {
 
         List<String> userIds = groupMemberIds.stream().map(String::valueOf).toList();
 
-        return groupRankingRepository.findHashFieldsById(keyPrefix, userIds).entrySet().stream()
+        return studyTimeStatsRepository.findHashFieldsById(keyPrefix, userIds).entrySet().stream()
                 .collect(Collectors.toMap(
                         // String -> Long 타입 변환
                         entry -> Long.parseLong(entry.getKey()),

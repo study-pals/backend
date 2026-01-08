@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import com.studypals.domain.groupManage.dao.StudyTimeStatsRepository;
 import com.studypals.global.redis.redisHashRepository.annotations.RedisHashEntity;
 import com.studypals.global.redis.redisHashRepository.annotations.RedisHashMapField;
 import com.studypals.global.redis.redisHashRepository.annotations.RedisId;
@@ -15,7 +16,7 @@ import com.studypals.global.redis.redisHashRepository.annotations.RedisId;
  * 각각의 id 형식은 {@link GroupRankingPeriod} 에서 확인할 수 있습니다.
  *
  * <p>
- * {@link com.studypals.domain.groupManage.dao.GroupRankingRepository} 에서 관리합니다.
+ * {@link StudyTimeStatsRepository} 에서 관리합니다.
  *
  *
  * @author sleepyhoon

@@ -15,7 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.groupManage.dao.GroupRankingRepository;
+import com.studypals.domain.groupManage.dao.StudyTimeStatsRepository;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
@@ -27,7 +27,7 @@ import com.studypals.global.utils.TimeUtils;
 class GroupRankingWorkerTest {
 
     @Mock
-    private GroupRankingRepository groupRankingRepository;
+    private StudyTimeStatsRepository studyTimeStatsRepository;
 
     @Mock
     private TimeUtils timeUtils;
@@ -53,7 +53,7 @@ class GroupRankingWorkerTest {
 
         // findHashFieldsById 호출 시 기존 값이 1000L이었다고 가정
         for (String key : expectedKeys) {
-            given(groupRankingRepository.findHashFieldsById(key, List.of(userIdStr)))
+            given(studyTimeStatsRepository.findHashFieldsById(key, List.of(userIdStr)))
                     .willReturn(Map.of(userIdStr, "1000"));
         }
 
@@ -63,10 +63,10 @@ class GroupRankingWorkerTest {
         // then
         for (String key : expectedKeys) {
             // 1. 조회가 각각 일어났는지 확인
-            verify(groupRankingRepository).findHashFieldsById(key, List.of(userIdStr));
+            verify(studyTimeStatsRepository).findHashFieldsById(key, List.of(userIdStr));
 
             // 2. 기존 1000 + 추가 3600 = "4600"이 저장되었는지 확인
-            verify(groupRankingRepository).saveMapById(key, Map.of(userIdStr, "4600"));
+            verify(studyTimeStatsRepository).saveMapById(key, Map.of(userIdStr, "4600"));
         }
     }
 
@@ -93,7 +93,7 @@ class GroupRankingWorkerTest {
                 "4", "4000");
 
         // 위 로그에서 [1, 2, 3, 4]가 호출된다고 했으므로 anyList() 혹은 eq(List.of("1","2","3","4")) 사용
-        given(groupRankingRepository.findHashFieldsById(eq(expectedKey), anyList()))
+        given(studyTimeStatsRepository.findHashFieldsById(eq(expectedKey), anyList()))
                 .willReturn(mockRedisData);
 
         // 2. When
