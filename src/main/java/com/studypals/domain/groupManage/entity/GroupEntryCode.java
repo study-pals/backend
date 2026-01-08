@@ -1,11 +1,16 @@
 package com.studypals.domain.groupManage.entity;
 
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
+import org.springframework.data.redis.core.index.Indexed;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * redis에 저장되는 groupEntryCode에 대한 정보입니다.
@@ -23,5 +28,11 @@ public class GroupEntryCode {
     @Id
     private String code;
 
-    private Long id;
+    @Indexed
+    private Long groupId;
+
+    @TimeToLive(unit = TimeUnit.DAYS)
+    @Builder.Default
+    @Setter
+    private Long ttl = 1L;
 }
