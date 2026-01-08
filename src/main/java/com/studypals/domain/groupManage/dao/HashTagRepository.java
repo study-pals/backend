@@ -31,7 +31,7 @@ public interface HashTagRepository extends JpaRepository<HashTag, Long> {
     Optional<HashTag> findByTag(String tag);
 
     /**
-     * tag 자동완성 시 사용할 메서드. prefix 에 대해 cnt 값 만큼의 자주 사용되는 데이터를 반환합니다.
+     * tag 자동완성 시 사용할 메서드. 특정 검색어에 대해 cnt 로 정렬한 데이터를 반환합니다.<br>
      *
      * @param value 검색할 인자(접두사 / 순서대로)
      * @param pageable 반환 개수 지정
