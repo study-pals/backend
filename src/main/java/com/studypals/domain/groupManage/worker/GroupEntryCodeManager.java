@@ -62,17 +62,17 @@ public class GroupEntryCodeManager {
      * <br>
      * <p>TTL은 Redis key 단위로 적용되며, 기존 TTL은 전달받은 값으로 덮어씌워집니다.</p>
      *
-     * @param code 만료 기간을 연장할 초대 코드
+     * @param groupId 만료 기간을 연장할 초대 코드 소유자 그룹 아이디
      * @param day 설정할 TTL 값 (단위는 Redis 설정에 따름)
      * @throws GroupException 초대 코드가 존재하지 않는 경우
      */
-    public void increaseExpire(String code, Long day) {
+    public void increaseExpire(Long groupId, Long day) {
         //
         GroupEntryCode entryCode = groupEntryCodeRepository
-                .findById(code)
+                .findFirstByGroupId(groupId)
                 .orElseThrow(() -> new GroupException(
                         GroupErrorCode.GROUP_CODE_NOT_FOUND,
-                        "[GroupEntryCodeManager#increaseExpire] unknown code while increase expire date"));
+                        "[GroupEntryCodeManager#increaseExpire] unknown group while increase expire date"));
 
         entryCode.setTtl(day);
         groupEntryCodeRepository.save(entryCode);
