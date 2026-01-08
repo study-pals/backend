@@ -29,11 +29,6 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
     @Query(value = "SELECT * FROM group_member WHERE member_id = :userId AND group_id = :groupId", nativeQuery = true)
     Optional<GroupMember> findByMemberIdAndGroupId(Long userId, Long groupId);
 
-    /**
-     * 해당 사용자가 속한 그룹에 대한 GroupMember 리스트를 찾습니다.
-     * @param memberId 사용자 아이디
-     * @return GroupMember 에 대한 List
-     */
     List<GroupMember> findAllByMemberId(Long memberId);
 
     @Query(
@@ -48,4 +43,12 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
     List<GroupSummaryDto> findGroupsByMemberId(@Param("memberId") Long memberId);
 
     boolean existsByMemberIdAndGroupId(Long memberId, Long groupId);
+
+    @Query("""
+    SELECT gm
+    FROM GroupMember gm
+    JOIN FETCH gm.member
+    WHERE gm.group.id = :groupId
+    """)
+    List<GroupMember> findGroupMembers(@Param("groupId") Long groupId);
 }

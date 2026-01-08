@@ -14,6 +14,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.groupManage.worker.GroupRankingWorker;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyDto;
@@ -58,6 +59,7 @@ public class StudySessionServiceImpl implements StudySessionService {
     private final DailyInfoWriter dailyInfoWriter;
     private final MemberReader memberReader;
     private final StudyTimeReader studyTimeReader;
+    private final GroupRankingWorker groupRankingWorker;
 
     @Override
     @Transactional
@@ -129,10 +131,12 @@ public class StudySessionServiceImpl implements StudySessionService {
 
         // 커밋 이후 status 반영 및 초기화
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            Long finalTotalTime = totalTime;
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
                     studyStatusWorker.delete(userId);
+                    groupRankingWorker.updateGroupRankings(userId, finalTotalTime);
                 }
             });
         }
