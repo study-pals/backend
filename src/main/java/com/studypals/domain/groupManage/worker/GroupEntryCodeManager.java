@@ -46,7 +46,7 @@ public class GroupEntryCodeManager {
      * @param groupId 초대 코드가 속한 그룹의 식별자
      * @return 조회되거나 새로 생성된 초대 코드 문자열
      */
-    public String getOrCreateCode(Long groupId) {
+    public GroupEntryCode getOrCreateCode(Long groupId) {
         LocalDateTime now = timeUtils.getRawLocalDateTime();
         LocalDateTime threshold = now.plusDays(1);
 
@@ -76,7 +76,7 @@ public class GroupEntryCodeManager {
 
         groupEntryCodeRepository.save(entryCode);
 
-        return entryCode.getCode();
+        return entryCode;
     }
 
     /**

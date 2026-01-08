@@ -13,6 +13,7 @@ import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupEntryRequestCustomMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupConst;
+import com.studypals.domain.groupManage.entity.GroupEntryCode;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
@@ -56,9 +57,9 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     @Transactional(readOnly = true)
     public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
         authorityValidator.validateLeaderAuthority(userId, groupId);
-        String entryCode = entryCodeManager.getOrCreateCode(groupId);
+        GroupEntryCode entryCode = entryCodeManager.getOrCreateCode(groupId);
 
-        return new GroupEntryCodeRes(groupId, entryCode);
+        return new GroupEntryCodeRes(groupId, entryCode.getCode(), entryCode.getExpireAt());
     }
 
     @Override
