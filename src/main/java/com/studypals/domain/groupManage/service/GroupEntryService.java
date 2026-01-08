@@ -43,7 +43,7 @@ public interface GroupEntryService {
      *
      * @param entryCode 그룹 초대 코드
      * @return 그룹 대표 정보
-     * @throws com.studypals.global.exceptions.exception.GroupException
+     * @throws com.studypals.global.exceptions.exception.GroupException 일치하는 entrycode 가 없는 경우
      */
     GroupSummaryRes getGroupSummary(String entryCode);
 
