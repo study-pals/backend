@@ -1,5 +1,6 @@
 package com.studypals.domain.groupManage.entity;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.annotation.Id;
@@ -30,6 +31,9 @@ public class GroupEntryCode {
 
     @Indexed
     private Long groupId;
+
+    @Setter
+    private LocalDateTime expireAt;
 
     @TimeToLive(unit = TimeUnit.DAYS)
     @Builder.Default

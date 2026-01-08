@@ -1,28 +1,18 @@
 package com.studypals.domain.groupManage.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.AssertTrue;
 
 /**
- * 코드에 대한 전체적인 역할을 적습니다.
- * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
- *
- * <p><b>상속 정보:</b><br>
- * 상속 정보를 적습니다.
- *
- * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br>
- * 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
- *
- * <p><b>빈 관리:</b><br>
- * 필요 시 빈 관리에 대한 내용을 적습니다.
- *
- * <p><b>외부 모듈:</b><br>
- * 필요 시 외부 모듈에 대한 내용을 적습니다.
+ * 초대 코드 만료 기한을 재설정하는 request dto 입니다. -1 인 경우 만료가 없는 무제한 초대 코드입니다.
  *
  * @author jack8
  * @see
  * @since 2026-01-08
  */
-public record UpdateEntryCodeReq(@Min(1) @Max(7) Long day) {}
+public record UpdateEntryCodeReq(Long day) {
+
+    @AssertTrue(message = "day 는 -1 이거나 1 이상, 30 이하여야 합니다.")
+    public boolean isDayMatch() {
+        return (day == -1 || (day >= 1 && day <= 30));
+    }
+}

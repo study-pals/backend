@@ -1,5 +1,7 @@
 package com.studypals.domain.groupManage.worker;
 
+import java.time.LocalDateTime;
+
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
@@ -9,6 +11,7 @@ import com.studypals.global.annotations.Worker;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
 import com.studypals.global.utils.RandomUtils;
+import com.studypals.global.utils.TimeUtils;
 
 /**
  * group 초대 코드 생성을 담당하는 Worker 클래스입니다.
@@ -28,6 +31,7 @@ public class GroupEntryCodeManager {
     private static final int GROUP_ENTRY_CODE_LENGTH = 6;
 
     private final GroupEntryCodeRedisRepository groupEntryCodeRepository;
+    private final TimeUtils timeUtils;
 
     /**
      * 지정된 groupId에 대한 초대 코드를 조회하거나 새로 생성합니다.
@@ -43,13 +47,33 @@ public class GroupEntryCodeManager {
      * @return 조회되거나 새로 생성된 초대 코드 문자열
      */
     public String getOrCreateCode(Long groupId) {
+        LocalDateTime now = timeUtils.getRawLocalDateTime();
+        LocalDateTime threshold = now.plusDays(1);
+
         GroupEntryCode entryCode = groupEntryCodeRepository
                 .findFirstByGroupId(groupId)
                 .orElseGet(() -> {
                     String code = generateNonDuplicatedCode();
-                    return GroupEntryCode.builder().code(code).groupId(groupId).build();
+                    return GroupEntryCode.builder()
+                            .code(code)
+                            .groupId(groupId)
+                            .ttl(1L)
+                            .expireAt(threshold)
+                            .build();
                 });
-        entryCode.setTtl(1L);
+
+        if (entryCode.getTtl() != null && entryCode.getTtl() != -1L) {
+            LocalDateTime expiredAt = entryCode.getExpireAt();
+
+            boolean missingExpireAt = (expiredAt == null);
+            boolean withinOneDay = (!missingExpireAt && !expiredAt.isAfter(threshold));
+
+            if (missingExpireAt || withinOneDay) {
+                entryCode.setTtl(1L);
+                entryCode.setExpireAt(threshold);
+            }
+        }
+
         groupEntryCodeRepository.save(entryCode);
 
         return entryCode.getCode();
@@ -67,14 +91,19 @@ public class GroupEntryCodeManager {
      * @throws GroupException 초대 코드가 존재하지 않는 경우
      */
     public void increaseExpire(Long groupId, Long day) {
-        //
+        LocalDateTime today = timeUtils.getRawLocalDateTime();
         GroupEntryCode entryCode = groupEntryCodeRepository
                 .findFirstByGroupId(groupId)
                 .orElseThrow(() -> new GroupException(
                         GroupErrorCode.GROUP_CODE_NOT_FOUND,
                         "[GroupEntryCodeManager#increaseExpire] unknown group while increase expire date"));
 
+        // TTL 설정/연장
         entryCode.setTtl(day);
+
+        if (day < 0) entryCode.setExpireAt(null);
+        else entryCode.setExpireAt(today.plusDays(day));
+
         groupEntryCodeRepository.save(entryCode);
     }
 
