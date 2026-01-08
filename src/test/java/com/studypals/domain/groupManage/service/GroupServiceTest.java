@@ -260,4 +260,34 @@ public class GroupServiceTest {
         // 카테고리별 목표 중 첫 번째 항목의 categoryName이 올바른지 확인
         assertThat(result.groupGoals().categoryGoals().get(0).categoryName()).isEqualTo("CS 공부");
     }
+
+    @Test
+    void updateGroup_success(){
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        CreateGroupReq req = new CreateGroupReq("new group name", "new group tag", 20, true, true, "image.example.com");
+        Group mockGroup = Group.builder()
+                        .id(groupId)
+                        .name("group name")
+                        .tag("group tag")
+                        .maxMember(10)
+                        .isOpen(false)
+                        .isApprovalRequired(false)
+                        .build();
+
+        given(groupReader.getById(groupId)).willReturn(mockGroup);
+
+        // when
+        Long actual = groupService.updateGroup(userId, groupId, req);
+        Group updatedGroup = groupReader.getById(groupId);
+
+        // then
+        assertThat(actual).isEqualTo(mockGroup.getId());
+        assertThat(updatedGroup.getName()).isEqualTo("new group name");
+        assertThat(updatedGroup.getTag()).isEqualTo("new group tag");
+        assertThat(updatedGroup.getMaxMember()).isEqualTo(20);
+        assertThat(updatedGroup.isOpen()).isEqualTo(true);
+        assertThat(updatedGroup.isApprovalRequired()).isEqualTo(true);
+    }
 }
