@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -35,42 +36,72 @@ class GroupRankingWorkerTest {
     private GroupRankingWorker groupRankingWorker;
 
     @Test
-    @DisplayName("공부 시간 업데이트 시 Repository의 증가 메서드가 호출되어야 한다")
+    @DisplayName("공부 시간 업데이트 시 일/주/월 키에 대해 각각 조회 후 저장이 발생해야 한다")
     void updateGroupRankings_Success() {
         // given
         Long userId = 1L;
-        Long studyTime = 3600L;
+        String userIdStr = "1";
+        Long addTime = 3600L;
         LocalDate now = LocalDate.of(2025, 12, 26);
+
         given(timeUtils.getToday()).willReturn(now);
 
+        // 각 기간별(일/주/월) Redis Key 생성 (실제 Enum 로직과 동일하게 설정 필요)
+        List<String> expectedKeys = Arrays.stream(GroupRankingPeriod.values())
+                .map(period -> period.getRedisKey(now))
+                .toList();
+
+        // findHashFieldsById 호출 시 기존 값이 1000L이었다고 가정
+        for (String key : expectedKeys) {
+            given(groupRankingRepository.findHashFieldsById(key, List.of(userIdStr)))
+                    .willReturn(Map.of(userIdStr, "1000"));
+        }
+
         // when
-        groupRankingWorker.updateGroupRankings(userId, studyTime);
+        groupRankingWorker.updateGroupRankings(userId, addTime);
 
         // then
-        verify(groupRankingRepository, times(1)).incrementUserStudyTime(now, userId, studyTime);
+        for (String key : expectedKeys) {
+            // 1. 조회가 각각 일어났는지 확인
+            verify(groupRankingRepository).findHashFieldsById(key, List.of(userIdStr));
+
+            // 2. 기존 1000 + 추가 3600 = "4600"이 저장되었는지 확인
+            verify(groupRankingRepository).saveMapById(key, Map.of(userIdStr, "4600"));
+        }
     }
 
     @Test
-    @DisplayName("그룹 랭킹 조회 시 공부 데이터가 없으면 0으로 반환한다")
+    @DisplayName("그룹 랭킹 조회 시 Redis 데이터를 Long으로 변환한다")
     void getGroupRanking_Transformation_Success() {
-        // given
-        Long myId = 1L;
-        Long otherId = 2L;
+        // 1. Given
         LocalDate now = LocalDate.of(2025, 12, 26);
         GroupRankingPeriod period = GroupRankingPeriod.WEEKLY;
+        String expectedKey = "weekly:2025W52"; // period.getRedisKey(now)의 결과와 일치해야 함
 
+        // Mock 멤버 리스트 생성 (ID 1, 2, 3, 4)
         List<GroupMember> profiles = createMockGroupMembers(1L);
 
+        // TimeUtils가 'now'를 반환하도록 설정
         given(timeUtils.getToday()).willReturn(now);
-        // Redis 결과 Mocking: 내 데이터는 5000초, 친구 데이터는 없음(null 상황 가정)
-        given(groupRankingRepository.getGroupRanking(eq(now), anyList(), eq(period)))
-                .willReturn(Map.of(1L, 10000L, 2L, 20000L, 3L, 5000L, 4L, 0L));
 
-        // when
+        // [중요] Repository 스터빙
+        // anyString()과 anyList()를 사용하여 인자 불일치 에러를 방지하거나, 정확한 값을 eq()로 지정
+        Map<String, String> mockRedisData = Map.of(
+                "1", "1000",
+                "2", "2000",
+                "3", "3000",
+                "4", "4000");
+
+        // 위 로그에서 [1, 2, 3, 4]가 호출된다고 했으므로 anyList() 혹은 eq(List.of("1","2","3","4")) 사용
+        given(groupRankingRepository.findHashFieldsById(eq(expectedKey), anyList()))
+                .willReturn(mockRedisData);
+
+        // 2. When
         Map<Long, Long> result = groupRankingWorker.getGroupRanking(profiles, period);
 
-        // then
+        // 3. Then
         assertThat(result).hasSize(4);
+        assertThat(result.get(1L)).isEqualTo(1000L);
     }
 
     // 헬퍼 메서드: GroupMember 엔티티 4명 생성
