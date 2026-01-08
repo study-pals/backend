@@ -1,8 +1,10 @@
 package com.studypals.domain.groupManage.worker;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,20 +33,57 @@ public class GroupRankingWorker {
     private final GroupRankingRepository groupRankingRepository;
     private final TimeUtils timeUtils;
 
+    /**
+     * Redis 내에 존재하는 일간/주간/월간 랭킹 값에서 해당 사용자의 공부 시간을 증가시킵니다.
+     *
+     * @param userId 사용자 ID
+     * @param studyTimeSeconds 증가시킬 공부 시간
+     */
     public void updateGroupRankings(Long userId, Long studyTimeSeconds) {
         LocalDate today = timeUtils.getToday();
 
-        // 만약 redis에 데이터가 없는 경우 mysql에서 가져와서 값을 초기화해야한다.
-        // 근데 rdb에는 하루 하루 공부 데이터만 존재한다. 일간 데이터를 모아서 주간/월간 데이터를 계산해 초기화해야한다.
-        groupRankingRepository.incrementUserStudyTime(today, userId, studyTimeSeconds);
+        List<String> redisKeys = Arrays.stream(GroupRankingPeriod.values())
+                .map(period -> period.getRedisKey(today))
+                .toList();
+        String userIdStr = String.valueOf(userId);
+
+        // 일간/주간/월간 3회를 걸쳐 업데이트
+        for (String key : redisKeys) {
+            Map<String, String> userRanking = groupRankingRepository.findHashFieldsById(key, List.of(userIdStr));
+            String userStudyTimeStr = userRanking.get(userIdStr);
+            Long userStudyTime;
+            if (userStudyTimeStr == null) {
+                userStudyTime = 0L;
+            } else {
+                userStudyTime = Long.parseLong(userStudyTimeStr);
+            }
+
+            userStudyTime += studyTimeSeconds;
+
+            groupRankingRepository.saveMapById(key, Map.of(userIdStr, String.valueOf(userStudyTime)));
+        }
     }
 
+    /**
+     * 주어진 사용자 ID 목록에 대해 그룹 랭킹 정보를 조회합니다.
+     *
+     * @param period 랭킹 기간 정보
+     * @return 랭킹 결과 맵
+     */
     public Map<Long, Long> getGroupRanking(List<GroupMember> profiles, GroupRankingPeriod period) {
         List<Long> groupMemberIds =
                 profiles.stream().map(gm -> gm.getMember().getId()).toList();
 
         LocalDate today = timeUtils.getToday();
-        // 만약 redis에 데이터가 없다면? mysql에서 데이터를 가져와야 한다.
-        return groupRankingRepository.getGroupRanking(today, groupMemberIds, period);
+
+        String keyPrefix = period.getRedisKey(today);
+
+        List<String> userIds = groupMemberIds.stream().map(String::valueOf).toList();
+
+        return groupRankingRepository.findHashFieldsById(keyPrefix, userIds).entrySet().stream()
+                .collect(Collectors.toMap(
+                        // String -> Long 타입 변환
+                        entry -> Long.parseLong(entry.getKey()),
+                        entry -> Long.parseLong(entry.getValue())));
     }
 }

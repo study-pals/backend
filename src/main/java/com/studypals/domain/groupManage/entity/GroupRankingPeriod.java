@@ -11,16 +11,16 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum GroupRankingPeriod {
-    DAILY("groupRanking:study:daily:", date -> date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))),
+    DAILY("daily:", date -> date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))),
 
-    WEEKLY("groupRanking:study:weekly:", date -> {
+    WEEKLY("weekly:", date -> {
         // ISO-8601 기준 주차 계산
         int year = date.get(IsoFields.WEEK_BASED_YEAR);
         int week = date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
         return year + "W" + String.format("%02d", week);
     }),
 
-    MONTHLY("groupRanking:study:monthly:", date -> date.format(DateTimeFormatter.ofPattern("yyyyMM")));
+    MONTHLY("monthly:", date -> date.format(DateTimeFormatter.ofPattern("yyyyMM")));
 
     private final String prefix;
     private final Function<LocalDate, String> formatter;
