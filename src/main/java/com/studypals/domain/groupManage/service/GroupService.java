@@ -2,10 +2,7 @@ package com.studypals.domain.groupManage.service;
 
 import java.util.List;
 
-import com.studypals.domain.groupManage.dto.CreateGroupReq;
-import com.studypals.domain.groupManage.dto.GetGroupDetailRes;
-import com.studypals.domain.groupManage.dto.GetGroupTagRes;
-import com.studypals.domain.groupManage.dto.GetGroupsRes;
+import com.studypals.domain.groupManage.dto.*;
 
 /**
  * GroupService 의 인터페이스입니다. 메서드를 정의합니다.
@@ -59,6 +56,7 @@ public interface GroupService {
      * @param groupId 수정할 그룹
      * @param dto 그룹 수정 시 필요한 데이터
      * @return 수정된 그룹 ID
+     * @throws com.studypals.global.exceptions.exception.GroupException
      */
-    Long updateGroup(Long userId, Long groupId, CreateGroupReq dto);
+    Long updateGroup(Long userId, Long groupId, UpdateGroupReq dto);
 }

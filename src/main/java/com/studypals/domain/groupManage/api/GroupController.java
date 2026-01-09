@@ -3,6 +3,7 @@ package com.studypals.domain.groupManage.api;
 import java.net.URI;
 import java.util.List;
 
+import com.studypals.domain.groupManage.dto.*;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -11,10 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.dto.CreateGroupReq;
-import com.studypals.domain.groupManage.dto.GetGroupDetailRes;
-import com.studypals.domain.groupManage.dto.GetGroupTagRes;
-import com.studypals.domain.groupManage.dto.GetGroupsRes;
 import com.studypals.domain.groupManage.service.GroupService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
@@ -68,7 +65,7 @@ public class GroupController {
 
     @PutMapping("/{groupId}")
     public ResponseEntity<Response<Long>> updateGroup(
-            @AuthenticationPrincipal Long userId, @Valid @RequestBody CreateGroupReq request,
+            @AuthenticationPrincipal Long userId, @Valid @RequestBody UpdateGroupReq request,
             @PathVariable Long groupId) {
         Long updatedGroupId = groupService.updateGroup(userId, groupId, request);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_UPDATE, updatedGroupId));

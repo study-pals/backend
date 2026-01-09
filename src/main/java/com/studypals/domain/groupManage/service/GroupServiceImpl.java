@@ -126,7 +126,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     @Transactional
-    public Long updateGroup(Long userId, Long groupId, CreateGroupReq dto){
+    public Long updateGroup(Long userId, Long groupId, UpdateGroupReq dto){
         Group group = groupReader.getById(groupId);
 
         group.update(dto.name(), dto.tag(), dto.maxMember(), dto.isOpen(), dto.isApprovalRequired());

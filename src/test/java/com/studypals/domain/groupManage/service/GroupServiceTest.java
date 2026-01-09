@@ -266,7 +266,7 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         Long groupId = 1L;
-        CreateGroupReq req = new CreateGroupReq("new group name", "new group tag", 20, true, true, "image.example.com");
+        UpdateGroupReq req = new UpdateGroupReq("new group name", "new group tag", 20, true, true, "image.example.com");
         Group mockGroup = Group.builder()
                         .id(groupId)
                         .name("group name")
