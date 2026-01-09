@@ -87,15 +87,15 @@ public class MemberServiceImpl implements MemberService {
         if (hasUsername == hasNickname && hasUsername) {
             throw new AuthException(
                     AuthErrorCode.SIGNUP_FAIL,
-                    "username 혹은 nickname 중 하나는 필수입니다.",
-                    "[MemberController#checkAvailability] username & nickname both blank");
+                    "username 혹은 nickname 중 하나만 존재해야 합니다.",
+                    "[MemberController#checkAvailability] username & nickname both exists");
         }
 
         if (hasUsername == hasNickname) {
             throw new AuthException(
                     AuthErrorCode.SIGNUP_FAIL,
-                    "username 혹은 nickname 중 하나만 존재해야 합니다.",
-                    "[MemberController#checkAvailability] username & nickname both exists");
+                    "username 혹은 nickname 중 하나는 필수입니다.",
+                    "[MemberController#checkAvailability] username & nickname both blank");
         }
 
         return hasUsername

@@ -21,10 +21,10 @@ import com.studypals.domain.groupManage.entity.GroupConst;
 import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
-import com.studypals.global.retry.RetryTx;
 import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
+import com.studypals.global.retry.RetryTx;
 
 /**
  * group service 의 구현 클래스입니다.

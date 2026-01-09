@@ -184,14 +184,11 @@ public class MemberControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void checkAvailability_fail_when_both_username_and_nickname_present() throws Exception {
         // given
-        given(memberService.duplicateCheck(new CheckDuplicateDto("username@example.com", "nickname")))
-                .willThrow(new AuthException(AuthErrorCode.SIGNUP_FAIL, "username 혹은 nickname 중 하나만 존재해야 합니다.", "log"));
-
         AuthErrorCode errorCode = AuthErrorCode.SIGNUP_FAIL;
         given(memberService.duplicateCheck(any()))
                 .willThrow(new AuthException(
                         AuthErrorCode.SIGNUP_FAIL,
-                        "username 혹은 nickname 중 하나는 필수입니다.",
+                        "username 혹은 nickname 중 하나만 존재해야 합니다.",
                         "[MemberController#checkAvailability] username & nickname both blank"));
 
         // when
