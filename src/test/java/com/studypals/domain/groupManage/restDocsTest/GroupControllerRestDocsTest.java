@@ -77,7 +77,8 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
     void createGroup_success() throws Exception {
 
         // given
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(groupService.createGroup(any(), any())).willReturn(1L);
 
@@ -100,6 +101,9 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("maxMember")
                                         .description("그룹 최대 인원수 / Default 100")
                                         .attributes(constraints("not null")),
+                                fieldWithPath("hashTags")
+                                        .description("해당 그룹을 나타내는 해시태그")
+                                        .attributes(constraints("개수 0 ~ 10, 각 문자 길이 ~ 20")),
                                 fieldWithPath("isOpen")
                                         .description("그룹 공개 여부 / Default FALSE")
                                         .attributes(constraints("not null")),

@@ -1,0 +1,125 @@
+package com.studypals.domain.groupManage.worker;
+
+import java.util.*;
+
+import org.springframework.dao.DataIntegrityViolationException;
+
+import lombok.RequiredArgsConstructor;
+
+import com.studypals.domain.groupManage.dao.GroupHashTagRepository;
+import com.studypals.domain.groupManage.dao.HashTagRepository;
+import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupHashTag;
+import com.studypals.domain.groupManage.entity.HashTag;
+import com.studypals.global.annotations.Worker;
+import com.studypals.global.utils.StringUtils;
+
+/**
+ * 그룹 해시태그 관리를 담당하는 워커 클래스입니다.
+ * <p>
+ * 사용자가 입력한 해시태그 목록을 정규화하여 {@link HashTag} 엔티티로 저장하고,
+ * 이미 존재하는 해시태그의 사용 횟수를 증가시키며,
+ * {@link Group} 과 {@link HashTag} 사이의 관계를 {@link GroupHashTag} 엔티티로 관리합니다.
+ * <p>
+ * 해시태그 저장 시 UNIQUE 제약 조건으로 인한 {@link DataIntegrityViolationException}
+ * (동시성 충돌)을 감지하면, 해당 태그들에 대해 재조회 및 재저장을 수행하여
+ * 동시성 문제를 완화합니다.
+ *
+ * <p><b>주요 기능:</b><br>
+ * - 입력 태그 문자열을 저장용 태그와 표시용 태그로 분리 및 정규화<br>
+ * - 존재하는 해시태그의 사용 횟수(usedCount) 증가<br>
+ * - 새 해시태그 생성 시 동시성 충돌 처리 및 재시도<br>
+ * - 그룹과 해시태그 간의 매핑({@link GroupHashTag}) 생성 및 저장<br>
+ *
+ * @author jack8
+ * @see com.studypals.domain.groupManage.dao.GroupHashTagRepository
+ * @see com.studypals.domain.groupManage.dao.HashTagRepository
+ * @since 2025-12-23
+ */
+@Worker
+@RequiredArgsConstructor
+public class GroupHashTagWorker {
+
+    private final GroupHashTagRepository groupHashTagRepository;
+    private final HashTagRepository hashTagRepository;
+    private final StringUtils stringUtils;
+
+    /**
+     * 그룹이 생성될 때, 설정한 tag 를 같이 저장하는 메서드입니다. 데이터 정규화 / 저장 on duplicate update 구현
+     * 등이 되어 있습니다.
+     * @param group 저장대상 그룹
+     * @param inputTags 그룹에 포함할 해시태그 문자열
+     */
+    public void saveTags(Group group, List<String> inputTags) {
+        // hashTag 에 저장되는 정규화된 문자열과 사용자에게 보여질 입력 그대로 문자열을 분리
+        Map<String, String> normalized = toNormalizedAndRowMap(inputTags);
+        if (normalized.isEmpty()) return;
+
+        Set<String> normalizedTags = new HashSet<>(normalized.keySet());
+
+        // 기존 hash tag 조회
+        List<HashTag> exists = hashTagRepository.findAllByTagIn(normalizedTags);
+        List<HashTag> notExists = notExistTagToCreate(normalizedTags, exists);
+
+        // 이미 존재하는 경우 usedCount 1 증가
+        if (!exists.isEmpty()) {
+            hashTagRepository.increaseUsedCountBulk(
+                    exists.stream().map(HashTag::getTag).toList());
+        }
+
+        if (!notExists.isEmpty()) {
+            exists.addAll(hashTagRepository.saveAll(notExists));
+        }
+
+        // 저장된 hashtag 를 기반으로 groupHashTag 저장
+        List<GroupHashTag> groupHashTags = new ArrayList<>();
+        for (HashTag tag : exists) {
+            String val = normalized.getOrDefault(tag.getTag(), tag.getTag());
+
+            groupHashTags.add(GroupHashTag.builder()
+                    .hashTag(tag)
+                    .displayTag(val)
+                    .group(group)
+                    .build());
+        }
+        groupHashTagRepository.saveAll(groupHashTags);
+    }
+
+    /**
+     * 각 태그에 대한 정규화 진행. 띄어쓰기는 _ 로 대체, 중복된 띄어쓰기 제거/특수문제 제거, trim 제거, lowercase
+     * @param tags 정규화 대상 리스트
+     * @return 정규화된 문자열 / raw 문자열로 이루어진 map
+     */
+    private Map<String, String> toNormalizedAndRowMap(List<String> tags) {
+        Map<String, String> result = new HashMap<>();
+        if (tags == null || tags.isEmpty()) {
+            return result;
+        }
+        for (String tag : tags) {
+            if (tag.isEmpty()) continue;
+            String norm = stringUtils.normalize(tag);
+            if (norm == null || norm.isBlank()) continue;
+            result.putIfAbsent(norm, tag);
+        }
+
+        return result;
+    }
+
+    /**
+     * 기존에 DB에 존재하지 않는 hash tag 를 찾아 새로운 엔티티를 생성하는 메서드
+     * @param reqData 해시태그 생성을 요청하는 데이터, DB 에 이미 존재하거나 없어서 새로 만들어야 되는 값이 합쳐져 있음
+     * @param existTags DB 에 이미 존재하는 데이터
+     * @return 새롭게 만들어지는 영속화 전 데이터
+     */
+    private List<HashTag> notExistTagToCreate(Set<String> reqData, List<HashTag> existTags) {
+        List<HashTag> result = new ArrayList<>();
+        for (HashTag tag : existTags) {
+            reqData.remove(tag.getTag());
+        }
+        for (String str : reqData) {
+            result.add(HashTag.builder().tag(str).usedCount(1L).build());
+        }
+
+        return result;
+    }
+}

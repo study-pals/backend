@@ -3,8 +3,7 @@ package com.studypals.domain.groupManage.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -85,6 +84,9 @@ public class GroupServiceTest {
     @Mock
     private ChatRoom mockChatRoom;
 
+    @Mock
+    private GroupHashTagWorker groupHashTagWorker;
+
     @InjectMocks
     private GroupServiceImpl groupService;
 
@@ -107,12 +109,14 @@ public class GroupServiceTest {
     void createGroup_success() {
         // given
         Long userId = 1L;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req = new CreateGroupReq(
+                "group name", "group tag", 10, false, false, "image.example.com", List.of("hashtag1", "hashtag2"));
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupWriter.create(req)).willReturn(mockGroup);
         given(chatRoomWriter.create(any())).willReturn(mockChatRoom);
         willDoNothing().given(chatRoomWriter).joinAsAdmin(mockChatRoom, mockMember);
+        willDoNothing().given(groupHashTagWorker).saveTags(mockGroup, req.hashTags());
 
         // when
         Long actual = groupService.createGroup(userId, req);
@@ -126,7 +130,8 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(groupWriter.create(req)).willThrow(new GroupException(errorCode));
 
@@ -142,7 +147,8 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_MEMBER_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupWriter.create(req)).willReturn(mockGroup);

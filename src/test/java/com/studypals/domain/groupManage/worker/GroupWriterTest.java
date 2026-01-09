@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,7 +50,8 @@ public class GroupWriterTest {
     @Test
     void create_success() {
         // given
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(groupMapper.toEntity(req)).willReturn(mockGroup);
         given(groupTagRepository.existsById(req.tag())).willReturn(true);
@@ -64,7 +67,8 @@ public class GroupWriterTest {
     void create_fail_tagNotFound() {
         // given
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(groupMapper.toEntity(req)).willReturn(mockGroup);
         given(groupTagRepository.existsById(req.tag())).willReturn(false);
@@ -80,7 +84,8 @@ public class GroupWriterTest {
     void create_fail_whileSave() {
         // given
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(groupMapper.toEntity(req)).willReturn(mockGroup);
         given(groupTagRepository.existsById(req.tag())).willReturn(true);

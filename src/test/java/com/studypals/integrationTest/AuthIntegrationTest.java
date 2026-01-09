@@ -9,7 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.memberManage.dao.RefreshTokenRedisRepository;
@@ -28,7 +27,6 @@ import com.studypals.testModules.testSupport.IntegrationSupport;
  * @see IntegrationSupport
  * @since 2025-04-08
  */
-@ActiveProfiles("test")
 @DisplayName("API TEST / 인증 통합 테스트")
 public class AuthIntegrationTest extends IntegrationSupport {
     @Autowired
