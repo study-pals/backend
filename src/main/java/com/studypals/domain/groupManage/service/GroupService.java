@@ -52,4 +52,13 @@ public interface GroupService {
      * @return 자세한 그룹 정보
      */
     GetGroupDetailRes getGroupDetails(Long userId, Long groupId);
+
+    /**
+     * 요청을 보낸 사용자가 속한 그룹의 정보를 수정합니다.
+     * @param userId 그룹을 수정할 사용자
+     * @param groupId 수정할 그룹
+     * @param dto 그룹 수정 시 필요한 데이터
+     * @return 수정된 그룹 ID
+     */
+    Long updateGroup(Long userId, Long groupId, CreateGroupReq dto);
 }

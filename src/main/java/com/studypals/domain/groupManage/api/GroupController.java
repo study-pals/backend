@@ -7,12 +7,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -69,5 +64,13 @@ public class GroupController {
             @AuthenticationPrincipal Long userId, @PathVariable Long groupId) {
         GetGroupDetailRes response = groupService.getGroupDetails(userId, groupId);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_DETAIL, response));
+    }
+
+    @PutMapping("/{groupId}")
+    public ResponseEntity<Response<Long>> updateGroup(
+            @AuthenticationPrincipal Long userId, @Valid @RequestBody CreateGroupReq request,
+            @PathVariable Long groupId) {
+        Long updatedGroupId = groupService.updateGroup(userId, groupId, request);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_UPDATE, updatedGroupId));
     }
 }
