@@ -92,6 +92,9 @@ public class GroupHashTagWorker {
      */
     private Map<String, String> toNormalizedAndRowMap(List<String> tags) {
         Map<String, String> result = new HashMap<>();
+        if (tags == null || tags.isEmpty()) {
+            return result;
+        }
         for (String tag : tags) {
             if (tag.isEmpty()) continue;
             String norm = stringUtils.normalize(tag);
