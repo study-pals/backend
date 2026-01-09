@@ -188,6 +188,11 @@ public class MemberControllerRestDocsTest extends RestDocsSupport {
                 .willThrow(new AuthException(AuthErrorCode.SIGNUP_FAIL, "username 혹은 nickname 중 하나만 존재해야 합니다.", "log"));
 
         AuthErrorCode errorCode = AuthErrorCode.SIGNUP_FAIL;
+        given(memberService.duplicateCheck(any()))
+                .willThrow(new AuthException(
+                        AuthErrorCode.SIGNUP_FAIL,
+                        "username 혹은 nickname 중 하나는 필수입니다.",
+                        "[MemberController#checkAvailability] username & nickname both blank"));
 
         // when
         ResultActions result = mockMvc.perform(get("/register/check")

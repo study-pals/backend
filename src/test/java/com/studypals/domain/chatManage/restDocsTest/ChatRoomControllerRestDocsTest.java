@@ -112,6 +112,7 @@ class ChatRoomControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data.userInfos[].userId").description("유저 ID"),
                                 fieldWithPath("data.userInfos[].role").description("유저 역할 (ADMIN | MANAGER | MEMBER)"),
                                 fieldWithPath("data.userInfos[].imageUrl").description("유저 프로필 이미지 URL"),
+                                fieldWithPath("data.userInfos[].nickname").description("유저 닉네임"),
                                 fieldWithPath("data.cursor[].userId").description("해당 커서가 가리키는 유저 ID"),
                                 fieldWithPath("data.cursor[].chatId").description("해당 유저가 마지막으로 읽은 채팅 ID"),
                                 fieldWithPath("data.logs[].id").description("채팅 ID"),

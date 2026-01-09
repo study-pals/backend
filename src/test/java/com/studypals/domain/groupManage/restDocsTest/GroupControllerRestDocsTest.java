@@ -121,26 +121,26 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         101L,
                         "알고리즘 코딩 마스터",
                         "취업준비",
+                        10,
                         "chat_algo_01",
-                        true, // 공개 (isOpen)
-                        false, // 승인 불필요 (isApprovalRequired)
-                        LocalDate.of(2025, 12, 1)),
+                        true,
+                        false,
+                        LocalDate.of(2025, 12, 1),
+                        List.of(new GroupMemberProfileImageDto("https://exam.com/user1.png", GroupRole.LEADER)),
+                        List.of(1L, 2L)),
                 new GetGroupsRes(
                         205L,
                         "프론트엔드 리액트 스터디",
                         "프론트개발",
+                        20,
                         "chat_react_fe",
-                        false, // 비공개
-                        true, // 승인 필요
-                        LocalDate.of(2025, 10, 25)),
-                new GetGroupsRes(
-                        312L,
-                        "CS 지식 주간 정리",
-                        "전공시험",
-                        "chat_cs_wk",
-                        true, // 공개
-                        true, // 승인 필요
-                        LocalDate.of(2025, 9, 10)));
+                        false,
+                        true,
+                        LocalDate.of(2025, 10, 25),
+                        List.of(
+                                new GroupMemberProfileImageDto("https://exam.com/user2.png", GroupRole.LEADER),
+                                new GroupMemberProfileImageDto("https://exam.com/user3.png", GroupRole.MEMBER)),
+                        List.of(3L, 4L)));
         Response<List<GetGroupsRes>> expected = CommonResponse.success(ResponseCode.GROUP_LIST, list);
 
         given(groupService.getGroups(any())).willReturn(list);
@@ -153,17 +153,27 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         httpRequest(),
                         httpResponse(),
                         responseFields(
-                                fieldWithPath("code").description("U02-17"),
-                                fieldWithPath("status").description("응답 상태(예: success or failed"),
+                                fieldWithPath("code").description("응답 코드 (예: U02-17)"),
+                                fieldWithPath("status").description("응답 상태 (예: success)"),
                                 fieldWithPath("message").description("응답 메시지"),
+
+                                // 그룹 기본 정보
                                 fieldWithPath("data[].groupId").description("그룹의 고유 ID"),
                                 fieldWithPath("data[].groupName").description("그룹 이름"),
                                 fieldWithPath("data[].groupTag").description("그룹의 태그"),
+                                fieldWithPath("data[].memberCount").description("그룹에 속한 전체 회원 수"),
                                 fieldWithPath("data[].chatRoomId").description("그룹에 연결된 채팅방 ID"),
                                 fieldWithPath("data[].isOpen").description("그룹 공개 여부 (true: 공개, false: 비공개)"),
                                 fieldWithPath("data[].isApprovalRequired")
                                         .description("그룹 가입 시 승인 필요 여부 (true: 필요, false: 불필요)"),
-                                fieldWithPath("data[].createdDate").description("그룹 생성일"))));
+                                fieldWithPath("data[].createdDate").description("그룹 생성일"),
+
+                                // 멤버 프로필 정보 상세화
+                                fieldWithPath("data[].profiles[].imageUrl").description("멤버의 프로필 이미지 URL"),
+                                fieldWithPath("data[].profiles[].role").description("그룹 내 역할 (LEADER, MEMBER)"),
+
+                                // 카테고리 정보
+                                fieldWithPath("data[].categoryIds[]").description("그룹 카테고리 ID 목록"))));
     }
 
     @Test

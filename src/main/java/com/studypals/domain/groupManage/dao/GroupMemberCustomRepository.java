@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
+import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 
 /**
  * {@link com.studypals.domain.groupManage.entity.GroupMember} 엔티티에 대한 커스텀 dao 클래스입니다.
@@ -31,9 +32,16 @@ public interface GroupMemberCustomRepository {
     List<GroupMemberProfileDto> findTopNMemberByJoinedAt(Long groupId, int limit);
 
     /**
-     * 그룹에 속한 모든 멤버를 조회합니다.
+     * 그룹에 속한 모든 멤버 정보 (id,nickname,imageUrl,role)를 조회합니다.
      * @param groupId 조회할 그룹 ID
-     * @return 멤버 프로필 리스트
+     * @return 멤버 정보 리스트
      */
     List<GroupMemberProfileDto> findAllMemberProfiles(Long groupId);
+
+    /**
+     * 여러 그룹에 속한 모든 멤버의 정보(id,nickname,imageUrl,role)를 한번에 조회합니다.
+     * @param groupIds
+     * @return
+     */
+    List<GroupMemberProfileMappingDto> findTopNMemberInGroupIds(List<Long> groupIds, int limit);
 }
