@@ -32,6 +32,8 @@ import com.studypals.domain.studyManage.dao.StudyStatusRedisRepository;
 @Configuration
 @EnableRedisRepositories(
         enableKeyspaceEvents = RedisKeyValueAdapter.EnableKeyspaceEvents.ON_STARTUP,
+        shadowCopy = RedisKeyValueAdapter.ShadowCopy.OFF,
+        keyspaceNotificationsConfigParameter = "",
         basePackageClasses = {
             RefreshTokenRedisRepository.class,
             StudyStatusRedisRepository.class,
