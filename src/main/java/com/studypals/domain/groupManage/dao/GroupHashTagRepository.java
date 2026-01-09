@@ -33,4 +33,8 @@ public interface GroupHashTagRepository extends JpaRepository<GroupHashTag, Long
         WHERE gt.group.id = :groupId
     """)
     List<GroupHashTag> findAllByGroupIdWithTag(@Param("groupId") Long groupId);
+
+    List<GroupHashTag> findAllByGroupId(Long groupId);
+
+    List<GroupHashTag> findAllByGroupIdIn(List<Long> groupIds);
 }

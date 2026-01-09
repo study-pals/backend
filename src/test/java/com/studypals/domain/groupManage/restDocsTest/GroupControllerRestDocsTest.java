@@ -121,6 +121,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         101L,
                         "알고리즘 코딩 마스터",
                         "취업준비",
+                        List.of(),
                         10,
                         "chat_algo_01",
                         true,
@@ -132,6 +133,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         205L,
                         "프론트엔드 리액트 스터디",
                         "프론트개발",
+                        List.of(),
                         20,
                         "chat_react_fe",
                         false,
@@ -194,6 +196,8 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
         GetGroupDetailRes groupDetailRes = new GetGroupDetailRes(
                 100L,
                 "핵심 CS 전공 스터디",
+                "tag",
+                List.of(),
                 true, // 공개
                 false, // 승인 불필요
                 10, // 최대 10명

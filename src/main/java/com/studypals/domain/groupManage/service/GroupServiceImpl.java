@@ -109,9 +109,12 @@ public class GroupServiceImpl implements GroupService {
         Map<Long, List<GroupCategoryDto>> categoriesMap =
                 groupCategories.stream().collect(Collectors.groupingBy(GroupCategoryDto::groupId));
 
+        Map<Long, List<String>> hashTagsMap = groupHashTagWorker.getHashTagsByGroups(groupIds);
+
         return groups.stream()
                 .map(group -> GetGroupsRes.of(
                         group,
+                        hashTagsMap.getOrDefault(group.id(), Collections.emptyList()),
                         membersMap.getOrDefault(group.id(), Collections.emptyList()),
                         categoriesMap.getOrDefault(group.id(), Collections.emptyList())))
                 .toList();
@@ -131,6 +134,9 @@ public class GroupServiceImpl implements GroupService {
         // 그룹에 속한 유저들의 목표 달성률 계산
         GroupTotalGoalDto userGoals = groupGoalCalculator.calculateGroupGoals(groupId, profiles);
 
-        return GetGroupDetailRes.of(group, profiles, userGoals);
+        // 그룹에 속한 해시태그
+        List<String> hashTags = groupHashTagWorker.getHashTagsByGroup(groupId);
+
+        return GetGroupDetailRes.of(group, hashTags, profiles, userGoals);
     }
 }
