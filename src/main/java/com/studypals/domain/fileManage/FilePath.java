@@ -1,4 +1,4 @@
-package com.studypals.global.file;
+package com.studypals.domain.fileManage;
 
 import java.util.List;
 

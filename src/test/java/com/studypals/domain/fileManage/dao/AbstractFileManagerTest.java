@@ -1,4 +1,4 @@
-package com.studypals.global.file.dao;
+package com.studypals.domain.fileManage.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.studypals.global.file.ObjectStorage;
+import com.studypals.domain.fileManage.ObjectStorage;
 
 /**
  * {@link AbstractFileManager} 에 대한 테스트코드입니다.

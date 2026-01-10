@@ -1,10 +1,10 @@
-package com.studypals.global.file.dao;
+package com.studypals.domain.fileManage.dao;
 
 import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
-import com.studypals.global.file.ObjectStorage;
+import com.studypals.domain.fileManage.ObjectStorage;
 
 @Repository
 public class ChatImageRepository extends AbstractFileRepository {

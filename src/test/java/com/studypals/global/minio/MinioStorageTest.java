@@ -1,4 +1,4 @@
-package com.studypals.global.file.minio;
+package com.studypals.global.minio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

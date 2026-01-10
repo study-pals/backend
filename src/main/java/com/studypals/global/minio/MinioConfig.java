@@ -1,4 +1,4 @@
-package com.studypals.global.file.minio;
+package com.studypals.global.minio;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

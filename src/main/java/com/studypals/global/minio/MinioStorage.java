@@ -1,4 +1,4 @@
-package com.studypals.global.file.minio;
+package com.studypals.global.minio;
 
 import jakarta.annotation.PostConstruct;
 
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.global.file.ObjectStorage;
+import com.studypals.domain.fileManage.ObjectStorage;
 
 import io.minio.*;
 import io.minio.http.Method;

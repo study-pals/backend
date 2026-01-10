@@ -1,4 +1,4 @@
-package com.studypals.global.file.dao;
+package com.studypals.domain.fileManage.dao;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.global.file.ObjectStorage;
+import com.studypals.domain.fileManage.ObjectStorage;
 
 /**
  * 파일을 처리하는데 사용하는 추상 클래스입니다.
