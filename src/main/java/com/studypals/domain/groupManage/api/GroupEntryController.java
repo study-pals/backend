@@ -55,6 +55,16 @@ public class GroupEntryController {
                 .body(response);
     }
 
+    @PatchMapping("/{groupId}/entry-code")
+    public ResponseEntity<Void> increaseCodeExpire(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long groupId,
+            @Valid @RequestBody UpdateEntryCodeReq req) {
+        groupEntryService.changeEntryCodeSetting(userId, groupId, req.day());
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/summary")
     public ResponseEntity<Response<GroupSummaryRes>> getGroupSummary(
             @RequestParam(required = true)

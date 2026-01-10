@@ -46,6 +46,10 @@ public class TimeUtils {
         }
     }
 
+    public LocalDateTime getRawLocalDateTime() {
+        return LocalDateTime.now(clock);
+    }
+
     public LocalTime getTime() {
         LocalDateTime now = LocalDateTime.now(clock);
         return now.toLocalTime();
