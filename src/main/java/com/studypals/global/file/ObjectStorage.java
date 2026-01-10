@@ -1,6 +1,4 @@
-package com.studypals.domain.common.fileManage;
-
-import org.springframework.web.multipart.MultipartFile;
+package com.studypals.global.file;
 
 /**
  * Object Storage 의 인터페이스입니다. 메서드를 정의합니다.
@@ -15,9 +13,11 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface ObjectStorage {
 
-    String upload(MultipartFile file, String path);
-
     void delete(String destination);
 
     String parsePath(String url);
+
+    String createPresignedGetUrl(String objectKey, int expirySeconds);
+
+    String createPresignedPutUrl(String objectKey, int expirySeconds, String contentType);
 }

@@ -1,23 +1,21 @@
-package com.studypals.global.minio;
-
-import java.io.InputStream;
+package com.studypals.global.file.minio;
 
 import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.common.fileManage.ObjectStorage;
+import com.studypals.global.file.ObjectStorage;
 
 import io.minio.*;
+import io.minio.http.Method;
 
 /**
- * MinIO의 파일 입출력 관련 메서드를 정의했습니다.
+ * MinIO 접근 메서드를 정의했습니다.
  *
- * <p>업로드, 삭제 메서드를 구현했습니다.
+ * <p>Presigned URL 생성, 파일 삭제 메서드를 구현했습니다.
  *
  * <p><b>상속 정보:</b><br>
  * {@link ObjectStorage} 의 구현 클래스입니다.
@@ -48,29 +46,6 @@ public class MinioStorage implements ObjectStorage {
     }
 
     /**
-     * MultipartFile 형태의 파일을 업로드합니다.
-     *
-     * @param file 업로드할 파일
-     * @param destination 저장할 파일 경로
-     * @return 저장된 minio URL
-     */
-    @Override
-    public String upload(MultipartFile file, String destination) {
-        try {
-            InputStream inputStream = file.getInputStream();
-
-            minioClient.putObject(
-                    PutObjectArgs.builder().bucket(bucket).object(destination).stream(inputStream, file.getSize(), -1)
-                            .contentType(file.getContentType())
-                            .build());
-
-            return endpoint + "/" + bucket + "/" + destination;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    /**
      * path 경로에 저장된 파일을 삭제합니다.
      *
      * @param destination 삭제할 파일의 경로
@@ -97,6 +72,34 @@ public class MinioStorage implements ObjectStorage {
     public String parsePath(String url) {
         int idx = (endpoint + "/" + bucket).length();
         return url.substring(idx);
+    }
+
+    @Override
+    public String createPresignedGetUrl(String objectKey, int expirySeconds) {
+        try {
+            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                    .method(Method.GET)
+                    .bucket(bucket)
+                    .object(objectKey)
+                    .expiry(expirySeconds)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    public String createPresignedPutUrl(String objectKey, int expirySeconds, String contentType) {
+        try {
+            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                    .method(Method.PUT)
+                    .bucket(bucket)
+                    .object(objectKey)
+                    .expiry(expirySeconds)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**

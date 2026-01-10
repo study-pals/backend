@@ -1,4 +1,4 @@
-package com.studypals.domain.common.fileManage.dao;
+package com.studypals.global.file.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -18,31 +18,31 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.studypals.domain.common.fileManage.ObjectStorage;
+import com.studypals.global.file.ObjectStorage;
 
 /**
- * {@link AbstractFileRepository} 에 대한 테스트코드입니다.
+ * {@link AbstractFileManager} 에 대한 테스트코드입니다.
  *
  * <p>성공 케이스 및 유효하지 않은 확장자 업로드 시 뱉는 예외에 대한 테스트입니다.
  *
  * @author s0o0bn
- * @see AbstractFileRepository
+ * @see AbstractFileManager
  * @since 2025-04-11
  */
 @ExtendWith(MockitoExtension.class)
-public class AbstractFileRepositoryTest {
+public class AbstractFileManagerTest {
     private static final String FILE_PATH = "/test-dir";
 
     @Mock
     private ObjectStorage objectStorage;
 
-    private AbstractFileRepository fileRepository;
+    private AbstractFileManager fileRepository;
 
     @BeforeEach
     void setUp() {
-        fileRepository = new AbstractFileRepository(objectStorage) {
+        fileRepository = new AbstractFileManager(objectStorage) {
             @Override
-            public String generateDestination(String fileName) {
+            public String createURL(String fileName) {
                 return FILE_PATH + "/" + fileName;
             }
 
