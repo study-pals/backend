@@ -19,5 +19,5 @@ public interface ObjectStorage {
 
     String createPresignedGetUrl(String objectKey, int expirySeconds);
 
-    String createPresignedPutUrl(String objectKey, int expirySeconds, String contentType);
+    String createPresignedPutUrl(String objectKey, int expirySeconds);
 }

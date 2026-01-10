@@ -89,7 +89,7 @@ public class MinioStorage implements ObjectStorage {
     }
 
     @Override
-    public String createPresignedPutUrl(String objectKey, int expirySeconds, String contentType) {
+    public String createPresignedPutUrl(String objectKey, int expirySeconds) {
         try {
             return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
                     .method(Method.PUT)
