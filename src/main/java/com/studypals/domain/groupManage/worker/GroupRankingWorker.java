@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.StudyTimeStatsRepository;
+import com.studypals.domain.groupManage.dto.UpdateStudyStatsDto;
 import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 import com.studypals.global.annotations.Worker;
@@ -35,32 +36,31 @@ public class GroupRankingWorker {
 
     /**
      * Redis 내에 존재하는 일간/주간/월간 랭킹 값에서 해당 사용자의 공부 시간을 증가시킵니다.
-     *
-     * @param userId 사용자 ID
-     * @param studyTimeSeconds 증가시킬 공부 시간
+     * TODO: 최악의 경우 6회 반복할 수 있는데, 이를 비동기적으로 실행하거나, 반복문을 단축시킬 수 있다면 좋을 것입니다.
+     * @param updateStudyStats 수정할 유저 id, 날짜, 공부 시간
      */
-    public void updateGroupRankings(Long userId, Long studyTimeSeconds) {
-        LocalDate today = timeUtils.getToday();
+    public void updateGroupRankings(List<UpdateStudyStatsDto> updateStudyStats) {
+        for (UpdateStudyStatsDto dto : updateStudyStats) {
+            List<String> redisKeys = Arrays.stream(GroupRankingPeriod.values())
+                    .map(period -> period.getRedisKey(dto.date()))
+                    .toList();
+            String userIdStr = String.valueOf(dto.id());
 
-        List<String> redisKeys = Arrays.stream(GroupRankingPeriod.values())
-                .map(period -> period.getRedisKey(today))
-                .toList();
-        String userIdStr = String.valueOf(userId);
+            // 일간/주간/월간 3회를 걸쳐 업데이트
+            for (String key : redisKeys) {
+                Map<String, String> userRanking = studyTimeStatsRepository.findHashFieldsById(key, List.of(userIdStr));
+                String userStudyTimeStr = userRanking.get(userIdStr);
+                Long userStudyTime;
+                if (userStudyTimeStr == null) {
+                    userStudyTime = 0L;
+                } else {
+                    userStudyTime = Long.parseLong(userStudyTimeStr);
+                }
 
-        // 일간/주간/월간 3회를 걸쳐 업데이트
-        for (String key : redisKeys) {
-            Map<String, String> userRanking = studyTimeStatsRepository.findHashFieldsById(key, List.of(userIdStr));
-            String userStudyTimeStr = userRanking.get(userIdStr);
-            Long userStudyTime;
-            if (userStudyTimeStr == null) {
-                userStudyTime = 0L;
-            } else {
-                userStudyTime = Long.parseLong(userStudyTimeStr);
+                userStudyTime += dto.studyTime();
+
+                studyTimeStatsRepository.saveMapById(key, Map.of(userIdStr, String.valueOf(userStudyTime)));
             }
-
-            userStudyTime += studyTimeSeconds;
-
-            studyTimeStatsRepository.saveMapById(key, Map.of(userIdStr, String.valueOf(userStudyTime)));
         }
     }
 
