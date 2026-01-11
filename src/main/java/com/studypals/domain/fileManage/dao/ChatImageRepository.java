@@ -20,9 +20,12 @@ public class ChatImageRepository extends AbstractFileRepository {
      * @return 이미지 조회에 필요한 URL
      */
     @Override
-    public String generateObjectKey(String fileName) {
+    protected String generateObjectKey(String fileName, String targetId) {
+        if (targetId == null || targetId.isBlank()) {
+            throw new IllegalArgumentException("ChatRoomId is required for ChatImage");
+        }
         String ext = extractExtension(fileName);
-        return CHAT_IMAGE_PATH + "/" + UUID.randomUUID() + "." + ext;
+        return CHAT_IMAGE_PATH + "/" + targetId + "/" + UUID.randomUUID() + "." + ext;
     }
 
     @Override

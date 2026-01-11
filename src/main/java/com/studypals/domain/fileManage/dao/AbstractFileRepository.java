@@ -30,18 +30,30 @@ public abstract class AbstractFileRepository {
     private static final List<String> acceptableExtensions = List.of("jpg", "jpeg", "png", "bmp", "webp");
 
     /**
-     * 클라이언트가 파일을 업로드할 수 있는 UploadUrl을 생성합니다.
+     * 클라이언트가 프로필 이미지를 업로드할 수 있는 UploadUrl을 생성합니다.
      */
     public String getUploadUrl(String fileName) {
-        if (!isFileAcceptable(fileName)) {
-            throw new RuntimeException("유효하지 않은 fileName");
-        }
+        validateFileName(fileName);
         String objectKey = generateObjectKey(fileName);
-
         return objectStorage.createPresignedPutUrl(objectKey, 300);
     }
 
-    public abstract String generateObjectKey(String fileName);
+    /**
+     * 클라이언트가 채팅 사진을 업로드할 수 있는 UploadUrl을 생성합니다.
+     */
+    public String getUploadUrl(String fileName, String targetId) {
+        validateFileName(fileName);
+        String objectKey = generateObjectKey(fileName, targetId);
+        return objectStorage.createPresignedPutUrl(objectKey, 300);
+    }
+
+    protected String generateObjectKey(String fileName) {
+        throw new UnsupportedOperationException("TargetId is required for this file type.");
+    }
+
+    protected String generateObjectKey(String fileName, String targetId) {
+        throw new UnsupportedOperationException("TargetId is not supported for this file type.");
+    }
 
     /**
      * 해당 리포지토리가 담당하는 파일 타입을 반환합니다.
@@ -77,12 +89,13 @@ public abstract class AbstractFileRepository {
      * @param fileName 확인할 파일 이름
      * @return 확장자 유효 여부
      */
-    private boolean isFileAcceptable(String fileName) {
+    private void validateFileName(String fileName) {
         if (fileName == null || !fileName.contains(".")) {
             throw new IllegalArgumentException("확장자가 없는 사진은 업로드 할 수 없습니다.");
         }
         String extension = extractExtension(fileName);
-
-        return acceptableExtensions.contains(extension);
+        if (!acceptableExtensions.contains(extension)) {
+            throw new RuntimeException("유효하지 않은 fileName");
+        }
     }
 }

@@ -8,7 +8,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.studypals.domain.fileManage.dao.AbstractFileRepository;
-import com.studypals.domain.fileManage.dto.PresignedUrlReq;
+import com.studypals.domain.fileManage.dto.ChatPresignedUrlReq;
+import com.studypals.domain.fileManage.dto.ProfilePresignedUrlReq;
 import com.studypals.domain.fileManage.entity.FileType;
 
 /**
@@ -29,11 +30,22 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String getUploadUrl(PresignedUrlReq request) {
-        AbstractFileRepository repository = repositoryMap.get(request.type());
+    public String getProfileUploadUrl(ProfilePresignedUrlReq request) {
+        AbstractFileRepository repository = getRepository(FileType.PROFILE);
+        return repository.getUploadUrl(request.fileName());
+    }
+
+    @Override
+    public String getChatUploadUrl(ChatPresignedUrlReq request) {
+        AbstractFileRepository repository = getRepository(FileType.CHAT_IMAGE);
+        return repository.getUploadUrl(request.fileName(), request.targetId());
+    }
+
+    private AbstractFileRepository getRepository(FileType fileType) {
+        AbstractFileRepository repository = repositoryMap.get(fileType);
         if (repository == null) {
             throw new IllegalArgumentException("지원하지 않는 파일 타입입니다.");
         }
-        return repository.getUploadUrl(request.fileName());
+        return repository;
     }
 }

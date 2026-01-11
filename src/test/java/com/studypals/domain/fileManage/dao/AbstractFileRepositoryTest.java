@@ -40,8 +40,13 @@ class AbstractFileRepositoryTest {
         // 추상 클래스 테스트를 위한 익명 클래스 구현
         fileRepository = new AbstractFileRepository(objectStorage) {
             @Override
-            public String generateObjectKey(String fileName) {
+            protected String generateObjectKey(String fileName) {
                 return "test/" + fileName;
+            }
+
+            @Override
+            protected String generateObjectKey(String fileName, String targetId) {
+                return "test/" + targetId + "/" + fileName;
             }
 
             @Override
@@ -53,7 +58,7 @@ class AbstractFileRepositoryTest {
 
     @Test
     @DisplayName("Upload URL 생성 성공")
-    void getUploadUrl_success() {
+    void getUploadUrl_success_no_targetId() {
         // given
         String fileName = "image.jpg";
         String expectedUrl = "https://example.com/presigned-url";
@@ -63,6 +68,25 @@ class AbstractFileRepositoryTest {
 
         // when
         String result = fileRepository.getUploadUrl(fileName);
+
+        // then
+        assertThat(result).isEqualTo(expectedUrl);
+        then(objectStorage).should().createPresignedPutUrl(eq(expectedKey), eq(300));
+    }
+
+    @Test
+    @DisplayName("Upload URL 생성 성공 - targetId 포함")
+    void getUploadUrl_success_with_targetId() {
+        // given
+        String fileName = "image.jpg";
+        String targetId = "room1";
+        String expectedUrl = "https://example.com/presigned-url";
+        String expectedKey = "test/" + targetId + "/" + fileName;
+
+        given(objectStorage.createPresignedPutUrl(eq(expectedKey), anyInt())).willReturn(expectedUrl);
+
+        // when
+        String result = fileRepository.getUploadUrl(fileName, targetId);
 
         // then
         assertThat(result).isEqualTo(expectedUrl);

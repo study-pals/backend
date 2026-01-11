@@ -21,7 +21,7 @@ public class MemberProfileRepository extends AbstractFileRepository {
      * @return 프로필 사진 조회에 필요한 경로(objectKey) 반환
      */
     @Override
-    public String generateObjectKey(String fileName) {
+    protected String generateObjectKey(String fileName) {
         String ext = extractExtension(fileName);
         return PROFILE_PATH + "/" + UUID.randomUUID() + "." + ext;
     }
