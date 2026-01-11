@@ -1,5 +1,7 @@
 package com.studypals.domain.groupManage.worker;
 
+import com.studypals.domain.groupManage.dao.GroupMemberRepository;
+import com.studypals.domain.groupManage.dto.UpdateGroupReq;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupRepository;
@@ -28,6 +30,7 @@ import com.studypals.global.exceptions.exception.GroupException;
 public class GroupWriter {
     private final GroupRepository groupRepository;
     private final GroupTagRepository groupTagRepository;
+    private final GroupMemberRepository groupMemberRepository;
     private final GroupMapper groupMapper;
 
     public Group create(CreateGroupReq dto) {
@@ -40,6 +43,20 @@ public class GroupWriter {
             groupRepository.save(group);
         } catch (Exception e) {
             throw new GroupException(GroupErrorCode.GROUP_CREATE_FAIL);
+        }
+
+        return group;
+    }
+
+    public Group update(Long userId, Long groupId, Group group, UpdateGroupReq dto) {
+        if(!groupMemberRepository.isLeader(groupId, userId)){
+            throw new GroupException(GroupErrorCode.GROUP_UPDATE_FAIL, "not leader");
+        }
+
+        try {
+            group.update(dto.name(), dto.tag(), dto.maxMember(), dto.isOpen(), dto.isApprovalRequired());
+        } catch (Exception e) {
+            throw new GroupException(GroupErrorCode.GROUP_UPDATE_FAIL);
         }
 
         return group;

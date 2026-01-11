@@ -48,4 +48,14 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
     List<GroupSummaryDto> findGroupsByMemberId(@Param("memberId") Long memberId);
 
     boolean existsByMemberIdAndGroupId(Long memberId, Long groupId);
+
+    @Query(
+        """
+        SELECT COUNT(gm) > 0 
+        FROM GroupMember gm
+        WHERE gm.group.id = :groupId
+            AND gm.member.id = :userId
+            AND gm.role = 'LEADER'
+        """)
+    boolean isLeader(@Param("groupId") Long groupId, @Param("userId") Long userId);
 }
