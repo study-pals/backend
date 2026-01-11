@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.fileManage.ObjectStorage;
+import com.studypals.domain.fileManage.entity.FileType;
 
 /**
  * 파일을 처리하는데 사용하는 추상 클래스입니다.
@@ -41,6 +42,12 @@ public abstract class AbstractFileRepository {
     }
 
     public abstract String generateObjectKey(String fileName);
+
+    /**
+     * 해당 리포지토리가 담당하는 파일 타입을 반환합니다.
+     * @return 파일 타입
+     */
+    public abstract FileType getFileType();
 
     /**
      * 파일을 삭제합니다.

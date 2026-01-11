@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 import com.studypals.domain.fileManage.ObjectStorage;
+import com.studypals.domain.fileManage.entity.FileType;
 
 @Repository
 public class ChatImageRepository extends AbstractFileRepository {
@@ -22,5 +23,10 @@ public class ChatImageRepository extends AbstractFileRepository {
     public String generateObjectKey(String fileName) {
         String ext = extractExtension(fileName);
         return CHAT_IMAGE_PATH + "/" + UUID.randomUUID() + "." + ext;
+    }
+
+    @Override
+    public FileType getFileType() {
+        return FileType.CHAT_IMAGE;
     }
 }

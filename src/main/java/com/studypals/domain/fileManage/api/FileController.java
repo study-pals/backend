@@ -16,7 +16,7 @@ import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 
 /**
- * 파일 업로드, 삭제 관련 로직을 처리하는 컨트롤러입니다.
+ * 파일 관련 로직을 처리하는 컨트롤러입니다.
  * 파일 업로드는 서버 측에서 presigned url을 발급하고 클라이언트 측에서 진행합니다.
  *
  * <pre>
@@ -34,7 +34,7 @@ public class FileController {
 
     @PostMapping("/presigned-url")
     public ResponseEntity<Response<PresignedUrlRes>> getProfileUploadUrl(@RequestBody PresignedUrlReq request) {
-        String response = fileService.getProfileUploadUrl(request);
+        String response = fileService.getUploadUrl(request);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.IMAGE_UPLOAD, new PresignedUrlRes(response)));
     }
 }

@@ -1,3 +1,5 @@
 package com.studypals.domain.fileManage.dto;
 
-public record PresignedUrlReq(String fileName) {}
+import com.studypals.domain.fileManage.entity.FileType;
+
+public record PresignedUrlReq(String fileName, FileType type) {}
