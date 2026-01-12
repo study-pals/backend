@@ -1,6 +1,7 @@
 package com.studypals.domain.groupManage.dto;
 
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -11,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @see
  * @since 2026-01-08
  */
-public record UpdateEntryCodeReq(Long day) {
+public record UpdateEntryCodeReq(@NotNull Long day) {
 
     @AssertTrue(message = "day 는 -1 이거나 1 이상, 30 이하여야 합니다.")
     @JsonIgnore
