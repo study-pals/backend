@@ -1,3 +1,6 @@
 package com.studypals.domain.fileManage.dto;
 
-public record ChatPresignedUrlReq(String fileName, String targetId) {}
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record ChatPresignedUrlReq(@NotNull @NotBlank String fileName, @NotNull @NotBlank String targetId) {}

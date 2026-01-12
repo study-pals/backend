@@ -26,7 +26,12 @@ public class FileServiceImpl implements FileService {
 
     public FileServiceImpl(List<AbstractFileRepository> repositories) {
         this.repositoryMap = repositories.stream()
-                .collect(Collectors.toMap(AbstractFileRepository::getFileType, Function.identity()));
+                .collect(Collectors.toMap(
+                        AbstractFileRepository::getFileType, Function.identity(), (existing, duplicate) -> {
+                            throw new IllegalStateException(
+                                    "Duplicate FileType mapping detected during FileServiceImpl initialization: "
+                                            + existing.getFileType());
+                        }));
     }
 
     @Override

@@ -28,6 +28,7 @@ import com.studypals.domain.fileManage.entity.FileType;
 public abstract class AbstractFileRepository {
     protected final ObjectStorage objectStorage;
     private static final List<String> acceptableExtensions = List.of("jpg", "jpeg", "png", "bmp", "webp");
+    private static final int PRESIGNED_URL_EXPIRE_TIME = 600; // 10분동안만 유효함
 
     /**
      * 클라이언트가 프로필 이미지를 업로드할 수 있는 UploadUrl을 생성합니다.
@@ -35,7 +36,7 @@ public abstract class AbstractFileRepository {
     public String getUploadUrl(String fileName) {
         validateFileName(fileName);
         String objectKey = generateObjectKey(fileName);
-        return objectStorage.createPresignedPutUrl(objectKey, 300);
+        return objectStorage.createPresignedPutUrl(objectKey, PRESIGNED_URL_EXPIRE_TIME);
     }
 
     /**
@@ -66,7 +67,7 @@ public abstract class AbstractFileRepository {
      *
      * @param url 삭제할 파일 URL
      */
-    protected void delete(String url) {
+    public void delete(String url) {
         String destination = objectStorage.parsePath(url);
         objectStorage.delete(destination);
     }
@@ -95,7 +96,7 @@ public abstract class AbstractFileRepository {
         }
         String extension = extractExtension(fileName);
         if (!acceptableExtensions.contains(extension)) {
-            throw new RuntimeException("유효하지 않은 fileName");
+            throw new IllegalArgumentException("지원하지 않는 파일 확장자입니다: " + extractExtension(fileName));
         }
     }
 }

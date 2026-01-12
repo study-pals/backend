@@ -84,7 +84,7 @@ public class MinioStorage implements ObjectStorage {
                     .expiry(expirySeconds)
                     .build());
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("Presigned GET URL 생성에 실패했습니다.", e);
         }
     }
 
@@ -98,7 +98,7 @@ public class MinioStorage implements ObjectStorage {
                     .expiry(expirySeconds)
                     .build());
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("Presigned PUT URL 생성에 실패했습니다.", e);
         }
     }
 

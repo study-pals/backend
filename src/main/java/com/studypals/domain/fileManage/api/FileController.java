@@ -1,5 +1,7 @@
 package com.studypals.domain.fileManage.api;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,14 +37,13 @@ public class FileController {
     private final FileService fileService;
 
     @PostMapping("/profile/presigned-url")
-    public ResponseEntity<Response<PresignedUrlRes>> getProfilePresignedUrl(
-            @RequestBody ProfilePresignedUrlReq request) {
+    public ResponseEntity<Response<PresignedUrlRes>> getUploadUrl(@Valid @RequestBody ProfilePresignedUrlReq request) {
         String response = fileService.getProfileUploadUrl(request);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.IMAGE_UPLOAD, new PresignedUrlRes(response)));
     }
 
     @PostMapping("/chat/presigned-url")
-    public ResponseEntity<Response<PresignedUrlRes>> getChatPresignedUrl(@RequestBody ChatPresignedUrlReq request) {
+    public ResponseEntity<Response<PresignedUrlRes>> getUploadUrl(@Valid @RequestBody ChatPresignedUrlReq request) {
         String response = fileService.getChatUploadUrl(request);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.IMAGE_UPLOAD, new PresignedUrlRes(response)));
     }

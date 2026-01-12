@@ -1,3 +1,6 @@
 package com.studypals.domain.fileManage.dto;
 
-public record ProfilePresignedUrlReq(String fileName) {}
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record ProfilePresignedUrlReq(@NotNull @NotBlank String fileName) {}

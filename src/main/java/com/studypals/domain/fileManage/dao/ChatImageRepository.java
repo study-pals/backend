@@ -16,8 +16,8 @@ public class ChatImageRepository extends AbstractFileRepository {
     }
 
     /**
-     * 채팅 이미지를 조회하기 위해 PreSigned-URL을 반환합니다.
-     * @return 이미지 조회에 필요한 URL
+     * 채팅 이미지를 업로드하기 위한 객체 키(저장 경로)를 생성하여 반환합니다.
+     * @return 업로드될 채팅 이미지의 객체 키(저장 경로)
      */
     @Override
     protected String generateObjectKey(String fileName, String targetId) {
