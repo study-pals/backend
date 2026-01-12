@@ -1,4 +1,4 @@
-package com.studypals.domain.fileManage.service;
+package com.studypals.global.file.service;
 
 import java.util.List;
 import java.util.Map;
@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.studypals.domain.fileManage.dao.AbstractFileRepository;
-import com.studypals.domain.fileManage.dto.ChatPresignedUrlReq;
-import com.studypals.domain.fileManage.dto.ProfilePresignedUrlReq;
-import com.studypals.domain.fileManage.entity.FileType;
+import com.studypals.global.file.dao.AbstractFileManager;
+import com.studypals.global.file.dto.ChatPresignedUrlReq;
+import com.studypals.global.file.dto.ProfilePresignedUrlReq;
+import com.studypals.global.file.entity.FileType;
 
 /**
  * 파일을 처리하는 로직을 정의한 구현 클래스입니다.
@@ -22,12 +22,12 @@ import com.studypals.domain.fileManage.entity.FileType;
 @Service
 public class FileServiceImpl implements FileService {
 
-    private final Map<FileType, AbstractFileRepository> repositoryMap;
+    private final Map<FileType, AbstractFileManager> repositoryMap;
 
-    public FileServiceImpl(List<AbstractFileRepository> repositories) {
+    public FileServiceImpl(List<AbstractFileManager> repositories) {
         this.repositoryMap = repositories.stream()
                 .collect(Collectors.toMap(
-                        AbstractFileRepository::getFileType, Function.identity(), (existing, duplicate) -> {
+                        AbstractFileManager::getFileType, Function.identity(), (existing, duplicate) -> {
                             throw new IllegalStateException(
                                     "Duplicate FileType mapping detected during FileServiceImpl initialization: "
                                             + existing.getFileType());
@@ -36,18 +36,18 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public String getProfileUploadUrl(ProfilePresignedUrlReq request) {
-        AbstractFileRepository repository = getRepository(FileType.PROFILE);
+        AbstractFileManager repository = getRepository(FileType.PROFILE);
         return repository.getUploadUrl(request.fileName());
     }
 
     @Override
     public String getChatUploadUrl(ChatPresignedUrlReq request) {
-        AbstractFileRepository repository = getRepository(FileType.CHAT_IMAGE);
+        AbstractFileManager repository = getRepository(FileType.CHAT_IMAGE);
         return repository.getUploadUrl(request.fileName(), request.targetId());
     }
 
-    private AbstractFileRepository getRepository(FileType fileType) {
-        AbstractFileRepository repository = repositoryMap.get(fileType);
+    private AbstractFileManager getRepository(FileType fileType) {
+        AbstractFileManager repository = repositoryMap.get(fileType);
         if (repository == null) {
             throw new IllegalArgumentException("지원하지 않는 파일 타입입니다.");
         }

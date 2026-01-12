@@ -12,10 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.fileManage.dao.AbstractFileRepository;
-import com.studypals.domain.fileManage.dto.ChatPresignedUrlReq;
-import com.studypals.domain.fileManage.dto.ProfilePresignedUrlReq;
-import com.studypals.domain.fileManage.entity.FileType;
+import com.studypals.global.file.dao.AbstractFileManager;
+import com.studypals.global.file.dto.ChatPresignedUrlReq;
+import com.studypals.global.file.dto.ProfilePresignedUrlReq;
+import com.studypals.global.file.entity.FileType;
+import com.studypals.global.file.service.FileServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class FileServiceImplTest {
@@ -25,8 +26,8 @@ class FileServiceImplTest {
     void getProfileUploadUrl_success() {
         // given
         // Mock Repositories 생성
-        AbstractFileRepository profileRepo = mock(AbstractFileRepository.class);
-        AbstractFileRepository chatRepo = mock(AbstractFileRepository.class);
+        AbstractFileManager profileRepo = mock(AbstractFileManager.class);
+        AbstractFileManager chatRepo = mock(AbstractFileManager.class);
 
         // 각 Mock이 담당할 FileType 설정 (생성자에서 Map 초기화 시 사용됨)
         given(profileRepo.getFileType()).willReturn(FileType.PROFILE);
@@ -55,7 +56,7 @@ class FileServiceImplTest {
     @DisplayName("채팅 업로드 URL 발급 성공")
     void getChatUploadUrl_success() {
         // given
-        AbstractFileRepository chatRepo = mock(AbstractFileRepository.class);
+        AbstractFileManager chatRepo = mock(AbstractFileManager.class);
         given(chatRepo.getFileType()).willReturn(FileType.CHAT_IMAGE);
 
         FileServiceImpl fileService = new FileServiceImpl(List.of(chatRepo));

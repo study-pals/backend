@@ -1,4 +1,4 @@
-package com.studypals.domain.fileManage.entity;
+package com.studypals.global.file.entity;
 
 public enum FileType {
     PROFILE,

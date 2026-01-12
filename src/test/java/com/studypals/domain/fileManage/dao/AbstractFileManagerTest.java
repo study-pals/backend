@@ -15,30 +15,31 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.fileManage.ObjectStorage;
-import com.studypals.domain.fileManage.entity.FileType;
+import com.studypals.global.file.ObjectStorage;
+import com.studypals.global.file.dao.AbstractFileManager;
+import com.studypals.global.file.entity.FileType;
 
 /**
- * {@link AbstractFileRepository} 에 대한 테스트코드입니다.
+ * {@link AbstractFileManager} 에 대한 테스트코드입니다.
  *
  * <p>Presigned URL 발급 성공/실패 케이스 및 파일 삭제 로직을 테스트합니다.
  *
  * @author s0o0bn
- * @see AbstractFileRepository
+ * @see AbstractFileManager
  * @since 2025-04-15
  */
 @ExtendWith(MockitoExtension.class)
-class AbstractFileRepositoryTest {
+class AbstractFileManagerTest {
 
     @Mock
     private ObjectStorage objectStorage;
 
-    private AbstractFileRepository fileRepository;
+    private AbstractFileManager fileRepository;
 
     @BeforeEach
     void setUp() {
         // 추상 클래스 테스트를 위한 익명 클래스 구현
-        fileRepository = new AbstractFileRepository(objectStorage) {
+        fileRepository = new AbstractFileManager(objectStorage) {
             @Override
             protected String generateObjectKey(String fileName) {
                 return "test/" + fileName;

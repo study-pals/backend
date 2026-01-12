@@ -1,17 +1,18 @@
-package com.studypals.domain.fileManage.dao;
+package com.studypals.domain.chatManage.worker;
 
 import java.util.UUID;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
-import com.studypals.domain.fileManage.ObjectStorage;
-import com.studypals.domain.fileManage.entity.FileType;
+import com.studypals.global.file.ObjectStorage;
+import com.studypals.global.file.dao.AbstractFileManager;
+import com.studypals.global.file.entity.FileType;
 
-@Repository
-public class ChatImageRepository extends AbstractFileRepository {
+@Component
+public class ChatImageManager extends AbstractFileManager {
     private static final String CHAT_IMAGE_PATH = "chat/image";
 
-    public ChatImageRepository(ObjectStorage objectStorage) {
+    public ChatImageManager(ObjectStorage objectStorage) {
         super(objectStorage);
     }
 

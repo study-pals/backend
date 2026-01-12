@@ -1,3 +1,3 @@
-package com.studypals.domain.fileManage.dto;
+package com.studypals.global.file.dto;
 
 public record PresignedUrlRes(String presignedUrl) {}

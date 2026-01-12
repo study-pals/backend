@@ -1,4 +1,4 @@
-package com.studypals.domain.fileManage.dto;
+package com.studypals.global.file.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

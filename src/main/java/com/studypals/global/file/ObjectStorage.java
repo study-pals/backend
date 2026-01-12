@@ -1,4 +1,4 @@
-package com.studypals.domain.fileManage;
+package com.studypals.global.file;
 
 /**
  * Object Storage 의 인터페이스입니다. 메서드를 정의합니다.

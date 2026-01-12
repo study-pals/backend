@@ -1,7 +1,7 @@
-package com.studypals.domain.fileManage.service;
+package com.studypals.global.file.service;
 
-import com.studypals.domain.fileManage.dto.ChatPresignedUrlReq;
-import com.studypals.domain.fileManage.dto.ProfilePresignedUrlReq;
+import com.studypals.global.file.dto.ChatPresignedUrlReq;
+import com.studypals.global.file.dto.ProfilePresignedUrlReq;
 
 /**
  * 파일을 처리하는 로직을 정의한 인터페이스입니다.

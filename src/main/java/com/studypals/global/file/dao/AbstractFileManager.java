@@ -1,13 +1,11 @@
-package com.studypals.domain.fileManage.dao;
+package com.studypals.global.file.dao;
 
 import java.util.List;
 
-import org.springframework.stereotype.Repository;
-
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.fileManage.ObjectStorage;
-import com.studypals.domain.fileManage.entity.FileType;
+import com.studypals.global.file.ObjectStorage;
+import com.studypals.global.file.entity.FileType;
 
 /**
  * 파일을 처리하는데 사용하는 추상 클래스입니다.
@@ -23,9 +21,8 @@ import com.studypals.domain.fileManage.entity.FileType;
  * @author s0o0bn
  * @since 2025-04-11
  */
-@Repository
 @RequiredArgsConstructor
-public abstract class AbstractFileRepository {
+public abstract class AbstractFileManager {
     protected final ObjectStorage objectStorage;
     private static final List<String> acceptableExtensions = List.of("jpg", "jpeg", "png", "bmp", "webp");
     private static final int PRESIGNED_URL_EXPIRE_TIME = 600; // 10분동안만 유효함

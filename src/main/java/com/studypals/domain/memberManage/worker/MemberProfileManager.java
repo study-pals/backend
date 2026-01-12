@@ -1,18 +1,19 @@
-package com.studypals.domain.fileManage.dao;
+package com.studypals.domain.memberManage.worker;
 
 import java.util.UUID;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
-import com.studypals.domain.fileManage.ObjectStorage;
-import com.studypals.domain.fileManage.entity.FileType;
+import com.studypals.global.file.ObjectStorage;
+import com.studypals.global.file.dao.AbstractFileManager;
+import com.studypals.global.file.entity.FileType;
 
-@Repository
-public class MemberProfileRepository extends AbstractFileRepository {
+@Component
+public class MemberProfileManager extends AbstractFileManager {
 
     private static final String PROFILE_PATH = "profile";
 
-    public MemberProfileRepository(ObjectStorage objectStorage) {
+    public MemberProfileManager(ObjectStorage objectStorage) {
         super(objectStorage);
     }
 

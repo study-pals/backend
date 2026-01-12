@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.fileManage.ObjectStorage;
+import com.studypals.global.file.ObjectStorage;
 
 import io.minio.*;
 import io.minio.http.Method;

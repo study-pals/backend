@@ -1,4 +1,4 @@
-package com.studypals.domain.fileManage.api;
+package com.studypals.global.file.api;
 
 import jakarta.validation.Valid;
 
@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.fileManage.dto.ChatPresignedUrlReq;
-import com.studypals.domain.fileManage.dto.PresignedUrlRes;
-import com.studypals.domain.fileManage.dto.ProfilePresignedUrlReq;
-import com.studypals.domain.fileManage.service.FileService;
+import com.studypals.global.file.dto.ChatPresignedUrlReq;
+import com.studypals.global.file.dto.PresignedUrlRes;
+import com.studypals.global.file.dto.ProfilePresignedUrlReq;
+import com.studypals.global.file.service.FileService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
