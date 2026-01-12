@@ -1,8 +1,14 @@
 package com.studypals.domain.groupManage.dto;
 
+import java.util.List;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 
 /**
  * 그룹 생성 시 사용되는 DTO 입니다.
@@ -24,4 +30,5 @@ public record CreateGroupReq(
         Boolean isOpen,
         Boolean isApprovalRequired,
         // since 12-05 sanghyeok
-        String imageUrl) {}
+        String imageUrl,
+        @JsonSetter(nulls = Nulls.AS_EMPTY) @Size(max = 10) List<@NotBlank @Size(max = 20) String> hashTags) {}

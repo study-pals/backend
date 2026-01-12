@@ -6,11 +6,12 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
@@ -26,7 +27,6 @@ import com.studypals.global.responses.ResponseCode;
  * @see AbstractGroupIntegrationTest
  * @since 2025-04-12
  */
-@ActiveProfiles("test")
 @DisplayName("API TEST / 그룹 관리 통합 테스트")
 public class GroupIntegrationTest extends AbstractGroupIntegrationTest {
     @Autowired
@@ -56,7 +56,8 @@ public class GroupIntegrationTest extends AbstractGroupIntegrationTest {
         // given
         CreateUserVar user = createUser();
         createGroupTag("group tag");
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         // when
         ResultActions result = mockMvc.perform(post("/groups")

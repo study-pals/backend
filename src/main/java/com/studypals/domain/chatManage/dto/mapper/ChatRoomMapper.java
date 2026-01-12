@@ -23,6 +23,7 @@ public interface ChatRoomMapper {
      */
     @Mapping(target = "userId", source = "member.id")
     @Mapping(target = "imageUrl", source = "member.imageUrl")
+    @Mapping(target = "nickname", source = "member.nickname")
     ChatRoomInfoRes.UserInfo toDto(ChatRoomMember entity);
 
     /**

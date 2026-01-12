@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studypals.global.redis.redisHashRepository.annotations.EnableRedisHashRepositories;
@@ -23,7 +22,6 @@ import com.studypals.testModules.testComponent.TestRedisHashRepository;
  * @since 2025-07-19
  */
 @SpringBootTest
-@ActiveProfiles("test")
 @EnableRedisHashRepositories(basePackageClasses = TestRedisHashRepository.class)
 public class RedisHashPerformanceTest {
 
