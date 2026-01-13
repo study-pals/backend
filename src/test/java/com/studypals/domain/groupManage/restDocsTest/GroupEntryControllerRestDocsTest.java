@@ -61,7 +61,7 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
         GroupEntryCodeRes entryCodeRes = new GroupEntryCodeRes(groupId, "A1B2C3", expiredAt);
         Response<GroupEntryCodeRes> expected = CommonResponse.success(ResponseCode.GROUP_ENTRY_CODE, entryCodeRes);
 
-        given(groupEntryService.generateEntryCode(any(), any())).willReturn(entryCodeRes);
+        given(groupEntryService.getOrCreateEntryCode(any(), any())).willReturn(entryCodeRes);
 
         // when
         ResultActions result = mockMvc.perform(post("/groups/{groupId}/entry-code", groupId));

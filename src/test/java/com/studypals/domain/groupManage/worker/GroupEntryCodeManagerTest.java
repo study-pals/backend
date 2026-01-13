@@ -3,7 +3,6 @@ package com.studypals.domain.groupManage.worker;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -59,7 +58,7 @@ public class GroupEntryCodeManagerTest {
                 .expireAt(null) // 무제한이면 null일 가능성
                 .build();
 
-        given(entryCodeRepository.findFirstByGroupId(groupId)).willReturn(Optional.of(existing));
+        given(entryCodeRepository.findByGroupId(groupId)).willReturn(Optional.of(existing));
 
         // when
         GroupEntryCode result = entryCodeManager.getOrCreateCode(groupId);
@@ -73,8 +72,7 @@ public class GroupEntryCodeManagerTest {
         assertThat(saved.getTtl()).isEqualTo(-1L);
         assertThat(saved.getExpireAt()).isNull(); // 그대로
 
-        verify(entryCodeRepository).findFirstByGroupId(groupId);
-        verifyNoMoreInteractions(entryCodeRepository);
+        verify(entryCodeRepository).findByGroupId(groupId);
     }
 
     @Test
@@ -93,7 +91,7 @@ public class GroupEntryCodeManagerTest {
                 .expireAt(threshold.plusDays(3)) // 1일보다 큼(=threshold 이후)
                 .build();
 
-        given(entryCodeRepository.findFirstByGroupId(groupId)).willReturn(Optional.of(existing));
+        given(entryCodeRepository.findByGroupId(groupId)).willReturn(Optional.of(existing));
 
         // when
         GroupEntryCode result = entryCodeManager.getOrCreateCode(groupId);
@@ -107,8 +105,7 @@ public class GroupEntryCodeManagerTest {
         assertThat(saved.getTtl()).isEqualTo(7L);
         assertThat(saved.getExpireAt()).isEqualTo(threshold.plusDays(3)); // 그대로
 
-        verify(entryCodeRepository).findFirstByGroupId(groupId);
-        verifyNoMoreInteractions(entryCodeRepository);
+        verify(entryCodeRepository).findByGroupId(groupId);
     }
 
     @Test
@@ -127,7 +124,7 @@ public class GroupEntryCodeManagerTest {
                 .expireAt(now.plusHours(3)) // 1일보다 작음(=threshold 이전)
                 .build();
 
-        given(entryCodeRepository.findFirstByGroupId(groupId)).willReturn(Optional.of(existing));
+        given(entryCodeRepository.findByGroupId(groupId)).willReturn(Optional.of(existing));
 
         // when
         GroupEntryCode result = entryCodeManager.getOrCreateCode(groupId);
@@ -138,11 +135,10 @@ public class GroupEntryCodeManagerTest {
 
         GroupEntryCode saved = captor.getValue();
         assertThat(result).isSameAs(existing);
-        assertThat(saved.getTtl()).isEqualTo(1L);
+        assertThat(saved.getTtl()).isEqualTo(TimeUtils.getSecondOfDay(1L));
         assertThat(saved.getExpireAt()).isEqualTo(threshold); // 1일로 리셋
 
-        verify(entryCodeRepository).findFirstByGroupId(groupId);
-        verifyNoMoreInteractions(entryCodeRepository);
+        verify(entryCodeRepository).findByGroupId(groupId);
     }
 
     @Test
@@ -161,7 +157,7 @@ public class GroupEntryCodeManagerTest {
                 .expireAt(fixedNow.plusDays(1))
                 .build();
 
-        given(entryCodeRepository.findFirstByGroupId(groupId)).willReturn(Optional.of(existing));
+        given(entryCodeRepository.findByGroupId(groupId)).willReturn(Optional.of(existing));
 
         // when
         entryCodeManager.increaseExpire(groupId, day);
@@ -175,8 +171,7 @@ public class GroupEntryCodeManagerTest {
         assertThat(saved.getTtl()).isEqualTo(-1L); // 코드 그대로면 -1 저장
         assertThat(saved.getExpireAt()).isNull();
 
-        verify(entryCodeRepository).findFirstByGroupId(groupId);
-        verifyNoMoreInteractions(entryCodeRepository);
+        verify(entryCodeRepository).findByGroupId(groupId);
     }
 
     @Test
@@ -195,7 +190,7 @@ public class GroupEntryCodeManagerTest {
                 .expireAt(fixedNow.plusDays(1))
                 .build();
 
-        given(entryCodeRepository.findFirstByGroupId(groupId)).willReturn(Optional.of(existing));
+        given(entryCodeRepository.findByGroupId(groupId)).willReturn(Optional.of(existing));
 
         // when
         entryCodeManager.increaseExpire(groupId, day);
@@ -206,11 +201,10 @@ public class GroupEntryCodeManagerTest {
 
         GroupEntryCode saved = captor.getValue();
         assertThat(saved.getGroupId()).isEqualTo(groupId);
-        assertThat(saved.getTtl()).isEqualTo(3L);
+        assertThat(saved.getTtl()).isEqualTo(TimeUtils.getSecondOfDay(3L));
         assertThat(saved.getExpireAt()).isEqualTo(fixedNow.plusDays(3));
 
-        verify(entryCodeRepository).findFirstByGroupId(groupId);
-        verifyNoMoreInteractions(entryCodeRepository);
+        verify(entryCodeRepository).findByGroupId(groupId);
     }
 
     @Test

@@ -72,6 +72,7 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
                 GroupEntryCode.builder().code("A1B2C3").groupId(group.groupId()).build();
 
         entryCodeRedisRepository.save(entryCode);
+        entryCodeRedisRepository.saveIdx(entryCode);
 
         // when
         ResultActions result = mockMvc.perform(get("/groups/summary")
@@ -98,6 +99,7 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
         GroupEntryReq req = new GroupEntryReq(group.groupId(), groupEntryCode.getCode());
 
         entryCodeRedisRepository.save(groupEntryCode);
+        entryCodeRedisRepository.saveIdx(groupEntryCode);
 
         // when
         ResultActions result = mockMvc.perform(post("/groups/join")
@@ -121,6 +123,7 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
         GroupEntryReq req = new GroupEntryReq(group.groupId(), groupEntryCode.getCode());
 
         entryCodeRedisRepository.save(groupEntryCode);
+        entryCodeRedisRepository.saveIdx(groupEntryCode);
 
         // when
         ResultActions result = mockMvc.perform(post("/groups/entry-requests")

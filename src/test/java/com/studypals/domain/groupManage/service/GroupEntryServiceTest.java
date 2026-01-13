@@ -79,7 +79,7 @@ public class GroupEntryServiceTest {
     private GroupEntryServiceImpl groupEntryService;
 
     @Test
-    void generateEntryCode_success() {
+    void getOrCreateEntryCode_success() {
         // given
         Long userId = 1L;
         Long groupId = 1L;
@@ -92,14 +92,14 @@ public class GroupEntryServiceTest {
         given(mockGroupEntryCode.getExpireAt()).willReturn(now);
 
         // when
-        GroupEntryCodeRes actual = groupEntryService.generateEntryCode(userId, groupId);
+        GroupEntryCodeRes actual = groupEntryService.getOrCreateEntryCode(userId, groupId);
 
         // then
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
-    void generateEntryCode_fail_invalidAuthority() {
+    void getOrCreateEntryCode_fail_invalidAuthority() {
         // given
         Long userId = 1L;
         Long groupId = 1L;
@@ -108,7 +108,7 @@ public class GroupEntryServiceTest {
         willThrow(new GroupException(errorCode)).given(authorityValidator).validateLeaderAuthority(userId, groupId);
 
         // when & then
-        assertThatThrownBy(() -> groupEntryService.generateEntryCode(userId, groupId))
+        assertThatThrownBy(() -> groupEntryService.getOrCreateEntryCode(userId, groupId))
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
