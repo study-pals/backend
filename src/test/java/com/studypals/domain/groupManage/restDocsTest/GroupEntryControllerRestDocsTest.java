@@ -108,7 +108,7 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
                                 .description("초대 코드를 연장할 그룹의 아이디")
                                 .attributes(constraints("not null"))),
                         requestFields(fieldWithPath("day")
-                                .description("연장할 초대 코드의 그룹 아이디")
+                                .description("연장할 일 수")
                                 .attributes(constraints("not null, min(0), max(30) || -1(만료 날짜 없음)")))));
     }
 
