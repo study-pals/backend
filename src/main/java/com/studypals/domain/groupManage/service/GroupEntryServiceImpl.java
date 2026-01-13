@@ -55,11 +55,15 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
     @Override
     @Transactional(readOnly = true)
-    public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
+    public GroupEntryCodeRes getOrCreateEntryCode(Long userId, Long groupId) {
         authorityValidator.validateLeaderAuthority(userId, groupId);
         GroupEntryCode entryCode = entryCodeManager.getOrCreateCode(groupId);
 
-        return new GroupEntryCodeRes(groupId, entryCode.getCode(), entryCode.getExpireAt());
+        return GroupEntryCodeRes.builder()
+                .groupId(groupId)
+                .code(entryCode.getCode())
+                .expiredAt(entryCode.getExpireAt())
+                .build();
     }
 
     @Override

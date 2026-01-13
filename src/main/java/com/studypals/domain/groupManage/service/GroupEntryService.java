@@ -26,7 +26,7 @@ public interface GroupEntryService {
      * @param groupId 코드를 생성할 그룹 ID
      * @return 그룹 ID와 해당 그룹의 초대 코드
      */
-    GroupEntryCodeRes generateEntryCode(Long userId, Long groupId);
+    GroupEntryCodeRes getOrCreateEntryCode(Long userId, Long groupId);
 
     /**
      * 초대 코드 설정을 변경합니다.

@@ -1,17 +1,18 @@
 package com.studypals.domain.groupManage.entity;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
-import org.springframework.data.redis.core.index.Indexed;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
+import com.studypals.domain.groupManage.dto.GroupEntryCodeConstant;
+import com.studypals.global.utils.TimeUtils;
 
 /**
  * redis에 저장되는 groupEntryCode에 대한 정보입니다.
@@ -21,7 +22,7 @@ import lombok.Setter;
  * @author s0o0bn
  * @since 2025-04-15
  */
-@RedisHash("entryCode")
+@RedisHash(GroupEntryCodeConstant.IDENTIFIER)
 @AllArgsConstructor
 @Builder
 @Getter
@@ -29,14 +30,13 @@ public class GroupEntryCode {
     @Id
     private String code;
 
-    @Indexed
     private Long groupId;
 
     @Setter
     private LocalDateTime expireAt;
 
-    @TimeToLive(unit = TimeUnit.DAYS)
+    @TimeToLive
     @Builder.Default
     @Setter
-    private Long ttl = 1L;
+    private Long ttl = TimeUtils.getSecondOfDay(1L);
 }

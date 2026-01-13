@@ -48,7 +48,7 @@ public class GroupEntryController {
     @PostMapping("/{groupId}/entry-code")
     public ResponseEntity<Response<GroupEntryCodeRes>> generateEntryCode(
             @AuthenticationPrincipal Long userId, @PathVariable Long groupId) {
-        GroupEntryCodeRes codeResponse = groupEntryService.generateEntryCode(userId, groupId);
+        GroupEntryCodeRes codeResponse = groupEntryService.getOrCreateEntryCode(userId, groupId);
         Response<GroupEntryCodeRes> response = CommonResponse.success(ResponseCode.GROUP_ENTRY_CODE, codeResponse);
 
         return ResponseEntity.created(URI.create("/groups/" + groupId + "/entry-code/" + codeResponse.code()))

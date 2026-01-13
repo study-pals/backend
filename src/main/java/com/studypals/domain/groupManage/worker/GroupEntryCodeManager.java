@@ -41,7 +41,7 @@ public class GroupEntryCodeManager {
      * 2. 존재하면 해당 코드를 반환합니다. <br>
      * 3. 존재하지 않으면 중복되지 않는 새 코드를 생성합니다. <br>
      * 4. 초대 코드의 TTL을 설정하고 Redis에 저장합니다.
-     * <p>기존 코드가 존재하는 경우에도 TTL은 항상 갱신됩니다.</p>
+     * <p>기존 코드가 존재하고 만료 날짜가 하루 이내라면 갱신됩니다.</p>
      *
      * @param groupId 초대 코드가 속한 그룹의 식별자
      * @return 조회되거나 새로 생성된 초대 코드 문자열
@@ -51,30 +51,34 @@ public class GroupEntryCodeManager {
         LocalDateTime threshold = now.plusDays(1);
 
         GroupEntryCode entryCode = groupEntryCodeRepository
-                .findFirstByGroupId(groupId)
+                .findByGroupId(groupId)
                 .orElseGet(() -> {
                     String code = generateNonDuplicatedCode();
                     return GroupEntryCode.builder()
                             .code(code)
                             .groupId(groupId)
-                            .ttl(1L)
+                            .ttl(TimeUtils.getSecondOfDay(1L))
                             .expireAt(threshold)
                             .build();
                 });
 
-        if (entryCode.getTtl() != null && entryCode.getTtl() != -1L) {
+        if (entryCode.getTtl() != null && entryCode.getTtl() > 0) {
             LocalDateTime expiredAt = entryCode.getExpireAt();
 
+            // 오류상황 - TTL 상으로는 기한이 존재하나 / expiredAt 이 null 인 경우 강제 초기화
             boolean missingExpireAt = (expiredAt == null);
+            // 오류상황을 제외하고(NPE 방지) 만료 기간이 이후 24시간 이내인 경우
             boolean withinOneDay = (!missingExpireAt && !expiredAt.isAfter(threshold));
 
+            // 만료 시간이 지금으로부터 1일 이내라면 1일로 갱신
             if (missingExpireAt || withinOneDay) {
-                entryCode.setTtl(1L);
+                entryCode.setTtl(TimeUtils.getSecondOfDay(1L));
                 entryCode.setExpireAt(threshold);
             }
         }
 
         groupEntryCodeRepository.save(entryCode);
+        groupEntryCodeRepository.saveIdx(entryCode);
 
         return entryCode;
     }
@@ -87,24 +91,26 @@ public class GroupEntryCodeManager {
      * <p>TTL은 Redis key 단위로 적용되며, 기존 TTL은 전달받은 값으로 덮어씌워집니다.</p>
      *
      * @param groupId 만료 기간을 연장할 초대 코드 소유자 그룹 아이디
-     * @param day 설정할 TTL 값 (단위는 Redis 설정에 따름)
+     * @param day 만료 날짜(day 기준, -1 / 1 ~ 30)
      * @throws GroupException 초대 코드가 존재하지 않는 경우
      */
     public void increaseExpire(Long groupId, Long day) {
         LocalDateTime today = timeUtils.getRawLocalDateTime();
         GroupEntryCode entryCode = groupEntryCodeRepository
-                .findFirstByGroupId(groupId)
+                .findByGroupId(groupId)
                 .orElseThrow(() -> new GroupException(
                         GroupErrorCode.GROUP_CODE_NOT_FOUND,
                         "[GroupEntryCodeManager#increaseExpire] unknown group while increase expire date"));
 
-        // TTL 설정/연장
-        entryCode.setTtl(day);
+        // TTL 설정/연장, day = -1 인 경우 무제한
+        Long ttl = (day > 0) ? TimeUtils.getSecondOfDay(day) : day;
+        entryCode.setTtl(ttl);
 
         if (day < 0) entryCode.setExpireAt(null);
         else entryCode.setExpireAt(today.plusDays(day));
 
         groupEntryCodeRepository.save(entryCode);
+        groupEntryCodeRepository.saveIdx(entryCode);
     }
 
     /**
