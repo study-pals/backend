@@ -49,15 +49,11 @@ public class GroupWriter {
     }
 
     public Group update(Long userId, Long groupId, Group group, UpdateGroupReq dto) {
-        if(!groupMemberRepository.isLeader(groupId, userId)){
+        if(!groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId)){
             throw new GroupException(GroupErrorCode.GROUP_UPDATE_FAIL, "not leader");
         }
 
-        try {
-            group.update(dto.name(), dto.tag(), dto.maxMember(), dto.isOpen(), dto.isApprovalRequired());
-        } catch (Exception e) {
-            throw new GroupException(GroupErrorCode.GROUP_UPDATE_FAIL);
-        }
+        group.update(dto.name(), dto.tag(), dto.maxMember(), dto.isOpen(), dto.isApprovalRequired());
 
         return group;
     }
