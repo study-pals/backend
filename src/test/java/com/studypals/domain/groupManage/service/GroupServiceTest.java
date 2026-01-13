@@ -283,7 +283,7 @@ public class GroupServiceTest {
                 .build();
         UpdateGroupReq req = new UpdateGroupReq("new group name", "new group tag", 20, true, true, "image.example.com");
 
-        given(groupMemberRepository.isLeader(groupId, userId)).willReturn(true);
+        given(groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId)).willReturn(true);
 
         // when
         groupWriterInj.update(userId, groupId, mockGroup, req);
@@ -313,7 +313,7 @@ public class GroupServiceTest {
 
         GroupErrorCode errorCode = GroupErrorCode.GROUP_UPDATE_FAIL;
 
-        given(groupMemberRepository.isLeader(groupId, userId)).willReturn(false);
+        given(groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId)).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> groupWriterInj.update(userId, groupId, mockGroup, req))
