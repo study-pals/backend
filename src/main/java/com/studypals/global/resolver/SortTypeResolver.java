@@ -1,10 +1,8 @@
 package com.studypals.global.resolver;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
 
 import com.studypals.global.request.SortType;
 
@@ -15,22 +13,25 @@ import com.studypals.global.request.SortType;
  * @author s0o0bn
  * @since 2025-06-05
  */
+@Component
 public class SortTypeResolver {
 
-    private final Map<String, SortType> cache;
+    public SortType resolve(String sort, Class<? extends SortType> sortEnumClass) {
+        if (sort == null || sort.isBlank()) {
+            throw new IllegalArgumentException("sort is required");
+        }
 
-    public SortTypeResolver(List<Class<? extends SortType>> sortTypeClasses) {
-        this.cache = sortTypeClasses.stream()
-                .flatMap(clazz -> Arrays.stream(clazz.getEnumConstants()))
-                .map(capture -> (SortType) capture)
-                .collect(Collectors.toMap(type -> type.name().toLowerCase(), type -> type, (a, b) -> {
-                    throw new IllegalArgumentException("Duplicate sort key : " + a.name());
-                }));
+        return resolveEnum(sort, sortEnumClass);
     }
 
-    public Optional<SortType> resolve(String sort) {
-        if (sort == null) return Optional.empty();
+    private SortType resolveEnum(String value, Class<? extends SortType> enumClass) {
+        for (SortType type : enumClass.getEnumConstants()) {
+            if (type.name().equalsIgnoreCase(value)) {
+                return type;
+            }
+        }
 
-        return Optional.ofNullable(cache.get(sort.toLowerCase()));
+        throw new IllegalArgumentException("Unsupported sort type: " + value + " (allowed: "
+                + Arrays.toString(enumClass.getEnumConstants()) + ")");
     }
 }

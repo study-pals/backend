@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
+import com.studypals.domain.groupManage.dao.groupEntryRepository.GroupEntryCodeRedisRepository;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryCode;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;

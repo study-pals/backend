@@ -3,10 +3,13 @@ package com.studypals.global.resolver;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import lombok.AllArgsConstructor;
 
 import com.studypals.global.annotations.CursorDefault;
 import com.studypals.global.request.Cursor;
@@ -19,16 +22,15 @@ import com.studypals.global.request.SortType;
  * @author s0o0bn
  * @since 2025-06-05
  */
+@Component
+@AllArgsConstructor
 public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
     private static final String CURSOR_PARAM = "cursor";
     private static final String SIZE_PARAM = "size";
     private static final String SORT_PARAM = "sort";
+    private static final String VALUE_PARAM = "value";
 
     private final SortTypeResolver sortTypeResolver;
-
-    public CursorDefaultResolver(SortTypeResolver sortTypeResolver) {
-        this.sortTypeResolver = sortTypeResolver;
-    }
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -46,7 +48,8 @@ public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
         long cursor = getCursor(webRequest, annotation);
         int size = getSize(webRequest, annotation);
         SortType sort = getSort(webRequest, annotation);
-        return new Cursor(cursor, size, sort);
+        String value = getValue(webRequest, annotation);
+        return new Cursor(cursor, value, size, sort);
     }
 
     /**
@@ -108,8 +111,14 @@ public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
     private SortType getSort(NativeWebRequest webRequest, CursorDefault cursorDefault) {
         String sortParam =
                 Optional.ofNullable(webRequest.getParameter(SORT_PARAM)).orElse(cursorDefault.sort());
-        return sortTypeResolver
-                .resolve(sortParam)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid sort parameter"));
+        return sortTypeResolver.resolve(sortParam, cursorDefault.sortType());
+    }
+
+    private String getValue(NativeWebRequest webRequest, CursorDefault cursorDefault) {
+
+        String raw = Optional.ofNullable(webRequest.getParameter(VALUE_PARAM)).orElse(cursorDefault.value());
+        if (raw == null || raw.isBlank()) return null;
+
+        return raw;
     }
 }

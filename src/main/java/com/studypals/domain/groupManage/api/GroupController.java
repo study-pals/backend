@@ -7,20 +7,18 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.groupManage.dao.groupRepository.GroupSortType;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.GetGroupDetailRes;
 import com.studypals.domain.groupManage.dto.GetGroupTagRes;
 import com.studypals.domain.groupManage.dto.GetGroupsRes;
 import com.studypals.domain.groupManage.service.GroupService;
+import com.studypals.global.annotations.CursorDefault;
+import com.studypals.global.request.Cursor;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
@@ -69,5 +67,14 @@ public class GroupController {
             @AuthenticationPrincipal Long userId, @PathVariable Long groupId) {
         GetGroupDetailRes response = groupService.getGroupDetails(userId, groupId);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_DETAIL, response));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Response<List<GetGroupsRes>>> searchByHashTag(
+            @CursorDefault(sortType = GroupSortType.class, cursor = 0, size = 5, sort = "POPULAR") Cursor cursor,
+            @RequestParam(required = false, name = "hashTag") String hashTag,
+            @RequestParam(required = false, name = "tag") String tag,
+            @RequestParam(required = false, name = "name") String name) {
+        return ResponseEntity.ok().build();
     }
 }

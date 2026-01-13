@@ -24,6 +24,8 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
+import com.studypals.global.exceptions.errorCode.GroupErrorCode;
+import com.studypals.global.exceptions.exception.GroupException;
 import com.studypals.global.retry.RetryTx;
 
 /**
@@ -138,5 +140,18 @@ public class GroupServiceImpl implements GroupService {
         List<String> hashTags = groupHashTagWorker.getHashTagsByGroup(groupId);
 
         return GetGroupDetailRes.of(group, hashTags, profiles, userGoals);
+    }
+
+    @Transactional
+    public List<GetGroupsRes> search(GroupSearchDto dto) {
+        try {
+            dto.validate();
+        } catch (IllegalArgumentException e) {
+            throw new GroupException(
+                    GroupErrorCode.GROUP_SEARCH_FAIL,
+                    e.getMessage(),
+                    "[GroupServiceImpl#search] validate dto fail : " + e.getMessage());
+        }
+        return List.of();
     }
 }

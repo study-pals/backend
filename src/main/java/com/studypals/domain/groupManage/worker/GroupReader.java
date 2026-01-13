@@ -4,8 +4,8 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
+import com.studypals.domain.groupManage.dao.groupRepository.GroupRepository;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.global.annotations.Worker;

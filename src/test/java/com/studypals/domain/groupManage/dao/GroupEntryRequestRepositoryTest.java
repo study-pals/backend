@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
+import com.studypals.domain.groupManage.dao.groupEntryRepository.GroupEntryRequestRepository;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.memberManage.entity.Member;

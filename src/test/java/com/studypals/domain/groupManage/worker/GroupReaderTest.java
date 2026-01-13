@@ -11,8 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
+import com.studypals.domain.groupManage.dao.groupRepository.GroupRepository;
 import com.studypals.domain.groupManage.entity.GroupTag;
 
 /**
