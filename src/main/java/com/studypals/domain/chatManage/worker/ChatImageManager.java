@@ -5,11 +5,11 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import com.studypals.global.file.ObjectStorage;
-import com.studypals.global.file.dao.AbstractFileManager;
-import com.studypals.global.file.entity.FileType;
+import com.studypals.global.file.dao.AbstractImageManager;
+import com.studypals.global.file.entity.ImageType;
 
 @Component
-public class ChatImageManager extends AbstractFileManager {
+public class ChatImageManager extends AbstractImageManager {
     private static final String CHAT_IMAGE_PATH = "chat/image";
 
     public ChatImageManager(ObjectStorage objectStorage) {
@@ -30,7 +30,7 @@ public class ChatImageManager extends AbstractFileManager {
     }
 
     @Override
-    public FileType getFileType() {
-        return FileType.CHAT_IMAGE;
+    public ImageType getFileType() {
+        return ImageType.CHAT_IMAGE;
     }
 }

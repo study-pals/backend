@@ -1,9 +1,6 @@
 package com.studypals.domain.fileManage.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
@@ -17,12 +14,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.dao.AbstractFileManager;
-import com.studypals.global.file.entity.FileType;
+import com.studypals.global.file.entity.ImageType;
 
 /**
  * {@link AbstractFileManager} 에 대한 테스트코드입니다.
  *
- * <p>Presigned URL 발급 성공/실패 케이스 및 파일 삭제 로직을 테스트합니다.
+ * <p>파일 삭제 로직 및 확장자 추출 로직을 테스트합니다.
  *
  * @author s0o0bn
  * @see AbstractFileManager
@@ -34,88 +31,11 @@ class AbstractFileManagerTest {
     @Mock
     private ObjectStorage objectStorage;
 
-    private AbstractFileManager fileRepository;
+    private TestFileManager fileRepository;
 
     @BeforeEach
     void setUp() {
-        // 추상 클래스 테스트를 위한 익명 클래스 구현
-        fileRepository = new AbstractFileManager(objectStorage) {
-            @Override
-            protected String generateObjectKey(String fileName) {
-                return "test/" + fileName;
-            }
-
-            @Override
-            protected String generateObjectKey(String fileName, String targetId) {
-                return "test/" + targetId + "/" + fileName;
-            }
-
-            @Override
-            public FileType getFileType() {
-                return FileType.PROFILE;
-            }
-        };
-    }
-
-    @Test
-    @DisplayName("Upload URL 생성 성공")
-    void getUploadUrl_success_no_targetId() {
-        // given
-        String fileName = "image.jpg";
-        String expectedUrl = "https://example.com/presigned-url";
-        String expectedKey = "test/" + fileName;
-
-        given(objectStorage.createPresignedPutUrl(eq(expectedKey), anyInt())).willReturn(expectedUrl);
-
-        // when
-        String result = fileRepository.getUploadUrl(fileName);
-
-        // then
-        assertThat(result).isEqualTo(expectedUrl);
-        then(objectStorage).should().createPresignedPutUrl(eq(expectedKey), eq(300));
-    }
-
-    @Test
-    @DisplayName("Upload URL 생성 성공 - targetId 포함")
-    void getUploadUrl_success_with_targetId() {
-        // given
-        String fileName = "image.jpg";
-        String targetId = "room1";
-        String expectedUrl = "https://example.com/presigned-url";
-        String expectedKey = "test/" + targetId + "/" + fileName;
-
-        given(objectStorage.createPresignedPutUrl(eq(expectedKey), anyInt())).willReturn(expectedUrl);
-
-        // when
-        String result = fileRepository.getUploadUrl(fileName, targetId);
-
-        // then
-        assertThat(result).isEqualTo(expectedUrl);
-        then(objectStorage).should().createPresignedPutUrl(eq(expectedKey), eq(300));
-    }
-
-    @Test
-    @DisplayName("Upload URL 생성 실패 - 지원하지 않는 확장자")
-    void getUploadUrl_fail_invalid_extension() {
-        // given
-        String fileName = "document.txt";
-
-        // when & then
-        assertThatThrownBy(() -> fileRepository.getUploadUrl(fileName))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("유효하지 않은 fileName");
-    }
-
-    @Test
-    @DisplayName("Upload URL 생성 실패 - 확장자 없음")
-    void getUploadUrl_fail_no_extension() {
-        // given
-        String fileName = "image";
-
-        // when & then
-        assertThatThrownBy(() -> fileRepository.getUploadUrl(fileName))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("확장자가 없는 사진은 업로드 할 수 없습니다.");
+        fileRepository = new TestFileManager(objectStorage);
     }
 
     @Test
@@ -132,5 +52,73 @@ class AbstractFileManagerTest {
 
         // then
         then(objectStorage).should(times(1)).delete(objectKey);
+    }
+
+    @Test
+    @DisplayName("확장자 추출 - 정상 케이스")
+    void extractExtension_success() {
+        // given
+        String fileName = "image.jpg";
+
+        // when
+        String extension = fileRepository.callExtractExtension(fileName);
+
+        // then
+        assertThat(extension).isEqualTo("jpg");
+    }
+
+    @Test
+    @DisplayName("확장자 추출 - 대문자 확장자 소문자로 변환")
+    void extractExtension_upperCase() {
+        // given
+        String fileName = "image.PNG";
+
+        // when
+        String extension = fileRepository.callExtractExtension(fileName);
+
+        // then
+        assertThat(extension).isEqualTo("png");
+    }
+
+    @Test
+    @DisplayName("확장자 추출 - 확장자 없음")
+    void extractExtension_noExtension() {
+        // given
+        String fileName = "image";
+
+        // when
+        String extension = fileRepository.callExtractExtension(fileName);
+
+        // then
+        assertThat(extension).isEmpty();
+    }
+
+    @Test
+    @DisplayName("확장자 추출 - 점으로 끝나는 경우")
+    void extractExtension_endsWithDot() {
+        // given
+        String fileName = "image.";
+
+        // when
+        String extension = fileRepository.callExtractExtension(fileName);
+
+        // then
+        assertThat(extension).isEmpty();
+    }
+
+    // 테스트를 위한 구체 클래스
+    static class TestFileManager extends AbstractFileManager {
+        public TestFileManager(ObjectStorage objectStorage) {
+            super(objectStorage);
+        }
+
+        @Override
+        public ImageType getFileType() {
+            return ImageType.PROFILE_IMAGE;
+        }
+
+        public String callExtractExtension(String fileName) {
+            return extractExtension(fileName);
+        }
     }
 }

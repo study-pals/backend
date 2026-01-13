@@ -10,16 +10,16 @@ import com.studypals.global.file.dto.ProfilePresignedUrlReq;
  * FileServiceImpl 의 부모 인터페이스입니다.
  *
  * @author sleepyhoon
- * @see FileServiceImpl
+ * @see ImageFileServiceImpl
  * @since 2026-01-10
  */
-public interface FileService {
+public interface ImageFileService {
     /**
      * 프로필 이미지 업로드를 위한 URL을 발급합니다.
      * @param request 프로필 파일 이름 정보가 담긴 요청 DTO
      * @return 업로드 가능한 URL
      */
-    String getProfileUploadUrl(ProfilePresignedUrlReq request);
+    String getProfileUploadUrl(ProfilePresignedUrlReq request, Long userId);
 
     /**
      * 채팅 이미지 업로드를 위한 URL을 발급합니다.

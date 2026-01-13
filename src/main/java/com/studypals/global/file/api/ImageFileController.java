@@ -3,6 +3,7 @@ package com.studypals.global.file.api;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import com.studypals.global.file.dto.ChatPresignedUrlReq;
 import com.studypals.global.file.dto.PresignedUrlRes;
 import com.studypals.global.file.dto.ProfilePresignedUrlReq;
-import com.studypals.global.file.service.FileService;
+import com.studypals.global.file.service.ImageFileService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
@@ -23,28 +24,29 @@ import com.studypals.global.responses.ResponseCode;
  * 파일 업로드는 서버 측에서 presigned url을 발급하고 클라이언트 측에서 진행합니다.
  *
  * <pre>
- *     - POST /files/profile/presigned-url : 프로필 사진 업로드를 위한 URL 발급
- *     - POST /files/chat/presigned-url : 채팅 사진 업로드를 위한 URL 발급
+ *     - POST /files/image/profile/presigned-url : 프로필 사진 업로드를 위한 URL 발급
+ *     - POST /files/image/presigned-url : 채팅 사진 업로드를 위한 URL 발급
  * </pre>
  *
  * @author sleepyhoon
  * @since 2026-01-10
  */
 @RestController
-@RequestMapping("/files")
+@RequestMapping("/files/image")
 @RequiredArgsConstructor
-public class FileController {
-    private final FileService fileService;
+public class ImageFileController {
+    private final ImageFileService imageFileService;
 
     @PostMapping("/profile/presigned-url")
-    public ResponseEntity<Response<PresignedUrlRes>> getUploadUrl(@Valid @RequestBody ProfilePresignedUrlReq request) {
-        String response = fileService.getProfileUploadUrl(request);
+    public ResponseEntity<Response<PresignedUrlRes>> getUploadUrl(
+            @Valid @RequestBody ProfilePresignedUrlReq request, @AuthenticationPrincipal Long userId) {
+        String response = imageFileService.getProfileUploadUrl(request, userId);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.IMAGE_UPLOAD, new PresignedUrlRes(response)));
     }
 
     @PostMapping("/chat/presigned-url")
     public ResponseEntity<Response<PresignedUrlRes>> getUploadUrl(@Valid @RequestBody ChatPresignedUrlReq request) {
-        String response = fileService.getChatUploadUrl(request);
+        String response = imageFileService.getChatUploadUrl(request);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.IMAGE_UPLOAD, new PresignedUrlRes(response)));
     }
 }
