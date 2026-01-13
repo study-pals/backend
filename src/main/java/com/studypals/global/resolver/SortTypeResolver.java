@@ -2,7 +2,9 @@ package com.studypals.global.resolver;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.studypals.global.request.SortType;
 
@@ -14,19 +16,21 @@ import com.studypals.global.request.SortType;
  * @since 2025-06-05
  */
 public class SortTypeResolver {
-    private final List<Class<? extends SortType>> sortTypeClasses;
+
+    private final Map<String, SortType> cache;
 
     public SortTypeResolver(List<Class<? extends SortType>> sortTypeClasses) {
-        this.sortTypeClasses = sortTypeClasses;
+        this.cache = sortTypeClasses.stream()
+                .flatMap(clazz -> Arrays.stream(clazz.getEnumConstants()))
+                .map(capture -> (SortType) capture)
+                .collect(Collectors.toMap(type -> type.name().toLowerCase(), type -> type, (a, b) -> {
+                    throw new IllegalArgumentException("Duplicate sort key : " + a.name());
+                }));
     }
 
     public Optional<SortType> resolve(String sort) {
         if (sort == null) return Optional.empty();
 
-        return sortTypeClasses.stream()
-                .flatMap(clazz -> Arrays.stream(clazz.getEnumConstants()))
-                .map(capture -> (SortType) capture)
-                .filter(type -> type.name().equalsIgnoreCase(sort))
-                .findFirst();
+        return Optional.ofNullable(cache.get(sort.toLowerCase()));
     }
 }
