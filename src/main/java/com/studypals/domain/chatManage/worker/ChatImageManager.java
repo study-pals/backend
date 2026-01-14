@@ -34,10 +34,14 @@ public class ChatImageManager extends AbstractImageManager {
     /**
      * 해당 채팅방에 속한 멤버인지 확인합니다.
      * @param userId 검증할 사용자 ID
-     * @param targetId 채팅방 ID
+     * @param chatRoomId 채팅방 ID
      */
     @Override
-    protected void validateTargetId(Long userId, String targetId) {}
+    protected void validateTargetId(Long userId, String chatRoomId) {
+        if (!chatRoomReader.isMemberOfChatRoom(userId, chatRoomId)) {
+            throw new RuntimeException("해당 채팅방에 속한 멤버가 아닙니다.");
+        }
+    }
 
     @Override
     protected String generateObjectKeyDetail(String targetId, String ext) {
