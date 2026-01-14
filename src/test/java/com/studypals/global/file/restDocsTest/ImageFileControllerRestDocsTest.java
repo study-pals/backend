@@ -3,7 +3,8 @@ package com.studypals.global.file.restDocsTest;
 import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
-import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
+import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -57,7 +58,11 @@ class ImageFileControllerRestDocsTest extends RestDocsSupport {
                 .andExpect(hasKey(expected))
                 .andDo(print())
                 .andDo(restDocs.document(
-                        requestFields(fieldWithPath("fileName").description("업로드할 파일 이름 (확장자 포함)")),
+                        httpRequest(),
+                        httpResponse(),
+                        requestFields(fieldWithPath("fileName")
+                                .description("업로드할 파일 이름 (확장자 포함)")
+                                .attributes(constraints("not null, not blank"))),
                         responseFields(
                                 fieldWithPath("code").description("응답 코드 (I01-01)"),
                                 fieldWithPath("status").description("응답 상태"),
@@ -89,9 +94,15 @@ class ImageFileControllerRestDocsTest extends RestDocsSupport {
                 .andExpect(hasKey(expected))
                 .andDo(print())
                 .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
                         requestFields(
-                                fieldWithPath("fileName").description("업로드할 파일 이름 (확장자 포함)"),
-                                fieldWithPath("chatRoomId").description("업로드 대상 채팅방 ID")),
+                                fieldWithPath("fileName")
+                                        .description("업로드할 파일 이름 (확장자 포함)")
+                                        .attributes(constraints("not null, not blank")),
+                                fieldWithPath("chatRoomId")
+                                        .description("업로드 대상 채팅방 ID")
+                                        .attributes(constraints("not null, not blank"))),
                         responseFields(
                                 fieldWithPath("code").description("응답 코드 (I01-01)"),
                                 fieldWithPath("status").description("응답 상태"),
