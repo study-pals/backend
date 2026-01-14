@@ -58,7 +58,11 @@ public class GroupMember {
         return role.equals(GroupRole.LEADER);
     }
 
-    public void updateRole(GroupRole role){
-        this.role = role;
+    public void promoteToLeader() {
+        this.role = GroupRole.LEADER;
+    }
+
+    public void demoteToMember() {
+        this.role = GroupRole.MEMBER;
     }
 }

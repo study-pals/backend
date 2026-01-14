@@ -31,7 +31,7 @@ public class GroupMemberController {
 
     @PutMapping("/{groupId}/promote/{nextLeaderId}")
     public ResponseEntity<Response<Long>> promoteLeader(
-            @AuthenticationPrincipal Long userId, @PathVariable Long groupId, @PathVariable Long nextLeaderId
+            @PathVariable Long groupId, @AuthenticationPrincipal Long userId, @PathVariable Long nextLeaderId
     ) {
         groupMemberService.promoteLeader(groupId, userId, nextLeaderId);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_LEADER, groupId));

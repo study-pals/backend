@@ -56,25 +56,23 @@ public class GroupMemberWriter {
     }
 
     public void promoteLeader(Long groupId, Long userId, Long nextLeaderId){
-        if(!groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId)){
-            throw new GroupException(GroupErrorCode.GROUP_PROMOTE_FAIL, "not leader");
-        }
-
         if(userId.equals(nextLeaderId)){
             throw new GroupException(GroupErrorCode.GROUP_PROMOTE_FAIL, "can't promote to myself");
         }
-
         GroupMember leader = groupMemberRepository.findByMemberIdAndGroupId(userId, groupId).orElseThrow(() -> {
             String message = String.format("member %d not found in group %d", userId, groupId);
             return new GroupException(GroupErrorCode.GROUP_MEMBER_NOT_FOUND, message);
         });
+        if (!leader.isLeader()) {
+            throw new GroupException(GroupErrorCode.GROUP_PROMOTE_FAIL, "not leader");
+        }
 
         GroupMember nextLeader = groupMemberRepository.findByMemberIdAndGroupId(nextLeaderId, groupId).orElseThrow(() -> {
             String message = String.format("member %d not found in group %d", nextLeaderId, groupId);
             return new GroupException(GroupErrorCode.GROUP_MEMBER_NOT_FOUND, message);
         });
 
-        nextLeader.updateRole(GroupRole.LEADER);
-        leader.updateRole(GroupRole.MEMBER);
+        nextLeader.promoteToLeader();
+        leader.demoteToMember();
     }
 }
