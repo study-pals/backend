@@ -7,9 +7,13 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.studypals.global.exceptions.errorCode.FileErrorCode;
+import com.studypals.global.exceptions.exception.FileException;
+import com.studypals.global.file.dao.AbstractFileManager;
 import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.dto.ChatPresignedUrlReq;
 import com.studypals.global.file.dto.ProfilePresignedUrlReq;
+import com.studypals.global.file.entity.FileType;
 import com.studypals.global.file.entity.ImageType;
 
 /**
@@ -22,33 +26,43 @@ import com.studypals.global.file.entity.ImageType;
 @Service
 public class ImageFileServiceImpl implements ImageFileService {
 
-    private final Map<ImageType, AbstractImageManager> repositoryMap;
+    private final Map<FileType, AbstractFileManager> managerMap;
 
-    public ImageFileServiceImpl(List<AbstractImageManager> repositories) {
-        this.repositoryMap = repositories.stream()
+    public ImageFileServiceImpl(List<AbstractFileManager> managers) {
+        this.managerMap = managers.stream()
                 .collect(Collectors.toMap(
-                        AbstractImageManager::getFileType, Function.identity(), (existing, duplicate) -> {
-                            throw new IllegalStateException("중복된 레포지토리입니다. 중복된 타입: " + existing.getFileType());
+                        AbstractFileManager::getFileType, Function.identity(), (existing, duplicate) -> {
+                            throw new IllegalStateException(String.format(
+                                    "ImageType 중복 등록 오류. '%s' 타입이 '%s'와 '%s' 클래스에서 중복으로 처리됩니다.",
+                                    existing.getFileType(),
+                                    existing.getClass().getName(),
+                                    duplicate.getClass().getName()));
                         }));
     }
 
     @Override
     public String getProfileUploadUrl(ProfilePresignedUrlReq request, Long userId) {
-        AbstractImageManager repository = getRepository(ImageType.PROFILE_IMAGE);
-        return repository.getUploadUrl(userId, request.fileName(), String.valueOf(userId));
+        AbstractImageManager manager = getManager(ImageType.PROFILE_IMAGE, AbstractImageManager.class);
+        return manager.getUploadUrl(userId, request.fileName(), String.valueOf(userId));
     }
 
     @Override
     public String getChatUploadUrl(ChatPresignedUrlReq request, Long userId) {
-        AbstractImageManager repository = getRepository(ImageType.CHAT_IMAGE);
-        return repository.getUploadUrl(userId, request.fileName(), request.targetId());
+        AbstractImageManager manager = getManager(ImageType.CHAT_IMAGE, AbstractImageManager.class);
+        return manager.getUploadUrl(userId, request.fileName(), request.chatRoomId());
     }
 
-    private AbstractImageManager getRepository(ImageType imageType) {
-        AbstractImageManager repository = repositoryMap.get(imageType);
-        if (repository == null) {
-            throw new IllegalArgumentException("지원하지 않는 파일 타입입니다.");
+    private <T extends AbstractFileManager> T getManager(FileType fileType, Class<T> managerClass) {
+        AbstractFileManager manager = managerMap.get(fileType);
+        if (manager == null) {
+            throw new FileException(FileErrorCode.UNSUPPORTED_FILE_IMAGE_TYPE);
         }
-        return repository;
+        if (!managerClass.isInstance(manager)) {
+            // 잘못된 타입의 Manager가 매핑된 경우, 이는 심각한 설정 오류입니다.
+            throw new IllegalStateException(String.format(
+                    "요청된 FileType '%s'에 대한 Manager 타입이 일치하지 않습니다. 기대값: %s, 실제값: %s",
+                    fileType, managerClass.getName(), manager.getClass().getName()));
+        }
+        return managerClass.cast(manager);
     }
 }

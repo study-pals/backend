@@ -41,13 +41,13 @@ public class ImageFileController {
     public ResponseEntity<Response<PresignedUrlRes>> getUploadUrl(
             @Valid @RequestBody ProfilePresignedUrlReq request, @AuthenticationPrincipal Long userId) {
         String response = imageFileService.getProfileUploadUrl(request, userId);
-        return ResponseEntity.ok(CommonResponse.success(ResponseCode.IMAGE_UPLOAD, new PresignedUrlRes(response)));
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.FILE_IMAGE_UPLOAD, new PresignedUrlRes(response)));
     }
 
     @PostMapping("/chat/presigned-url")
     public ResponseEntity<Response<PresignedUrlRes>> getUploadUrl(
             @Valid @RequestBody ChatPresignedUrlReq request, @AuthenticationPrincipal Long userId) {
         String response = imageFileService.getChatUploadUrl(request, userId);
-        return ResponseEntity.ok(CommonResponse.success(ResponseCode.IMAGE_UPLOAD, new PresignedUrlRes(response)));
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.FILE_IMAGE_UPLOAD, new PresignedUrlRes(response)));
     }
 }
