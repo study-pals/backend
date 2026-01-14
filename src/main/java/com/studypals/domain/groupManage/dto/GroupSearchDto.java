@@ -9,7 +9,7 @@ import lombok.Builder;
  * @since 2026-01-13
  */
 @Builder
-public record GroupSearchDto(String tag, String hashTag, String name) {
+public record GroupSearchDto(String tag, String hashTag, String name, Boolean isOpen, Boolean isApprovalRequired) {
     public void validate() {
         int count = 0;
 

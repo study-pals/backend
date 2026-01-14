@@ -1,5 +1,11 @@
 package com.studypals.domain.groupManage.dao.groupRepository;
 
+import org.springframework.data.domain.Slice;
+
+import com.studypals.domain.groupManage.dto.GroupSearchDto;
+import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.global.request.Cursor;
+
 /**
  * 코드에 대한 전체적인 역할을 적습니다.
  * <p>
@@ -22,4 +28,6 @@ package com.studypals.domain.groupManage.dao.groupRepository;
  * @see
  * @since 2026-01-13
  */
-public interface GroupCustomRepository {}
+public interface GroupCustomRepository {
+    Slice<Group> search(GroupSearchDto dto, Cursor cursor);
+}
