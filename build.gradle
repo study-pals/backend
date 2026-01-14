@@ -69,11 +69,16 @@ dependencies {
     // spring security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
+    //netty for message broker
+    implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
+
+
     // REST Docs / test
     asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.springframework.restdocs:spring-restdocs-core'
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-redis'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-redis'
     testImplementation 'org.mockito:mockito-core:4.6.1'
 
