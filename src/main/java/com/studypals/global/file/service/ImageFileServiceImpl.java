@@ -35,13 +35,13 @@ public class ImageFileServiceImpl implements ImageFileService {
     @Override
     public String getProfileUploadUrl(ProfilePresignedUrlReq request, Long userId) {
         AbstractImageManager repository = getRepository(ImageType.PROFILE_IMAGE);
-        return repository.getUploadUrl(request.fileName(), String.valueOf(userId));
+        return repository.getUploadUrl(userId, request.fileName(), String.valueOf(userId));
     }
 
     @Override
-    public String getChatUploadUrl(ChatPresignedUrlReq request) {
+    public String getChatUploadUrl(ChatPresignedUrlReq request, Long userId) {
         AbstractImageManager repository = getRepository(ImageType.CHAT_IMAGE);
-        return repository.getUploadUrl(request.fileName(), request.targetId());
+        return repository.getUploadUrl(userId, request.fileName(), request.targetId());
     }
 
     private AbstractImageManager getRepository(ImageType imageType) {

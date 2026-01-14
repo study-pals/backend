@@ -26,5 +26,5 @@ public interface ImageFileService {
      * @param request 채팅 파일 이름과 타겟 ID 정보가 담긴 요청 DTO
      * @return 업로드 가능한 URL
      */
-    String getChatUploadUrl(ChatPresignedUrlReq request);
+    String getChatUploadUrl(ChatPresignedUrlReq request, Long userId);
 }

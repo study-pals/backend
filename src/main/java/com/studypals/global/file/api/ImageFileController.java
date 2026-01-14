@@ -45,8 +45,9 @@ public class ImageFileController {
     }
 
     @PostMapping("/chat/presigned-url")
-    public ResponseEntity<Response<PresignedUrlRes>> getUploadUrl(@Valid @RequestBody ChatPresignedUrlReq request) {
-        String response = imageFileService.getChatUploadUrl(request);
+    public ResponseEntity<Response<PresignedUrlRes>> getUploadUrl(
+            @Valid @RequestBody ChatPresignedUrlReq request, @AuthenticationPrincipal Long userId) {
+        String response = imageFileService.getChatUploadUrl(request, userId);
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.IMAGE_UPLOAD, new PresignedUrlRes(response)));
     }
 }

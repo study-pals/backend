@@ -8,27 +8,46 @@ import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.entity.ImageType;
 
+/**
+ * 파일 중 채팅 이미지를 처리하는데 사용하는 구체 클래스입니다.
+ *
+ *  <p>
+ *  - 채팅 이미지 업로드를 위해 Presigned URL을 사용합니다.
+ *  - 채팅 이미지 조회를 위해 Presigned URL을 사용합니다.
+ *
+ * <p><b>상속 구조</b><br>
+ * {@link AbstractImageManager}
+ *
+ * @author sleepyhoon
+ * @See AbstractImageManager
+ * @since 2026-01-13
+ */
 @Component
 public class ChatImageManager extends AbstractImageManager {
-    private static final String CHAT_IMAGE_PATH = "chat/image";
+    private static final String CHAT_IMAGE_PATH = "chat";
+    private static ChatRoomReader chatRoomReader;
 
     public ChatImageManager(ObjectStorage objectStorage) {
         super(objectStorage);
     }
 
     /**
-     * 채팅 이미지를 업로드하기 위한 객체 키(저장 경로)를 생성하여 반환합니다.
-     * @return 업로드될 채팅 이미지의 객체 키(저장 경로)
+     * 해당 채팅방에 속한 멤버인지 확인합니다.
+     * @param userId 검증할 사용자 ID
+     * @param targetId 채팅방 ID
      */
     @Override
-    protected String generateObjectKey(String fileName, String targetId) {
-        if (targetId == null || targetId.isBlank()) {
-            throw new IllegalArgumentException("ChatRoomId is required for ChatImage");
-        }
-        String ext = extractExtension(fileName);
+    protected void validateTargetId(Long userId, String targetId) {}
+
+    @Override
+    protected String generateObjectKeyDetail(String targetId, String ext) {
         return CHAT_IMAGE_PATH + "/" + targetId + "/" + UUID.randomUUID() + "." + ext;
     }
 
+    /**
+     * 이 클래스는 채팅 이미지를 처리합니다.
+     * @return 처리하는 이미지 종류
+     */
     @Override
     public ImageType getFileType() {
         return ImageType.CHAT_IMAGE;
