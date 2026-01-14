@@ -3,7 +3,7 @@ package com.studypals.global.file.dao;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.global.file.ObjectStorage;
-import com.studypals.global.file.entity.ImageType;
+import com.studypals.global.file.entity.FileType;
 
 /**
  * 파일을 처리하는데 사용하는 최상위 추상 클래스입니다.
@@ -33,7 +33,7 @@ public abstract class AbstractFileManager {
      * 클래스가 담당하는 파일 타입을 반환합니다.
      * @return 파일 타입
      */
-    public abstract ImageType getFileType();
+    public abstract FileType getFileType();
 
     /**
      * 파일 이름에서 확장자를 추출합니다.

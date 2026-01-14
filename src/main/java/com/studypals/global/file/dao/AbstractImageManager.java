@@ -2,6 +2,8 @@ package com.studypals.global.file.dao;
 
 import java.util.List;
 
+import com.studypals.global.exceptions.errorCode.FileErrorCode;
+import com.studypals.global.exceptions.exception.FileException;
 import com.studypals.global.file.ObjectStorage;
 
 /**
@@ -16,7 +18,7 @@ import com.studypals.global.file.ObjectStorage;
  * @since 2026-01-13
  */
 public abstract class AbstractImageManager extends AbstractFileManager {
-    private static final List<String> acceptableExtensions = List.of("jpg", "jpeg", "png", "bmp", "webp");
+    protected static final List<String> acceptableExtensions = List.of("jpg", "jpeg", "png", "bmp", "webp");
     protected static final int PRESIGNED_URL_EXPIRE_TIME = 600; // 10분동안만 유효함
 
     public AbstractImageManager(ObjectStorage objectStorage) {
@@ -77,11 +79,11 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      */
     private void validateFileName(String fileName) {
         if (fileName == null || !fileName.contains(".")) {
-            throw new IllegalArgumentException("확장자가 없는 사진은 업로드 할 수 없습니다.");
+            throw new FileException(FileErrorCode.INVALID_FILE_NAME);
         }
         String extension = extractExtension(fileName);
         if (!acceptableExtensions.contains(extension)) {
-            throw new IllegalArgumentException("지원하지 않는 파일 확장자입니다: " + extractExtension(fileName));
+            throw new FileException(FileErrorCode.UNSUPPORTED_FILE_IMAGE_EXTENSION);
         }
     }
 }

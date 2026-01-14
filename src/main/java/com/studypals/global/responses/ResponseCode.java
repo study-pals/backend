@@ -56,9 +56,10 @@ public enum ResponseCode {
     STUDY_CATEGORY_UPDATE("U03-08"),
     STUDY_STATUS_CHECK("U03-09"),
 
-    // I01 - Image
-    IMAGE_UPLOAD("I01-00"),
-    IMAGE_ACCESS("I01-01"),
+    // I01 - file
+    FILE_IMAGE_TYPE("I01-00"),
+    FILE_IMAGE_UPLOAD("I01-01"),
+    FILE_IMAGE_ACCESS("I01-02"),
 
     // C01 - chatRoom(not messaging)
     CHAT_ROOM_SEARCH("C01-00"),
@@ -68,6 +69,7 @@ public enum ResponseCode {
     CHAT_ROOM_JOIN("C01-04"),
     CHAT_ROOM_LEAVE("C01-05"),
     CHAT_ROOM_ROLE("C01-06"),
+    CHAT_ROOM_NOT_CONTAIN_MEMBER("C01-07"),
 
     CHAT_SEND("C02-00"),
     CHAT_SUBSCRIBE("C02-01");

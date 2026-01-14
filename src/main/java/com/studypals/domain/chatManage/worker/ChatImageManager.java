@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.studypals.global.exceptions.errorCode.ChatErrorCode;
+import com.studypals.global.exceptions.exception.ChatException;
 import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.entity.ImageType;
@@ -25,10 +27,11 @@ import com.studypals.global.file.entity.ImageType;
 @Component
 public class ChatImageManager extends AbstractImageManager {
     private static final String CHAT_IMAGE_PATH = "chat";
-    private static ChatRoomReader chatRoomReader;
+    private final ChatRoomReader chatRoomReader;
 
-    public ChatImageManager(ObjectStorage objectStorage) {
+    public ChatImageManager(ObjectStorage objectStorage, ChatRoomReader chatRoomReader) {
         super(objectStorage);
+        this.chatRoomReader = chatRoomReader;
     }
 
     /**
@@ -39,7 +42,7 @@ public class ChatImageManager extends AbstractImageManager {
     @Override
     protected void validateTargetId(Long userId, String chatRoomId) {
         if (!chatRoomReader.isMemberOfChatRoom(userId, chatRoomId)) {
-            throw new RuntimeException("해당 채팅방에 속한 멤버가 아닙니다.");
+            throw new ChatException(ChatErrorCode.CHAT_ROOM_NOT_CONTAIN_MEMBER);
         }
     }
 
