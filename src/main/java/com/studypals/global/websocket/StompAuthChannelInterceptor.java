@@ -46,7 +46,6 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
     private final JwtUtils jwtUtils;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
-    private final MemberReader memberReader;
     private final UserSubscribeInfoRepository userSubscribeInfoRepository;
 
     private static final String ACCESS_HEADER = "Authorization";
@@ -67,8 +66,11 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (accessor == null) throw new IllegalArgumentException("not invalid protocol");
-        if (accessor.getCommand() == null) throw new IllegalArgumentException("header not exist");
 
+        //heartbeat 통과
+        if (accessor.getCommand() == null) {
+            return message;
+        }
         try {
             switch (accessor.getCommand()) {
                 case CONNECT -> handleConnect(accessor);
@@ -123,11 +125,11 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
                     ChatErrorCode.CHAT_SUBSCRIBE_FAIL,
                     "[StompAuthChannelInterceptor#handleSubscribe] destination null");
 
-        if (!destination.startsWith("/sub/chat/room/")) {
+        if (!destination.startsWith("/exchange/amq.topic/chat.room.")) {
             return;
         }
         // url 로 부터 구독하고자 하는 방의 id 를 추출
-        String roomId = extractRoomIdFromDestination(destination);
+        String roomId = destination.substring(destination.lastIndexOf('.') + 1); //extractRoomIdFromDestination(destination);
         String sessionId = accessor.getSessionId();
 
         // todo: delete before prod

@@ -1,5 +1,7 @@
 package com.studypals.global.websocket;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -25,9 +27,11 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
+@EnableConfigurationProperties(StompRelayProp.class)
 public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final StompAuthChannelInterceptor stompAuthChannelInterceptor;
+    private final StompRelayProp stompProp;
 
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
@@ -41,9 +45,21 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/sub", "/queue");
+        //config.enableSimpleBroker("/sub", "/queue");
         config.setApplicationDestinationPrefixes("/pub", "/req");
         config.setUserDestinationPrefix("/user");
+
+        config.enableStompBrokerRelay("/exchange", "/queue")
+                .setRelayHost(stompProp.host())
+                .setRelayPort(stompProp.port())
+                .setClientLogin(stompProp.username())
+                .setClientPasscode(stompProp.password())
+                .setSystemLogin(stompProp.username())
+                .setSystemPasscode(stompProp.password())
+                .setVirtualHost(stompProp.virtualHost())
+                .setTaskScheduler(taskScheduler())
+                .setSystemHeartbeatSendInterval(10000)
+                .setSystemHeartbeatReceiveInterval(10000);
     }
 
     @Override
