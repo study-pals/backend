@@ -1,6 +1,7 @@
 package com.studypals.global.file.service;
 
 import com.studypals.global.file.dto.ChatPresignedUrlReq;
+import com.studypals.global.file.dto.PresignedUrlRes;
 import com.studypals.global.file.dto.ProfilePresignedUrlReq;
 
 /**
@@ -19,12 +20,12 @@ public interface ImageFileService {
      * @param request 프로필 파일 이름 정보가 담긴 요청 DTO
      * @return 업로드 가능한 URL
      */
-    String getProfileUploadUrl(ProfilePresignedUrlReq request, Long userId);
+    PresignedUrlRes getProfileUploadUrl(ProfilePresignedUrlReq request, Long userId);
 
     /**
      * 채팅 이미지 업로드를 위한 URL을 발급합니다.
      * @param request 채팅 파일 이름과 타겟 ID 정보가 담긴 요청 DTO
      * @return 업로드 가능한 URL
      */
-    String getChatUploadUrl(ChatPresignedUrlReq request, Long userId);
+    PresignedUrlRes getChatUploadUrl(ChatPresignedUrlReq request, Long userId);
 }

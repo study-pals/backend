@@ -24,8 +24,8 @@ import com.studypals.global.responses.ResponseCode;
  * 파일 업로드는 서버 측에서 presigned url을 발급하고 클라이언트 측에서 진행합니다.
  *
  * <pre>
- *     - POST /files/image/profile/presigned-url : 프로필 사진 업로드를 위한 URL 발급
- *     - POST /files/image/presigned-url : 채팅 사진 업로드를 위한 URL 발급
+ *     - POST /files/image/profile : 프로필 사진 업로드를 위한 URL 발급
+ *     - POST /files/image/chat : 채팅 사진 업로드를 위한 URL 발급
  * </pre>
  *
  * @author sleepyhoon
@@ -37,17 +37,17 @@ import com.studypals.global.responses.ResponseCode;
 public class ImageFileController {
     private final ImageFileService imageFileService;
 
-    @PostMapping("/profile/presigned-url")
+    @PostMapping("/profile")
     public ResponseEntity<Response<PresignedUrlRes>> getUploadUrl(
             @Valid @RequestBody ProfilePresignedUrlReq request, @AuthenticationPrincipal Long userId) {
-        String response = imageFileService.getProfileUploadUrl(request, userId);
-        return ResponseEntity.ok(CommonResponse.success(ResponseCode.FILE_IMAGE_UPLOAD, new PresignedUrlRes(response)));
+        PresignedUrlRes response = imageFileService.getProfileUploadUrl(request, userId);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.FILE_IMAGE_UPLOAD, response));
     }
 
-    @PostMapping("/chat/presigned-url")
+    @PostMapping("/chat")
     public ResponseEntity<Response<PresignedUrlRes>> getUploadUrl(
             @Valid @RequestBody ChatPresignedUrlReq request, @AuthenticationPrincipal Long userId) {
-        String response = imageFileService.getChatUploadUrl(request, userId);
-        return ResponseEntity.ok(CommonResponse.success(ResponseCode.FILE_IMAGE_UPLOAD, new PresignedUrlRes(response)));
+        PresignedUrlRes response = imageFileService.getChatUploadUrl(request, userId);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.FILE_IMAGE_UPLOAD, response));
     }
 }

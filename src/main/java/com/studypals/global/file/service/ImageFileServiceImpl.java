@@ -12,6 +12,7 @@ import com.studypals.global.exceptions.exception.FileException;
 import com.studypals.global.file.dao.AbstractFileManager;
 import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.dto.ChatPresignedUrlReq;
+import com.studypals.global.file.dto.PresignedUrlRes;
 import com.studypals.global.file.dto.ProfilePresignedUrlReq;
 import com.studypals.global.file.entity.FileType;
 import com.studypals.global.file.entity.ImageType;
@@ -41,15 +42,17 @@ public class ImageFileServiceImpl implements ImageFileService {
     }
 
     @Override
-    public String getProfileUploadUrl(ProfilePresignedUrlReq request, Long userId) {
+    public PresignedUrlRes getProfileUploadUrl(ProfilePresignedUrlReq request, Long userId) {
         AbstractImageManager manager = getManager(ImageType.PROFILE_IMAGE, AbstractImageManager.class);
-        return manager.getUploadUrl(userId, request.fileName(), String.valueOf(userId));
+        String uploadUrl = manager.getUploadUrl(userId, request.fileName(), String.valueOf(userId));
+        return new PresignedUrlRes(uploadUrl);
     }
 
     @Override
-    public String getChatUploadUrl(ChatPresignedUrlReq request, Long userId) {
+    public PresignedUrlRes getChatUploadUrl(ChatPresignedUrlReq request, Long userId) {
         AbstractImageManager manager = getManager(ImageType.CHAT_IMAGE, AbstractImageManager.class);
-        return manager.getUploadUrl(userId, request.fileName(), request.chatRoomId());
+        String uploadUrl = manager.getUploadUrl(userId, request.fileName(), request.chatRoomId());
+        return new PresignedUrlRes(uploadUrl);
     }
 
     private <T extends AbstractFileManager> T getManager(FileType fileType, Class<T> managerClass) {

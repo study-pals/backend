@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.dto.ChatPresignedUrlReq;
+import com.studypals.global.file.dto.PresignedUrlRes;
 import com.studypals.global.file.dto.ProfilePresignedUrlReq;
 import com.studypals.global.file.entity.ImageType;
 
@@ -51,10 +52,11 @@ class ImageFileServiceImplTest {
         when(mockProfileImageManager.getUploadUrl(userId, "profile.jpg", "1")).thenReturn(expectedUrl);
 
         // when
-        String actualUrl = imageFileService.getProfileUploadUrl(request, userId);
+        PresignedUrlRes actualResult = imageFileService.getProfileUploadUrl(request, userId);
 
         // then
-        assertThat(actualUrl).isEqualTo(expectedUrl);
+        assertThat(actualResult).isNotNull();
+        assertThat(actualResult.url()).isEqualTo(expectedUrl);
         verify(mockProfileImageManager).getUploadUrl(userId, "profile.jpg", "1");
         verify(mockChatImageManager, never()).getUploadUrl(any(), any(), any());
     }
@@ -71,10 +73,11 @@ class ImageFileServiceImplTest {
                 .thenReturn(expectedUrl);
 
         // when
-        String actualUrl = imageFileService.getChatUploadUrl(request, userId);
+        PresignedUrlRes actualResult = imageFileService.getChatUploadUrl(request, userId);
 
         // then
-        assertThat(actualUrl).isEqualTo(expectedUrl);
+        assertThat(actualResult).isNotNull();
+        assertThat(actualResult.url()).isEqualTo(expectedUrl);
         verify(mockChatImageManager).getUploadUrl(userId, "chat-image.png", "chat-room-123");
         verify(mockProfileImageManager, never()).getUploadUrl(any(), any(), any());
     }
