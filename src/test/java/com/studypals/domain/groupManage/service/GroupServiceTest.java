@@ -3,8 +3,7 @@ package com.studypals.domain.groupManage.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,6 +20,7 @@ import com.studypals.domain.chatManage.worker.ChatRoomWriter;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.domain.groupManage.worker.*;
@@ -92,6 +92,9 @@ public class GroupServiceTest {
     @Mock
     private ChatRoom mockChatRoom;
 
+    @Mock
+    private GroupHashTagWorker groupHashTagWorker;
+
     @InjectMocks
     private GroupServiceImpl groupService;
 
@@ -114,12 +117,14 @@ public class GroupServiceTest {
     void createGroup_success() {
         // given
         Long userId = 1L;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req = new CreateGroupReq(
+                "group name", "group tag", 10, false, false, "image.example.com", List.of("hashtag1", "hashtag2"));
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupWriter.create(req)).willReturn(mockGroup);
         given(chatRoomWriter.create(any())).willReturn(mockChatRoom);
         willDoNothing().given(chatRoomWriter).joinAsAdmin(mockChatRoom, mockMember);
+        willDoNothing().given(groupHashTagWorker).saveTags(mockGroup, req.hashTags());
 
         // when
         Long actual = groupService.createGroup(userId, req);
@@ -133,7 +138,8 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(groupWriter.create(req)).willThrow(new GroupException(errorCode));
 
@@ -149,7 +155,8 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_MEMBER_CREATE_FAIL;
-        CreateGroupReq req = new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com");
+        CreateGroupReq req =
+                new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
         given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupWriter.create(req)).willReturn(mockGroup);
@@ -219,10 +226,7 @@ public class GroupServiceTest {
     void getGroupDetails_success() {
         Long userId = 1L;
         Long groupId = 1L;
-        List<GroupMemberProfileDto> profiles = List.of(
-                new GroupMemberProfileDto(1L, "개발자A", "https://example.com/img/profile_a.png", GroupRole.LEADER),
-                new GroupMemberProfileDto(2L, "열공학생B", "https://example.com/img/profile_b.png", GroupRole.MEMBER),
-                new GroupMemberProfileDto(3L, "스터디봇C", "https://example.com/img/profile_c.png", GroupRole.MEMBER));
+        List<GroupMember> groupMembers = createMockGroupMembers(groupId);
 
         // 1. GroupCategoryGoalDto 목록 생성
         List<GroupCategoryGoalDto> categoryGoals = List.of(
@@ -249,14 +253,15 @@ public class GroupServiceTest {
         GroupTotalGoalDto totalGoals = new GroupTotalGoalDto(categoryGoals, 71);
 
         given(groupReader.getById(groupId)).willReturn(mockGroup);
-        given(groupMemberReader.getAllMemberProfiles(mockGroup)).willReturn(profiles);
-        given(groupGoalCalculator.calculateGroupGoals(groupId, profiles)).willReturn(totalGoals);
+        given(mockGroup.getId()).willReturn(groupId);
+        given(groupMemberReader.getAllMemberProfiles(mockGroup.getId())).willReturn(groupMembers);
+        given(groupGoalCalculator.calculateGroupGoals(groupId, groupMembers)).willReturn(totalGoals);
 
         // When
         GetGroupDetailRes result = groupService.getGroupDetails(userId, groupId);
 
         // Then
-        assertThat(result.profiles().size()).isEqualTo(profiles.size());
+        assertThat(result.profiles().size()).isEqualTo(groupMembers.size());
 
         // GroupTotalGoalDto 객체의 userGoals 리스트를 검증합니다.
         assertThat(result.groupGoals().categoryGoals().size()).isEqualTo(categoryGoals.size());
@@ -320,5 +325,30 @@ public class GroupServiceTest {
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
+    // 헬퍼 메서드: GroupMember 엔티티 4명 생성
+    private List<GroupMember> createMockGroupMembers(Long groupId) {
+        Group group = Group.builder().id(groupId).build();
+
+        return List.of(
+                createMember(1L, "개발자A", "img_a", group, GroupRole.LEADER),
+                createMember(2L, "열공학생B", "img_b", group, GroupRole.MEMBER),
+                createMember(3L, "스터디봇C", "img_c", group, GroupRole.MEMBER),
+                createMember(4L, "코딩천재D", "img_d", group, GroupRole.MEMBER));
+    }
+
+    private GroupMember createMember(Long id, String nick, String img, Group group, GroupRole role) {
+        Member member = Member.builder()
+                .id(id)
+                .nickname(nick)
+                .imageUrl("https://example.com/" + img)
+                .build();
+
+        return GroupMember.builder()
+                .id(id + 1000L) // GroupMember 자체의 ID
+                .member(member)
+                .group(group)
+                .role(role)
+                .joinedAt(LocalDate.now())
+                .build();
     }
 }

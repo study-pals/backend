@@ -35,7 +35,12 @@ pipeline {
 
 
         /* 3 + 4) 테스트 와 빌드  --------------------------------------------- */
-        stage('Build') { steps { sh './gradlew clean build --info --stacktrace' } }
+        stage('Build') {
+            steps {
+                sh 'chmod +x ./gradlew'
+                sh './gradlew clean build --info --stacktrace'
+            }
+        }
 
         /* 5) Docker 이미지 빌드 ------------------------------------------- */
         stage('Build Docker Image') { steps { sh "docker build -t ${DOCKER_IMAGE_NAME} -f DockerfileDev ." } }

@@ -23,6 +23,8 @@ import com.studypals.global.responses.ResponseCode;
  * <pre>
  *     - GET /groups/tags : 그룹 태그 조회
  *     - POST /groups : 그룹 생성({@link CreateGroupReq})
+ *     - GET /groups : 유저가 속한 그룹 조회
+ *     - GET /groups/{groupId} : 그룹 정보 조회
  * </pre>
  *
  * @author s0o0bn
@@ -55,7 +57,6 @@ public class GroupController {
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_LIST, response));
     }
 
-    // 오늘의 목표 정보도 포함시켜야함
     @GetMapping("/{groupId}")
     public ResponseEntity<Response<GetGroupDetailRes>> getGroupDetail(
             @AuthenticationPrincipal Long userId, @PathVariable Long groupId) {
