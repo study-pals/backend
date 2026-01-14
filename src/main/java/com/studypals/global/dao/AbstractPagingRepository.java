@@ -10,9 +10,7 @@ import org.springframework.data.domain.Sort;
 
 import lombok.Getter;
 
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.studypals.global.request.SortType;
 
@@ -32,27 +30,30 @@ public abstract class AbstractPagingRepository<T> {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    protected OrderSpecifier<?> getOrderSpecifier(Class<T> entityClass, SortType sortType) {
+    protected <E> OrderSpecifier<?> getOrderSpecifier(EntityPath<E> root, SortType sortType) {
         String field = sortType.getField();
         Sort.Direction direction = sortType.getDirection();
 
-        EntityMetadata metadata = getEntityMetadata(entityClass);
+        EntityMetadata metadata = getEntityMetadata(root.getType());
         Class<?> sortFieldType = metadata.getFieldType(field);
 
-        PathBuilder<T> path = new PathBuilder<>(entityClass, metadata.getEntityName());
-        Order order = direction == Sort.Direction.ASC ? Order.ASC : Order.DESC;
+        // ✅ alias를 문자열로 만들지 말고 root의 metadata를 그대로 사용
+        PathMetadata rootMetadata = root.getMetadata();
+        PathBuilder<E> path = new PathBuilder<>((Class<E>) root.getType(), rootMetadata);
 
+        Order order = direction == Sort.Direction.ASC ? Order.ASC : Order.DESC;
         return new OrderSpecifier<>(order, (Expression<? extends Comparable>) path.get(field, sortFieldType));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    protected OrderSpecifier<?>[] getOrderSpecifierWithId(Class<T> entityClass, SortType type) {
-        OrderSpecifier<?> primary = getOrderSpecifier(entityClass, type);
+    protected <E> OrderSpecifier<?>[] getOrderSpecifierWithId(EntityPath<E> root, SortType type) {
+        OrderSpecifier<?> primary = getOrderSpecifier(root, type);
 
         Sort.Direction direction = type.getDirection();
         Order order = direction == Sort.Direction.ASC ? Order.ASC : Order.DESC;
-        EntityMetadata metadata = getEntityMetadata(entityClass);
-        PathBuilder<T> path = new PathBuilder<>(entityClass, metadata.getEntityName());
+
+        EntityMetadata metadata = getEntityMetadata(root.getType());
+        PathBuilder<E> path = new PathBuilder<>((Class<E>) root.getType(), root.getMetadata());
 
         OrderSpecifier<?> secondary = new OrderSpecifier<>(order, (Expression<? extends Comparable>)
                 path.get(metadata.getIdFieldName(), metadata.getIdFieldType()));
@@ -60,7 +61,7 @@ public abstract class AbstractPagingRepository<T> {
         return new OrderSpecifier<?>[] {primary, secondary};
     }
 
-    private EntityMetadata getEntityMetadata(Class<T> entityClass) {
+    private EntityMetadata getEntityMetadata(Class<?> entityClass) {
         return CACHE.computeIfAbsent(entityClass, cls -> {
             String className = cls.getSimpleName();
             String entityName = Character.toLowerCase(className.charAt(0)) + className.substring(1);

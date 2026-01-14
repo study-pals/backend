@@ -12,14 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.groupRepository.GroupSortType;
-import com.studypals.domain.groupManage.dto.CreateGroupReq;
-import com.studypals.domain.groupManage.dto.GetGroupDetailRes;
-import com.studypals.domain.groupManage.dto.GetGroupTagRes;
-import com.studypals.domain.groupManage.dto.GetGroupsRes;
+import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.service.GroupService;
 import com.studypals.global.annotations.CursorDefault;
 import com.studypals.global.request.Cursor;
 import com.studypals.global.responses.CommonResponse;
+import com.studypals.global.responses.CursorResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 
@@ -70,11 +68,22 @@ public class GroupController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Response<List<GetGroupsRes>>> searchByHashTag(
+    public ResponseEntity<CursorResponse<GetGroupsRes>> searchByHashTag(
             @CursorDefault(sortType = GroupSortType.class, cursor = 0, size = 5, sort = "POPULAR") Cursor cursor,
             @RequestParam(required = false, name = "hashTag") String hashTag,
             @RequestParam(required = false, name = "tag") String tag,
-            @RequestParam(required = false, name = "name") String name) {
-        return ResponseEntity.ok().build();
+            @RequestParam(required = false, name = "name") String name,
+            @RequestParam(required = false, name = "open") Boolean open,
+            @RequestParam(required = false, name = "approval") Boolean approval) {
+        GroupSearchDto dto = GroupSearchDto.builder()
+                .hashTag(hashTag)
+                .tag(tag)
+                .name(name)
+                .isOpen(open == null || open)
+                .isApprovalRequired(approval == null || approval)
+                .build();
+        CursorResponse.Content<GetGroupsRes> response = groupService.search(dto, cursor);
+
+        return ResponseEntity.ok(CursorResponse.success(ResponseCode.GROUP_SEARCH, response));
     }
 }

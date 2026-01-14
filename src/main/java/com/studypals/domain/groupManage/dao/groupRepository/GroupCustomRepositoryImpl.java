@@ -132,7 +132,7 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
 
     private OrderSpecifier<?>[] getOrderSpecifier(SortType sort) {
         if (sort instanceof GroupSortType) {
-            return super.getOrderSpecifierWithId(Group.class, sort);
+            return super.getOrderSpecifierWithId(group, sort);
         } else {
             throw new IllegalArgumentException("[GroupCustomRepositoryImpl#getOrderSpecifier] not supported sort type");
         }

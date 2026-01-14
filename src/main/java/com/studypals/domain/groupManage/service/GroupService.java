@@ -2,10 +2,9 @@ package com.studypals.domain.groupManage.service;
 
 import java.util.List;
 
-import com.studypals.domain.groupManage.dto.CreateGroupReq;
-import com.studypals.domain.groupManage.dto.GetGroupDetailRes;
-import com.studypals.domain.groupManage.dto.GetGroupTagRes;
-import com.studypals.domain.groupManage.dto.GetGroupsRes;
+import com.studypals.domain.groupManage.dto.*;
+import com.studypals.global.request.Cursor;
+import com.studypals.global.responses.CursorResponse;
 
 /**
  * GroupService 의 인터페이스입니다. 메서드를 정의합니다.
@@ -34,7 +33,7 @@ public interface GroupService {
      * @param userId 그룹을 생성할 사용자
      * @param dto 그룹 생성 시 필요한 데이터
      * @return 생성된 그룹 ID
-     * @throws com.studypals.global.exceptions.exception.GroupException
+     * @throws com.studypals.global.exceptions.exception.GroupException 중복 발생 등
      */
     Long createGroup(Long userId, CreateGroupReq dto);
 
@@ -52,4 +51,13 @@ public interface GroupService {
      * @return 자세한 그룹 정보
      */
     GetGroupDetailRes getGroupDetails(Long userId, Long groupId);
+
+    /**
+     * dto 에서 정의된 필드에 의해 검색을 수행합니다. (hashtag, tag, name). 이를 기반으로 Slice 로 반환합니다.
+     * 또한, 기타 옵션(참가 가능 여부, 참가 시 승인 여부)
+     * @param dto 검색에 필요한 데이터 파라미터
+     * @param cursor 페이징 시 필요한 데이터 종류
+     * @return 그룹 정보가 포함된 CursorResponse
+     */
+    CursorResponse.Content<GetGroupsRes> search(GroupSearchDto dto, Cursor cursor);
 }

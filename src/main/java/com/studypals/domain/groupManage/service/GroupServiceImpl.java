@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,8 @@ import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
+import com.studypals.global.request.Cursor;
+import com.studypals.global.responses.CursorResponse;
 import com.studypals.global.retry.RetryTx;
 
 /**
@@ -90,36 +93,8 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional(readOnly = true)
     public List<GetGroupsRes> getGroups(Long userId) {
-        // jwt filter 에서 주입한 userId이므로 DB에 존재하는지 체크하지 않음
         List<GroupSummaryDto> groups = groupMemberReader.getGroups(userId);
-
-        List<Long> groupIds = groups.stream().map(GroupSummaryDto::id).toList();
-
-        // 각 그룹에 속한 멤버들 프로필, 역할 조회하기
-        List<GroupMemberProfileMappingDto> profileImages = groupMemberReader.getTopNMemberProfileImages(
-                groupIds, GroupConst.GROUP_SUMMARY_MEMBER_COUNT.getValue());
-
-        // 그룹id : 속한 멤버들
-        Map<Long, List<GroupMemberProfileMappingDto>> membersMap =
-                profileImages.stream().collect(Collectors.groupingBy(GroupMemberProfileMappingDto::groupId));
-
-        // 각 그룹이 가지고 있는 카테고리 조회하기
-        List<GroupCategoryDto> groupCategories =
-                studyCategoryReader.findByStudyTypeAndTypeId(StudyType.GROUP, groupIds);
-
-        // 그룹id : 속한 카테고리들
-        Map<Long, List<GroupCategoryDto>> categoriesMap =
-                groupCategories.stream().collect(Collectors.groupingBy(GroupCategoryDto::groupId));
-
-        Map<Long, List<String>> hashTagsMap = groupHashTagWorker.getHashTagsByGroups(groupIds);
-
-        return groups.stream()
-                .map(group -> GetGroupsRes.of(
-                        group,
-                        hashTagsMap.getOrDefault(group.id(), Collections.emptyList()),
-                        membersMap.getOrDefault(group.id(), Collections.emptyList()),
-                        categoriesMap.getOrDefault(group.id(), Collections.emptyList())))
-                .toList();
+        return assembleGroupResponses(groups);
     }
 
     @Override
@@ -142,8 +117,9 @@ public class GroupServiceImpl implements GroupService {
         return GetGroupDetailRes.of(group, hashTags, profiles, userGoals);
     }
 
-    @Transactional
-    public List<GetGroupsRes> search(GroupSearchDto dto) {
+    @Override
+    @Transactional(readOnly = true)
+    public CursorResponse.Content<GetGroupsRes> search(GroupSearchDto dto, Cursor cursor) {
         try {
             dto.validate();
         } catch (IllegalArgumentException e) {
@@ -152,6 +128,52 @@ public class GroupServiceImpl implements GroupService {
                     e.getMessage(),
                     "[GroupServiceImpl#search] validate dto fail : " + e.getMessage());
         }
-        return List.of();
+
+        Slice<Group> groupSlice = groupReader.search(dto, cursor);
+        List<Group> groups = groupSlice.getContent();
+
+        if (groups.isEmpty()) {
+            return new CursorResponse.Content<>(Collections.emptyList(), -1L, groupSlice.hasNext());
+        }
+
+        List<GroupSummaryDto> summary = groups.stream().map(groupMapper::toDto).toList();
+        List<GetGroupsRes> responseContent = assembleGroupResponses(summary);
+
+        return new CursorResponse.Content<>(
+                responseContent, responseContent.get(responseContent.size() - 1).groupId(), groupSlice.hasNext());
+    }
+
+    private List<GetGroupsRes> assembleGroupResponses(List<GroupSummaryDto> groups) {
+        List<Long> groupIds = groups.stream().map(GroupSummaryDto::id).toList();
+
+        Map<Long, List<GroupMemberProfileMappingDto>> membersMap = loadTopMembersMap(groupIds);
+        Map<Long, List<GroupCategoryDto>> categoriesMap = loadCategoriesMap(groupIds);
+        Map<Long, List<String>> hashTagsMap = loadHashTagsMap(groupIds);
+
+        return groups.stream()
+                .map(g -> GetGroupsRes.of(
+                        g,
+                        hashTagsMap.getOrDefault(g.id(), Collections.emptyList()),
+                        membersMap.getOrDefault(g.id(), Collections.emptyList()),
+                        categoriesMap.getOrDefault(g.id(), Collections.emptyList())))
+                .toList();
+    }
+
+    private Map<Long, List<GroupMemberProfileMappingDto>> loadTopMembersMap(List<Long> groupIds) {
+        List<GroupMemberProfileMappingDto> profileImages = groupMemberReader.getTopNMemberProfileImages(
+                groupIds, GroupConst.GROUP_SUMMARY_MEMBER_COUNT.getValue());
+
+        return profileImages.stream().collect(Collectors.groupingBy(GroupMemberProfileMappingDto::groupId));
+    }
+
+    private Map<Long, List<GroupCategoryDto>> loadCategoriesMap(List<Long> groupIds) {
+        List<GroupCategoryDto> groupCategories =
+                studyCategoryReader.findByStudyTypeAndTypeId(StudyType.GROUP, groupIds);
+
+        return groupCategories.stream().collect(Collectors.groupingBy(GroupCategoryDto::groupId));
+    }
+
+    private Map<Long, List<String>> loadHashTagsMap(List<Long> groupIds) {
+        return groupHashTagWorker.getHashTagsByGroups(groupIds);
     }
 }
