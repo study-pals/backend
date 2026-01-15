@@ -53,7 +53,7 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * @param targetId 업로드 대상 식별자 (예: userId, groupId, chatRoomId)
      * @return 생성된 ObjectKey
      */
-    protected String generateObjectKey(String fileName, String targetId) {
+    private String generateObjectKey(String fileName, String targetId) {
         String ext = extractExtension(fileName);
         return generateObjectKeyDetail(targetId, ext);
     }
