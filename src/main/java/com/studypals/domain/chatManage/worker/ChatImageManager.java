@@ -47,8 +47,8 @@ public class ChatImageManager extends AbstractImageManager {
     }
 
     @Override
-    protected String generateObjectKeyDetail(String targetId, String ext) {
-        return CHAT_IMAGE_PATH + "/" + targetId + "/" + UUID.randomUUID() + "." + ext;
+    protected String generateObjectKeyDetail(String chatRoomId, String ext) {
+        return CHAT_IMAGE_PATH + "/" + chatRoomId + "/" + UUID.randomUUID() + "." + ext;
     }
 
     /**
