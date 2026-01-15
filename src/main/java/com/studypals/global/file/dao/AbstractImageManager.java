@@ -2,6 +2,8 @@ package com.studypals.global.file.dao;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import com.studypals.global.exceptions.errorCode.FileErrorCode;
 import com.studypals.global.exceptions.exception.FileException;
 import com.studypals.global.file.ObjectStorage;
@@ -18,8 +20,12 @@ import com.studypals.global.file.ObjectStorage;
  * @since 2026-01-13
  */
 public abstract class AbstractImageManager extends AbstractFileManager {
-    protected static final List<String> acceptableExtensions = List.of("jpg", "jpeg", "png", "bmp", "webp");
-    protected static final int PRESIGNED_URL_EXPIRE_TIME = 600; // 10분동안만 유효함
+
+    @Value("${file.upload.extensions}")
+    private List<String> acceptableExtensions;
+
+    @Value("${file.upload.presigned-url-expire-time}")
+    private int presignedUrlExpireTime;
 
     public AbstractImageManager(ObjectStorage objectStorage) {
         super(objectStorage);
@@ -38,7 +44,7 @@ public abstract class AbstractImageManager extends AbstractFileManager {
         validateFileName(fileName);
         validateTargetId(userId, targetId);
         String objectKey = generateObjectKey(fileName, targetId);
-        return objectStorage.createPresignedPutUrl(objectKey, PRESIGNED_URL_EXPIRE_TIME);
+        return objectStorage.createPresignedPutUrl(objectKey, presignedUrlExpireTime);
     }
 
     /**
