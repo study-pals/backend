@@ -1,4 +1,4 @@
-package com.studypals.domain.fileManage.dao;
+package com.studypals.global.file.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.global.file.ObjectStorage;
-import com.studypals.global.file.dao.AbstractFileManager;
 import com.studypals.global.file.entity.ImageType;
 
 /**
