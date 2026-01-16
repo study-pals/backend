@@ -7,14 +7,22 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.studypals.domain.chatManage.entity.ChatRoom;
+import com.studypals.domain.chatManage.worker.ChatImageManager;
+import com.studypals.domain.chatManage.worker.ChatImageWriter;
+import com.studypals.domain.chatManage.worker.ChatRoomReader;
+import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.worker.MemberProfileImageManager;
+import com.studypals.domain.memberManage.worker.MemberProfileImageWriter;
+import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.FileErrorCode;
 import com.studypals.global.exceptions.exception.FileException;
+import com.studypals.global.file.FileType;
 import com.studypals.global.file.dao.AbstractFileManager;
 import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.dto.ChatPresignedUrlReq;
 import com.studypals.global.file.dto.PresignedUrlRes;
 import com.studypals.global.file.dto.ProfilePresignedUrlReq;
-import com.studypals.global.file.entity.FileType;
 import com.studypals.global.file.entity.ImageType;
 
 /**
@@ -27,9 +35,18 @@ import com.studypals.global.file.entity.ImageType;
 @Service
 public class ImageFileServiceImpl implements ImageFileService {
 
-    private final Map<FileType, AbstractFileManager> managerMap;
+    private final Map<FileType, AbstractImageManager> managerMap;
+    private final MemberReader memberReader;
+    private final ChatRoomReader chatRoomReader;
+    private final MemberProfileImageWriter profileImageWriter;
+    private final ChatImageWriter chatImageWriter;
 
-    public ImageFileServiceImpl(List<AbstractFileManager> managers) {
+    public ImageFileServiceImpl(
+            List<AbstractImageManager> managers,
+            MemberReader memberReader,
+            ChatRoomReader chatRoomReader,
+            MemberProfileImageWriter profileImageWriter,
+            ChatImageWriter chatImageWriter) {
         this.managerMap = managers.stream()
                 .collect(Collectors.toMap(
                         AbstractFileManager::getFileType, Function.identity(), (existing, duplicate) -> {
@@ -39,24 +56,44 @@ public class ImageFileServiceImpl implements ImageFileService {
                                     existing.getClass().getName(),
                                     duplicate.getClass().getName()));
                         }));
+        this.memberReader = memberReader;
+        this.chatRoomReader = chatRoomReader;
+        this.profileImageWriter = profileImageWriter;
+        this.chatImageWriter = chatImageWriter;
     }
 
     @Override
     public PresignedUrlRes getProfileUploadUrl(ProfilePresignedUrlReq request, Long userId) {
-        AbstractImageManager manager = getManager(ImageType.PROFILE_IMAGE, AbstractImageManager.class);
-        String uploadUrl = manager.getUploadUrl(userId, request.fileName(), String.valueOf(userId));
-        return new PresignedUrlRes(uploadUrl);
+        MemberProfileImageManager manager = getManager(ImageType.PROFILE_IMAGE, MemberProfileImageManager.class);
+
+        String objectKey = manager.createObjectKey(userId, request.fileName(), String.valueOf(userId));
+
+        Member member = memberReader.getRef(userId);
+
+        Long imageId = profileImageWriter.save(member, objectKey, request.fileName());
+
+        String uploadUrl = manager.getUploadUrl(objectKey);
+
+        return new PresignedUrlRes(imageId, uploadUrl);
     }
 
     @Override
     public PresignedUrlRes getChatUploadUrl(ChatPresignedUrlReq request, Long userId) {
-        AbstractImageManager manager = getManager(ImageType.CHAT_IMAGE, AbstractImageManager.class);
-        String uploadUrl = manager.getUploadUrl(userId, request.fileName(), request.chatRoomId());
-        return new PresignedUrlRes(uploadUrl);
+        ChatImageManager manager = getManager(ImageType.CHAT_IMAGE, ChatImageManager.class);
+
+        String objectKey = manager.createObjectKey(userId, request.fileName(), request.chatRoomId());
+
+        ChatRoom chatRoom = chatRoomReader.getById(request.chatRoomId());
+
+        Long imageId = chatImageWriter.save(chatRoom, objectKey, request.fileName());
+
+        String uploadUrl = manager.getUploadUrl(objectKey);
+
+        return new PresignedUrlRes(imageId, uploadUrl);
     }
 
-    private <T extends AbstractFileManager> T getManager(FileType fileType, Class<T> managerClass) {
-        AbstractFileManager manager = managerMap.get(fileType);
+    private <T extends AbstractImageManager> T getManager(FileType fileType, Class<T> managerClass) {
+        AbstractImageManager manager = managerMap.get(fileType);
         if (manager == null) {
             throw new FileException(FileErrorCode.UNSUPPORTED_FILE_IMAGE_TYPE);
         }
