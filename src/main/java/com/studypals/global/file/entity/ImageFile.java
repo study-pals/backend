@@ -2,41 +2,79 @@ package com.studypals.global.file.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
 /**
- * 코드에 대한 전체적인 역할을 적습니다.
- * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
+ * 객체 스토리지에 저장된 이미지 파일의 메타데이터를 관리하는 엔티티의 공통 속성을 정의하는 추상 클래스입니다.
+ * {@code @MappedSuperclass}를 사용하여 이 클래스를 상속하는 엔티티들은 아래 필드들을 자신의 컬럼으로 포함하게 됩니다.
  *
- * <p><b>상속 정보:</b><br>
- * 상속 정보를 적습니다.
- *
- * <p><b>주요 생성자:</b><br>
- * {@code ExampleClass(String example)}  <br> 주요 생성자와 그 매개변수에 대한 설명을 적습니다. <br>
- *
- * <p><b>빈 관리:</b><br>
- * 필요 시 빈 관리에 대한 내용을 적습니다.
- *
- * <p><b>외부 모듈:</b><br>
- * 필요 시 외부 모듈에 대한 내용을 적습니다.
- *
- * @author My
- * @see
- * @since 2026-01-15
+ * @author sleepyhoon
+ * @since 2026-01-13
  */
+@Getter
+@SuperBuilder
+@AllArgsConstructor
 @MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class ImageFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String filePath;
+    /**
+     * 객체 스토리지(예: MinIO, S3) 내에서 파일을 식별하는 고유한 키입니다.
+     * 예: "profile/1/uuid.jpg"
+     */
+    @Column(nullable = false, unique = true)
+    private String objectKey;
 
-    private Long sourceId;
+    /**
+     * 사용자가 업로드한 원본 파일의 이름입니다.
+     * 예: "my_vacation_photo.jpg"
+     */
+    @Column(nullable = false)
+    private String originalFileName;
 
+    /**
+     * 파일의 MIME 타입입니다.
+     * 예: "jpg"
+     */
+    @Column(nullable = false)
+    private String mimeType;
+
+    /**
+     * 이미지 상태입니다.
+     * Presigned URL 발급하면 PENDING
+     * 발급 후 성공 API를 호출하면 COMPLETE
+     * 발급 후 일정 시간 이내 성공 API를 호출하지 않으면 EXPIRED
+     */
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private ImageStatus imageStatus = ImageStatus.PENDING;
+
+    /**
+     * 이미지가 업로드된 시간입니다.
+     */
+    @CreatedDate
+    @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 }
