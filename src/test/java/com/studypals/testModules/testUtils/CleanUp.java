@@ -46,7 +46,9 @@ public class CleanUp {
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
 
         for (String table : tableNames) {
-            jdbcTemplate.execute("TRUNCATE TABLE " + table.toLowerCase());
+            if (isTableExists(table)) {
+                jdbcTemplate.execute("TRUNCATE TABLE " + table.toLowerCase());
+            }
         }
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
 
@@ -54,5 +56,18 @@ public class CleanUp {
                 .getConnection()
                 .serverCommands()
                 .flushAll();
+    }
+
+    /**
+     * 실제 DB에 테이블이 존재하는지 쿼리
+     */
+    private boolean isTableExists(String tableName) {
+        try {
+            // MySQL/H2 공용: 테이블 정보 조회 시 에러가 없으면 존재하는 것으로 간주
+            jdbcTemplate.execute("SELECT 1 FROM " + tableName + " LIMIT 1");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

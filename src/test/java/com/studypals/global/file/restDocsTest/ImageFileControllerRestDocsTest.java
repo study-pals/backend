@@ -40,9 +40,10 @@ class ImageFileControllerRestDocsTest extends RestDocsSupport {
     void getProfileUploadUrl_success() throws Exception {
         // given
         ProfilePresignedUrlReq request = new ProfilePresignedUrlReq("my-profile.jpeg");
+        Long imageId = 1L;
         String presignedUrl = "https://s3-presigned-url.com/for/profile/my-profile.jpeg?signature=...";
 
-        PresignedUrlRes response = new PresignedUrlRes(presignedUrl);
+        PresignedUrlRes response = new PresignedUrlRes(imageId, presignedUrl);
         given(imageFileService.getProfileUploadUrl(any(ProfilePresignedUrlReq.class), any()))
                 .willReturn(response);
 
@@ -67,6 +68,7 @@ class ImageFileControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("code").description("응답 코드 (I01-01)"),
                                 fieldWithPath("status").description("응답 상태"),
                                 fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("data.id").description("이미지 파일의 식별 ID"),
                                 fieldWithPath("data.url").description("생성된 Presigned URL"))));
     }
 
@@ -77,7 +79,8 @@ class ImageFileControllerRestDocsTest extends RestDocsSupport {
         // given
         ChatPresignedUrlReq request = new ChatPresignedUrlReq("chat-image.png", "chat-room-123");
         String presignedUrl = "https://s3-presigned-url.com/for/chat/chat-image.png?signature=...";
-        PresignedUrlRes response = new PresignedUrlRes(presignedUrl);
+        Long imageId = 1L;
+        PresignedUrlRes response = new PresignedUrlRes(imageId, presignedUrl);
 
         given(imageFileService.getChatUploadUrl(any(ChatPresignedUrlReq.class), any()))
                 .willReturn(response);
@@ -107,6 +110,7 @@ class ImageFileControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("code").description("응답 코드 (I01-01)"),
                                 fieldWithPath("status").description("응답 상태"),
                                 fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("data.id").description("이미지 파일의 식별 ID"),
                                 fieldWithPath("data.url").description("생성된 Presigned URL"))));
     }
 }
