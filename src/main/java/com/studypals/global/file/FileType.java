@@ -1,4 +1,4 @@
-package com.studypals.global.file.entity;
+package com.studypals.global.file;
 
 /**
  * 파일의 종류를 나타내는 최상위 마커 인터페이스입니다. <p>

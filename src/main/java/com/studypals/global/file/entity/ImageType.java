@@ -1,5 +1,7 @@
 package com.studypals.global.file.entity;
 
+import com.studypals.global.file.FileType;
+
 /**
  * 파일 이미지 타입을 정의합니다.<p>
  * 현재 프로필, 채팅 이미지만 고려합니다.
