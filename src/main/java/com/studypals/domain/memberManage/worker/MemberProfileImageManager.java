@@ -1,12 +1,15 @@
 package com.studypals.domain.memberManage.worker;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.studypals.global.file.FileProperties;
 import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.entity.ImageType;
+import com.studypals.global.file.entity.ImageVariantKey;
 
 /**
  * 파일 중 프로필 이미지를 처리하는데 사용하는 구체 클래스입니다.
@@ -23,12 +26,12 @@ import com.studypals.global.file.entity.ImageType;
  * @since 2026-01-13
  */
 @Component
-public class MemberProfileManager extends AbstractImageManager {
+public class MemberProfileImageManager extends AbstractImageManager {
 
     private static final String PROFILE_PATH = "profile";
 
-    public MemberProfileManager(ObjectStorage objectStorage) {
-        super(objectStorage);
+    public MemberProfileImageManager(ObjectStorage objectStorage, FileProperties properties) {
+        super(objectStorage, properties);
     }
 
     /**
@@ -38,6 +41,11 @@ public class MemberProfileManager extends AbstractImageManager {
     @Override
     protected String generateObjectKeyDetail(String targetId, String ext) {
         return PROFILE_PATH + "/" + targetId + "/" + UUID.randomUUID() + "." + ext;
+    }
+
+    @Override
+    protected List<ImageVariantKey> variants() {
+        return List.of(ImageVariantKey.SMALL, ImageVariantKey.LARGE);
     }
 
     /**

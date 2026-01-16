@@ -2,10 +2,10 @@ package com.studypals.global.file.dao;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import com.studypals.global.exceptions.errorCode.FileErrorCode;
 import com.studypals.global.exceptions.exception.FileException;
+import com.studypals.global.file.FileProperties;
+import com.studypals.global.file.FileUtils;
 import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.entity.ImageVariantKey;
 
@@ -22,14 +22,13 @@ import com.studypals.global.file.entity.ImageVariantKey;
  */
 public abstract class AbstractImageManager extends AbstractFileManager {
 
-    @Value("${file.upload.extensions}")
-    private List<String> acceptableExtensions;
+    private final List<String> acceptableExtensions;
+    private final int presignedUrlExpireTime;
 
-    @Value("${file.upload.presigned-url-expire-time}")
-    private int presignedUrlExpireTime;
-
-    public AbstractImageManager(ObjectStorage objectStorage) {
+    public AbstractImageManager(ObjectStorage objectStorage, FileProperties properties) {
         super(objectStorage);
+        this.acceptableExtensions = properties.extensions();
+        this.presignedUrlExpireTime = properties.presignedUrlExpireTime();
     }
 
     /**
@@ -41,11 +40,14 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * @param targetId 업로드 대상 식별자 (예: userId, groupId, chatRoomId)
      * @return 업로드 가능한 Presigned URL
      */
-    public final String getUploadUrl(Long userId, String fileName, String targetId) {
+    public final String getUploadUrl(String objectKey) {
+        return objectStorage.createPresignedPutUrl(objectKey, presignedUrlExpireTime);
+    }
+
+    public final String createObjectKey(Long userId, String fileName, String targetId) {
         validateFileName(fileName);
         validateTargetId(userId, targetId);
-        String objectKey = generateObjectKey(fileName, targetId);
-        return objectStorage.createPresignedPutUrl(objectKey, presignedUrlExpireTime);
+        return generateObjectKey(fileName, targetId);
     }
 
     /**
@@ -55,7 +57,7 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * @return 생성된 ObjectKey
      */
     private String generateObjectKey(String fileName, String targetId) {
-        String ext = extractExtension(fileName);
+        String ext = FileUtils.extractExtension(fileName);
         return generateObjectKeyDetail(targetId, ext);
     }
 
@@ -94,7 +96,7 @@ public abstract class AbstractImageManager extends AbstractFileManager {
         if (fileName == null || !fileName.contains(".")) {
             throw new FileException(FileErrorCode.INVALID_FILE_NAME);
         }
-        String extension = extractExtension(fileName);
+        String extension = FileUtils.extractExtension(fileName);
         if (!acceptableExtensions.contains(extension)) {
             throw new FileException(FileErrorCode.UNSUPPORTED_FILE_IMAGE_EXTENSION);
         }

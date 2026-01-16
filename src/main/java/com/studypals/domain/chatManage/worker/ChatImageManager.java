@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.ChatException;
+import com.studypals.global.file.FileProperties;
 import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.entity.ImageType;
@@ -31,8 +32,8 @@ public class ChatImageManager extends AbstractImageManager {
     private static final String CHAT_IMAGE_PATH = "chat";
     private final ChatRoomReader chatRoomReader;
 
-    public ChatImageManager(ObjectStorage objectStorage, ChatRoomReader chatRoomReader) {
-        super(objectStorage);
+    public ChatImageManager(ObjectStorage objectStorage, FileProperties properties, ChatRoomReader chatRoomReader) {
+        super(objectStorage, properties);
         this.chatRoomReader = chatRoomReader;
     }
 
