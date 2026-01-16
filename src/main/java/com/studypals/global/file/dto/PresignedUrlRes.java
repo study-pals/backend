@@ -1,3 +1,3 @@
 package com.studypals.global.file.dto;
 
-public record PresignedUrlRes(String url) {}
+public record PresignedUrlRes(Long id, String url) {}
