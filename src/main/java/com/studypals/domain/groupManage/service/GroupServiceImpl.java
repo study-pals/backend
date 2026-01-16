@@ -133,4 +133,14 @@ public class GroupServiceImpl implements GroupService {
 
         return GetGroupDetailRes.of(group, groupMembers, userGoals);
     }
+
+    @Override
+    @Transactional
+    public Long updateGroup(Long userId, Long groupId, UpdateGroupReq dto) {
+        Group group = groupReader.getById(groupId);
+
+        groupWriter.update(userId, groupId, group, dto);
+
+        return group.getId();
+    }
 }
