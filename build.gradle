@@ -50,7 +50,6 @@ dependencies {
     runtimeOnly "io.jsonwebtoken:jjwt-jackson:0.12.6"
 
     // redis
-
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.session:spring-session-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'

@@ -68,7 +68,7 @@ public class GroupController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<CursorResponse<GetGroupsRes>> searchByHashTag(
+    public ResponseEntity<CursorResponse<GetGroupsRes>> searchGroups(
             @CursorDefault(sortType = GroupSortType.class, cursor = 0, size = 5, sort = "POPULAR") Cursor cursor,
             @RequestParam(required = false, name = "hashTag") String hashTag,
             @RequestParam(required = false, name = "tag") String tag,

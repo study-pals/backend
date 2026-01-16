@@ -1,6 +1,7 @@
 package com.studypals.domain.groupManage.worker;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -106,12 +107,11 @@ public class GroupHashTagWorker {
         }
 
         List<GroupHashTag> groupHashTags = groupHashTagRepository.findAllByGroupIdIn(groupIds);
-        Map<Long, List<String>> result = new HashMap<>();
-        for (GroupHashTag groupHashTag : groupHashTags) {
-            Long groupId = groupHashTag.getGroup().getId();
-            result.computeIfAbsent(groupId, k -> new ArrayList<>()).add(groupHashTag.getDisplayTag());
-        }
-        return result;
+
+        return groupHashTags.stream()
+                .collect(Collectors.groupingBy(
+                        gh -> gh.getGroup().getId(),
+                        Collectors.mapping(GroupHashTag::getDisplayTag, Collectors.toList())));
     }
     /**
      * 각 태그에 대한 정규화 진행. 띄어쓰기는 _ 로 대체, 중복된 띄어쓰기 제거/특수문제 제거, trim 제거, lowercase

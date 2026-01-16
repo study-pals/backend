@@ -133,7 +133,7 @@ public class GroupServiceImpl implements GroupService {
         List<Group> groups = groupSlice.getContent();
 
         if (groups.isEmpty()) {
-            return new CursorResponse.Content<>(Collections.emptyList(), -1L, groupSlice.hasNext());
+            return new CursorResponse.Content<>(Collections.emptyList(), 0L, groupSlice.hasNext());
         }
 
         List<GroupSummaryDto> summary = groups.stream().map(groupMapper::toDto).toList();
