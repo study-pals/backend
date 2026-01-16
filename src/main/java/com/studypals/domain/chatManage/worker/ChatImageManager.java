@@ -1,5 +1,6 @@
 package com.studypals.domain.chatManage.worker;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
@@ -9,6 +10,7 @@ import com.studypals.global.exceptions.exception.ChatException;
 import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.entity.ImageType;
+import com.studypals.global.file.entity.ImageVariantKey;
 
 /**
  * 파일 중 채팅 이미지를 처리하는데 사용하는 구체 클래스입니다.
@@ -49,6 +51,11 @@ public class ChatImageManager extends AbstractImageManager {
     @Override
     protected String generateObjectKeyDetail(String chatRoomId, String ext) {
         return CHAT_IMAGE_PATH + "/" + chatRoomId + "/" + UUID.randomUUID() + "." + ext;
+    }
+
+    @Override
+    protected List<ImageVariantKey> variants() {
+        return List.of(ImageVariantKey.SMALL, ImageVariantKey.MEDIUM, ImageVariantKey.LARGE);
     }
 
     /**

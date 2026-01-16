@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.studypals.global.exceptions.errorCode.FileErrorCode;
 import com.studypals.global.exceptions.exception.FileException;
 import com.studypals.global.file.ObjectStorage;
+import com.studypals.global.file.entity.ImageVariantKey;
 
 /**
  *  * 파일을 처리하는데 사용하는 추상 클래스입니다.
@@ -78,6 +79,12 @@ public abstract class AbstractImageManager extends AbstractFileManager {
     protected void validateTargetId(Long userId, String targetId) {
         // 기본 구현: 검증 없음
     }
+
+    /**
+     * 구현체에서 다루는 이미지 사이즈를 반환합니다.
+     * @return ImageVariantKey 리스트
+     */
+    protected abstract List<ImageVariantKey> variants();
 
     /**
      * 사전에 정해둔 파일 확장자를 가지는지 확인합니다.
