@@ -28,7 +28,7 @@ import com.studypals.global.file.entity.ImageVariantKey;
 @Component
 public class MemberProfileImageManager extends AbstractImageManager {
 
-    private static final String PROFILE_PATH = "profile";
+    private static final String PROFILE_PATH = "origin/profile";
 
     public MemberProfileImageManager(ObjectStorage objectStorage, FileProperties properties) {
         super(objectStorage, properties);

@@ -29,7 +29,7 @@ import com.studypals.global.file.entity.ImageVariantKey;
  */
 @Component
 public class ChatImageManager extends AbstractImageManager {
-    private static final String CHAT_IMAGE_PATH = "chat";
+    private static final String CHAT_IMAGE_PATH = "origin/chat";
     private final ChatRoomReader chatRoomReader;
 
     public ChatImageManager(ObjectStorage objectStorage, FileProperties properties, ChatRoomReader chatRoomReader) {
