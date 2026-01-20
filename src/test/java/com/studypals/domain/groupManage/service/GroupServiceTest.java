@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,11 +15,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.studypals.domain.chatManage.dto.CreateChatRoomDto;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.worker.ChatRoomWriter;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupConst;
 import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.domain.groupManage.worker.*;
@@ -52,19 +55,22 @@ public class GroupServiceTest {
     private GroupReader groupReader;
 
     @Mock
-    private GroupMemberWriter groupMemberWriter;
-
-    @Mock
     private GroupMemberReader groupMemberReader;
 
     @Mock
-    private GroupAuthorityValidator groupAuthorityValidator;
+    private GroupMemberWriter groupMemberWriter;
+
+    @Mock
+    private GroupAuthorityValidator validator;
 
     @Mock
     private GroupMapper groupMapper;
 
     @Mock
     private GroupGoalCalculator groupGoalCalculator;
+
+    @Mock
+    private GroupHashTagWorker groupHashTagWorker;
 
     @Mock
     private ChatRoomWriter chatRoomWriter;
@@ -84,9 +90,6 @@ public class GroupServiceTest {
     @Mock
     private ChatRoom mockChatRoom;
 
-    @Mock
-    private GroupHashTagWorker groupHashTagWorker;
-
     @InjectMocks
     private GroupServiceImpl groupService;
 
@@ -94,7 +97,6 @@ public class GroupServiceTest {
     void getGroupTags_success() {
         // given
         GetGroupTagRes res = new GetGroupTagRes(mockGroupTag.getName());
-
         given(groupReader.getGroupTags()).willReturn(List.of(mockGroupTag));
         given(groupMapper.toTagDto(mockGroupTag)).willReturn(res);
 
@@ -102,7 +104,9 @@ public class GroupServiceTest {
         List<GetGroupTagRes> actual = groupService.getGroupTags();
 
         // then
-        assertThat(actual).isEqualTo(List.of(res));
+        assertThat(actual).containsExactly(res);
+        then(groupReader).should(times(1)).getGroupTags();
+        then(groupMapper).should(times(1)).toTagDto(mockGroupTag);
     }
 
     @Test
@@ -112,17 +116,34 @@ public class GroupServiceTest {
         CreateGroupReq req = new CreateGroupReq(
                 "group name", "group tag", 10, false, false, "image.example.com", List.of("hashtag1", "hashtag2"));
 
-        given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupWriter.create(req)).willReturn(mockGroup);
-        given(chatRoomWriter.create(any())).willReturn(mockChatRoom);
-        willDoNothing().given(chatRoomWriter).joinAsAdmin(mockChatRoom, mockMember);
+        given(memberReader.getRef(userId)).willReturn(mockMember);
+
+        // 해시태그 저장
         willDoNothing().given(groupHashTagWorker).saveTags(mockGroup, req.hashTags());
+
+        // 채팅방 생성/참여
+        given(chatRoomWriter.create(any(CreateChatRoomDto.class))).willReturn(mockChatRoom);
+        willDoNothing().given(chatRoomWriter).joinAsAdmin(mockChatRoom, mockMember);
+
+        // groupId 반환을 위해
+        given(mockGroup.getId()).willReturn(777L);
 
         // when
         Long actual = groupService.createGroup(userId, req);
 
         // then
-        assertThat(actual).isEqualTo(mockGroup.getId());
+        assertThat(actual).isEqualTo(777L);
+
+        then(groupWriter).should().create(req);
+        then(memberReader).should().getRef(userId);
+        then(groupMemberWriter).should().createLeader(mockMember, mockGroup);
+        then(groupHashTagWorker).should().saveTags(mockGroup, req.hashTags());
+        then(chatRoomWriter).should().create(any(CreateChatRoomDto.class));
+        then(chatRoomWriter).should().joinAsAdmin(mockChatRoom, mockMember);
+
+        // ★ 변경 반영 포인트: group.setChatRoom(chatRoom) 호출됐는지
+        then(mockGroup).should().setChatRoom(mockChatRoom);
     }
 
     @Test
@@ -140,6 +161,12 @@ public class GroupServiceTest {
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
+
+        // 생성 실패면 이후 로직 호출되면 안 됨
+        then(memberReader).shouldHaveNoInteractions();
+        then(groupMemberWriter).shouldHaveNoInteractions();
+        then(groupHashTagWorker).shouldHaveNoInteractions();
+        then(chatRoomWriter).shouldHaveNoInteractions();
     }
 
     @Test
@@ -150,8 +177,8 @@ public class GroupServiceTest {
         CreateGroupReq req =
                 new CreateGroupReq("group name", "group tag", 10, false, false, "image.example.com", List.of());
 
-        given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupWriter.create(req)).willReturn(mockGroup);
+        given(memberReader.getRef(userId)).willReturn(mockMember);
         given(groupMemberWriter.createLeader(mockMember, mockGroup)).willThrow(new GroupException(errorCode));
 
         // when & then
@@ -159,111 +186,104 @@ public class GroupServiceTest {
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
+
+        // 리더 생성에서 터졌으면 이후는 호출되면 안 됨
+        then(groupHashTagWorker).shouldHaveNoInteractions();
+        then(chatRoomWriter).shouldHaveNoInteractions();
+        then(mockGroup).should(never()).setChatRoom(any());
     }
 
     @Test
-    void getGroups_success() {
-        // 1. Given: 그룹 요약 데이터 준비
+    void getGroups_success_includingHashTags() {
+        // given
         Long userId = 1L;
-        int limit = 4;
+        int limit = GroupConst.GROUP_SUMMARY_MEMBER_COUNT.getValue();
+
         List<GroupSummaryDto> groups = List.of(
                 new GroupSummaryDto(
-                        101L, "CS 전공 지식 뿌시기", "취업준비", 10, "chat_cs001", true, false, LocalDate.of(2025, 11, 15)),
-                new GroupSummaryDto(
-                        205L,
-                        "자바 스터디 (Spring Boot)",
-                        "백엔드개발",
-                        20,
-                        "chat_java05",
-                        false,
-                        true,
-                        LocalDate.of(2025, 10, 20)));
+                        101L, "CS 전공 지식", "취업준비", 10, "chat_cs001", true, false, LocalDate.of(2025, 11, 15)),
+                new GroupSummaryDto(205L, "자바 스터디", "백엔드", 20, "chat_java05", false, true, LocalDate.of(2025, 10, 20)));
         List<Long> groupIds = List.of(101L, 205L);
 
         given(groupMemberReader.getGroups(userId)).willReturn(groups);
 
-        // 2. Given: 멤버 프로필 데이터 준비 (groupId가 포함된 DTO여야 함)
+        // 프로필(TopN)
         List<GroupMemberProfileMappingDto> profiles = List.of(
                 new GroupMemberProfileMappingDto(101L, "https://img.com/1", GroupRole.LEADER),
                 new GroupMemberProfileMappingDto(205L, "https://img.com/2", GroupRole.MEMBER));
-
         given(groupMemberReader.getTopNMemberProfileImages(groupIds, limit)).willReturn(profiles);
 
-        // 3. Given: 카테고리 데이터 준비
+        // 카테고리
         List<GroupCategoryDto> categories =
                 List.of(new GroupCategoryDto(101L, 1L), new GroupCategoryDto(101L, 2L), new GroupCategoryDto(205L, 3L));
         given(studyCategoryReader.findByStudyTypeAndTypeId(StudyType.GROUP, groupIds))
                 .willReturn(categories);
 
-        // When
+        // ★ 변경 반영 포인트: 해시태그 Map
+        Map<Long, List<String>> hashTagsMap = Map.of(
+                101L, List.of("cs", "interview"),
+                205L, List.of("java", "spring"));
+        given(groupHashTagWorker.getHashTagsByGroups(groupIds)).willReturn(hashTagsMap);
+
+        // when
         List<GetGroupsRes> result = groupService.getGroups(userId);
 
-        // Then
+        // then
         assertThat(result).hasSize(2);
 
-        // 첫 번째 그룹 검증
+        // 101
         assertThat(result.get(0).groupId()).isEqualTo(101L);
         assertThat(result.get(0).profiles()).hasSize(1);
         assertThat(result.get(0).profiles().get(0).role()).isEqualTo(GroupRole.LEADER);
         assertThat(result.get(0).categoryIds()).containsExactlyInAnyOrder(1L, 2L);
+        assertThat(result.get(0).hashTags()).containsExactlyInAnyOrder("cs", "interview");
 
-        // 두 번째 그룹 검증
+        // 205
         assertThat(result.get(1).groupId()).isEqualTo(205L);
         assertThat(result.get(1).profiles()).hasSize(1);
         assertThat(result.get(1).profiles().get(0).role()).isEqualTo(GroupRole.MEMBER);
         assertThat(result.get(1).categoryIds()).containsExactly(3L);
+        assertThat(result.get(1).hashTags()).containsExactlyInAnyOrder("java", "spring");
+
+        then(groupHashTagWorker).should(times(1)).getHashTagsByGroups(groupIds);
     }
 
     @Test
-    void getGroupDetails_success() {
+    void getGroupDetails_success_includingHashTags_andValidatorCalled() {
+        // given
         Long userId = 1L;
         Long groupId = 1L;
-        List<GroupMemberProfileDto> profiles = List.of(
-                new GroupMemberProfileDto(1L, "개발자A", "https://example.com/img/profile_a.png", GroupRole.LEADER),
-                new GroupMemberProfileDto(2L, "열공학생B", "https://example.com/img/profile_b.png", GroupRole.MEMBER),
-                new GroupMemberProfileDto(3L, "스터디봇C", "https://example.com/img/profile_c.png", GroupRole.MEMBER));
 
-        // 1. GroupCategoryGoalDto 목록 생성
-        List<GroupCategoryGoalDto> categoryGoals = List.of(
-                new GroupCategoryGoalDto(
-                        501L, // categoryId (CS 공부)
-                        1000L, // categoryGoal (목표량)
-                        "CS 공부", // categoryName
-                        75 // achievementPercent (75% 달성)
-                        ),
-                new GroupCategoryGoalDto(
-                        502L, // categoryId (알고리즘)
-                        50L, // categoryGoal (목표량)
-                        "알고리즘", // categoryName
-                        100 // achievementPercent (100% 달성)
-                        ),
-                new GroupCategoryGoalDto(
-                        503L, // categoryId (면접 준비)
-                        200L, // categoryGoal (목표량)
-                        "면접 준비", // categoryName
-                        40 // achievementPercent (40% 달성)
-                        ));
-
-        // 2. GroupTotalGoalDto 생성 (평균 71% 가정: (75 + 100 + 40) / 3 = 71.66... -> 71 (버림))
-        GroupTotalGoalDto totalGoals = new GroupTotalGoalDto(categoryGoals, 71);
+        // validator는 void
+        willDoNothing().given(validator).isMemberOfGroup(userId, groupId);
 
         given(groupReader.getById(groupId)).willReturn(mockGroup);
+
+        List<GroupMemberProfileDto> profiles = List.of(
+                new GroupMemberProfileDto(1L, "개발자A", "https://example.com/a.png", GroupRole.LEADER),
+                new GroupMemberProfileDto(2L, "열공학생B", "https://example.com/b.png", GroupRole.MEMBER));
         given(groupMemberReader.getAllMemberProfiles(mockGroup)).willReturn(profiles);
+
+        GroupTotalGoalDto totalGoals =
+                new GroupTotalGoalDto(List.of(new GroupCategoryGoalDto(501L, 1000L, "CS", 75)), 75);
         given(groupGoalCalculator.calculateGroupGoals(groupId, profiles)).willReturn(totalGoals);
 
-        // When
+        // ★ 변경 반영 포인트: 단건 해시태그 조회
+        given(groupHashTagWorker.getHashTagsByGroup(groupId)).willReturn(List.of("java", "spring"));
+
+        // GroupDetailRes.of 내부에서 group을 읽을 수 있으니, mockGroup의 필드 접근이 필요하면 stub 필요
+        // 여기서는 profiles/goals/hashTags만 검증
+
+        // when
         GetGroupDetailRes result = groupService.getGroupDetails(userId, groupId);
 
-        // Then
-        assertThat(result.profiles().size()).isEqualTo(profiles.size());
+        // then
+        then(validator).should().isMemberOfGroup(userId, groupId);
+        then(groupReader).should().getById(groupId);
+        then(groupHashTagWorker).should().getHashTagsByGroup(groupId);
 
-        // GroupTotalGoalDto 객체의 userGoals 리스트를 검증합니다.
-        assertThat(result.groupGoals().categoryGoals().size()).isEqualTo(categoryGoals.size());
-
-        // 평균 달성률 확인 (선택 사항)
-        assertThat(result.groupGoals().overallAveragePercent()).isEqualTo(71);
-
-        // 카테고리별 목표 중 첫 번째 항목의 categoryName이 올바른지 확인
-        assertThat(result.groupGoals().categoryGoals().get(0).categoryName()).isEqualTo("CS 공부");
+        assertThat(result.profiles()).hasSize(2);
+        assertThat(result.groupGoals().overallAveragePercent()).isEqualTo(75);
+        assertThat(result.hashTags()).containsExactlyInAnyOrder("java", "spring");
     }
 }

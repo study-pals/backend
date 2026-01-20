@@ -311,7 +311,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Long groupId = 10L;
-        Cursor cursor = new Cursor(0, 10, DateSortType.NEW);
+        Cursor cursor = new Cursor(0L, "2025-03-02", 10, DateSortType.NEW);
 
         Member member1 = Member.builder().id(1L).build();
         Member member2 = Member.builder().id(2L).build();
@@ -341,7 +341,7 @@ public class GroupEntryServiceTest {
         // given
         Long userId = 1L;
         Long groupId = 1L;
-        Cursor cursor = new Cursor(0, 10, DateSortType.NEW);
+        Cursor cursor = new Cursor(0L, "2025-03-02", 10, DateSortType.NEW);
 
         willThrow(new GroupException(GroupErrorCode.GROUP_FORBIDDEN))
                 .given(authorityValidator)

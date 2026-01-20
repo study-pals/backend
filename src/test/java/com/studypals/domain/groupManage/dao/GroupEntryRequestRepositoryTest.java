@@ -45,7 +45,7 @@ public class GroupEntryRequestRepositoryTest extends DataJpaSupport {
         Slice<GroupEntryRequest> expected = new SliceImpl<>(List.of(request1, request2));
 
         // when
-        Cursor cursor = new Cursor(0, 10, DateSortType.NEW);
+        Cursor cursor = new Cursor(0L, "2025-03-02", 10, DateSortType.NEW);
         Slice<GroupEntryRequest> actual = entryRequestRepository.findAllByGroupIdWithPagination(group.getId(), cursor);
 
         // then

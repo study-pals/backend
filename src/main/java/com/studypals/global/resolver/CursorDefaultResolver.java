@@ -22,8 +22,8 @@ import com.studypals.global.request.SortType;
  * @author s0o0bn
  * @since 2025-06-05
  */
-@Component
 @AllArgsConstructor
+@Component
 public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
     private static final String CURSOR_PARAM = "cursor";
     private static final String SIZE_PARAM = "size";

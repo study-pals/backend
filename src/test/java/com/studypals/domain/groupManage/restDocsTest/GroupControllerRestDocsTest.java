@@ -121,7 +121,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         101L,
                         "알고리즘 코딩 마스터",
                         "취업준비",
-                        List.of(),
+                        List.of("알고리즘", "백준", "프로그래머스"),
                         10,
                         "chat_algo_01",
                         true,
@@ -133,7 +133,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         205L,
                         "프론트엔드 리액트 스터디",
                         "프론트개발",
-                        List.of(),
+                        List.of("리엑트", "안드로이드 스튜디오"),
                         20,
                         "chat_react_fe",
                         false,
@@ -161,8 +161,9 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
 
                                 // 그룹 기본 정보
                                 fieldWithPath("data[].groupId").description("그룹의 고유 ID"),
-                                fieldWithPath("data[].groupName").description("그룹 이름"),
-                                fieldWithPath("data[].groupTag").description("그룹의 태그"),
+                                fieldWithPath("data[].name").description("그룹 이름"),
+                                fieldWithPath("data[].tag").description("그룹의 태그"),
+                                fieldWithPath("data[].hashTags").description("그룹의 해시태그"),
                                 fieldWithPath("data[].memberCount").description("그룹에 속한 전체 회원 수"),
                                 fieldWithPath("data[].chatRoomId").description("그룹에 연결된 채팅방 ID"),
                                 fieldWithPath("data[].isOpen").description("그룹 공개 여부 (true: 공개, false: 비공개)"),
@@ -197,7 +198,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                 100L,
                 "핵심 CS 전공 스터디",
                 "tag",
-                List.of(),
+                List.of("운영체제", "네트워크", "자료구조"),
                 true, // 공개
                 false, // 승인 불필요
                 10, // 최대 10명
@@ -223,6 +224,8 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                                 // GetGroupDetailRes 필드 설명
                                 fieldWithPath("data.id").description("그룹의 고유 ID"),
                                 fieldWithPath("data.name").description("그룹 이름"),
+                                fieldWithPath("data.tag").description("그룹의 태그"),
+                                fieldWithPath("data.hashTags").description("그룹의 해시태그"),
                                 fieldWithPath("data.isOpen").description("그룹 공개 여부 (true: 공개, false: 비공개)"),
                                 fieldWithPath("data.isApprovalRequired")
                                         .description("그룹 가입 시 승인 필요 여부 (true: 필요, false: 불필요)"),

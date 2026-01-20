@@ -7,8 +7,8 @@ import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 
 public record GetGroupsRes(
         Long groupId,
-        String groupName,
-        String groupTag,
+        String name,
+        String tag,
         List<String> hashTags,
         int memberCount,
         String chatRoomId,

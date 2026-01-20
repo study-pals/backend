@@ -77,7 +77,7 @@ public class GroupEntryRequestReaderTest {
         List<GroupEntryRequest> requests = List.of(request1, request2, request3);
 
         Long groupId = 1L;
-        Cursor cursor = new Cursor(0, 10, DateSortType.NEW);
+        Cursor cursor = new Cursor(0L, "2025-03-02", 10, DateSortType.NEW);
 
         given(mockGroup.getId()).willReturn(groupId);
         given(entryRequestRepository.findAllByGroupIdWithPagination(groupId, cursor))
@@ -94,7 +94,7 @@ public class GroupEntryRequestReaderTest {
     @Test
     void getByGroup_success_empty() {
         Long groupId = 1L;
-        Cursor cursor = new Cursor(0, 10, DateSortType.NEW);
+        Cursor cursor = new Cursor(0L, "2025-03-02", 10, DateSortType.NEW);
 
         given(mockGroup.getId()).willReturn(groupId);
         given(entryRequestRepository.findAllByGroupIdWithPagination(groupId, cursor))

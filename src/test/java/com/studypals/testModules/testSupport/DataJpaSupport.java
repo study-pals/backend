@@ -8,9 +8,10 @@ import org.springframework.context.annotation.Import;
 
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.global.config.QueryDslTestConfig;
+import com.studypals.testModules.testComponent.TestSupportConfig;
 
 @DataJpaTest
-@Import(QueryDslTestConfig.class)
+@Import({QueryDslTestConfig.class, TestSupportConfig.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public abstract class DataJpaSupport extends TestEnvironment {
     @Autowired
