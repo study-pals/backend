@@ -3,6 +3,8 @@ package com.studypals.domain.groupManage.dto;
 import java.util.List;
 
 import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupMember;
+import com.studypals.domain.memberManage.entity.Member;
 
 public record GetGroupDetailRes(
         Long id,
@@ -16,7 +18,7 @@ public record GetGroupDetailRes(
         List<GroupMemberProfileDto> profiles,
         GroupTotalGoalDto groupGoals) {
     public static GetGroupDetailRes of(
-            Group group, List<String> hashTags, List<GroupMemberProfileDto> profiles, GroupTotalGoalDto goals) {
+            Group group, List<String> hashTags, List<GroupMember> groupMembers, GroupTotalGoalDto goals) {
         return new GetGroupDetailRes(
                 group.getId(),
                 group.getName(),
@@ -26,7 +28,13 @@ public record GetGroupDetailRes(
                 group.isApprovalRequired(),
                 group.getMaxMember(),
                 group.getTotalMember(),
-                profiles,
+                groupMembers.stream()
+                        .map(gm -> {
+                            Member member = gm.getMember();
+                            return new GroupMemberProfileDto(
+                                    member.getId(), member.getNickname(), member.getImageUrl(), gm.getRole());
+                        })
+                        .toList(),
                 goals);
     }
 }

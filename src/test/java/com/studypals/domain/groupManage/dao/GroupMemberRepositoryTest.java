@@ -85,12 +85,12 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
         insertGroupMember(group, m1, GroupRole.LEADER); // 리더
 
         // when
-        List<GroupMemberProfileDto> result = groupMemberRepository.findAllMemberProfiles(group.getId());
+        List<GroupMember> result = groupMemberRepository.findGroupMembers(group.getId());
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).nickname()).isEqualTo("리더"); // 리더가 우선순위로 나와야 함
-        assertThat(result.get(0).role()).isEqualTo(GroupRole.LEADER);
+        assertThat(result.get(0).getMember().getNickname()).isEqualTo("리더"); // 리더가 우선순위로 나와야 함
+        assertThat(result.get(0).getRole()).isEqualTo(GroupRole.LEADER);
     }
 
     @Test

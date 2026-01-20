@@ -22,6 +22,7 @@ import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupConst;
+import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.domain.groupManage.worker.*;
@@ -253,20 +254,45 @@ public class GroupServiceTest {
         // given
         Long userId = 1L;
         Long groupId = 1L;
+        List<GroupMember> groupMembers = createMockGroupMembers(groupId);
 
         // validator는 void
         willDoNothing().given(validator).isMemberOfGroup(userId, groupId);
 
         given(groupReader.getById(groupId)).willReturn(mockGroup);
 
-        List<GroupMemberProfileDto> profiles = List.of(
-                new GroupMemberProfileDto(1L, "개발자A", "https://example.com/a.png", GroupRole.LEADER),
-                new GroupMemberProfileDto(2L, "열공학생B", "https://example.com/b.png", GroupRole.MEMBER));
-        given(groupMemberReader.getAllMemberProfiles(mockGroup)).willReturn(profiles);
+        given(groupMemberReader.getAllMemberProfiles(groupId)).willReturn(groupMembers);
 
         GroupTotalGoalDto totalGoals =
                 new GroupTotalGoalDto(List.of(new GroupCategoryGoalDto(501L, 1000L, "CS", 75)), 75);
-        given(groupGoalCalculator.calculateGroupGoals(groupId, profiles)).willReturn(totalGoals);
+        given(groupGoalCalculator.calculateGroupGoals(groupId, groupMembers)).willReturn(totalGoals);
+
+        // 1. GroupCategoryGoalDto 목록 생성
+        List<GroupCategoryGoalDto> categoryGoals = List.of(
+                new GroupCategoryGoalDto(
+                        501L, // categoryId (CS 공부)
+                        1000L, // categoryGoal (목표량)
+                        "CS 공부", // categoryName
+                        75 // achievementPercent (75% 달성)
+                        ),
+                new GroupCategoryGoalDto(
+                        502L, // categoryId (알고리즘)
+                        50L, // categoryGoal (목표량)
+                        "알고리즘", // categoryName
+                        100 // achievementPercent (100% 달성)
+                        ),
+                new GroupCategoryGoalDto(
+                        503L, // categoryId (면접 준비)
+                        200L, // categoryGoal (목표량)
+                        "면접 준비", // categoryName
+                        40 // achievementPercent (40% 달성)
+                        ));
+
+        // 2. GroupTotalGoalDto 생성 (평균 71% 가정: (75 + 100 + 40) / 3 = 71.66... -> 71 (버림))
+        given(groupReader.getById(groupId)).willReturn(mockGroup);
+        given(mockGroup.getId()).willReturn(groupId);
+        given(groupMemberReader.getAllMemberProfiles(mockGroup.getId())).willReturn(groupMembers);
+        given(groupGoalCalculator.calculateGroupGoals(groupId, groupMembers)).willReturn(totalGoals);
 
         // ★ 변경 반영 포인트: 단건 해시태그 조회
         given(groupHashTagWorker.getHashTagsByGroup(groupId)).willReturn(List.of("java", "spring"));
@@ -281,9 +307,41 @@ public class GroupServiceTest {
         then(validator).should().isMemberOfGroup(userId, groupId);
         then(groupReader).should().getById(groupId);
         then(groupHashTagWorker).should().getHashTagsByGroup(groupId);
+        // Then
+        assertThat(result.profiles().size()).isEqualTo(groupMembers.size());
+
+        // GroupTotalGoalDto 객체의 userGoals 리스트를 검증합니다.
+        assertThat(result.groupGoals().categoryGoals().size()).isEqualTo(categoryGoals.size());
 
         assertThat(result.profiles()).hasSize(2);
         assertThat(result.groupGoals().overallAveragePercent()).isEqualTo(75);
         assertThat(result.hashTags()).containsExactlyInAnyOrder("java", "spring");
+    }
+
+    // 헬퍼 메서드: GroupMember 엔티티 4명 생성
+    private List<GroupMember> createMockGroupMembers(Long groupId) {
+        Group group = Group.builder().id(groupId).build();
+
+        return List.of(
+                createMember(1L, "개발자A", "img_a", group, GroupRole.LEADER),
+                createMember(2L, "열공학생B", "img_b", group, GroupRole.MEMBER),
+                createMember(3L, "스터디봇C", "img_c", group, GroupRole.MEMBER),
+                createMember(4L, "코딩천재D", "img_d", group, GroupRole.MEMBER));
+    }
+
+    private GroupMember createMember(Long id, String nick, String img, Group group, GroupRole role) {
+        Member member = Member.builder()
+                .id(id)
+                .nickname(nick)
+                .imageUrl("https://example.com/" + img)
+                .build();
+
+        return GroupMember.builder()
+                .id(id + 1000L) // GroupMember 자체의 ID
+                .member(member)
+                .group(group)
+                .role(role)
+                .joinedAt(LocalDate.now())
+                .build();
     }
 }

@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -31,5 +33,11 @@ public class ArgumentResolverConfig implements WebMvcConfigurer {
     @Override
     public void addArgumentResolvers(@NotNull List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(cursorDefaultResolver);
+    }
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        // 모든 Enum에 대해 대소문자 구분 없이 매핑되도록 지원
+        ApplicationConversionService.configure(registry);
     }
 }
