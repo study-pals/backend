@@ -263,10 +263,6 @@ public class GroupServiceTest {
 
         given(groupMemberReader.getAllMemberProfiles(groupId)).willReturn(groupMembers);
 
-        GroupTotalGoalDto totalGoals =
-                new GroupTotalGoalDto(List.of(new GroupCategoryGoalDto(501L, 1000L, "CS", 75)), 75);
-        given(groupGoalCalculator.calculateGroupGoals(groupId, groupMembers)).willReturn(totalGoals);
-
         // 1. GroupCategoryGoalDto 목록 생성
         List<GroupCategoryGoalDto> categoryGoals = List.of(
                 new GroupCategoryGoalDto(
@@ -287,6 +283,9 @@ public class GroupServiceTest {
                         "면접 준비", // categoryName
                         40 // achievementPercent (40% 달성)
                         ));
+
+        GroupTotalGoalDto totalGoals = new GroupTotalGoalDto(categoryGoals, 75);
+        given(groupGoalCalculator.calculateGroupGoals(groupId, groupMembers)).willReturn(totalGoals);
 
         // 2. GroupTotalGoalDto 생성 (평균 71% 가정: (75 + 100 + 40) / 3 = 71.66... -> 71 (버림))
         given(groupReader.getById(groupId)).willReturn(mockGroup);
@@ -313,7 +312,7 @@ public class GroupServiceTest {
         // GroupTotalGoalDto 객체의 userGoals 리스트를 검증합니다.
         assertThat(result.groupGoals().categoryGoals().size()).isEqualTo(categoryGoals.size());
 
-        assertThat(result.profiles()).hasSize(2);
+        assertThat(result.profiles()).hasSize(4);
         assertThat(result.groupGoals().overallAveragePercent()).isEqualTo(75);
         assertThat(result.hashTags()).containsExactlyInAnyOrder("java", "spring");
     }
