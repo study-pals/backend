@@ -37,7 +37,7 @@ public abstract class AbstractPagingRepository<T> {
         EntityMetadata metadata = getEntityMetadata(root.getType());
         Class<?> sortFieldType = metadata.getFieldType(field);
 
-        //alias를 문자열로 만들지 말고 root의 metadata를 그대로 사용
+        // alias를 문자열로 만들지 말고 root의 metadata를 그대로 사용
         PathMetadata rootMetadata = root.getMetadata();
         PathBuilder<E> path = new PathBuilder<>((Class<E>) root.getType(), rootMetadata);
 

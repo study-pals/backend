@@ -63,7 +63,6 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
     private final JPAQueryFactory queryFactory;
     private final StringUtils stringUtils;
 
-
     /**
      * 검색 조건과 커서 정보를 기반으로 그룹 목록을 조회합니다.
      *
@@ -107,10 +106,10 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
         List<Group> results = queryFactory
                 .selectFrom(group)
                 .where(
-                        assembleWhere(dto),     // 키워드 검색 조건 (tag/name/hashTag 중 1개)
+                        assembleWhere(dto), // 키워드 검색 조건 (tag/name/hashTag 중 1개)
                         assembleCursor(cursor), // 커서 조건 (정렬 기준 + id tie-break)
-                        assembleType(dto)       // 공개/정원/승인 필터
-                )
+                        assembleType(dto) // 공개/정원/승인 필터
+                        )
                 .orderBy(orders)
                 .limit(cursor.size() + 1)
                 .fetch();
@@ -122,7 +121,6 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
         // Slice는 "요청 페이지 번호"가 의미가 약하므로 0 고정 / CursorResponse 에서 사라짐
         return new SliceImpl<>(results, PageRequest.of(0, cursor.size()), hasNext);
     }
-
 
     /**
      * 키워드 기반 검색 조건을 조립합니다.
@@ -145,7 +143,7 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
      *       {@code WHERE exists (SELECT 1 FROM GroupHashTag ght
      *       WHERE ght.group_id = g.id
      *       AND ght.hashTag.tag like %:norm% )}</li>
- *       </pre>
+     *       </pre>
      *
      * </ul>
      *
@@ -284,7 +282,6 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
         throw new IllegalArgumentException("cursor sort not matched");
     }
 
-
     /**
      * 해시태그 기준으로 그룹을 필터링하기 위한 exists 서브쿼리 조건을 생성합니다.
      *
@@ -317,7 +314,6 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
                 .where(groupHashTag.group.id.eq(group.id), groupHashTag.hashTag.tag.contains(normHashTag))
                 .exists();
     }
-
 
     /**
      * 정렬 조건(OrderSpecifier)을 생성합니다.
