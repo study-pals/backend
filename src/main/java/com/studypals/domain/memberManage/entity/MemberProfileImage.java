@@ -14,6 +14,7 @@ import lombok.experimental.SuperBuilder;
 
 import com.studypals.global.file.entity.ImageFile;
 
+// 주석 추가
 @Entity
 @Getter
 @SuperBuilder

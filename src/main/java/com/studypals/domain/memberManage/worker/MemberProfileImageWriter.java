@@ -9,6 +9,7 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.entity.MemberProfileImage;
 import com.studypals.global.annotations.Worker;
 import com.studypals.global.file.FileUtils;
+import com.studypals.global.file.entity.ImageStatus;
 
 /**
  * 회원 프로필 이미지의 메타데이터를 데이터베이스에 저장하는 역할을 전담하는 Worker 클래스입니다.
@@ -47,7 +48,10 @@ public class MemberProfileImageWriter {
                 .objectKey(objectKey)
                 .originalFileName(fileName)
                 .mimeType(extension)
+                .imageStatus(ImageStatus.PENDING) // 비동기 리사이징 대기 상태로 저장
                 .build());
+
+        member.setProfileImage(savedImage);
 
         return savedImage.getId();
     }

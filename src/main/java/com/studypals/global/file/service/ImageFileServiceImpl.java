@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.worker.ChatImageManager;
@@ -20,25 +21,25 @@ import com.studypals.global.exceptions.exception.FileException;
 import com.studypals.global.file.FileType;
 import com.studypals.global.file.dao.AbstractFileManager;
 import com.studypals.global.file.dao.AbstractImageManager;
-import com.studypals.global.file.dto.ChatPresignedUrlReq;
-import com.studypals.global.file.dto.PresignedUrlRes;
-import com.studypals.global.file.dto.ProfilePresignedUrlReq;
+import com.studypals.global.file.dto.ImageUploadRes;
 import com.studypals.global.file.entity.ImageType;
 
 /**
  * 이미지 파일 관련 비즈니스 로직을 처리하는 서비스 구현체입니다.
  * <p>
- * 이 서비스는 클라이언트가 파일을 스토리지에 직접 업로드하는 데 필요한 Presigned URL을 생성하는 역할을 담당합니다.
+ * 이 서비스는 클라이언트로부터 받은 파일을 스토리지에 직접 업로드하는 역할을 담당합니다.
  * {@link ImageType}에 따라 적절한 {@link AbstractImageManager}를 동적으로 선택하여 로직을 위임하는 전략 패턴을 사용합니다.
  * 이를 통해 새로운 이미지 타입이 추가되더라도 서비스 코드의 변경 없이 유연하게 확장할 수 있습니다.
  *
  * <p><b>주요 흐름:</b>
  * <ol>
- *     <li>클라이언트로부터 이미지 타입에 맞는 Presigned URL 생성 요청을 받습니다.</li>
- *     <li>요청 타입에 맞는 Manager를 조회합니다. (예: 프로필 사진, 채팅 사진)</li>
+ *     <li>클라이언트로부터 이미지 파일과 메타데이터를 받습니다.</li>
+ *     <li>요청 타입에 맞는 Manager를 조회합니다.</li>
  *     <li>Manager를 통해 스토리지에 저장될 고유한 Object Key를 생성합니다.</li>
- *     <li>파일이 실제로 업로드되기 전에, 해당 Object Key와 파일 메타데이터를 데이터베이스에 먼저 저장합니다.</li>
- *     <li>생성된 Object Key를 기반으로 스토리지에 업로드할 수 있는 Presigned URL을 발급하여 클라이언트에 반환합니다.</li>
+ *     <li>이미지 리사이징 로직을 수행합니다.</li>
+ *     <li>ObjectStorage를 통해 파일을 스토리지에 업로드합니다.</li>
+ *     <li>업로드된 파일 정보와 메타데이터를 데이터베이스에 저장합니다.</li>
+ *     <li>저장된 이미지 ID와 접근 가능한 URL을 반환합니다.</li>
  * </ol>
  *
  * @author sleepyhoon
@@ -92,61 +93,68 @@ public class ImageFileServiceImpl implements ImageFileService {
     }
 
     /**
-     * 사용자 프로필 이미지 업로드를 위한 Presigned URL을 생성합니다.
+     * 사용자 프로필 이미지를 업로드합니다.
      * <p>
      * {@link ImageType#PROFILE_IMAGE} 타입에 맞는 Manager를 찾아 다음을 수행합니다:
      * <ol>
      *     <li>사용자 ID와 파일명을 기반으로 Object Key를 생성합니다.</li>
-     *     <li>생성된 Object Key를 포함한 이미지 정보를 DB에 미리 저장하고, 이미지 ID를 발급받습니다.</li>
-     *     <li>Object Key를 사용하여 스토리지에 업로드할 수 있는 Presigned URL을 생성합니다.</li>
+     *     <li>스토리지에 파일을 업로드합니다.</li>
+     *     <li>이미지 정보를 DB에 저장합니다.</li>
      * </ol>
      *
-     * @param request 파일 이름이 담긴 요청 DTO
+     * @param file 업로드할 이미지 파일
      * @param userId Presigned URL을 요청한 사용자의 ID
-     * @return 생성된 이미지 ID와 Presigned URL이 포함된 응답 DTO
+     * @return 생성된 이미지 ID와 접근 URL이 포함된 응답 DTO
      */
     @Override
-    public PresignedUrlRes getProfileUploadUrl(ProfilePresignedUrlReq request, Long userId) {
+    public ImageUploadRes uploadProfileImage(MultipartFile file, Long userId) {
         MemberProfileImageManager manager = getManager(ImageType.PROFILE_IMAGE, MemberProfileImageManager.class);
+        Member member = memberReader.get(userId);
 
-        String objectKey = manager.createObjectKey(userId, request.fileName(), String.valueOf(userId));
+        // 기존에 프로필이 존재하는 경우, minio 에서 삭제해야 함.
+        if (member.getProfileImage() != null) {
+            manager.delete(member.getProfileImage().getObjectKey());
+        }
 
-        Member member = memberReader.getRef(userId);
+        String objectKey = manager.createObjectKey(userId, file.getOriginalFilename(), String.valueOf(userId));
 
-        Long imageId = profileImageWriter.save(member, objectKey, request.fileName());
+        // Manager에게 업로드 위임 (리사이징 로직 등은 Manager 내부에서 처리 가능)
+        String fileUrl = manager.upload(file, objectKey);
 
-        String uploadUrl = manager.getUploadUrl(objectKey);
+        Long imageId = profileImageWriter.save(member, objectKey, file.getOriginalFilename());
 
-        return new PresignedUrlRes(imageId, uploadUrl);
+        return new ImageUploadRes(imageId, fileUrl);
     }
 
     /**
-     * 채팅방 내 이미지 업로드를 위한 Presigned URL을 생성합니다.
+     * 채팅방 내 이미지를 업로드합니다.
      * <p>
      * {@link ImageType#CHAT_IMAGE} 타입에 맞는 Manager를 찾아 다음을 수행합니다:
      * <ol>
      *     <li>채팅방 ID, 사용자 ID, 파일명을 기반으로 Object Key를 생성합니다.</li>
-     *     <li>생성된 Object Key를 포함한 이미지 정보를 DB에 미리 저장하고, 이미지 ID를 발급받습니다.</li>
-     *     <li>Object Key를 사용하여 스토리지에 업로드할 수 있는 Presigned URL을 생성합니다.</li>
+     *     <li>스토리지에 파일을 업로드합니다.</li>
+     *     <li>이미지 정보를 DB에 저장합니다.</li>
      * </ol>
      *
-     * @param request 채팅방 ID와 파일 이름이 담긴 요청 DTO
+     * @param file 업로드할 이미지 파일
+     * @param chatRoomId 채팅방 ID
      * @param userId Presigned URL을 요청한 사용자의 ID
-     * @return 생성된 이미지 ID와 Presigned URL이 포함된 응답 DTO
+     * @return 생성된 이미지 ID와 접근 URL이 포함된 응답 DTO
      */
     @Override
-    public PresignedUrlRes getChatUploadUrl(ChatPresignedUrlReq request, Long userId) {
+    public ImageUploadRes uploadChatImage(MultipartFile file, String chatRoomId, Long userId) {
         ChatImageManager manager = getManager(ImageType.CHAT_IMAGE, ChatImageManager.class);
 
-        String objectKey = manager.createObjectKey(userId, request.fileName(), request.chatRoomId());
+        String objectKey = manager.createObjectKey(userId, file.getOriginalFilename(), chatRoomId);
 
-        ChatRoom chatRoom = chatRoomReader.getById(request.chatRoomId());
+        // Manager에게 업로드 위임
+        String fileUrl = manager.upload(file, objectKey);
 
-        Long imageId = chatImageWriter.save(chatRoom, objectKey, request.fileName());
+        ChatRoom chatRoom = chatRoomReader.getById(chatRoomId);
 
-        String uploadUrl = manager.getUploadUrl(objectKey);
+        Long imageId = chatImageWriter.save(chatRoom, objectKey, file.getOriginalFilename());
 
-        return new PresignedUrlRes(imageId, uploadUrl);
+        return new ImageUploadRes(imageId, fileUrl);
     }
 
     /**

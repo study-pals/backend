@@ -35,8 +35,10 @@ import lombok.experimental.SuperBuilder;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class ImageFile {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "image_file_id")
     private Long id;
 
     /**
@@ -61,10 +63,11 @@ public abstract class ImageFile {
     private String mimeType;
 
     /**
-     * 이미지 상태입니다.
-     * Presigned URL 발급하면 PENDING
-     * 발급 후 성공 API를 호출하면 COMPLETE
-     * 발급 후 일정 시간 이내 성공 API를 호출하지 않으면 EXPIRED
+     * 이미지의 처리 상태입니다.
+     * <p>
+     * - PENDING: 처리 대기 중 (리사이징 전)
+     * - COMPLETE: 처리 완료 (리사이징 완료)
+     * - FAILED: 처리 실패 (재시도 필요)
      */
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -77,4 +80,18 @@ public abstract class ImageFile {
     @CreatedDate
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
+
+    /**
+     * 이미지 처리가 완료되었음을 표시합니다.
+     */
+    public void complete() {
+        this.imageStatus = ImageStatus.COMPLETE;
+    }
+
+    /**
+     * 이미지 처리 중 오류가 발생했음을 표시합니다.
+     */
+    public void fail() {
+        this.imageStatus = ImageStatus.FAILED;
+    }
 }

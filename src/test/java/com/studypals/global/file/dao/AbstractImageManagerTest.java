@@ -152,7 +152,7 @@ class AbstractImageManagerTest {
             when(objectStorage.createPresignedPutUrl(anyString(), anyInt())).thenReturn(expectedUrl);
 
             // when
-            String actualUrl = imageManager.getUploadUrl(objectKey);
+            String actualUrl = imageManager.getPresignedGetUrl(objectKey);
 
             // then
             assertThat(actualUrl).isEqualTo(expectedUrl);

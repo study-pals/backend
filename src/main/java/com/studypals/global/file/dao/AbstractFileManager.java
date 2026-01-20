@@ -1,5 +1,7 @@
 package com.studypals.global.file.dao;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.global.file.FileType;
@@ -33,6 +35,17 @@ public abstract class AbstractFileManager {
      * 하위 클래스에서 스토리지 기능에 접근할 수 있도록 {@code protected}로 선언되었습니다.
      */
     protected final ObjectStorage objectStorage;
+
+    /**
+     * 파일을 스토리지에 업로드합니다.
+     *
+     * @param file      업로드할 파일
+     * @param objectKey 스토리지에 저장될 키
+     * @return 업로드된 파일의 접근 URL
+     */
+    public String upload(MultipartFile file, String objectKey) {
+        return objectStorage.upload(file, objectKey);
+    }
 
     /**
      * 스토리지에 저장된 파일을 삭제합니다.

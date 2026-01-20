@@ -51,6 +51,10 @@ public class Member {
     @Column(name = "image_url", nullable = true, length = 255)
     private String imageUrl;
 
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Setter
+    private MemberProfileImage profileImage;
+
     @Column(name = "created_at")
     @CreatedDate
     private LocalDate createdDate;
@@ -73,6 +77,6 @@ public class Member {
     public void updateProfile(LocalDate birthday, String position, String imageUrl) {
         this.birthday = birthday;
         this.position = position;
-        this.imageUrl = imageUrl;
+        this.imageUrl = imageUrl; // TODO : 수정 필요
     }
 }

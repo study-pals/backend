@@ -82,7 +82,7 @@ class ImageFileServiceImplTest {
         when(memberReader.getRef(userId)).thenReturn(Member.builder().id(userId).build());
         when(memberProfileImageWriter.save(any(Member.class), eq(expectedObjectKey), eq(request.fileName())))
                 .thenReturn(expectedImageId);
-        when(mockProfileImageManager.getUploadUrl(expectedObjectKey)).thenReturn(expectedUrl);
+        when(mockProfileImageManager.getPresignedGetUrl(expectedObjectKey)).thenReturn(expectedUrl);
 
         // when
         PresignedUrlRes actualResult = imageFileService.getProfileUploadUrl(request, userId);
@@ -95,8 +95,8 @@ class ImageFileServiceImplTest {
         // 올바른 메서드가 올바른 인자와 함께 호출되었는지 검증합니다.
         verify(mockProfileImageManager).createObjectKey(userId, request.fileName(), String.valueOf(userId));
         verify(memberProfileImageWriter).save(any(Member.class), eq(expectedObjectKey), eq(request.fileName()));
-        verify(mockProfileImageManager).getUploadUrl(expectedObjectKey);
-        verify(mockChatImageManager, never()).getUploadUrl(any());
+        verify(mockProfileImageManager).getPresignedGetUrl(expectedObjectKey);
+        verify(mockChatImageManager, never()).getPresignedGetUrl(any());
     }
 
     @Test
@@ -116,7 +116,7 @@ class ImageFileServiceImplTest {
                 .thenReturn(ChatRoom.builder().id(request.chatRoomId()).build());
         when(chatImageWriter.save(any(ChatRoom.class), eq(expectedObjectKey), eq(request.fileName())))
                 .thenReturn(expectedImageId);
-        when(mockChatImageManager.getUploadUrl(expectedObjectKey)).thenReturn(expectedUrl);
+        when(mockChatImageManager.getPresignedGetUrl(expectedObjectKey)).thenReturn(expectedUrl);
 
         // when
         PresignedUrlRes actualResult = imageFileService.getChatUploadUrl(request, userId);
@@ -129,7 +129,7 @@ class ImageFileServiceImplTest {
         // 올바른 메서드가 올바른 인자와 함께 호출되었는지 검증합니다.
         verify(mockChatImageManager).createObjectKey(userId, request.fileName(), request.chatRoomId());
         verify(chatImageWriter).save(any(ChatRoom.class), eq(expectedObjectKey), eq(request.fileName()));
-        verify(mockChatImageManager).getUploadUrl(expectedObjectKey);
-        verify(mockProfileImageManager, never()).getUploadUrl(any());
+        verify(mockChatImageManager).getPresignedGetUrl(expectedObjectKey);
+        verify(mockProfileImageManager, never()).getPresignedGetUrl(any());
     }
 }

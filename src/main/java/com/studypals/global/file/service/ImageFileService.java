@@ -1,8 +1,8 @@
 package com.studypals.global.file.service;
 
-import com.studypals.global.file.dto.ChatPresignedUrlReq;
-import com.studypals.global.file.dto.PresignedUrlRes;
-import com.studypals.global.file.dto.ProfilePresignedUrlReq;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.studypals.global.file.dto.ImageUploadRes;
 
 /**
  * 파일을 처리하는 로직을 정의한 인터페이스입니다.
@@ -16,16 +16,19 @@ import com.studypals.global.file.dto.ProfilePresignedUrlReq;
  */
 public interface ImageFileService {
     /**
-     * 프로필 이미지 업로드를 위한 URL을 발급합니다.
-     * @param request 프로필 파일 이름 정보가 담긴 요청 DTO
-     * @return 업로드 가능한 URL
+     * 프로필 이미지를 스토리지에 업로드합니다.
+     * @param file 업로드할 이미지 파일
+     * @param userId 요청한 사용자 ID
+     * @return 업로드된 파일 정보 (ID, Access URL)
      */
-    PresignedUrlRes getProfileUploadUrl(ProfilePresignedUrlReq request, Long userId);
+    ImageUploadRes uploadProfileImage(MultipartFile file, Long userId);
 
     /**
-     * 채팅 이미지 업로드를 위한 URL을 발급합니다.
-     * @param request 채팅 파일 이름과 타겟 ID 정보가 담긴 요청 DTO
-     * @return 업로드 가능한 URL
+     * 채팅 이미지를 스토리지에 업로드합니다.
+     * @param file 업로드할 이미지 파일
+     * @param chatRoomId 채팅방 ID
+     * @param userId 요청한 사용자 ID
+     * @return 업로드된 파일 정보 (ID, Access URL)
      */
-    PresignedUrlRes getChatUploadUrl(ChatPresignedUrlReq request, Long userId);
+    ImageUploadRes uploadChatImage(MultipartFile file, String chatRoomId, Long userId);
 }

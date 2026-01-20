@@ -1,5 +1,7 @@
 package com.studypals.global.file;
 
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  * Object Storage와의 상호작용을 위한 표준 인터페이스를 정의합니다.
  * <p>
@@ -17,9 +19,17 @@ package com.studypals.global.file;
 public interface ObjectStorage {
 
     /**
+     * 스토리지에 파일을 저장합니다.
+     *
+     * @param file 저장할 파일
+     * @param objectKey 파일을 저장할 경로
+     */
+    String upload(MultipartFile file, String objectKey);
+
+    /**
      * 스토리지에서 지정된 객체(파일)를 삭제합니다.
      *
-     * @param objectKey 삭제할 객체의 고유 키 (예: "profile/images/user1.jpg")
+     * @param objectKey 삭제할 객체의 경로
      */
     void delete(String objectKey);
 
@@ -45,16 +55,4 @@ public interface ObjectStorage {
      * @return 생성된 Presigned GET URL
      */
     String createPresignedGetUrl(String objectKey, int expirySeconds);
-
-    /**
-     * 객체 업로드를 위한 Presigned URL을 생성합니다.
-     * <p>
-     * 클라이언트는 이 URL을 사용하여 서버를 거치지 않고 스토리지에 직접 파일을 업로드할 수 있습니다.
-     * 이는 서버의 부하를 줄이고 업로드 속도를 향상시키는 효과적인 방법입니다.
-     *
-     * @param objectKey 업로드될 객체에 부여할 고유 키
-     * @param expirySeconds URL의 만료 시간 (초 단위)
-     * @return 생성된 Presigned PUT URL
-     */
-    String createPresignedPutUrl(String objectKey, int expirySeconds);
 }
