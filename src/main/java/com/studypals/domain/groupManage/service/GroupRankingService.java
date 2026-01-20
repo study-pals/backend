@@ -24,7 +24,7 @@ public interface GroupRankingService {
      * @param userId 조회를 시도하는 사용자 ID
      * @param groupId 랭킹을 조회하려고 하는 그룹 ID
      * @param period 조회하고 싶은 랭킹 종류 (daily/weekly/monthly)
-     * @return
+     * @return 그룹에 속한 사용자 및 공부 시간에 대한 데이터(정렬되지 않음)
      */
     List<GroupMemberRankingDto> getGroupRanking(Long userId, Long groupId, GroupRankingPeriod period);
 }

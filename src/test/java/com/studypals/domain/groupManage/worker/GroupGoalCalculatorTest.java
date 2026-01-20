@@ -90,7 +90,7 @@ class GroupGoalCalculatorTest {
 
     @Test
     @DisplayName("성공 케이스: 모든 StudyTime을 가져와 정확한 달성률을 계산하고 반환한다")
-    void calculateGroupGoals_ShouldReturnAccuratePercentages() throws Exception {
+    void calculateGroupGoals_ShouldReturnAccuratePercentages() {
         // Given
         // 1L, 2L ID를 가진 실제 멤버 객체 생성 (memberIds [1,2,3,4]와 매칭됨)
         Member m1 = createMemberEntity(1L, "개발자A", "img_a");
