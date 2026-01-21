@@ -21,6 +21,7 @@ import com.studypals.global.exceptions.exception.FileException;
 import com.studypals.global.file.FileType;
 import com.studypals.global.file.dao.AbstractFileManager;
 import com.studypals.global.file.dao.AbstractImageManager;
+import com.studypals.global.file.dto.ImageUploadDto;
 import com.studypals.global.file.dto.ImageUploadRes;
 import com.studypals.global.file.entity.ImageType;
 
@@ -116,14 +117,11 @@ public class ImageFileServiceImpl implements ImageFileService {
             manager.delete(member.getProfileImage().getObjectKey());
         }
 
-        String objectKey = manager.createObjectKey(userId, file.getOriginalFilename(), String.valueOf(userId));
+        ImageUploadDto uploadDto = manager.upload(file, userId);
 
-        // Manager에게 업로드 위임 (리사이징 로직 등은 Manager 내부에서 처리 가능)
-        String fileUrl = manager.upload(file, objectKey);
+        Long imageId = profileImageWriter.save(member, uploadDto.objectKey(), file.getOriginalFilename());
 
-        Long imageId = profileImageWriter.save(member, objectKey, file.getOriginalFilename());
-
-        return new ImageUploadRes(imageId, fileUrl);
+        return new ImageUploadRes(imageId, uploadDto.imageUrl());
     }
 
     /**
@@ -145,16 +143,13 @@ public class ImageFileServiceImpl implements ImageFileService {
     public ImageUploadRes uploadChatImage(MultipartFile file, String chatRoomId, Long userId) {
         ChatImageManager manager = getManager(ImageType.CHAT_IMAGE, ChatImageManager.class);
 
-        String objectKey = manager.createObjectKey(userId, file.getOriginalFilename(), chatRoomId);
-
-        // Manager에게 업로드 위임
-        String fileUrl = manager.upload(file, objectKey);
+        ImageUploadDto uploadDto = manager.upload(file, chatRoomId, userId);
 
         ChatRoom chatRoom = chatRoomReader.getById(chatRoomId);
 
-        Long imageId = chatImageWriter.save(chatRoom, objectKey, file.getOriginalFilename());
+        Long imageId = chatImageWriter.save(chatRoom, uploadDto.objectKey(), file.getOriginalFilename());
 
-        return new ImageUploadRes(imageId, fileUrl);
+        return new ImageUploadRes(imageId, uploadDto.imageUrl());
     }
 
     /**

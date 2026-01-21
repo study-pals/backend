@@ -37,17 +37,6 @@ public abstract class AbstractFileManager {
     protected final ObjectStorage objectStorage;
 
     /**
-     * 파일을 스토리지에 업로드합니다.
-     *
-     * @param file      업로드할 파일
-     * @param objectKey 스토리지에 저장될 키
-     * @return 업로드된 파일의 접근 URL
-     */
-    public String upload(MultipartFile file, String objectKey) {
-        return objectStorage.upload(file, objectKey);
-    }
-
-    /**
      * 스토리지에 저장된 파일을 삭제합니다.
      * <p>
      * 전체 파일 URL을 입력받아 내부적으로 객체 키(Object Key)를 추출한 후,
@@ -69,4 +58,16 @@ public abstract class AbstractFileManager {
      * @return 이 Manager가 처리하는 {@link FileType}
      */
     public abstract FileType getFileType();
+
+    /**
+     * 파일을 스토리지에 업로드합니다.
+     * <p>
+     * 이 추상 메서드는 하위 클래스에서 반드시 구현해야 합니다.
+     * @param file      업로드할 파일
+     * @param objectKey 스토리지에 저장될 키
+     * @return 업로드된 파일의 접근 URL
+     */
+    public String upload(MultipartFile file, String objectKey) {
+        return objectStorage.upload(file, objectKey);
+    }
 }

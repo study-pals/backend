@@ -48,7 +48,7 @@ public class MemberProfileImageWriter {
                 .objectKey(objectKey)
                 .originalFileName(fileName)
                 .mimeType(extension)
-                .imageStatus(ImageStatus.PENDING) // 비동기 리사이징 대기 상태로 저장
+                .imageStatus(ImageStatus.PENDING)
                 .build());
 
         member.setProfileImage(savedImage);

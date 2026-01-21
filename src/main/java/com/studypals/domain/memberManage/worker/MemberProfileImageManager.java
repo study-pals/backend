@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.studypals.global.file.FileProperties;
 import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.dao.AbstractImageManager;
+import com.studypals.global.file.dto.ImageUploadDto;
 import com.studypals.global.file.entity.ImageType;
 import com.studypals.global.file.entity.ImageVariantKey;
 
@@ -55,5 +57,17 @@ public class MemberProfileImageManager extends AbstractImageManager {
     @Override
     public ImageType getFileType() {
         return ImageType.PROFILE_IMAGE;
+    }
+
+    /**
+     * 프로필 이미지를 업로드하고, 생성된 ObjectKey와 파일 URL을 반환합니다.
+     *
+     * @param file 업로드할 파일
+     * @param userId 사용자 ID
+     * @return ObjectKey와 파일 URL을 담은 ImageUploadDto
+     */
+    public ImageUploadDto upload(MultipartFile file, Long userId) {
+        // 공통 업로드 로직을 수행하는 부모 클래스의 템플릿 메서드를 호출합니다.
+        return performUpload(file, userId, String.valueOf(userId));
     }
 }

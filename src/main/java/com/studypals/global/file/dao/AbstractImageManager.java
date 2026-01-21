@@ -2,11 +2,14 @@ package com.studypals.global.file.dao;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.studypals.global.exceptions.errorCode.FileErrorCode;
 import com.studypals.global.exceptions.exception.FileException;
 import com.studypals.global.file.FileProperties;
 import com.studypals.global.file.FileUtils;
 import com.studypals.global.file.ObjectStorage;
+import com.studypals.global.file.dto.ImageUploadDto;
 import com.studypals.global.file.entity.ImageVariantKey;
 
 /**
@@ -55,6 +58,13 @@ public abstract class AbstractImageManager extends AbstractFileManager {
         return objectStorage.createPresignedGetUrl(objectKey, presignedUrlExpireTime);
     }
 
+    // 주석 필요
+    public final ImageUploadDto upload(MultipartFile file, Long userId) {
+        String objectKey = createObjectKey(userId, file.getOriginalFilename(), String.valueOf(userId));
+        String imageUrl = objectStorage.upload(file, objectKey);
+        return new ImageUploadDto(imageUrl, objectKey);
+    }
+
     /**
      * 스토리지에 저장될 고유한 객체 키(Object Key)를 생성하는 템플릿 메서드입니다.
      * <p>
@@ -62,7 +72,6 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * <ol>
      *     <li>{@link #validateFileName}: 파일 이름과 확장자를 검증합니다.</li>
      *     <li>{@link #validateTargetId}: 하위 클래스에서 재정의 가능한 대상 ID 유효성을 검증합니다 (Hook).</li>
-     *     <li>{@link #generateObjectKey}: 실제 객체 키를 생성합니다.</li>
      * </ol>
      *
      * @param userId 업로드를 요청한 사용자 ID
@@ -73,7 +82,8 @@ public abstract class AbstractImageManager extends AbstractFileManager {
     public final String createObjectKey(Long userId, String fileName, String targetId) {
         validateFileName(fileName);
         validateTargetId(userId, targetId);
-        return generateObjectKey(fileName, targetId);
+        String extension = FileUtils.extractExtension(fileName);
+        return generateObjectKeyDetail(fileName, extension);
     }
 
     /**
@@ -106,19 +116,6 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      */
     protected void validateTargetId(Long userId, String targetId) {
         // 기본 구현은 비어 있으며, 하위 클래스에서 필요에 따라 재정의합니다.
-    }
-
-    /**
-     * 객체 키 생성을 위한 내부 헬퍼 메서드입니다.
-     * 파일 확장자를 추출한 뒤, 하위 클래스에서 구현된 {@link #generateObjectKeyDetail}을 호출하여 최종 키를 완성합니다.
-     *
-     * @param fileName 원본 파일 이름
-     * @param targetId 업로드 대상 식별자
-     * @return 생성된 객체 키
-     */
-    private String generateObjectKey(String fileName, String targetId) {
-        String ext = FileUtils.extractExtension(fileName);
-        return generateObjectKeyDetail(targetId, ext);
     }
 
     /**

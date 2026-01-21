@@ -67,7 +67,7 @@ public class MinioStorage implements ObjectStorage {
 
             return endpoint + "/" + bucket + "/" + objectKey;
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("MinIO 파일 업로드에 실패했습니다. ObjectKey: " + objectKey, e);
         }
     }
 
@@ -84,7 +84,7 @@ public class MinioStorage implements ObjectStorage {
                     .object(destination)
                     .build());
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("MinIO 파일 삭제에 실패했습니다. ObjectKey: " + destination, e);
         }
     }
 
@@ -129,7 +129,7 @@ public class MinioStorage implements ObjectStorage {
                     .config("public")
                     .build());
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("MinIO 버킷 초기화에 실패했습니다. Bucket: " + bucket, e);
         }
     }
 }
