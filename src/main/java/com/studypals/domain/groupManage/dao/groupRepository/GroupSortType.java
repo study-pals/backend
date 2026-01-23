@@ -1,5 +1,8 @@
 package com.studypals.domain.groupManage.dao.groupRepository;
 
+import java.time.LocalDate;
+import java.util.function.Function;
+
 import org.springframework.data.domain.Sort;
 
 import lombok.Getter;
@@ -57,15 +60,17 @@ import com.studypals.global.request.SortType;
  */
 @Getter
 public enum GroupSortType implements SortType {
-    POPULAR("totalMember", Sort.Direction.DESC),
-    NEW("createdDate", Sort.Direction.DESC),
-    OLD("createdDate", Sort.Direction.ASC);
+    POPULAR("totalMember", Sort.Direction.DESC, Integer::parseInt),
+    NEW("createdDate", Sort.Direction.DESC, LocalDate::parse),
+    OLD("createdDate", Sort.Direction.ASC, LocalDate::parse);
 
     private final String field;
     private final Sort.Direction direction;
+    private final Function<String, ?> parser;
 
-    GroupSortType(String field, Sort.Direction direction) {
+    GroupSortType(String field, Sort.Direction direction, Function<String, ?> parser) {
         this.field = field;
         this.direction = direction;
+        this.parser = parser;
     }
 }

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.dao.groupRepository.GroupRepository;
+import com.studypals.domain.groupManage.dao.groupRepository.GroupSortType;
 import com.studypals.domain.groupManage.dto.GroupSearchDto;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupTag;
@@ -43,6 +44,15 @@ public class GroupReader {
     }
 
     public Slice<Group> search(GroupSearchDto dto, Cursor cursor) {
+        GroupSortType sortType = (GroupSortType) cursor.sort();
+        try {
+            sortType.getParser().apply(cursor.value());
+        } catch (RuntimeException e) {
+            throw new GroupException(
+                    GroupErrorCode.GROUP_SEARCH_FAIL,
+                    "value 타입 문자열 형식이 올바르지 않습니다.",
+                    "[GroupReader#search] parsing value fail");
+        }
         return groupRepository.search(dto, cursor);
     }
 }
