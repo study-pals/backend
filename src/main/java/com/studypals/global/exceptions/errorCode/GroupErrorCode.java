@@ -44,7 +44,9 @@ public enum GroupErrorCode implements ErrorCode {
     GROUP_CATEGORY_NOT_FOUND(ResponseCode.GROUP_CATEGORY, HttpStatus.BAD_REQUEST, "can't findAndDelete group category"),
 
     GROUP_ENTRY_REQUEST_NOT_FOUND(
-            ResponseCode.GROUP_ENTRY_REQUEST, HttpStatus.NOT_FOUND, "can't findAndDelete group entry request");
+            ResponseCode.GROUP_ENTRY_REQUEST, HttpStatus.NOT_FOUND, "can't findAndDelete group entry request"),
+
+    GROUP_HASHTAG_FAIL(ResponseCode.GROUP_HASHTAG, HttpStatus.BAD_REQUEST, "fail to save group hash tag");
 
     private final ResponseCode responseCode;
     private final HttpStatus status;

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,13 +13,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.multipart.MultipartFile;
 
+import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
-import io.minio.ObjectWriteResponse;
 import io.minio.RemoveObjectArgs;
+import io.minio.http.Method;
 
 /**
  * {@link MinioStorage} 에 대한 테스트코드입니다.
@@ -46,23 +44,6 @@ public class MinioStorageTest {
     void setUp() {
         ReflectionTestUtils.setField(minioStorage, "endpoint", TEST_ENDPOINT);
         ReflectionTestUtils.setField(minioStorage, "bucket", TEST_BUCKET);
-    }
-
-    @Test
-    void upload_success() throws Exception {
-        // given
-        MultipartFile file =
-                new MockMultipartFile("file", "test_image.png", "image/png", "test image content".getBytes());
-        String destination = "file destination";
-        ObjectWriteResponse mockResponse = mock(ObjectWriteResponse.class);
-        given(minioClient.putObject(any())).willReturn(mockResponse);
-
-        // when
-        String actual = minioStorage.upload(file, destination);
-
-        // then
-        String expected = getStoragePath() + destination;
-        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -94,6 +75,58 @@ public class MinioStorageTest {
         // then
         String expected = "/" + destination;
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void createPresignedGetUrl_success() throws Exception {
+        // given
+        String objectKey = "test-object";
+        int expiry = 300;
+        String expectedUrl = "http://presigned-url";
+
+        given(minioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
+                .willReturn(expectedUrl);
+
+        // when
+        String actualUrl = minioStorage.createPresignedGetUrl(objectKey, expiry);
+
+        // then
+        assertThat(actualUrl).isEqualTo(expectedUrl);
+
+        ArgumentCaptor<GetPresignedObjectUrlArgs> captor = ArgumentCaptor.forClass(GetPresignedObjectUrlArgs.class);
+        then(minioClient).should(times(1)).getPresignedObjectUrl(captor.capture());
+
+        GetPresignedObjectUrlArgs args = captor.getValue();
+        assertThat(args.bucket()).isEqualTo(TEST_BUCKET);
+        assertThat(args.object()).isEqualTo(objectKey);
+        assertThat(args.method()).isEqualTo(Method.GET);
+        assertThat(args.expiry()).isEqualTo(expiry);
+    }
+
+    @Test
+    void createPresignedPutUrl_success() throws Exception {
+        // given
+        String objectKey = "test-object";
+        int expiry = 300;
+        String expectedUrl = "http://presigned-url";
+
+        given(minioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
+                .willReturn(expectedUrl);
+
+        // when
+        String actualUrl = minioStorage.createPresignedPutUrl(objectKey, expiry);
+
+        // then
+        assertThat(actualUrl).isEqualTo(expectedUrl);
+
+        ArgumentCaptor<GetPresignedObjectUrlArgs> captor = ArgumentCaptor.forClass(GetPresignedObjectUrlArgs.class);
+        then(minioClient).should(times(1)).getPresignedObjectUrl(captor.capture());
+
+        GetPresignedObjectUrlArgs args = captor.getValue();
+        assertThat(args.bucket()).isEqualTo(TEST_BUCKET);
+        assertThat(args.object()).isEqualTo(objectKey);
+        assertThat(args.method()).isEqualTo(Method.PUT);
+        assertThat(args.expiry()).isEqualTo(expiry);
     }
 
     private String getStoragePath() {

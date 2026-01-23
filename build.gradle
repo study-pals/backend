@@ -34,7 +34,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.mapstruct:mapstruct:1.6.3'
-
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
@@ -139,7 +139,12 @@ tasks.named('test', Test) {
     // REST Docs snippets 출력 디렉터리
     outputs.dir(snippetsDir)
     environment envProps
-    systemProperty 'spring.profiles.active', 'test'
+    def active =
+            System.getProperty("spring.profiles.active")
+                    ?: System.getenv("SPRING_PROFILES_ACTIVE")
+                    ?: "test"
+
+    systemProperty "spring.profiles.active", active
 
     testLogging {
         events "passed", "skipped", "failed"

@@ -2,6 +2,7 @@ package com.studypals.domain.groupManage.worker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -18,8 +19,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.groupManage.dto.GroupCategoryGoalDto;
-import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.dto.GroupTotalGoalDto;
+import com.studypals.domain.groupManage.entity.Group;
+import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
@@ -48,7 +50,7 @@ class GroupGoalCalculatorTest {
     private final Long GROUP_ID = 100L;
 
     // 테스트에 필요한 고정 데이터
-    private List<GroupMemberProfileDto> profiles;
+    private List<GroupMember> profiles;
     private List<StudyCategory> categories;
     private List<Long> memberIds;
     private final Long categoryId1 = 1L;
@@ -59,10 +61,8 @@ class GroupGoalCalculatorTest {
     void setUp() {
         when(timeUtils.getToday()).thenReturn(TODAY);
 
-        profiles = List.of(
-                new GroupMemberProfileDto(10L, "UserA", "url_a", GroupRole.MEMBER),
-                new GroupMemberProfileDto(20L, "UserB", "url_b", GroupRole.MEMBER));
-        memberIds = List.of(10L, 20L);
+        profiles = createMockGroupMembers(GROUP_ID);
+        memberIds = List.of(1L, 2L);
 
         // categoryId1: 목표 시간 60분
         StudyCategory category1 = StudyCategory.builder()
@@ -91,106 +91,78 @@ class GroupGoalCalculatorTest {
     @Test
     @DisplayName("성공 케이스: 모든 StudyTime을 가져와 정확한 달성률을 계산하고 반환한다")
     void calculateGroupGoals_ShouldReturnAccuratePercentages() throws Exception {
-        // Given - StudyTime 데이터 설정
-        Member member1 = Member.builder()
-                .id(10L)
-                .username("username1")
-                .password("password1")
-                .nickname("nickname1")
-                .build();
-        Member member2 = Member.builder()
-                .id(20L)
-                .username("username2")
-                .password("password2")
-                .nickname("nickname2")
-                .build();
+        // Given
+        // 1L, 2L ID를 가진 실제 멤버 객체 생성 (memberIds [1,2,3,4]와 매칭됨)
+        Member m1 = createMemberEntity(1L, "개발자A", "img_a");
+        Member m2 = createMemberEntity(2L, "열공학생B", "img_b");
+
         List<StudyTime> studyTimes = List.of(
-                // Category 1 (CS Study)
+                // Category 1 (CS Study): 목표 60분.
                 StudyTime.builder()
-                        .id(1001L)
-                        .member(member1)
+                        .member(m1)
                         .time(20L)
                         .studyCategory(categories.get(0))
                         .studiedDate(TODAY)
                         .build(),
                 StudyTime.builder()
-                        .id(1002L)
-                        .member(member2)
+                        .member(m2)
                         .time(10L)
                         .studyCategory(categories.get(0))
                         .studiedDate(TODAY)
                         .build(),
 
-                // Category 2 (Algorithm)
+                // Category 2 (Algorithm): 목표 120분.
                 StudyTime.builder()
-                        .id(2001L)
-                        .member(member1)
-                        .time(100L)
-                        .studyCategory(categories.get(1))
-                        .studiedDate(TODAY)
-                        .build(),
-                StudyTime.builder()
-                        .id(2002L)
-                        .member(member2)
+                        .member(m1)
                         .time(100L)
                         .studyCategory(categories.get(1))
                         .studiedDate(TODAY)
                         .build());
 
-        // Mocking StudyTimeRepository 호출
-        when(studyTimeRepository.findByMemberIdInAndDateAndCategoryIdIn(eq(memberIds), eq(TODAY), any()))
+        // Mockito 인자 매칭을 위해 anyList() 사용 (주소값 차이 방지)
+        when(studyTimeRepository.findByMemberIdInAndDateAndCategoryIdIn(anyList(), eq(TODAY), anyList()))
                 .thenReturn(studyTimes);
 
         // When
-        // ✨ 반환 타입 변경: GroupTotalGoalDto
         GroupTotalGoalDto result = groupGoalCalculator.calculateGroupGoals(GROUP_ID, profiles);
         List<GroupCategoryGoalDto> results = result.categoryGoals();
 
         // Then
         assertThat(results).hasSize(3);
 
-        // Category 1 검증 (25%)
+        // Category 1 검증
         assertThat(results).contains(new GroupCategoryGoalDto(categoryId1, 60L, "CS Study", 25));
 
-        // Category 2 검증 (83%)
-        assertThat(results).contains(new GroupCategoryGoalDto(categoryId2, 120L, "Algorithm", 83));
+        // Category 2 검증
+        assertThat(results).contains(new GroupCategoryGoalDto(categoryId2, 120L, "Algorithm", 41));
 
-        // Category 3 검증 (목표 0L, 달성 0L -> 0%)
+        // Category 3 검증
         assertThat(results).contains(new GroupCategoryGoalDto(categoryId3, 0L, "FailCategory", 0));
 
-        // ✨ 전체 평균 검증 (36%)
-        assertThat(result.overallAveragePercent()).isEqualTo(36);
+        // ✨ 전체 평균 검증
+        assertThat(result.overallAveragePercent()).isEqualTo(22);
     }
 
     @Test
     @DisplayName("엣지 케이스: 달성률이 100% 초과하거나 목표 시간이 0일 때 올바르게 처리한다")
     void calculateGroupGoals_ShouldHandleOver100PercentAndZeroGoal() {
-        Member member1 = Member.builder()
-                .id(10L)
-                .username("username1")
-                .password("password1")
-                .nickname("nickname1")
-                .build();
-        Member member2 = Member.builder()
-                .id(20L)
-                .username("username2")
-                .password("password2")
-                .nickname("nickname2")
-                .build();
+        // Given
+        Member m1 = createMemberEntity(1L, "개발자A", "img_a");
+        Member m2 = createMemberEntity(2L, "열공학생B", "img_b");
 
         // Given - StudyTime 데이터 설정
         List<StudyTime> studyTimes = List.of(
                 // Category 1 (CS Study) - 100% 초과 상황 유도 (200%)
                 StudyTime.builder()
                         .id(1001L)
-                        .member(member1)
+                        .member(m1)
                         .time(120L)
                         .studyCategory(categories.get(0))
                         .studiedDate(TODAY)
                         .build(),
                 StudyTime.builder()
                         .id(1002L)
-                        .member(member2)
+                        .member(m2)
                         .time(120L)
                         .studyCategory(categories.get(0))
                         .studiedDate(TODAY)
@@ -199,7 +171,7 @@ class GroupGoalCalculatorTest {
                 // Category 2 (Algorithm) - 41% 달성 유도
                 StudyTime.builder()
                         .id(2001L)
-                        .member(member1)
+                        .member(m1)
                         .time(100L) // A: 100분
                         .studyCategory(categories.get(1)) // 카테고리 2
                         .studiedDate(TODAY)
@@ -208,7 +180,7 @@ class GroupGoalCalculatorTest {
                 // Category 3 (FailCategory, 목표 0L) - 분모 0 상황 유도
                 StudyTime.builder()
                         .id(3001L)
-                        .member(member1)
+                        .member(m1)
                         .time(100L) // 실제 공부 시간은 있으나 목표가 0
                         .studyCategory(categories.get(2)) // 카테고리 3
                         .studiedDate(TODAY)
@@ -265,5 +237,32 @@ class GroupGoalCalculatorTest {
 
         // ✨ 전체 평균 검증 (0%)
         assertThat(result.overallAveragePercent()).isEqualTo(0);
+    }
+
+    private List<GroupMember> createMockGroupMembers(Long groupId) {
+        Group group = Group.builder().id(groupId).build();
+
+        // 1L ~ 4L ID를 가진 멤버들 생성
+        return List.of(
+                createGroupMember(createMemberEntity(1L, "개발자A", "img_a"), group, GroupRole.LEADER),
+                createGroupMember(createMemberEntity(2L, "열공학생B", "img_b"), group, GroupRole.MEMBER));
+    }
+
+    private Member createMemberEntity(Long id, String nick, String img) {
+        return Member.builder()
+                .id(id)
+                .nickname(nick)
+                .imageUrl("https://example.com/" + img)
+                .build();
+    }
+
+    private GroupMember createGroupMember(Member member, Group group, GroupRole role) {
+        return GroupMember.builder()
+                .id(member.getId() + 1000L) // GroupMember ID: 1001, 1002...
+                .member(member)
+                .group(group)
+                .role(role)
+                .joinedAt(LocalDate.now())
+                .build();
     }
 }

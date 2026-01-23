@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.studypals.global.responses.ResponseCode;
@@ -29,7 +28,6 @@ import com.studypals.testModules.testSupport.IntegrationSupport;
  * @author jack8
  * @since 2025-04-14
  */
-@ActiveProfiles("test")
 @DisplayName("API TEST / 공부 시간 통합 테스트")
 public class StudyTimeIntegrationTest extends IntegrationSupport {
 
