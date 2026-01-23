@@ -3,6 +3,7 @@ package com.studypals.domain.groupManage.dao.groupEntryRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepositoryCustom;
 import com.studypals.domain.groupManage.entity.GroupEntryCode;
 
 /**
