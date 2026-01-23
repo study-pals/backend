@@ -10,11 +10,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @since 2026-01-14
  */
 @ConfigurationProperties(prefix = "stomp.relay")
-public record StompRelayProp (
+public record StompRelayProp(
         String host,
         Integer port,
         String username,
         String password,
-        String virtualHost
-) {
-}
+        String virtualHost,
+        Integer systemHeartbeatSendInterval,
+        Integer systemHeartbeatReceiveInterval) {}

@@ -37,14 +37,13 @@ public abstract class TestEnvironment {
                     .withPassword("testpassword")
                     .withCommand("--innodb_redo_log_capacity=512M", "--skip-log-bin")
                     .withTmpFs(Collections.singletonMap("/var/lib/mysql", "rw"))
-                    .withLogConsumer(new Slf4jLogConsumer(log).withPrefix("MYSQL"))
-                    .withReuse(true);
+                    .withLogConsumer(new Slf4jLogConsumer(log).withPrefix("MYSQL"));
             MYSQL.start();
 
-            REDIS = new GenericContainer<>("redis:7.2").withExposedPorts(6379).withReuse(true);
+            REDIS = new GenericContainer<>("redis:7.2").withExposedPorts(6379);
             REDIS.start();
 
-            MONGO = new MongoDBContainer("mongo:7.0").withReuse(true);
+            MONGO = new MongoDBContainer("mongo:7.0");
             MONGO.start();
         }
     }

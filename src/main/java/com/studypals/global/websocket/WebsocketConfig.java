@@ -1,6 +1,5 @@
 package com.studypals.global.websocket;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +44,6 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        //config.enableSimpleBroker("/sub", "/queue");
         config.setApplicationDestinationPrefixes("/pub", "/req");
         config.setUserDestinationPrefix("/user");
 
@@ -58,8 +56,8 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setSystemPasscode(stompProp.password())
                 .setVirtualHost(stompProp.virtualHost())
                 .setTaskScheduler(taskScheduler())
-                .setSystemHeartbeatSendInterval(10000)
-                .setSystemHeartbeatReceiveInterval(10000);
+                .setSystemHeartbeatSendInterval(stompProp.systemHeartbeatSendInterval())
+                .setSystemHeartbeatReceiveInterval(stompProp.systemHeartbeatReceiveInterval());
     }
 
     @Override

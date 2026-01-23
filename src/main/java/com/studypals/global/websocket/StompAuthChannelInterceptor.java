@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -16,7 +17,6 @@ import org.springframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dao.ChatRoomMemberRepository;
-import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.AuthException;
@@ -52,6 +52,9 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
     private final AtomicInteger connectCnt = new AtomicInteger(0);
 
+    @Value("${chat.subscribe.address.default}")
+    private String chatSubscribeAddressDefault;
+
     /**
      * 메시지가 controller 로 바인딩 되기 전 과정을 수행합니다. 보통 {@code CONNECT, SUBSCRIBE, SEND} 에 대한
      * intercept 가 가능합니다.
@@ -67,7 +70,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
         if (accessor == null) throw new IllegalArgumentException("not invalid protocol");
 
-        //heartbeat 통과
+        // heartbeat 통과
         if (accessor.getCommand() == null) {
             return message;
         }
@@ -125,15 +128,10 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
                     ChatErrorCode.CHAT_SUBSCRIBE_FAIL,
                     "[StompAuthChannelInterceptor#handleSubscribe] destination null");
 
-        if (!destination.startsWith("/exchange/amq.topic/chat.room.")) {
-            return;
-        }
         // url 로 부터 구독하고자 하는 방의 id 를 추출
-        String roomId = destination.substring(destination.lastIndexOf('.') + 1); //extractRoomIdFromDestination(destination);
+        String roomId = extractRoomIdFromDestination(destination);
         String sessionId = accessor.getSessionId();
 
-        // todo: delete before prod
-        if (roomId.equals("hello")) return;
         if (sessionId == null) return;
 
         // 방 문자열 구조가 UUID 인지
@@ -167,19 +165,25 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     }
 
     private void handleUnsubscribe(StompHeaderAccessor accessor) {
-        String roomId = extractRoomIdFromDestination(accessor.getDestination());
+        String destination = accessor.getDestination();
+        String roomId = extractRoomIdFromDestination(destination);
         String sessionId = accessor.getSessionId();
+        if (roomId == null || sessionId == null) {
+            return;
+        }
         userSubscribeInfoRepository.deleteMapById(sessionId, roomId);
     }
 
     private String extractRoomIdFromDestination(String destination) {
         // 예: "/sub/chat/room/{roomId}" 형식에서 {roomId}만 추출
-        if (destination != null && destination.contains("/chat/room/")) {
-            return destination.substring(destination.lastIndexOf("/") + 1);
+        if (!StringUtils.hasText(destination)) {
+            return null;
         }
-        throw new ChatException(
-                ChatErrorCode.CHAT_SUBSCRIBE_FAIL,
-                "[StompAuthChannelInterceptor#handleSubscribe] destination format invalid");
+        if (destination.startsWith(chatSubscribeAddressDefault)) {
+            return destination.substring(chatSubscribeAddressDefault.length());
+        }
+
+        return null;
     }
 
     private void validateRoomId(String roomId) {
