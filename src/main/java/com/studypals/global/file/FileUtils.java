@@ -1,5 +1,8 @@
 package com.studypals.global.file;
 
+import com.studypals.global.exceptions.errorCode.FileErrorCode;
+import com.studypals.global.exceptions.exception.FileException;
+
 /**
  * 파일 관련 유틸리티 메서드를 제공하는 클래스입니다.
  * <p>
@@ -29,6 +32,9 @@ public final class FileUtils {
      * @return 추출된 소문자 확장자 (예: "jpg", "pdf") 또는 확장자가 없는 경우 빈 문자열
      */
     public static String extractExtension(String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            throw new FileException(FileErrorCode.INVALID_FILE_NAME);
+        }
         int lastDotIndex = fileName.lastIndexOf(".");
         if (lastDotIndex == -1 || lastDotIndex == fileName.length() - 1) {
             return ""; // 확장자가 없는 경우 처리

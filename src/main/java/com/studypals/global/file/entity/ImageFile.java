@@ -19,11 +19,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 /**
  * 객체 스토리지에 저장된 이미지 파일의 메타데이터를 관리하는 엔티티의 공통 속성을 정의하는 추상 클래스입니다.
  * {@code @MappedSuperclass}를 사용하여 이 클래스를 상속하는 엔티티들은 아래 필드들을 자신의 컬럼으로 포함하게 됩니다.
+ *
+ * objectKey, originalFileName, mimeType, imageStatus의 경우 protected setter를 가집니다. 이는 오직 수정 가능한 이미지 한정으로 사용합니다.
  *
  * @author sleepyhoon
  * @since 2026-01-13
@@ -46,6 +49,7 @@ public abstract class ImageFile {
      * 예: "profile/1/uuid.jpg"
      */
     @Column(nullable = false, unique = true)
+    @Setter(AccessLevel.PROTECTED)
     private String objectKey;
 
     /**
@@ -53,6 +57,7 @@ public abstract class ImageFile {
      * 예: "my_vacation_photo.jpg"
      */
     @Column(nullable = false)
+    @Setter(AccessLevel.PROTECTED)
     private String originalFileName;
 
     /**
@@ -60,6 +65,7 @@ public abstract class ImageFile {
      * 예: "jpg"
      */
     @Column(nullable = false)
+    @Setter(AccessLevel.PROTECTED)
     private String mimeType;
 
     /**
@@ -72,6 +78,7 @@ public abstract class ImageFile {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
+    @Setter(AccessLevel.PROTECTED)
     private ImageStatus imageStatus = ImageStatus.PENDING;
 
     /**

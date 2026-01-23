@@ -13,12 +13,14 @@ import com.studypals.domain.chatManage.worker.ChatImageManager;
 import com.studypals.domain.chatManage.worker.ChatImageWriter;
 import com.studypals.domain.chatManage.worker.ChatRoomReader;
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.entity.MemberProfileImage;
 import com.studypals.domain.memberManage.worker.MemberProfileImageManager;
 import com.studypals.domain.memberManage.worker.MemberProfileImageWriter;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.FileErrorCode;
 import com.studypals.global.exceptions.exception.FileException;
 import com.studypals.global.file.FileType;
+import com.studypals.global.file.FileUtils;
 import com.studypals.global.file.dao.AbstractFileManager;
 import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.dto.ImageUploadDto;
@@ -65,12 +67,17 @@ public class ImageFileServiceImpl implements ImageFileService {
      * 만약 서로 다른 Manager가 동일한 FileType을 처리하려고 할 경우, 애플리케이션 구동 시점에
      * {@link IllegalStateException}을 발생시켜 설정 오류를 방지합니다.
      *
+     * <p>
+     * managerMap 안에는 아래와 같이 AbstractFileManager을 상속한 스프링 빈이 저장됩니다.
+     * <pre>
+     * {
+     *   ImageType.PROFILE_IMAGE : (MemberProfileImageManager 인스턴스),
+     *   ImageType.CHAT_IMAGE    : (ChatImageManager 인스턴스)
+     * }
+     * </pre>
+     * 이를 통해 이후의 서비스 메서드에서는 파일 타입만으로 적절한 Manager를 즉시 찾아 사용할 수 있습니다.
+     *
      * @param managers Spring 컨텍스트에 의해 주입되는 {@code AbstractImageManager}의 모든 구현체 리스트
-     * @param memberReader 회원 정보를 조회하는 워커
-     * @param chatRoomReader 채팅방 정보를 조회하는 워커
-     * @param profileImageWriter 프로필 이미지 메타데이터를 저장하는 워커
-     * @param chatImageWriter 채팅 이미지 메타데이터를 저장하는 워커
-     * @throws IllegalStateException 동일한 FileType을 처리하는 Manager가 두 개 이상 존재할 경우 발생
      */
     public ImageFileServiceImpl(
             List<AbstractImageManager> managers,
@@ -110,16 +117,29 @@ public class ImageFileServiceImpl implements ImageFileService {
     @Override
     public ImageUploadRes uploadProfileImage(MultipartFile file, Long userId) {
         MemberProfileImageManager manager = getManager(ImageType.PROFILE_IMAGE, MemberProfileImageManager.class);
-        Member member = memberReader.get(userId);
 
-        // 기존에 프로필이 존재하는 경우, minio 에서 삭제해야 함.
-        if (member.getProfileImage() != null) {
-            manager.delete(member.getProfileImage().getObjectKey());
-        }
-
+        // 1. [MinIO] 프로필 사진 업로드, 업로드가 성공하면 file 정보는 전부 유효합니다.
         ImageUploadDto uploadDto = manager.upload(file, userId);
 
-        Long imageId = profileImageWriter.save(member, uploadDto.objectKey(), file.getOriginalFilename());
+        // DB 업데이트를 위한 준비
+        Member member = memberReader.get(userId);
+        String extension = FileUtils.extractExtension(file.getOriginalFilename());
+        MemberProfileImage currentProfile = member.getProfileImage();
+        Long imageId;
+
+        if (currentProfile != null) {
+            // 2. [DB] 기존 정보가 있으면 -> DB 먼저 업데이트
+            String oldObjectKey = currentProfile.getObjectKey(); // 삭제할 키 미리 백업
+
+            currentProfile.update(uploadDto.objectKey(), file.getOriginalFilename(), extension);
+            imageId = profileImageWriter.saveEntity(currentProfile); // 더티 체킹을 하지 않으므로 명시적 저장
+
+            // 3. [MinIO] 모든 처리가 끝난 후 -> 기존 파일 삭제
+            manager.delete(oldObjectKey);
+        } else {
+            // [DB] 기존 프로필이 없으면 그냥 저장
+            imageId = profileImageWriter.save(member, uploadDto.objectKey(), file.getOriginalFilename());
+        }
 
         return new ImageUploadRes(imageId, uploadDto.imageUrl());
     }
@@ -143,7 +163,7 @@ public class ImageFileServiceImpl implements ImageFileService {
     public ImageUploadRes uploadChatImage(MultipartFile file, String chatRoomId, Long userId) {
         ChatImageManager manager = getManager(ImageType.CHAT_IMAGE, ChatImageManager.class);
 
-        ImageUploadDto uploadDto = manager.upload(file, chatRoomId, userId);
+        ImageUploadDto uploadDto = manager.upload(file, userId, chatRoomId);
 
         ChatRoom chatRoom = chatRoomReader.getById(chatRoomId);
 

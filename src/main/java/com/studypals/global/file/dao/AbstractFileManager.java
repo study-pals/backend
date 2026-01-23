@@ -38,15 +38,11 @@ public abstract class AbstractFileManager {
 
     /**
      * 스토리지에 저장된 파일을 삭제합니다.
-     * <p>
-     * 전체 파일 URL을 입력받아 내부적으로 객체 키(Object Key)를 추출한 후,
-     * {@link ObjectStorage#delete}를 호출하여 실제 파일을 삭제합니다.
      *
-     * @param url 삭제할 파일의 전체 URL
+     * @param objectKey 삭제할 파일의 객체 키(Object Key)
      */
-    public void delete(String url) {
-        String destination = objectStorage.parsePath(url);
-        objectStorage.delete(destination);
+    public void delete(String objectKey) {
+        objectStorage.delete(objectKey);
     }
 
     /**

@@ -78,7 +78,7 @@ public class ChatImageManager extends AbstractImageManager {
      * @param userId 사용자 ID
      * @return ObjectKey와 파일 URL을 담은 ImageUploadDto
      */
-    public ImageUploadDto upload(MultipartFile file, String chatRoomId, Long userId) {
+    public ImageUploadDto upload(MultipartFile file, Long userId, String chatRoomId) {
         // 공통 업로드 로직을 수행하는 부모 클래스의 템플릿 메서드를 호출합니다.
         return performUpload(file, userId, chatRoomId);
     }

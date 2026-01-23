@@ -55,4 +55,9 @@ public class MemberProfileImageWriter {
 
         return savedImage.getId();
     }
+
+    @Transactional
+    public Long saveEntity(MemberProfileImage entity) {
+        return memberProfileImageRepository.save(entity).getId();
+    }
 }

@@ -59,10 +59,10 @@ public abstract class AbstractImageManager extends AbstractFileManager {
     }
 
     // 주석 필요
-    public final ImageUploadDto upload(MultipartFile file, Long userId) {
-        String objectKey = createObjectKey(userId, file.getOriginalFilename(), String.valueOf(userId));
-        String imageUrl = objectStorage.upload(file, objectKey);
-        return new ImageUploadDto(imageUrl, objectKey);
+    protected final ImageUploadDto performUpload(MultipartFile file, Long userId, String targetId) {
+        String objectKey = createObjectKey(userId, file.getOriginalFilename(), targetId);
+        String imageUrl = super.upload(file, objectKey);
+        return new ImageUploadDto(objectKey, imageUrl);
     }
 
     /**
@@ -83,7 +83,7 @@ public abstract class AbstractImageManager extends AbstractFileManager {
         validateFileName(fileName);
         validateTargetId(userId, targetId);
         String extension = FileUtils.extractExtension(fileName);
-        return generateObjectKeyDetail(fileName, extension);
+        return generateObjectKeyDetail(targetId, extension);
     }
 
     /**
