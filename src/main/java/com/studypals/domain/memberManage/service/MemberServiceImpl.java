@@ -64,6 +64,7 @@ public class MemberServiceImpl implements MemberService {
     public Long updateProfile(Long userId, UpdateProfileReq dto) {
         Member member = memberReader.get(userId);
 
+        // TODO: 이미지를 직접 받도록 변경 후, update 로직을 수정해야 함.
         member.updateProfile(dto.birthday(), dto.position(), dto.imageUrl());
 
         memberWriter.save(member);

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.studypals.global.file.FileUtils;
 import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.entity.ImageType;
 
@@ -117,7 +118,7 @@ class AbstractFileManagerTest {
         }
 
         public String callExtractExtension(String fileName) {
-            return extractExtension(fileName);
+            return FileUtils.extractExtension(fileName);
         }
     }
 }

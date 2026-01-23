@@ -1,23 +1,28 @@
 package com.studypals.global.file.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
+import com.studypals.global.exceptions.exception.FileException;
+import com.studypals.global.file.FileProperties;
 import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.entity.ImageType;
+import com.studypals.global.file.entity.ImageVariantKey;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractImageManagerTest {
@@ -25,106 +30,133 @@ class AbstractImageManagerTest {
     @Mock
     private ObjectStorage objectStorage;
 
+    private FileProperties fileUploadProperties;
     private TestImageManager imageManager;
-
-    @BeforeEach
-    void setUp() {
-        imageManager = new TestImageManager(objectStorage);
-        // @Value 주입을 시뮬레이션하기 위해 ReflectionTestUtils 사용
-        ReflectionTestUtils.setField(
-                imageManager, "acceptableExtensions", List.of("jpg", "jpeg", "png", "bmp", "webp"));
-        ReflectionTestUtils.setField(imageManager, "presignedUrlExpireTime", 600);
-    }
-
-    @Test
-    @DisplayName("업로드 URL 발급 성공 - 파일 이름 검증 통과")
-    void getUploadUrl_success() {
-        // given
-        Long userId = 1L;
-        String fileName = "image.jpg";
-        String targetId = "user1";
-        String expectedUrl = "https://example.com/presigned-url";
-
-        given(objectStorage.createPresignedPutUrl(anyString(), anyInt())).willReturn(expectedUrl);
-
-        // when
-        String result = imageManager.getUploadUrl(userId, fileName, targetId);
-
-        // then
-        assertThat(result).isEqualTo(expectedUrl);
-    }
-
-    @Test
-    @DisplayName("업로드 URL 발급 실패 - 대문자 확장자도 허용")
-    void getUploadUrl_upperCase() {
-        // given
-        Long userId = 1L;
-        String fileName = "image.PNG";
-        String targetId = "user1";
-        String expectedUrl = "https://example.com/presigned-url";
-
-        given(objectStorage.createPresignedPutUrl(anyString(), anyInt())).willReturn(expectedUrl);
-
-        // when
-        String result = imageManager.getUploadUrl(userId, fileName, targetId);
-
-        // then
-        assertThat(result).isEqualTo(expectedUrl);
-    }
-
-    @Test
-    @DisplayName("업로드 URL 발급 실패 - 지원하지 않는 확장자")
-    void getUploadUrl_invalidExtension() {
-        // given
-        Long userId = 1L;
-        String fileName = "document.txt";
-        String targetId = "user1";
-
-        // when & then
-        assertThatThrownBy(() -> imageManager.getUploadUrl(userId, fileName, targetId))
-                .isInstanceOf(RuntimeException.class); // FileException이 RuntimeException을 상속한다고 가정
-    }
-
-    @Test
-    @DisplayName("업로드 URL 발급 실패 - 확장자 없음")
-    void getUploadUrl_noExtension() {
-        // given
-        Long userId = 1L;
-        String fileName = "image";
-        String targetId = "user1";
-
-        // when & then
-        assertThatThrownBy(() -> imageManager.getUploadUrl(userId, fileName, targetId))
-                .isInstanceOf(RuntimeException.class);
-    }
-
-    @Test
-    @DisplayName("업로드 URL 발급 실패 - null 파일 이름")
-    void getUploadUrl_null() {
-        // given
-        Long userId = 1L;
-        String fileName = null;
-        String targetId = "user1";
-
-        // when & then
-        assertThatThrownBy(() -> imageManager.getUploadUrl(userId, fileName, targetId))
-                .isInstanceOf(RuntimeException.class);
-    }
 
     // 테스트를 위한 구체 클래스
     static class TestImageManager extends AbstractImageManager {
-        public TestImageManager(ObjectStorage objectStorage) {
-            super(objectStorage);
+        public TestImageManager(ObjectStorage objectStorage, FileProperties fileUploadProperties) {
+            super(objectStorage, fileUploadProperties);
         }
 
         @Override
         protected String generateObjectKeyDetail(String targetId, String ext) {
-            return "key";
+            return "test-path/" + targetId + "/" + UUID.randomUUID() + "." + ext;
+        }
+
+        @Override
+        protected List<ImageVariantKey> variants() {
+            return List.of();
         }
 
         @Override
         public ImageType getFileType() {
             return ImageType.PROFILE_IMAGE;
+        }
+    }
+
+    @BeforeEach
+    void setUp() {
+        // given
+        fileUploadProperties = new FileProperties(List.of("jpg", "jpeg", "png", "bmp", "webp"), 600);
+        imageManager = new TestImageManager(objectStorage, fileUploadProperties);
+    }
+
+    @Nested
+    @DisplayName("createObjectKey 메서드 테스트")
+    class CreateObjectKeyTest {
+
+        @Test
+        @DisplayName("성공: 유효한 요청 시 ObjectKey를 정상적으로 생성한다")
+        void should_CreateObjectKey_When_RequestIsValid() {
+            // given
+            Long userId = 1L;
+            String fileName = "image.jpg";
+            String targetId = "user1";
+
+            // when
+            String objectKey = imageManager.createObjectKey(userId, fileName, targetId);
+
+            // then
+            assertThat(objectKey).contains("test-path/user1/");
+            assertThat(objectKey).endsWith(".jpg");
+        }
+
+        @Test
+        @DisplayName("성공: 대문자 확장자도 허용하여 ObjectKey를 생성한다")
+        void should_CreateObjectKey_When_ExtensionIsUpperCase() {
+            // given
+            Long userId = 1L;
+            String fileName = "image.PNG";
+            String targetId = "user1";
+
+            // when
+            String objectKey = imageManager.createObjectKey(userId, fileName, targetId);
+
+            // then
+            assertThat(objectKey).contains("test-path/user1/");
+            assertThat(objectKey).endsWith(".png");
+        }
+
+        @Test
+        @DisplayName("실패: 지원하지 않는 확장자이면 FileException 던진다")
+        void should_ThrowException_When_ExtensionIsUnsupported() {
+            // given
+            Long userId = 1L;
+            String fileName = "document.txt";
+            String targetId = "user1";
+
+            // when & then
+            assertThatCode(() -> imageManager.createObjectKey(userId, fileName, targetId))
+                    .isInstanceOf(FileException.class);
+        }
+
+        @Test
+        @DisplayName("실패: 파일 이름에 확장자가 없으면 FileException 던진다")
+        void should_ThrowException_When_FileNameHasNoExtension() {
+            // given
+            Long userId = 1L;
+            String fileName = "image";
+            String targetId = "user1";
+
+            // when & then
+            assertThatCode(() -> imageManager.createObjectKey(userId, fileName, targetId))
+                    .isInstanceOf(FileException.class);
+        }
+
+        @Test
+        @DisplayName("실패: 파일 이름이 null이면 FileException 던진다")
+        void should_ThrowException_When_FileNameIsNull() {
+            // given
+            Long userId = 1L;
+            String targetId = "user1";
+
+            // when & then
+            assertThatCode(() -> imageManager.createObjectKey(userId, null, targetId))
+                    .isInstanceOf(FileException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("getUploadUrl(objectKey) 메서드 테스트")
+    class GetUploadUrlTest {
+
+        @Test
+        @DisplayName("성공: 주어진 ObjectKey로 Presigned URL을 정상적으로 생성한다")
+        void should_ReturnPresignedUrl_When_ObjectKeyIsValid() {
+            // given
+            String objectKey = "test-path/user1/some-uuid.jpg";
+            String expectedUrl = "https://example.com/presigned-url";
+            int expireTime = fileUploadProperties.presignedUrlExpireTime();
+
+            when(objectStorage.createPresignedPutUrl(anyString(), anyInt())).thenReturn(expectedUrl);
+
+            // when
+            String actualUrl = imageManager.getPresignedGetUrl(objectKey);
+
+            // then
+            assertThat(actualUrl).isEqualTo(expectedUrl);
+            verify(objectStorage).createPresignedPutUrl(objectKey, expireTime);
         }
     }
 }

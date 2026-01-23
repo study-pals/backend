@@ -1,9 +1,12 @@
 package com.studypals.global.minio;
 
+import java.io.InputStream;
+
 import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,6 +49,29 @@ public class MinioStorage implements ObjectStorage {
     }
 
     /**
+     * MultipartFile 형태의 파일을 업로드합니다.
+     *
+     * @param file 업로드할 파일
+     * @param objectKey 저장할 파일 경로
+     * @return 저장된 minio URL
+     */
+    @Override
+    public String upload(MultipartFile file, String objectKey) {
+        try {
+            InputStream inputStream = file.getInputStream();
+
+            minioClient.putObject(
+                    PutObjectArgs.builder().bucket(bucket).object(objectKey).stream(inputStream, file.getSize(), -1)
+                            .contentType(file.getContentType())
+                            .build());
+
+            return endpoint + "/" + bucket + "/" + objectKey;
+        } catch (Exception e) {
+            throw new RuntimeException("MinIO 파일 업로드에 실패했습니다. ObjectKey: " + objectKey, e);
+        }
+    }
+
+    /**
      * path 경로에 저장된 파일을 삭제합니다.
      *
      * @param destination 삭제할 파일의 경로
@@ -58,7 +84,7 @@ public class MinioStorage implements ObjectStorage {
                     .object(destination)
                     .build());
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("MinIO 파일 삭제에 실패했습니다. ObjectKey: " + destination, e);
         }
     }
 
@@ -88,20 +114,6 @@ public class MinioStorage implements ObjectStorage {
         }
     }
 
-    @Override
-    public String createPresignedPutUrl(String objectKey, int expirySeconds) {
-        try {
-            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
-                    .method(Method.PUT)
-                    .bucket(bucket)
-                    .object(objectKey)
-                    .expiry(expirySeconds)
-                    .build());
-        } catch (Exception e) {
-            throw new RuntimeException("Presigned PUT URL 생성에 실패했습니다.", e);
-        }
-    }
-
     /**
      * MinIO 버킷이 유효한지 확인합니다. 유효하지 않다면, 해당 이름으로 버킷을 생성합니다.
      */
@@ -117,7 +129,7 @@ public class MinioStorage implements ObjectStorage {
                     .config("public")
                     .build());
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("MinIO 버킷 초기화에 실패했습니다. Bucket: " + bucket, e);
         }
     }
 }

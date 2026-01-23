@@ -1,4 +1,4 @@
-package com.studypals.domain.chatManage.worker;
+package com.studypals.domain.memberManage.worker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,29 +16,26 @@ import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.entity.ImageType;
 
 @ExtendWith(MockitoExtension.class)
-class ChatImageManagerTest {
+class MemberProfileImageManagerTest {
 
     @Mock
     private ObjectStorage objectStorage;
 
-    @Mock
-    private ChatRoomReader chatRoomReader;
-
-    private ChatImageManager chatImageManager;
+    private MemberProfileImageManager memberProfileImageManager;
 
     @BeforeEach
     void setUp() {
         FileProperties fileUploadProperties = new FileProperties(List.of("jpg", "png"), 600);
-        chatImageManager = new ChatImageManager(objectStorage, fileUploadProperties, chatRoomReader);
+        memberProfileImageManager = new MemberProfileImageManager(objectStorage, fileUploadProperties);
     }
 
     @Test
     @DisplayName("파일 타입 반환 확인")
     void getFileType() {
         // when
-        ImageType type = chatImageManager.getFileType();
+        ImageType type = memberProfileImageManager.getFileType();
 
         // then
-        assertThat(type).isEqualTo(ImageType.CHAT_IMAGE);
+        assertThat(type).isEqualTo(ImageType.PROFILE_IMAGE);
     }
 }
