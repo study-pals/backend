@@ -161,13 +161,16 @@ include::{snippets}/group-entry-controller-rest-docs-test/get-group-summary_succ
 각 그룹을 검색합니다. tag, hashTag, name 에 기반하여 검색을 수행할 수 있습니다. 검색 시 기타 필터링 및 정렬 기준을
 선택할 수 있습니다.
 
-[NOTE]
-approval 의 경우 true(혹은 기입 X)로 둔다면 (true/false) 가 전부 검색됩니다. false 로 두게 되면 (false)만 검색됩니다.
-즉, true 인 경우 모든 경우, false 인 경우 가입 요청 없이 바로 가입 가능한 그룹만 검색됩니다.
 
-[NOTE]
-open 의 경우 true(혹은 기입 X)로 둔다면 (true) 만 검색됩니다. false 로 두게 된다면 (true/false) 가 전부 검색됩니다.
-즉, true 인 경우 당장 가입이 가능한 그룹, false 인 경우 가입 가능한 그룹 및 불가능한 그룹 전부 검색됩니다.
+approval::
+* `null` -> 전체
+* `true` -> 승인 필요만
+* `false` -> 승인 불필요만
+
+open::
+* `null` -> 전체
+* `true` -> 공개 + 정원 미달 (`isOpen = true` AND `totalMember < maxMember`)
+* `false` -> 비공개 또는 정원 꽉 참 (`isOpen = false` OR `totalMember >= maxMember`)
 
 [NOTE]
 tag/name/hashTag 중 하나로만 검색이 가능합니다.
