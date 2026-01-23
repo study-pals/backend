@@ -22,8 +22,6 @@ import com.studypals.global.utils.TimeUtils;
 
 /**
  * 그룹에 속한 유저들의 달성 수준을 계산하는 클래스입니다.
- * <p>
- * 코드에 대한 작동 원리 등을 적습니다.
  *
  * <p><b>빈 관리:</b><br>
  * Worker

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class StringUtils {
 
-    private static final Pattern DISALLOWED = Pattern.compile("[^a-zA-Z0-9_\\s]");
+    private static final Pattern DISALLOWED = Pattern.compile("[^a-zA-Z0-9_\\s\\p{IsHangul}]");
     private static final Pattern SPACES = Pattern.compile("\\s+");
     private static final Pattern MULTI_UNDERSCORE = Pattern.compile("_+");
 

@@ -1,4 +1,4 @@
-package com.studypals.domain.groupManage.dao;
+package com.studypals.domain.groupManage.dao.groupMemberRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +34,7 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
     @Query(
             """
       SELECT new com.studypals.domain.groupManage.dto.GroupSummaryDto(
-            g.id, g.name, g.tag, g.totalMember, g.chatRoom.id, g.isOpen, g.isApprovalRequired, g.createdDate
+            g.id, g.name, g.tag,  g.totalMember, g.chatRoom.id, g.isOpen, g.isApprovalRequired, g.createdDate
       )
       FROM GroupMember gm
       JOIN gm.group g

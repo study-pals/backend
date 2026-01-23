@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.studypals.domain.chatManage.entity.ChatRoom;
+import com.studypals.domain.groupManage.dao.groupMemberRepository.GroupMemberRepository;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.dto.GroupMemberProfileMappingDto;
 import com.studypals.domain.groupManage.entity.Group;

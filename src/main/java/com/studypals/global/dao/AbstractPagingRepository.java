@@ -1,15 +1,16 @@
 package com.studypals.global.dao;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import jakarta.persistence.Id;
 
 import org.springframework.data.domain.Sort;
 
 import lombok.Getter;
 
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.studypals.global.request.SortType;
 
@@ -28,29 +29,44 @@ public abstract class AbstractPagingRepository<T> {
         return direction == Sort.Direction.ASC ? Order.ASC : Order.DESC;
     }
 
-    @SuppressWarnings("unchecked")
-    protected OrderSpecifier<?> getOrderSpecifier(Class<T> entityClass, SortType sortType) {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    protected <E> OrderSpecifier<?> getOrderSpecifier(EntityPath<E> root, SortType sortType) {
         String field = sortType.getField();
         Sort.Direction direction = sortType.getDirection();
 
-        EntityMetadata metadata = getEntityMetadata(entityClass);
+        EntityMetadata metadata = getEntityMetadata(root.getType());
         Class<?> sortFieldType = metadata.getFieldType(field);
-        CACHE.put(entityClass, metadata);
 
-        PathBuilder<T> path = new PathBuilder<>(entityClass, metadata.getEntityName());
+        // alias를 문자열로 만들지 말고 root의 metadata를 그대로 사용
+        PathMetadata rootMetadata = root.getMetadata();
+        PathBuilder<E> path = new PathBuilder<>((Class<E>) root.getType(), rootMetadata);
+
         Order order = direction == Sort.Direction.ASC ? Order.ASC : Order.DESC;
-
         return new OrderSpecifier<>(order, (Expression<? extends Comparable>) path.get(field, sortFieldType));
     }
 
-    private EntityMetadata getEntityMetadata(Class<T> entityClass) {
-        if (CACHE.containsKey(entityClass)) return CACHE.get(entityClass);
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    protected <E> OrderSpecifier<?>[] getOrderSpecifierWithId(EntityPath<E> root, SortType type) {
+        OrderSpecifier<?> primary = getOrderSpecifier(root, type);
 
-        // querydsl 에서 필요한 건 Class 명 자체가 아니라 QEntity 의 static final 변수명
-        // ex) QGroup.group => "group"
-        String className = entityClass.getSimpleName();
-        String entityName = Character.toLowerCase(className.charAt(0)) + className.substring(1);
-        return CACHE.put(entityClass, new EntityMetadata(entityClass, entityName));
+        Sort.Direction direction = type.getDirection();
+        Order order = direction == Sort.Direction.ASC ? Order.ASC : Order.DESC;
+
+        EntityMetadata metadata = getEntityMetadata(root.getType());
+        PathBuilder<E> path = new PathBuilder<>((Class<E>) root.getType(), root.getMetadata());
+
+        OrderSpecifier<?> secondary = new OrderSpecifier<>(order, (Expression<? extends Comparable>)
+                path.get(metadata.getIdFieldName(), metadata.getIdFieldType()));
+
+        return new OrderSpecifier<?>[] {primary, secondary};
+    }
+
+    private EntityMetadata getEntityMetadata(Class<?> entityClass) {
+        return CACHE.computeIfAbsent(entityClass, cls -> {
+            String className = cls.getSimpleName();
+            String entityName = Character.toLowerCase(className.charAt(0)) + className.substring(1);
+            return new EntityMetadata(cls, entityName);
+        });
     }
 
     private static class EntityMetadata {
@@ -61,22 +77,53 @@ public abstract class AbstractPagingRepository<T> {
 
         private final Map<String, Class<?>> fieldClasses;
 
+        @Getter
+        private final String idFieldName;
+
+        @Getter
+        private final Class<?> idFieldType;
+
         public EntityMetadata(Class<?> entityClass, String entityName) {
             this.entityClass = entityClass;
             this.entityName = entityName;
             this.fieldClasses = new ConcurrentHashMap<>();
+
+            IdField idField = findIdField(entityClass);
+            this.idFieldName = idField.name;
+            this.idFieldType = idField.type;
+        }
+
+        private static IdField findIdField(Class<?> cls) {
+            for (Class<?> c = cls; c != null && c != Object.class; c = c.getSuperclass()) {
+                for (Field f : c.getDeclaredFields()) {
+                    if (f.isAnnotationPresent(Id.class)) {
+                        return new IdField(f.getName(), f.getType());
+                    }
+                }
+            }
+            throw new IllegalArgumentException("No @Id field found in " + cls.getName());
+        }
+
+        private static class IdField {
+            final String name;
+            final Class<?> type;
+
+            IdField(String name, Class<?> type) {
+                this.name = name;
+                this.type = type;
+            }
         }
 
         public Class<?> getFieldType(String fieldName) {
-            if (fieldClasses.containsKey(fieldName)) return fieldClasses.get(fieldName);
-
-            try {
-                return fieldClasses.put(
-                        fieldName, entityClass.getDeclaredField(fieldName).getType());
-            } catch (NoSuchFieldException e) {
-                throw new IllegalArgumentException("[AbstractPagingRepository.EntityMetadata#getFieldType] field "
-                        + fieldName + " does not exists");
-            }
+            return fieldClasses.computeIfAbsent(fieldName, fn -> {
+                try {
+                    return entityClass.getDeclaredField(fn).getType();
+                } catch (NoSuchFieldException e) {
+                    throw new IllegalArgumentException(
+                            "[AbstractPagingRepository.EntityMetadata#getFieldType] field " + fn + " does not exists",
+                            e);
+                }
+            });
         }
     }
 }

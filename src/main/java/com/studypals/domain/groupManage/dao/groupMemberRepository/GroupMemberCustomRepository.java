@@ -1,4 +1,4 @@
-package com.studypals.domain.groupManage.dao;
+package com.studypals.domain.groupManage.dao.groupMemberRepository;
 
 import java.util.List;
 
@@ -33,8 +33,9 @@ public interface GroupMemberCustomRepository {
 
     /**
      * 여러 그룹에 속한 모든 멤버의 정보(id,nickname,imageUrl,role)를 한번에 조회합니다.
-     * @param groupIds
-     * @return
+     * @param groupIds 검색할 groupId 리스트
+     * @param limit 가져올 사용자의 개수 제한
+     * @return 입력된 groupIds 에 대해, 각 그룹당 소속된 상위 limit 명을 포함한 데이터.
      */
     List<GroupMemberProfileMappingDto> findTopNMemberInGroupIds(List<Long> groupIds, int limit);
 }

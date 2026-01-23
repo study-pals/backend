@@ -19,6 +19,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studypals.testModules.restDocs.RestDocsConfig;
+import com.studypals.testModules.testComponent.TestSupportConfig;
 
 /**
  * rest docs 를 사용한 통합테스트 시, 해당 클래스를 extend 하여야 합니다. 기본적인 설정 및 필수 bean을 autowired 한 상태입니다.
@@ -40,7 +41,7 @@ import com.studypals.testModules.restDocs.RestDocsConfig;
  * @since 2025-04-06
  */
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-@Import({RestDocsConfig.class})
+@Import({RestDocsConfig.class, TestSupportConfig.class})
 @ExtendWith(RestDocumentationExtension.class)
 public abstract class RestDocsSupport {
 

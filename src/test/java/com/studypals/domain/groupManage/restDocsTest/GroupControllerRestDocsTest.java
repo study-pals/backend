@@ -11,6 +11,8 @@ import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,7 +30,9 @@ import com.studypals.domain.groupManage.api.GroupController;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.entity.GroupRole;
 import com.studypals.domain.groupManage.service.GroupService;
+import com.studypals.global.request.Cursor;
 import com.studypals.global.responses.CommonResponse;
+import com.studypals.global.responses.CursorResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
 import com.studypals.testModules.testSupport.RestDocsSupport;
@@ -121,6 +125,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         101L,
                         "알고리즘 코딩 마스터",
                         "취업준비",
+                        List.of("알고리즘", "백준", "프로그래머스"),
                         10,
                         "chat_algo_01",
                         true,
@@ -132,6 +137,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         205L,
                         "프론트엔드 리액트 스터디",
                         "프론트개발",
+                        List.of("리엑트", "안드로이드 스튜디오"),
                         20,
                         "chat_react_fe",
                         false,
@@ -159,8 +165,9 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
 
                                 // 그룹 기본 정보
                                 fieldWithPath("data[].groupId").description("그룹의 고유 ID"),
-                                fieldWithPath("data[].groupName").description("그룹 이름"),
-                                fieldWithPath("data[].groupTag").description("그룹의 태그"),
+                                fieldWithPath("data[].name").description("그룹 이름"),
+                                fieldWithPath("data[].tag").description("그룹의 태그"),
+                                fieldWithPath("data[].hashTags").description("그룹의 해시태그"),
                                 fieldWithPath("data[].memberCount").description("그룹에 속한 전체 회원 수"),
                                 fieldWithPath("data[].chatRoomId").description("그룹에 연결된 채팅방 ID"),
                                 fieldWithPath("data[].isOpen").description("그룹 공개 여부 (true: 공개, false: 비공개)"),
@@ -194,6 +201,8 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
         GetGroupDetailRes groupDetailRes = new GetGroupDetailRes(
                 100L,
                 "핵심 CS 전공 스터디",
+                "tag",
+                List.of("운영체제", "네트워크", "자료구조"),
                 true, // 공개
                 false, // 승인 불필요
                 10, // 최대 10명
@@ -219,6 +228,8 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                                 // GetGroupDetailRes 필드 설명
                                 fieldWithPath("data.id").description("그룹의 고유 ID"),
                                 fieldWithPath("data.name").description("그룹 이름"),
+                                fieldWithPath("data.tag").description("그룹의 태그"),
+                                fieldWithPath("data.hashTags").description("그룹의 해시태그"),
                                 fieldWithPath("data.isOpen").description("그룹 공개 여부 (true: 공개, false: 비공개)"),
                                 fieldWithPath("data.isApprovalRequired")
                                         .description("그룹 가입 시 승인 필요 여부 (true: 필요, false: 불필요)"),
@@ -249,5 +260,99 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                                         .description("카테고리 이름"),
                                 fieldWithPath("data.groupGoals.categoryGoals[].achievementPercent")
                                         .description("그룹 목표 대비 카테고리 달성률 (%)"))));
+    }
+
+    @Test
+    @WithMockUser
+    void searchGroups_success() throws Exception {
+
+        // given
+        List<GetGroupsRes> content = List.of(
+                new GetGroupsRes(
+                        101L,
+                        "알고리즘 코딩 마스터",
+                        "취업준비",
+                        List.of("알고리즘", "백준"),
+                        10,
+                        "chat_algo_01",
+                        true,
+                        false,
+                        LocalDate.of(2025, 12, 1),
+                        List.of(new GroupMemberProfileImageDto("https://exam.com/user1.png", GroupRole.LEADER)),
+                        List.of(1L, 2L)),
+                new GetGroupsRes(
+                        205L,
+                        "자바 스터디",
+                        "백엔드",
+                        List.of("java", "spring"),
+                        20,
+                        "chat_java_01",
+                        true,
+                        false,
+                        LocalDate.of(2025, 11, 20),
+                        List.of(new GroupMemberProfileImageDto("https://exam.com/user2.png", GroupRole.MEMBER)),
+                        List.of(3L)));
+
+        CursorResponse.Content<GetGroupsRes> cursorContent = new CursorResponse.Content<>(content, 205L, true);
+
+        CursorResponse<GetGroupsRes> response = CursorResponse.success(ResponseCode.GROUP_SEARCH, cursorContent);
+
+        given(groupService.search(any(GroupSearchDto.class), any(Cursor.class))).willReturn(cursorContent);
+
+        // when
+        ResultActions result = mockMvc.perform(get("/groups/search")
+                .param("tag", "취업")
+                .param("cursor", "0")
+                .param("size", "5")
+                .param("sort", "POPULAR")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(hasKey(response))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+
+                        /* ===== Query Parameters ===== */
+                        queryParameters(
+                                parameterWithName("tag").optional().description("그룹 태그 검색 (tag/hashTag/name 중 하나만 허용)"),
+                                parameterWithName("hashTag").optional().description("해시태그 검색"),
+                                parameterWithName("name").optional().description("그룹 이름 검색"),
+                                parameterWithName("open").optional().description("공개 그룹 여부 (default: true)"),
+                                parameterWithName("approval").optional().description("승인 필요 여부 (default: true)"),
+                                parameterWithName("cursor").optional().description("커서 기준 ID (첫 페이지는 0, default: 0)"),
+                                parameterWithName("value")
+                                        .optional()
+                                        .description("커서 기준 tie point (첫 페이지는 null, default: \"\")"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("sort").description("정렬 기준 (POPULAR | NEW | OLD)")),
+
+                        /* ===== Response Fields ===== */
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드"),
+                                fieldWithPath("status").description("응답 상태"),
+                                fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("data").description("커서 기반 페이징 응답"),
+                                fieldWithPath("data.content").description("조회된 그룹 목록"),
+                                fieldWithPath("data.next").description("다음 페이지 커서 값"),
+                                fieldWithPath("data.hasNext").description("다음 페이지 존재 여부"),
+
+                                // content[].*
+                                fieldWithPath("data.content[].groupId").description("그룹 ID"),
+                                fieldWithPath("data.content[].name").description("그룹 이름"),
+                                fieldWithPath("data.content[].tag").description("그룹 태그"),
+                                fieldWithPath("data.content[].hashTags").description("그룹 해시태그 목록"),
+                                fieldWithPath("data.content[].memberCount").description("그룹 인원 수"),
+                                fieldWithPath("data.content[].chatRoomId").description("채팅방 ID"),
+                                fieldWithPath("data.content[].isOpen").description("공개 여부"),
+                                fieldWithPath("data.content[].isApprovalRequired")
+                                        .description("승인 필요 여부"),
+                                fieldWithPath("data.content[].createdDate").description("그룹 생성일"),
+                                fieldWithPath("data.content[].profiles").description("상위 멤버 프로필 목록"),
+                                fieldWithPath("data.content[].profiles[].imageUrl")
+                                        .description("프로필 이미지 URL"),
+                                fieldWithPath("data.content[].profiles[].role").description("그룹 내 역할"),
+                                fieldWithPath("data.content[].categoryIds").description("그룹 카테고리 ID 목록"))));
     }
 }

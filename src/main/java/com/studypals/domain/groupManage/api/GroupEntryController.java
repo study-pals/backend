@@ -15,6 +15,7 @@ import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.service.GroupEntryService;
 import com.studypals.global.annotations.CursorDefault;
 import com.studypals.global.request.Cursor;
+import com.studypals.global.request.DateSortType;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.CursorResponse;
 import com.studypals.global.responses.Response;
@@ -93,7 +94,9 @@ public class GroupEntryController {
 
     @GetMapping("/{groupId}/entry-requests")
     public ResponseEntity<CursorResponse<GroupEntryRequestDto>> getEntryRequests(
-            @AuthenticationPrincipal Long userId, @PathVariable Long groupId, @CursorDefault Cursor cursor) {
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long groupId,
+            @CursorDefault(sortType = DateSortType.class) Cursor cursor) {
         CursorResponse.Content<GroupEntryRequestDto> response =
                 groupEntryService.getEntryRequests(userId, groupId, cursor);
         return ResponseEntity.ok(CursorResponse.success(ResponseCode.GROUP_ENTRY_REQUEST_LIST, response));

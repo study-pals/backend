@@ -1,4 +1,4 @@
-package com.studypals.domain.groupManage.dao;
+package com.studypals.domain.groupManage.dao.groupRepository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -21,7 +21,7 @@ import com.studypals.domain.groupManage.entity.Group;
  * @since 2025-04-12
  */
 @Repository
-public interface GroupRepository extends JpaRepository<Group, Long> {
+public interface GroupRepository extends JpaRepository<Group, Long>, GroupCustomRepository {
 
     @Modifying
     @Query(

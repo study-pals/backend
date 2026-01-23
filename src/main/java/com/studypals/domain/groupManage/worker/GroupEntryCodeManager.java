@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
+import com.studypals.domain.groupManage.dao.groupEntryRepository.GroupEntryCodeRedisRepository;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryCode;
 import com.studypals.global.annotations.Worker;

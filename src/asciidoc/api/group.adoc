@@ -37,7 +37,7 @@
 
 == ✨ API 문서
 
-=== 1. 그룹 생성/탈퇴/관리 API
+=== 1. 그룹 가입/탈퇴/관리 API
 ''''
 
 ==== 1-1. 그룹 태그 불러오기
@@ -150,8 +150,8 @@ include::{snippets}/group-entry-controller-rest-docs-test/increase-code-expire_s
 
 
 
-
-==== 2-3. 유저가 속한 그룹 조회
+=== 3. 그룹 조회 API
+==== 3-1. 유저가 속한 그룹 조회
 
 *Description* +
 
@@ -172,7 +172,7 @@ include::{snippets}/group-controller-rest-docs-test/get-groups_success/http-requ
 include::{snippets}/group-controller-rest-docs-test/get-groups_success/http-response.adoc[]
 include::{snippets}/group-controller-rest-docs-test/get-groups_success/response-fields.adoc[]
 
-==== 2-4. 그룹 상세 조회
+==== 3-2. 그룹 상세 조회
 
 *Description* +
 
@@ -192,7 +192,7 @@ include::{snippets}/group-controller-rest-docs-test/get-group-detail_success/htt
 include::{snippets}/group-controller-rest-docs-test/get-group-detail_success/http-response.adoc[]
 include::{snippets}/group-controller-rest-docs-test/get-group-detail_success/response-fields.adoc[]
 
-==== 2-5. 그룹 대표 정보 조회
+==== 3-3. 그룹 대표 정보 조회
 
 *Description* +
 
@@ -217,7 +217,79 @@ include::{snippets}/group-entry-controller-rest-docs-test/get-group-summary_succ
 include::{snippets}/group-entry-controller-rest-docs-test/get-group-summary_success/http-response.adoc[]
 include::{snippets}/group-entry-controller-rest-docs-test/get-group-summary_success/response-fields.adoc[]
 
-==== 2-6. 그룹 가입
+==== 3-4. 그룹 검색
+
+*Description* +
+
+'''
+
+각 그룹을 검색합니다. tag, hashTag, name 에 기반하여 검색을 수행할 수 있습니다. 검색 시 기타 필터링 및 정렬 기준을
+선택할 수 있습니다.
+
+
+approval::
+* `null` -> 전체
+* `true` -> 승인 필요만
+* `false` -> 승인 불필요만
+
+open::
+* `null` -> 전체
+* `true` -> 공개 + 정원 미달 (`isOpen = true` AND `totalMember < maxMember`)
+* `false` -> 비공개 또는 정원 꽉 참 (`isOpen = false` OR `totalMember >= maxMember`)
+
+[NOTE]
+tag/name/hashTag 중 하나로만 검색이 가능합니다.
+
+[NOTE]
+request param 의 cursor 데이터는 이전 응답의 "data.next" 필드로 주어집니다. (이전 데이터의 가장 마지막 ID)
+
+[NOTE]
+request param 의 value 데이터는 이전 응답의 "data.next" 필드에서 주어진 식별자를 보고, 해당 데이터의 정렬 기준 값을
+문자열로 주어야 합니다. (주어진 resposne 의 경우 "next" 가 205 이므로 groupId = 205 인 필드에 대해 정렬 기준 (POPULAR) 과
+대응되는 memberCount 값을 줘야 함)
+
+
+
+*Request* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/search-groups_success/http-request.adoc[]
+include::{snippets}/group-controller-rest-docs-test/search-groups_success/query-parameters.adoc[]
+
+*Response* +
+
+'''
+
+include::{snippets}/group-controller-rest-docs-test/search-groups_success/http-response.adoc[]
+include::{snippets}/group-controller-rest-docs-test/search-groups_success/response-fields.adoc[]
+
+=== 4. 그룹 가입 관련 API
+
+==== 4-1. 초대 코드 생성
+
+*Description* +
+
+'''
+
+그룹 초대 코드 생성을 위해 사용합니다.
+
+*Request* +
+
+'''
+
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/http-request.adoc[]
+
+*Response* +
+
+'''
+
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/response-headers.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/response-fields.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/http-response.adoc[]
+
+
+==== 4-2. 그룹 가입
 
 *Description* +
 
@@ -240,7 +312,7 @@ include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/req
 include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/http-response.adoc[]
 include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/response-headers.adoc[]
 
-==== 2-7. 그룹 가입 요청
+==== 4-3. 그룹 가입 요청
 
 *Description* +
 
@@ -263,7 +335,7 @@ include::{snippets}/group-entry-controller-rest-docs-test/request-participant_su
 include::{snippets}/group-entry-controller-rest-docs-test/request-participant_success/http-response.adoc[]
 include::{snippets}/group-entry-controller-rest-docs-test/request-participant_success/response-headers.adoc[]
 
-==== 2-8. 그룹 가입 요청 조회
+==== 4-4. 그룹 가입 요청 조회
 
 *Description* +
 
@@ -286,7 +358,7 @@ include::{snippets}/group-entry-controller-rest-docs-test/get-entry-requests_suc
 include::{snippets}/group-entry-controller-rest-docs-test/get-entry-requests_success/http-response.adoc[]
 include::{snippets}/group-entry-controller-rest-docs-test/get-entry-requests_success/response-fields.adoc[]
 
-==== 2-9. 그룹 가입 요청 승인
+==== 4-5. 그룹 가입 요청 승인
 
 *Description*
 
@@ -307,7 +379,7 @@ include::{snippets}/group-entry-controller-rest-docs-test/accept-entry-request_s
 include::{snippets}/group-entry-controller-rest-docs-test/accept-entry-request_success/http-response.adoc[]
 include::{snippets}/group-entry-controller-rest-docs-test/accept-entry-request_success/response-headers.adoc[]
 
-==== 2-10. 그룹 가입 요청 거절
+==== 4-6. 그룹 가입 요청 거절
 
 *Description*
 
@@ -327,10 +399,10 @@ include::{snippets}/group-entry-controller-rest-docs-test/refuse-entry-request_s
 '''
 include::{snippets}/group-entry-controller-rest-docs-test/refuse-entry-request_success/http-response.adoc[]
 
-=== 3. 그룹 스터디 조회/생성/관리 API
+=== 5. 그룹 스터디 조회/생성/관리 API
 ''''
 
-==== 3-1.그룹 카테고리 생성
+==== 5-1. 그룹 카테고리 생성
 
 *Description*
 
@@ -350,10 +422,10 @@ include::{snippets}/group-category-controller-rest-docs-test/create_success/requ
 include::{snippets}/group-category-controller-rest-docs-test/create_success/http-response.adoc[]
 include::{snippets}/group-category-controller-rest-docs-test/create_success/response-headers.adoc[]
 
-=== 그룹 랭킹 조회 API
+=== 6. 그룹 랭킹 조회 API
 '''
 
-==== 일간/주간/월간 랭킹 조회
+==== 6-1. 일간/주간/월간 랭킹 조회
 
 *Description*
 

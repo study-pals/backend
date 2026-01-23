@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.studypals.global.resolver.SortTypeResolver;
 import com.studypals.testModules.testComponent.TestController;
 import com.studypals.testModules.testComponent.TestErrorCode;
 
@@ -25,7 +26,7 @@ import com.studypals.testModules.testComponent.TestErrorCode;
  * @since 2025-04-01
  */
 @WebMvcTest(TestController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, SortTypeResolver.class})
 @TestPropertySource(properties = "debug.message.print=false")
 @AutoConfigureMockMvc(addFilters = false)
 class GlobalExceptionHandlerTest {

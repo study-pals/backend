@@ -1,4 +1,4 @@
-package com.studypals.domain.groupManage.dao;
+package com.studypals.domain.groupManage.dao.groupMemberRepository;
 
 import static com.studypals.domain.groupManage.entity.QGroupMember.groupMember;
 import static com.studypals.domain.memberManage.entity.QMember.member;
@@ -17,7 +17,7 @@ import com.studypals.domain.groupManage.entity.GroupRole;
 
 /**
  * group member custom repository 의 구현 클래스입니다.
- *
+ *./
  * <p>group member 관련 커스텀 쿼리를 구현합니다.
  *
  * <p><b>상속 정보:</b><br>
