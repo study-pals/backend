@@ -80,8 +80,8 @@ public class GroupController {
                 .hashTag(hashTag)
                 .tag(tag)
                 .name(name)
-                .isOpen(open == null || open)
-                .isApprovalRequired(approval == null || approval)
+                .isOpen(open)
+                .isApprovalRequired(approval)
                 .build();
         CursorResponse.Content<GetGroupsRes> response = groupService.search(dto, cursor);
 

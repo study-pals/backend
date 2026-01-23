@@ -176,9 +176,10 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
      * 이 메서드는 "검색 키워드"가 아닌 "그룹의 상태"를 필터링합니다.
      * 필요성:
      * <ul>
-     *   <li>공개 그룹만 보여주기({@code isOpen = true})</li>
-     *   <li>정원 미달 그룹만 노출({@code totalMember < maxMember})</li>
-     *   <li>승인 필요 여부로 필터({@code isApprovalRequired = true})</li>
+     *   <li>open = null: 전체</li>
+     *   <li>open = true: 공개 + 정원 미달</li>
+     *   <li>open = false: 비공개 또는 정원 꽉 참</li>
+     *   <li>approval = true/false: 승인 필요/불필요 필터</li>
      * </ul>
      * </p>
      *
@@ -188,8 +189,7 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
      * <pre>
      * {@code
      * WHERE
-     *   g.isOpen = true
-     *   AND g.totalMember < g.maxMember
+     *   (g.isOpen = true AND g.totalMember < g.maxMember)
      *   AND g.isApprovalRequired = true
      * }
      * </pre>
@@ -199,15 +199,26 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
     private BooleanExpression assembleType(GroupSearchDto dto) {
         BooleanExpression cond = null;
 
-        if (dto.isOpen() != null && dto.isOpen()) {
-            // 공개 그룹 + 정원 미달 필터
-            cond = and(cond, group.isOpen.isTrue());
-            cond = and(cond, group.totalMember.lt(group.maxMember));
+        if (dto.isOpen() != null) {
+            if (dto.isOpen()) {
+                // 공개 그룹 + 정원 미달 필터
+                cond = and(cond, group.isOpen.isTrue());
+                cond = and(cond, group.totalMember.lt(group.maxMember));
+            } else {
+                // 비공개 그룹 필터
+                cond = and(cond, group.isOpen.isFalse());
+                cond = and(cond, group.isOpen.isFalse().or(group.totalMember.goe(group.maxMember)));
+            }
         }
 
-        if (dto.isApprovalRequired() != null && dto.isApprovalRequired()) {
-            // 승인 필요 필터
-            cond = and(cond, group.isApprovalRequired.isTrue());
+        if (dto.isApprovalRequired() != null) {
+            if (dto.isApprovalRequired()) {
+                // 승인 필요 필터
+                cond = and(cond, group.isApprovalRequired.isTrue());
+            } else {
+                // 승인 불필요 필터
+                cond = and(cond, group.isApprovalRequired.isFalse());
+            }
         }
 
         return cond;
