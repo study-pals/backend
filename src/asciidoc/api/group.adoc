@@ -37,10 +37,10 @@
 
 == ✨ API 문서
 
-=== 그룹 가입/탈퇴/관리 API
+=== 1. 그룹 가입/탈퇴/관리 API
 ''''
 
-==== 1. 그룹 태그 불러오기
+==== 1-1. 그룹 태그 불러오기
 
 *Description* +
 
@@ -62,7 +62,7 @@ include::{snippets}/group-controller-rest-docs-test/get-group-tags_success/http-
 include::{snippets}/group-controller-rest-docs-test/get-group-tags_success/response-fields.adoc[]
 include::{snippets}/group-controller-rest-docs-test/get-group-tags_success/http-response.adoc[]
 
-==== 2. 그룹 생성
+==== 1-2. 그룹 생성
 
 *Description* +
 
@@ -84,9 +84,74 @@ include::{snippets}/group-controller-rest-docs-test/create-group_success/http-re
 include::{snippets}/group-controller-rest-docs-test/create-group_success/response-headers.adoc[]
 include::{snippets}/group-controller-rest-docs-test/create-group_success/http-response.adoc[]
 
-=== 그룹 조회 API
+=== 2. 그룹 가입 관련 API
 
-==== 1. 유저가 속한 그룹 조회
+==== 2-1. 초대 코드 생성
+
+*Description* +
+
+'''
+
+그룹 초대 코드 생성을 위해 사용합니다.
+
+기본적으로 초대 코드는 1일의 만료 기한을 가지고 있지만 유저의 설정에 의해 그 기한이 변경될 수 있습니다.
+따라서 초대 코드 반환 시 해당 코드의 만료 기한을 함께 반환합니다.
+
+이때, 남은 기한이 1일 이하이고, 초대 코드 요청이 들어오면 다시 1일로 설정합니다.
+
+남은 기한이 1일 이상인 경우 만료 기한을 갱신하지 않습니다.
+
+expiredDate 가 null 인 경우, 해당 초대 코드는 만료 기한이 없습니다.
+
+*Request* +
+
+'''
+
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/http-request.adoc[]
+
+*Response* +
+
+'''
+
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/response-headers.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/response-fields.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/http-response.adoc[]
+
+
+==== 2-2. 초대 코드 만료 시간 설정
+
+*Description* +
+
+'''
+
+그룹 초대 코드 만료 날짜를 설정합니다.
+
+기본적으로 사용자는 모두 "1일"의 만료 기한을 가지는 초대 코드를 가져올 수 있으며, 요청 시마다 만료 기한이 갱신됩니다. 다만, 3일, 7일 단위
+등으로 초대 코드를 생성하고 싶은 사용자를 위해 일종의 옵션으로서 존재하는 API 입니다.
+
+해당 API 는 이미 만들어진 코드가 있을 때, 해당 코드의 만료 기한을 연장하는 API 입니다. 따라서 클라이언트는 먼저 1일 짜리 초대
+코드를 먼저 생성한 뒤, 해당 API 를 사용해 만료 기한을 추가로 설정하도록 해야 합니다.
+
+기한은 1일 ~ 30일이며, -1 을 입력 시 만료 날짜가 없는 초대 코드를 만들 수 있습니다.
+
+*Request* +
+
+'''
+
+include::{snippets}/group-entry-controller-rest-docs-test/increase-code-expire_success/http-request.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/increase-code-expire_success/path-parameters.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/increase-code-expire_success/request-fields.adoc[]
+
+
+*Response* +
+
+'''
+include::{snippets}/group-entry-controller-rest-docs-test/increase-code-expire_success/http-response.adoc[]
+
+
+
+=== 3. 그룹 조회 API
+==== 3-1. 유저가 속한 그룹 조회
 
 *Description* +
 
@@ -107,7 +172,7 @@ include::{snippets}/group-controller-rest-docs-test/get-groups_success/http-requ
 include::{snippets}/group-controller-rest-docs-test/get-groups_success/http-response.adoc[]
 include::{snippets}/group-controller-rest-docs-test/get-groups_success/response-fields.adoc[]
 
-==== 2. 그룹 상세 조회
+==== 3-2. 그룹 상세 조회
 
 *Description* +
 
@@ -127,7 +192,7 @@ include::{snippets}/group-controller-rest-docs-test/get-group-detail_success/htt
 include::{snippets}/group-controller-rest-docs-test/get-group-detail_success/http-response.adoc[]
 include::{snippets}/group-controller-rest-docs-test/get-group-detail_success/response-fields.adoc[]
 
-==== 3. 그룹 대표 정보 조회
+==== 3-3. 그룹 대표 정보 조회
 
 *Description* +
 
@@ -152,7 +217,7 @@ include::{snippets}/group-entry-controller-rest-docs-test/get-group-summary_succ
 include::{snippets}/group-entry-controller-rest-docs-test/get-group-summary_success/http-response.adoc[]
 include::{snippets}/group-entry-controller-rest-docs-test/get-group-summary_success/response-fields.adoc[]
 
-==== 4. 그룹 검색
+==== 3-4. 그룹 검색
 
 *Description* +
 
@@ -199,9 +264,9 @@ include::{snippets}/group-controller-rest-docs-test/search-groups_success/query-
 include::{snippets}/group-controller-rest-docs-test/search-groups_success/http-response.adoc[]
 include::{snippets}/group-controller-rest-docs-test/search-groups_success/response-fields.adoc[]
 
-=== 그룹 가입 관련 API
+=== 4. 그룹 가입 관련 API
 
-==== 1. 초대 코드 생성
+==== 4-1. 초대 코드 생성
 
 *Description* +
 
@@ -224,7 +289,7 @@ include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_su
 include::{snippets}/group-entry-controller-rest-docs-test/generate-entry-code_success/http-response.adoc[]
 
 
-==== 2. 그룹 가입
+==== 4-2. 그룹 가입
 
 *Description* +
 
@@ -247,7 +312,7 @@ include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/req
 include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/http-response.adoc[]
 include::{snippets}/group-entry-controller-rest-docs-test/join-group_success/response-headers.adoc[]
 
-==== 3. 그룹 가입 요청
+==== 4-3. 그룹 가입 요청
 
 *Description* +
 
@@ -270,7 +335,7 @@ include::{snippets}/group-entry-controller-rest-docs-test/request-participant_su
 include::{snippets}/group-entry-controller-rest-docs-test/request-participant_success/http-response.adoc[]
 include::{snippets}/group-entry-controller-rest-docs-test/request-participant_success/response-headers.adoc[]
 
-==== 4. 그룹 가입 요청 조회
+==== 4-4. 그룹 가입 요청 조회
 
 *Description* +
 
@@ -293,7 +358,7 @@ include::{snippets}/group-entry-controller-rest-docs-test/get-entry-requests_suc
 include::{snippets}/group-entry-controller-rest-docs-test/get-entry-requests_success/http-response.adoc[]
 include::{snippets}/group-entry-controller-rest-docs-test/get-entry-requests_success/response-fields.adoc[]
 
-==== 5. 그룹 가입 요청 승인
+==== 4-5. 그룹 가입 요청 승인
 
 *Description*
 
@@ -314,7 +379,7 @@ include::{snippets}/group-entry-controller-rest-docs-test/accept-entry-request_s
 include::{snippets}/group-entry-controller-rest-docs-test/accept-entry-request_success/http-response.adoc[]
 include::{snippets}/group-entry-controller-rest-docs-test/accept-entry-request_success/response-headers.adoc[]
 
-==== 6. 그룹 가입 요청 거절
+==== 4-6. 그룹 가입 요청 거절
 
 *Description*
 
@@ -334,10 +399,10 @@ include::{snippets}/group-entry-controller-rest-docs-test/refuse-entry-request_s
 '''
 include::{snippets}/group-entry-controller-rest-docs-test/refuse-entry-request_success/http-response.adoc[]
 
-=== 그룹 스터디 조회/생성/관리 API
+=== 5. 그룹 스터디 조회/생성/관리 API
 ''''
 
-==== 그룹 카테고리 생성
+==== 5-1. 그룹 카테고리 생성
 
 *Description*
 
@@ -357,10 +422,10 @@ include::{snippets}/group-category-controller-rest-docs-test/create_success/requ
 include::{snippets}/group-category-controller-rest-docs-test/create_success/http-response.adoc[]
 include::{snippets}/group-category-controller-rest-docs-test/create_success/response-headers.adoc[]
 
-=== 그룹 랭킹 조회 API
+=== 6. 그룹 랭킹 조회 API
 '''
 
-==== 일간/주간/월간 랭킹 조회
+==== 6-1. 일간/주간/월간 랭킹 조회
 
 *Description*
 

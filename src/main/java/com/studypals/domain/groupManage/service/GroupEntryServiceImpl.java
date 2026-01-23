@@ -13,6 +13,7 @@ import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupEntryRequestCustomMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupConst;
+import com.studypals.domain.groupManage.entity.GroupEntryCode;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
@@ -54,11 +55,21 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
     @Override
     @Transactional(readOnly = true)
-    public GroupEntryCodeRes generateEntryCode(Long userId, Long groupId) {
+    public GroupEntryCodeRes getOrCreateEntryCode(Long userId, Long groupId) {
         authorityValidator.validateLeaderAuthority(userId, groupId);
-        String entryCode = entryCodeManager.generate(groupId);
+        GroupEntryCode entryCode = entryCodeManager.getOrCreateCode(groupId);
 
-        return new GroupEntryCodeRes(groupId, entryCode);
+        return GroupEntryCodeRes.builder()
+                .groupId(groupId)
+                .code(entryCode.getCode())
+                .expiredAt(entryCode.getExpireAt())
+                .build();
+    }
+
+    @Override
+    public void changeEntryCodeSetting(Long userId, Long groupId, Long day) {
+        authorityValidator.validateLeaderAuthority(userId, groupId);
+        entryCodeManager.increaseExpire(groupId, day);
     }
 
     @Override
