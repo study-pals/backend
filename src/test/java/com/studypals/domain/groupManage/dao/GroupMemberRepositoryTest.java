@@ -130,4 +130,24 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
         assertThat(mapping2.groupId()).isEqualTo(g2.getId());
         assertThat(mapping2.imageUrl()).isEqualTo("imageUrl-url");
     }
+
+    @Test
+    void checkLeaderByGroupIdAndMemberId_success(){
+        // given
+        Member m1 = insertMember("user1", "리더");
+        Member m2 = insertMember("user2", "멤버");
+        ChatRoom chatRoom = insertChatRoom("chat1");
+        Group group = insertGroup(chatRoom);
+
+        insertGroupMember(group, m2, GroupRole.MEMBER); // 나중에 가입한 일반 멤버
+        insertGroupMember(group, m1, GroupRole.LEADER); // 리더
+
+        // when
+        boolean m1IsLeader = groupMemberRepository.checkLeaderByGroupIdAndMemberId(group.getId(), m1.getId());
+        boolean m2IsLeader = groupMemberRepository.checkLeaderByGroupIdAndMemberId(group.getId(), m2.getId());
+
+        // then
+        assertThat(m1IsLeader).isTrue();
+        assertThat(m2IsLeader).isFalse();
+    }
 }
