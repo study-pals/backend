@@ -325,6 +325,7 @@ public class GroupServiceTest {
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
+    }
     // 헬퍼 메서드: GroupMember 엔티티 4명 생성
     private List<GroupMember> createMockGroupMembers(Long groupId) {
         Group group = Group.builder().id(groupId).build();
