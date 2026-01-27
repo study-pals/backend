@@ -85,7 +85,7 @@ class ImageFileControllerRestDocsTest extends RestDocsSupport {
     void getChatUploadUrl_success() throws Exception {
         // given
         Long imageId = 1L;
-        String imageUrl = "http://example.com/image.jpg";
+        String imageUrl = "http://example.com/presigned-url-image.jpg";
         ImageUploadRes response = new ImageUploadRes(imageId, imageUrl);
 
         given(imageFileService.uploadChatImage(any(MultipartFile.class), any(), any()))
@@ -113,6 +113,6 @@ class ImageFileControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("status").description("응답 상태"),
                                 fieldWithPath("message").description("응답 메시지"),
                                 fieldWithPath("data.imageId").description("이미지 파일의 식별 ID"),
-                                fieldWithPath("data.imageUrl").description("저장된 이미지 주소"))));
+                                fieldWithPath("data.imageUrl").description("저장된 이미지를 조회할 presigned url"))));
     }
 }
