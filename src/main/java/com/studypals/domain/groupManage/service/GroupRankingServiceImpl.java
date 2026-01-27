@@ -13,6 +13,7 @@ import com.studypals.domain.groupManage.entity.GroupRankingPeriod;
 import com.studypals.domain.groupManage.worker.GroupAuthorityValidator;
 import com.studypals.domain.groupManage.worker.GroupMemberReader;
 import com.studypals.domain.groupManage.worker.GroupRankingWorker;
+import com.studypals.global.file.ObjectStorage;
 
 /**
  * groupRankingService 구현 클래스입니다.
@@ -36,6 +37,8 @@ public class GroupRankingServiceImpl implements GroupRankingService {
     private final GroupMemberReader groupMemberReader;
     private final GroupAuthorityValidator validator;
 
+    private final ObjectStorage objectStorage;
+
     @Override
     public List<GroupMemberRankingDto> getGroupRanking(Long userId, Long groupId, GroupRankingPeriod period) {
         // 해당 유저가 속한 그룹인가?
@@ -54,7 +57,8 @@ public class GroupRankingServiceImpl implements GroupRankingService {
                     return new GroupMemberRankingDto(
                             groupMember.getMember().getId(),
                             groupMember.getMember().getNickname(),
-                            groupMember.getMember().getImageUrl(),
+                            objectStorage.convertKeyToFileUrl(
+                                    groupMember.getMember().getProfileImageObjectKey()),
                             studySeconds,
                             groupMember.getRole());
                 })

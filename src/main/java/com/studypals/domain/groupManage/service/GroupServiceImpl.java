@@ -25,6 +25,7 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
+import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.retry.RetryTx;
 
 /**
@@ -53,12 +54,13 @@ public class GroupServiceImpl implements GroupService {
     private final GroupAuthorityValidator validator;
     private final GroupMapper groupMapper;
     private final GroupGoalCalculator groupGoalCalculator;
-
     private final GroupHashTagWorker groupHashTagWorker;
 
     // chat room worker class
     private final ChatRoomWriter chatRoomWriter;
     private final StudyCategoryReader studyCategoryReader;
+
+    private final ObjectStorage objectStorage;
 
     @Override
     public List<GetGroupTagRes> getGroupTags() {
@@ -114,7 +116,8 @@ public class GroupServiceImpl implements GroupService {
                 .map(group -> GetGroupsRes.of(
                         group,
                         membersMap.getOrDefault(group.id(), Collections.emptyList()),
-                        categoriesMap.getOrDefault(group.id(), Collections.emptyList())))
+                        categoriesMap.getOrDefault(group.id(), Collections.emptyList()),
+                        objectStorage))
                 .toList();
     }
 
@@ -131,6 +134,6 @@ public class GroupServiceImpl implements GroupService {
         // 그룹에 속한 유저들의 목표 달성률 계산
         GroupTotalGoalDto userGoals = groupGoalCalculator.calculateGroupGoals(groupId, groupMembers);
 
-        return GetGroupDetailRes.of(group, groupMembers, userGoals);
+        return GetGroupDetailRes.of(group, groupMembers, userGoals, objectStorage);
     }
 }

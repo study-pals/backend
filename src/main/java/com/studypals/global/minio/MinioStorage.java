@@ -49,6 +49,19 @@ public class MinioStorage implements ObjectStorage {
     }
 
     /**
+     * objectKey에서 fileUrl로 변환해줍니다. objectKey가 null 이거나 비어있다면 null을 반환합니다.
+     * @param objectKey minio 내 파일 경로
+     * @return 클라이언트에서 바로 접근할 수 있는 파일 경로
+     */
+    @Override
+    public String convertKeyToFileUrl(String objectKey) {
+        if (objectKey == null || objectKey.isBlank()) {
+            return null;
+        }
+        return endpoint + "/" + bucket + "/" + objectKey;
+    }
+
+    /**
      * MultipartFile 형태의 파일을 업로드합니다.
      *
      * @param file 업로드할 파일
@@ -65,7 +78,7 @@ public class MinioStorage implements ObjectStorage {
                             .contentType(file.getContentType())
                             .build());
 
-            return endpoint + "/" + bucket + "/" + objectKey;
+            return convertKeyToFileUrl(objectKey);
         } catch (Exception e) {
             throw new RuntimeException("MinIO 파일 업로드에 실패했습니다. ObjectKey: " + objectKey, e);
         }

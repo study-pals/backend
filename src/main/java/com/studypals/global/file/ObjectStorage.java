@@ -19,6 +19,14 @@ import org.springframework.web.multipart.MultipartFile;
 public interface ObjectStorage {
 
     /**
+     * objectKey에서 fileUrl로 변환해줍니다.
+     *
+     * @param objectKey
+     * @return 클라이언트에서 바로 접근할 수 있는 파일 경로
+     */
+    String convertKeyToFileUrl(String objectKey);
+
+    /**
      * 스토리지에 파일을 저장합니다.
      *
      * @param file 저장할 파일

@@ -2,29 +2,34 @@ package com.studypals.domain.chatManage.dto.mapper;
 
 import java.util.Map;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 
 import com.studypals.domain.chatManage.dto.ChatRoomInfoRes;
+import com.studypals.domain.chatManage.dto.ChatRoomInfoRes.UserInfo;
 import com.studypals.domain.chatManage.dto.ChatRoomListRes;
 import com.studypals.domain.chatManage.dto.ChatroomLatestInfo;
 import com.studypals.domain.chatManage.entity.ChatRoomMember;
+import com.studypals.global.file.ObjectStorage;
 
 /**
- * ChatRoom 에 대한 mapper 클래스입니다.
+ * ChatRoom 도메인 관련 mapper 입니다.
  *
- * @author jack8
- * @since 2025-05-22
+ * @author sleepyhoon
+ * @see
+ * @since 2026-01-27
  */
-@Mapper(componentModel = "spring")
-public interface ChatRoomMapper {
-    /**
-     * 트랜잭션 내에서만 처리되어야 합니다.
-     */
-    @Mapping(target = "userId", source = "member.id")
-    @Mapping(target = "imageUrl", source = "member.imageUrl")
-    @Mapping(target = "nickname", source = "member.nickname")
-    ChatRoomInfoRes.UserInfo toDto(ChatRoomMember entity);
+@Component
+public class ChatRoomMapper {
+
+    public ChatRoomInfoRes.UserInfo toDto(ChatRoomMember entity, ObjectStorage objectStorage) {
+        return UserInfo.builder()
+                .userId(entity.getMember().getId())
+                .nickname(entity.getMember().getNickname())
+                .role(entity.getRole())
+                // TODO: 채팅방 이미지도 minio로 이동해야함. 아직 구현되지 않음.
+                .imageUrl(objectStorage.convertKeyToFileUrl(entity.getChatRoom().getImageUrl()))
+                .build();
+    }
 
     /**
      * 단일 ChatRoomMember 객체와 최신 메시지 조회 결과를 기반으로
@@ -35,7 +40,7 @@ public interface ChatRoomMapper {
      * @param latestInfos 채팅방별 최신 메시지 및 언리드 정보
      * @return ChatRoomListRes.ChatRoomInfo 변환 결과
      */
-    default ChatRoomListRes.ChatRoomInfo toChatRoomInfo(
+    public ChatRoomListRes.ChatRoomInfo toChatRoomInfo(
             ChatRoomMember chatRoomMember, Map<String, ChatroomLatestInfo> latestInfos) {
         String chatRoomId = chatRoomMember.getChatRoom().getId();
         ChatroomLatestInfo info = latestInfos.get(chatRoomId);

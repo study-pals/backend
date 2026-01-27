@@ -19,6 +19,7 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
+import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.request.Cursor;
 import com.studypals.global.responses.CursorResponse;
 
@@ -51,6 +52,8 @@ public class GroupEntryServiceImpl implements GroupEntryService {
     private final GroupEntryRequestWriter entryRequestWriter;
 
     private final ChatRoomWriter chatRoomWriter;
+
+    private final ObjectStorage objectStorage;
 
     @Override
     @Transactional(readOnly = true)
@@ -111,7 +114,7 @@ public class GroupEntryServiceImpl implements GroupEntryService {
                 .map(r -> r.getMember().getId())
                 .toList());
         List<GroupEntryRequestDto> content =
-                GroupEntryRequestCustomMapper.map(entryRequests.getContent(), requestedMembers);
+                GroupEntryRequestCustomMapper.map(entryRequests.getContent(), requestedMembers, objectStorage);
 
         return new CursorResponse.Content<>(
                 content, content.get(content.size() - 1).requestId(), entryRequests.hasNext());

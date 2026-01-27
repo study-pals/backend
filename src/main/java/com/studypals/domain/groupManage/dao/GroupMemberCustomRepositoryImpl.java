@@ -38,10 +38,15 @@ public class GroupMemberCustomRepositoryImpl implements GroupMemberCustomReposit
     public List<GroupMemberProfileDto> findTopNMemberByJoinedAt(Long groupId, int limit) {
         return queryFactory
                 .select(Projections.constructor(
-                        GroupMemberProfileDto.class, member.id, member.nickname, member.imageUrl, groupMember.role))
+                        GroupMemberProfileDto.class,
+                        member.id,
+                        member.nickname,
+                        member.profileImage.objectKey,
+                        groupMember.role))
                 .from(groupMember)
                 .join(member)
                 .on(groupMember.member.id.eq(member.id))
+                .leftJoin(member.profileImage) // 프로필 이미지가 없는 멤버도 조회되도록 Left Join 추가
                 .where(groupMember.group.id.eq(groupId))
                 .orderBy(orderByLeaderPriority(), groupMember.joinedAt.desc())
                 .limit(limit)
@@ -52,10 +57,14 @@ public class GroupMemberCustomRepositoryImpl implements GroupMemberCustomReposit
     public List<GroupMemberProfileMappingDto> findTopNMemberInGroupIds(List<Long> groupIds, int limit) {
         return queryFactory
                 .select(Projections.constructor(
-                        GroupMemberProfileMappingDto.class, groupMember.group.id, member.imageUrl, groupMember.role))
+                        GroupMemberProfileMappingDto.class,
+                        groupMember.group.id,
+                        member.profileImage.objectKey,
+                        groupMember.role))
                 .from(groupMember)
                 .join(member)
                 .on(groupMember.member.id.eq(member.id))
+                .leftJoin(member.profileImage) // 프로필 이미지가 없는 멤버도 조회되도록 Left Join 추가
                 .where(groupMember.group.id.in(groupIds))
                 .orderBy(orderByLeaderPriority(), groupMember.joinedAt.desc())
                 .limit(limit)

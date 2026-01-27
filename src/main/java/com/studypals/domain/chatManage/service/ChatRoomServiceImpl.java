@@ -19,6 +19,7 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.ChatException;
+import com.studypals.global.file.ObjectStorage;
 
 /**
  * 채팅방 진입 시 필요한 정보를 조회하는 서비스 구현 클래스입니다.
@@ -52,6 +53,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatMessageMapper chatMessageMapper;
     private final ChatMessageReader chatMessageReader;
     private final MemberReader memberReader;
+
+    private final ObjectStorage objectStorage;
 
     /**
      * 특정 유저가 특정 채팅방에 입장할 때 필요한 전체 정보를 조회합니다.
@@ -112,7 +115,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return ChatRoomInfoRes.builder()
                 .roomId(chatRoomId)
                 .name(chatRoom.getName())
-                .userInfos(members.stream().map(chatRoomMapper::toDto).toList())
+                .userInfos(members.stream()
+                        .map(m -> chatRoomMapper.toDto(m, objectStorage))
+                        .toList())
                 .cursor(chatCursorRes)
                 .logs(logs)
                 .build();

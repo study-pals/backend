@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.studypals.domain.studyManage.dto.GroupCategoryDto;
+import com.studypals.global.file.ObjectStorage;
 
 public record GetGroupsRes(
         Long groupId,
@@ -17,7 +18,10 @@ public record GetGroupsRes(
         List<GroupMemberProfileImageDto> profiles,
         List<Long> categoryIds) {
     public static GetGroupsRes of(
-            GroupSummaryDto dto, List<GroupMemberProfileMappingDto> rawProfiles, List<GroupCategoryDto> categoryIds) {
+            GroupSummaryDto dto,
+            List<GroupMemberProfileMappingDto> rawProfiles,
+            List<GroupCategoryDto> categoryIds,
+            ObjectStorage objectStorage) {
         return new GetGroupsRes(
                 dto.id(),
                 dto.name(),
@@ -28,7 +32,8 @@ public record GetGroupsRes(
                 dto.approvalRequired(),
                 dto.createdDate(),
                 rawProfiles.stream()
-                        .map(rp -> new GroupMemberProfileImageDto(rp.imageUrl(), rp.role()))
+                        .map(rp -> new GroupMemberProfileImageDto(
+                                objectStorage.convertKeyToFileUrl(rp.imageUrl()), rp.role()))
                         .toList(),
                 categoryIds.stream().map(GroupCategoryDto::categoryId).toList());
     }
