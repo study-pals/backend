@@ -31,7 +31,7 @@ import com.studypals.global.file.entity.ImageFile;
  * </ul>
  *
  * @author sleepyhoon
- * @since 2024-01-15
+ * @since 2026-01-15
  * @see ImageFile
  * @see ChatRoom
  * @see com.studypals.domain.chatManage.worker.ChatImageManager

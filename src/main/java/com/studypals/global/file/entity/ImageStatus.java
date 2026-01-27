@@ -7,7 +7,7 @@ package com.studypals.global.file.entity;
  * 특히 리사이징 실패 시 재시도 로직을 위한 상태 구분에 활용됩니다.
  *
  * @author sleepyhoon
- * @since 2024-01-15
+ * @since 2026-01-15
  */
 public enum ImageStatus {
     /**

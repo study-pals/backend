@@ -36,7 +36,7 @@ import com.studypals.global.file.entity.ImageStatus;
  * </ul>
  *
  * @author sleepyhoon
- * @since 2024-01-15
+ * @since 2026-01-15
  * @see ImageFile
  * @see Member
  * @see com.studypals.global.file.service.ImageFileServiceImpl

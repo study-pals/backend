@@ -51,6 +51,11 @@ class AbstractImageManagerTest {
         public ImageType getFileType() {
             return ImageType.PROFILE_IMAGE;
         }
+
+        @Override
+        public boolean usePresignedUrl() {
+            return false;
+        }
     }
 
     @BeforeEach

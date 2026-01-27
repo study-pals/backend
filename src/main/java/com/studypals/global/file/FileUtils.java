@@ -11,7 +11,7 @@ import com.studypals.global.exceptions.exception.FileException;
  * 외부에서 인스턴스화되는 것을 방지하기 위해 private 생성자를 가집니다.
  *
  * @author sleepyhoon
- * @since 2024-01-10
+ * @since 2026-01-10
  */
 public final class FileUtils {
 

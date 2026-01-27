@@ -17,7 +17,7 @@ import org.springframework.validation.annotation.Validated;
  * @param extensions 허용되는 파일 확장자 목록. {@code @NotEmpty} 제약조건이 적용되어, 최소 하나 이상의 확장자가 설정되어야 합니다.
  * @param presignedUrlExpireTime Presigned URL의 만료 시간(초 단위). {@code @Positive} 제약조건이 적용되어, 반드시 양수여야 합니다.
  * @author sleepyhoon
- * @since 2024-01-10
+ * @since 2026-01-10
  */
 @Validated
 @ConfigurationProperties(prefix = "file.upload")

@@ -6,6 +6,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.studypals.domain.chatManage.entity.ChatRoom;
@@ -115,6 +118,7 @@ public class ImageFileServiceImpl implements ImageFileService {
      * @return 생성된 이미지 ID와 접근 URL이 포함된 응답 DTO
      */
     @Override
+    @Transactional
     public ImageUploadRes uploadProfileImage(MultipartFile file, Long userId) {
         MemberProfileImageManager manager = getManager(ImageType.PROFILE_IMAGE, MemberProfileImageManager.class);
 
@@ -132,13 +136,26 @@ public class ImageFileServiceImpl implements ImageFileService {
             String oldObjectKey = currentProfile.getObjectKey(); // 삭제할 키 미리 백업
 
             currentProfile.update(uploadDto.objectKey(), file.getOriginalFilename(), extension);
-            imageId = profileImageWriter.saveEntity(currentProfile); // 더티 체킹을 하지 않으므로 명시적 저장
 
-            // 3. [MinIO] 모든 처리가 끝난 후 -> 기존 파일 삭제
-            manager.delete(oldObjectKey);
+            imageId = currentProfile.getId();
+
+            // 성공적으로 수정이 되었을 때만 minio에서 기존 프로필을 delete
+            if (TransactionSynchronizationManager.isSynchronizationActive()) {
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        manager.delete(oldObjectKey);
+                    }
+                });
+            }
         } else {
             // [DB] 기존 프로필이 없으면 그냥 저장
-            imageId = profileImageWriter.save(member, uploadDto.objectKey(), file.getOriginalFilename());
+            MemberProfileImage savedImage =
+                    profileImageWriter.save(member, uploadDto.objectKey(), file.getOriginalFilename());
+
+            imageId = savedImage.getId();
+
+            member.setProfileImage(savedImage);
         }
 
         return new ImageUploadRes(imageId, uploadDto.imageUrl());
@@ -160,6 +177,7 @@ public class ImageFileServiceImpl implements ImageFileService {
      * @return 생성된 이미지 ID와 접근 URL이 포함된 응답 DTO
      */
     @Override
+    @Transactional
     public ImageUploadRes uploadChatImage(MultipartFile file, String chatRoomId, Long userId) {
         ChatImageManager manager = getManager(ImageType.CHAT_IMAGE, ChatImageManager.class);
 

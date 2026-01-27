@@ -67,7 +67,11 @@ public class MemberProfileImageManager extends AbstractImageManager {
      * @return ObjectKey와 파일 URL을 담은 ImageUploadDto
      */
     public ImageUploadDto upload(MultipartFile file, Long userId) {
-        // 공통 업로드 로직을 수행하는 부모 클래스의 템플릿 메서드를 호출합니다.
         return performUpload(file, userId, String.valueOf(userId));
+    }
+
+    @Override
+    protected boolean usePresignedUrl() {
+        return false;
     }
 }

@@ -82,4 +82,9 @@ public class ChatImageManager extends AbstractImageManager {
         // 공통 업로드 로직을 수행하는 부모 클래스의 템플릿 메서드를 호출합니다.
         return performUpload(file, userId, chatRoomId);
     }
+
+    @Override
+    protected boolean usePresignedUrl() {
+        return true;
+    }
 }

@@ -76,6 +76,11 @@ public abstract class AbstractImageManager extends AbstractFileManager {
     protected final ImageUploadDto performUpload(MultipartFile file, Long userId, String targetId) {
         String objectKey = createObjectKey(userId, file.getOriginalFilename(), targetId);
         String imageUrl = super.upload(file, objectKey);
+
+        if (usePresignedUrl()) {
+            imageUrl = getPresignedGetUrl(objectKey);
+        }
+
         return new ImageUploadDto(objectKey, imageUrl);
     }
 
@@ -103,7 +108,7 @@ public abstract class AbstractImageManager extends AbstractFileManager {
     /**
      * 파일 이름의 유효성과 확장자를 검증합니다.
      * 파일 이름이 null이거나 '.'을 포함하지 않는 경우, 또는 허용되지 않은 확장자인 경우 예외를 발생시킵니다.
-     *
+     * TODO: 강도높은 유효성 검증을 위해 Tika, ImageIO을 추가로 도입할 수 있습니다.
      * @param fileName 검증할 파일 이름
      * @throws FileException 유효하지 않은 파일 이름 또는 지원하지 않는 확장자인 경우
      */
@@ -151,4 +156,11 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * @return {@link ImageVariantKey} 리스트
      */
     protected abstract List<ImageVariantKey> variants();
+
+    /**
+     * 업로드 완료 후 반환할 URL을 Presigned URL로 할지 여부를 결정합니다.
+     *
+     * @return true면 Presigned URL 반환, false면 업로드 시 반환된 URL(Public) 사용
+     */
+    protected abstract boolean usePresignedUrl();
 }

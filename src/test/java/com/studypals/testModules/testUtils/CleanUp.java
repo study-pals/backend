@@ -4,6 +4,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Table;
@@ -27,6 +29,7 @@ public class CleanUp {
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager entityManager;
     private final StringRedisTemplate stringRedisTemplate;
+    private final DataSource dataSource;
 
     @Transactional
     public void all() {

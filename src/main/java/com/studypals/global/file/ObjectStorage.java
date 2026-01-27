@@ -31,6 +31,7 @@ public interface ObjectStorage {
      *
      * @param file 저장할 파일
      * @param objectKey 파일을 저장할 경로
+     * @return 업로드된 파일에 접근할 수 있는 전체 URL
      */
     String upload(MultipartFile file, String objectKey);
 

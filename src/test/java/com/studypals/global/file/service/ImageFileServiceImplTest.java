@@ -11,12 +11,15 @@ import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.studypals.domain.chatManage.entity.ChatRoom;
@@ -31,6 +34,7 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.dto.ImageUploadDto;
 import com.studypals.global.file.dto.ImageUploadRes;
+import com.studypals.global.file.entity.ImageStatus;
 import com.studypals.global.file.entity.ImageType;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +65,7 @@ class ImageFileServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        TransactionSynchronizationManager.initSynchronization();
         given(profileImageManager.getFileType()).willReturn(ImageType.PROFILE_IMAGE);
         given(chatImageManager.getFileType()).willReturn(ImageType.CHAT_IMAGE);
 
@@ -72,6 +77,11 @@ class ImageFileServiceImplTest {
                 chatImageWriter);
     }
 
+    @AfterEach
+    void tearDown() {
+        TransactionSynchronizationManager.clear();
+    }
+
     @Test
     @DisplayName("프로필 이미지 업로드 - 성공 (기존 프로필 없음)")
     void uploadProfileImage_Success_NoExistingProfile() {
@@ -80,25 +90,33 @@ class ImageFileServiceImplTest {
         String originalFilename = "test.jpg";
         String objectKey = "profile/1/uuid.jpg";
         String imageUrl = "http://test.com/profile/1/uuid.jpg";
+        Member member = Member.builder().id(1L).build();
+
+        Long expectedImageId = 99L;
+        MemberProfileImage expectedImage = MemberProfileImage.builder()
+                .id(expectedImageId)
+                .member(member)
+                .objectKey(objectKey)
+                .originalFileName(originalFilename)
+                .mimeType("jpg")
+                .imageStatus(ImageStatus.PENDING)
+                .build();
 
         given(multipartFile.getOriginalFilename()).willReturn(originalFilename);
 
         ImageUploadDto uploadDto = new ImageUploadDto(objectKey, imageUrl);
         given(profileImageManager.upload(multipartFile, userId)).willReturn(uploadDto);
 
-        Member member = mock(Member.class);
         given(memberReader.get(userId)).willReturn(member);
-        given(member.getProfileImage()).willReturn(null);
 
-        Long savedImageId = 10L;
         given(profileImageWriter.save(eq(member), eq(objectKey), eq(originalFilename)))
-                .willReturn(savedImageId);
+                .willReturn(expectedImage);
 
         // when
         ImageUploadRes res = imageFileService.uploadProfileImage(multipartFile, userId);
 
         // then
-        assertThat(res.imageId()).isEqualTo(savedImageId);
+        assertThat(res.imageId()).isEqualTo(expectedImageId);
         assertThat(res.imageUrl()).isEqualTo(imageUrl);
 
         verify(profileImageManager).upload(multipartFile, userId);
@@ -128,18 +146,16 @@ class ImageFileServiceImplTest {
         given(member.getProfileImage()).willReturn(existingProfile);
         given(existingProfile.getObjectKey()).willReturn(oldObjectKey);
 
-        Long updatedImageId = 10L;
-        given(profileImageWriter.saveEntity(existingProfile)).willReturn(updatedImageId);
-
         // when
         ImageUploadRes res = imageFileService.uploadProfileImage(multipartFile, userId);
 
+        // 트랜잭션 커밋 후 동작(파일 삭제)을 검증하기 위해 수동으로 트리거
+        TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
+
         // then
-        assertThat(res.imageId()).isEqualTo(updatedImageId);
         assertThat(res.imageUrl()).isEqualTo(newImageUrl);
 
         verify(existingProfile).update(eq(newObjectKey), eq(originalFilename), anyString());
-        verify(profileImageWriter).saveEntity(existingProfile);
         verify(profileImageManager).delete(oldObjectKey);
     }
 
