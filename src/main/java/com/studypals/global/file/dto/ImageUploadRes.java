@@ -3,7 +3,7 @@ package com.studypals.global.file.dto;
 /**
  * 이미지 업로드 완료 후 반환되는 응답 DTO입니다.
  *
- * @param id       데이터베이스에 저장된 이미지의 고유 ID (PK).
+ * @param imageId       데이터베이스에 저장된 이미지의 고유 ID (PK).
  *                 추후 비즈니스 로직(예: 회원 정보 수정, 채팅 메시지 전송)에서 이 ID를 참조합니다.
  * @param imageUrl 업로드된 이미지를 즉시 조회할 수 있는 URL.
  *                 <p>
@@ -15,4 +15,4 @@ package com.studypals.global.file.dto;
  * @author sleepyhoon
  * @since 2026-01-15
  */
-public record ImageUploadRes(Long id, String imageUrl) {}
+public record ImageUploadRes(Long imageId, String imageUrl) {}

@@ -153,7 +153,7 @@ public class MemberControllerRestDocsTest extends RestDocsSupport {
     @WithMockUser
     void updateProfile_success() throws Exception {
         // given
-        UpdateProfileReq req = new UpdateProfileReq(LocalDate.of(1999, 8, 20), "학생", "exmaple.image.com");
+        UpdateProfileReq req = new UpdateProfileReq(LocalDate.of(1999, 8, 20), "학생");
 
         given(memberService.updateProfile(anyLong(), any(UpdateProfileReq.class)))
                 .willReturn(1L);
@@ -169,10 +169,7 @@ public class MemberControllerRestDocsTest extends RestDocsSupport {
                         httpResponse(),
                         requestFields(
                                 fieldWithPath("birthday").description("생일").optional(),
-                                fieldWithPath("position").description("직무/포지션").optional(),
-                                fieldWithPath("imageUrl")
-                                        .description("프로필 이미지 URL")
-                                        .optional()),
+                                fieldWithPath("position").description("직무/포지션").optional()),
                         responseFields(
                                 fieldWithPath("code").description("응답 코드 (U01-02)"),
                                 fieldWithPath("status").description("응답 상태"),

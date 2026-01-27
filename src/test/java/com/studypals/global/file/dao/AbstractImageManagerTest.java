@@ -2,8 +2,6 @@ package com.studypals.global.file.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -149,14 +147,14 @@ class AbstractImageManagerTest {
             String expectedUrl = "https://example.com/presigned-url";
             int expireTime = fileUploadProperties.presignedUrlExpireTime();
 
-            when(objectStorage.createPresignedPutUrl(anyString(), anyInt())).thenReturn(expectedUrl);
+            when(objectStorage.createPresignedGetUrl(objectKey, expireTime)).thenReturn(expectedUrl);
 
             // when
             String actualUrl = imageManager.getPresignedGetUrl(objectKey);
 
             // then
             assertThat(actualUrl).isEqualTo(expectedUrl);
-            verify(objectStorage).createPresignedPutUrl(objectKey, expireTime);
+            verify(objectStorage).createPresignedGetUrl(objectKey, expireTime);
         }
     }
 }

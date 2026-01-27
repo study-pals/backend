@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,6 +30,7 @@ import com.studypals.domain.chatManage.worker.ChatMessageReader;
 import com.studypals.domain.chatManage.worker.ChatRoomReader;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
+import com.studypals.global.file.ObjectStorage;
 
 /**
  * {@link ChatRoomService} 에 대한 테스트코드
@@ -66,6 +68,10 @@ class ChatRoomServiceTest {
     @Mock
     private MemberReader memberReader;
 
+    @Mock
+    private ObjectStorage objectStorage;
+
+    @InjectMocks
     private ChatRoomServiceImpl chatRoomService;
 
     private final ChatMessageMapper chatMessageMapper = Mappers.getMapper(ChatMessageMapper.class);
@@ -73,7 +79,7 @@ class ChatRoomServiceTest {
     @BeforeEach
     void setup() {
         chatRoomService = new ChatRoomServiceImpl(
-                chatRoomReader, chatRoomMapper, chatMessageMapper, chatMessageReader, memberReader);
+                chatRoomReader, chatRoomMapper, chatMessageMapper, chatMessageReader, memberReader, objectStorage);
     }
 
     @Test
@@ -91,7 +97,7 @@ class ChatRoomServiceTest {
         given(mockMember1.getId()).willReturn(userId);
         given(mockMember1.getId()).willReturn(2L);
 
-        given(chatRoomMapper.toDto(any()))
+        given(chatRoomMapper.toDto(any(), any()))
                 .willReturn(new ChatRoomInfoRes.UserInfo(userId, "nickname", ChatRoomRole.MEMBER, "image"));
 
         given(mockMember1.getId()).willReturn(userId);

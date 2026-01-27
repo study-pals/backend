@@ -60,9 +60,9 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
 
         List<GroupMemberProfileDto> expected = List.of(
                 new GroupMemberProfileDto(
-                        member1.getId(), member1.getNickname(), member1.getImageUrl(), leader.getRole()),
+                        member1.getId(), member1.getNickname(), member1.getProfileImageObjectKey(), leader.getRole()),
                 new GroupMemberProfileDto(
-                        member2.getId(), member2.getNickname(), member2.getImageUrl(), member.getRole()));
+                        member2.getId(), member2.getNickname(), member2.getProfileImageObjectKey(), member.getRole()));
 
         // when
         List<GroupMemberProfileDto> actual =
@@ -121,13 +121,13 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
                 .findFirst()
                 .get();
         assertThat(mapping1.groupId()).isEqualTo(g1.getId());
-        assertThat(mapping1.imageUrl()).isEqualTo("imageUrl-url");
+        assertThat(mapping1.imageUrl()).isEqualTo(m1.getProfileImageObjectKey());
 
         GroupMemberProfileMappingDto mapping2 = result.stream()
                 .filter(r -> r.groupId().equals(g2.getId()))
                 .findFirst()
                 .get();
         assertThat(mapping2.groupId()).isEqualTo(g2.getId());
-        assertThat(mapping2.imageUrl()).isEqualTo("imageUrl-url");
+        assertThat(mapping2.imageUrl()).isEqualTo(m2.getProfileImageObjectKey());
     }
 }

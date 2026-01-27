@@ -41,7 +41,7 @@ public abstract class ImageFile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "image_file_id")
+    @Column(name = "id", nullable = false, unique = true)
     private Long id;
 
     /**
@@ -85,7 +85,7 @@ public abstract class ImageFile {
      * 이미지가 업로드된 시간입니다.
      */
     @CreatedDate
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     /**

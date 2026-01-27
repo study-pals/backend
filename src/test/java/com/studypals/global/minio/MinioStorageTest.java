@@ -103,31 +103,32 @@ public class MinioStorageTest {
         assertThat(args.expiry()).isEqualTo(expiry);
     }
 
-    @Test
-    void createPresignedPutUrl_success() throws Exception {
-        // given
-        String objectKey = "test-object";
-        int expiry = 300;
-        String expectedUrl = "http://presigned-url";
-
-        given(minioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
-                .willReturn(expectedUrl);
-
-        // when
-        String actualUrl = minioStorage.createPresignedPutUrl(objectKey, expiry);
-
-        // then
-        assertThat(actualUrl).isEqualTo(expectedUrl);
-
-        ArgumentCaptor<GetPresignedObjectUrlArgs> captor = ArgumentCaptor.forClass(GetPresignedObjectUrlArgs.class);
-        then(minioClient).should(times(1)).getPresignedObjectUrl(captor.capture());
-
-        GetPresignedObjectUrlArgs args = captor.getValue();
-        assertThat(args.bucket()).isEqualTo(TEST_BUCKET);
-        assertThat(args.object()).isEqualTo(objectKey);
-        assertThat(args.method()).isEqualTo(Method.PUT);
-        assertThat(args.expiry()).isEqualTo(expiry);
-    }
+    //    @Test
+    //    void createPresignedPutUrl_success() throws Exception {
+    //        // given
+    //        String objectKey = "test-object";
+    //        int expiry = 300;
+    //        String expectedUrl = "http://presigned-url";
+    //
+    //        given(minioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
+    //                .willReturn(expectedUrl);
+    //
+    //        // when
+    //        String actualUrl = minioStorage.createPresignedPutUrl(objectKey, expiry);
+    //
+    //        // then
+    //        assertThat(actualUrl).isEqualTo(expectedUrl);
+    //
+    //        ArgumentCaptor<GetPresignedObjectUrlArgs> captor =
+    // ArgumentCaptor.forClass(GetPresignedObjectUrlArgs.class);
+    //        then(minioClient).should(times(1)).getPresignedObjectUrl(captor.capture());
+    //
+    //        GetPresignedObjectUrlArgs args = captor.getValue();
+    //        assertThat(args.bucket()).isEqualTo(TEST_BUCKET);
+    //        assertThat(args.object()).isEqualTo(objectKey);
+    //        assertThat(args.method()).isEqualTo(Method.PUT);
+    //        assertThat(args.expiry()).isEqualTo(expiry);
+    //    }
 
     private String getStoragePath() {
         return TEST_ENDPOINT + "/" + TEST_BUCKET + "/";

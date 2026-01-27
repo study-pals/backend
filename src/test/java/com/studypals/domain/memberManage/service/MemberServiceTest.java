@@ -24,6 +24,7 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.memberManage.worker.MemberWriter;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.exception.AuthException;
+import com.studypals.global.file.ObjectStorage;
 
 /**
  * {@link MemberService} 에 대한 단위 테스트입니다.
@@ -49,6 +50,9 @@ class MemberServiceTest {
 
     @Mock
     private Member mockMember;
+
+    @Mock
+    private ObjectStorage objectStorage;
 
     @InjectMocks
     private MemberServiceImpl memberService;
@@ -129,7 +133,7 @@ class MemberServiceTest {
         // given
         Long userId = 1L;
 
-        UpdateProfileReq req = new UpdateProfileReq(LocalDate.of(1999, 8, 20), "학생", "example.image.com");
+        UpdateProfileReq req = new UpdateProfileReq(LocalDate.of(1999, 8, 20), "학생");
 
         given(memberReader.get(userId)).willReturn(mockMember);
         given(mockMember.getId()).willReturn(1L);
@@ -141,7 +145,7 @@ class MemberServiceTest {
         assertThat(result).isEqualTo(1L);
 
         then(memberReader).should().get(userId);
-        then(mockMember).should().updateProfile(LocalDate.of(1999, 8, 20), "학생", "example.image.com");
+        then(mockMember).should().updateProfile(LocalDate.of(1999, 8, 20), "학생");
         then(memberWriter).should().save(mockMember);
     }
 
@@ -162,7 +166,7 @@ class MemberServiceTest {
                 .build();
 
         given(memberReader.get(userId)).willReturn(mockMember);
-        given(mapper.toRes(mockMember)).willReturn(res);
+        given(mapper.toRes(mockMember, objectStorage)).willReturn(res);
 
         // when
         MemberDetailsRes result = memberService.getProfile(userId);
@@ -171,6 +175,6 @@ class MemberServiceTest {
         assertThat(result).isSameAs(res);
 
         then(memberReader).should().get(userId);
-        then(mapper).should().toRes(mockMember);
+        then(mapper).should().toRes(mockMember, objectStorage);
     }
 }

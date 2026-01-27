@@ -28,6 +28,7 @@ import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
+import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.request.Cursor;
 import com.studypals.global.request.DateSortType;
 import com.studypals.global.responses.CursorResponse;
@@ -73,6 +74,9 @@ public class GroupEntryServiceTest {
 
     @Mock
     private GroupEntryRequest mockEntryRequest;
+
+    @Mock
+    private ObjectStorage objectStorage;
 
     @InjectMocks
     private GroupEntryServiceImpl groupEntryService;

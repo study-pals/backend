@@ -23,6 +23,7 @@ import com.studypals.domain.groupManage.worker.GroupAuthorityValidator;
 import com.studypals.domain.groupManage.worker.GroupMemberReader;
 import com.studypals.domain.groupManage.worker.GroupRankingWorker;
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.global.file.ObjectStorage;
 
 @ExtendWith(MockitoExtension.class)
 class GroupRankingServiceTest {
@@ -35,6 +36,9 @@ class GroupRankingServiceTest {
 
     @Mock
     private GroupAuthorityValidator validator;
+
+    @Mock
+    private ObjectStorage objectStorage;
 
     @InjectMocks
     private GroupRankingServiceImpl groupRankingService;
@@ -82,11 +86,7 @@ class GroupRankingServiceTest {
     }
 
     private GroupMember createMember(Long id, String nick, String img, Group group, GroupRole role) {
-        Member member = Member.builder()
-                .id(id)
-                .nickname(nick)
-                .imageUrl("https://example.com/" + img)
-                .build();
+        Member member = Member.builder().id(id).nickname(nick).build();
 
         return GroupMember.builder()
                 .id(id + 1000L) // GroupMember 자체의 ID

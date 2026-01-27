@@ -1,11 +1,13 @@
 package com.studypals.global.file.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -15,31 +17,32 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.worker.ChatImageManager;
 import com.studypals.domain.chatManage.worker.ChatImageWriter;
 import com.studypals.domain.chatManage.worker.ChatRoomReader;
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.entity.MemberProfileImage;
 import com.studypals.domain.memberManage.worker.MemberProfileImageManager;
 import com.studypals.domain.memberManage.worker.MemberProfileImageWriter;
 import com.studypals.domain.memberManage.worker.MemberReader;
-import com.studypals.global.file.dto.ChatPresignedUrlReq;
-import com.studypals.global.file.dto.PresignedUrlRes;
-import com.studypals.global.file.dto.ProfilePresignedUrlReq;
+import com.studypals.global.file.dao.AbstractImageManager;
+import com.studypals.global.file.dto.ImageUploadDto;
+import com.studypals.global.file.dto.ImageUploadRes;
 import com.studypals.global.file.entity.ImageType;
 
 @ExtendWith(MockitoExtension.class)
 class ImageFileServiceImplTest {
 
-    // Service under test
     private ImageFileService imageFileService;
 
     @Mock
-    private MemberProfileImageManager mockProfileImageManager;
+    private MemberProfileImageManager profileImageManager;
 
     @Mock
-    private ChatImageManager mockChatImageManager;
+    private ChatImageManager chatImageManager;
 
     @Mock
     private MemberReader memberReader;
@@ -48,88 +51,146 @@ class ImageFileServiceImplTest {
     private ChatRoomReader chatRoomReader;
 
     @Mock
-    private MemberProfileImageWriter memberProfileImageWriter;
+    private MemberProfileImageWriter profileImageWriter;
 
     @Mock
     private ChatImageWriter chatImageWriter;
 
+    @Mock
+    private MultipartFile multipartFile;
+
     @BeforeEach
     void setUp() {
-        when(mockProfileImageManager.getFileType()).thenReturn(ImageType.PROFILE_IMAGE);
-        when(mockChatImageManager.getFileType()).thenReturn(ImageType.CHAT_IMAGE);
+        given(profileImageManager.getFileType()).willReturn(ImageType.PROFILE_IMAGE);
+        given(chatImageManager.getFileType()).willReturn(ImageType.CHAT_IMAGE);
 
         imageFileService = new ImageFileServiceImpl(
-                List.of(mockProfileImageManager, mockChatImageManager),
+                List.of(profileImageManager, chatImageManager),
                 memberReader,
                 chatRoomReader,
-                memberProfileImageWriter,
+                profileImageWriter,
                 chatImageWriter);
     }
 
     @Test
-    @DisplayName("getProfileUploadUrl 호출 시 ProfileImageManager의 getUploadUrl을 호출해야 한다")
-    void getProfileUploadUrl_shouldCallCorrectManager() {
+    @DisplayName("프로필 이미지 업로드 - 성공 (기존 프로필 없음)")
+    void uploadProfileImage_Success_NoExistingProfile() {
         // given
         Long userId = 1L;
-        ProfilePresignedUrlReq request = new ProfilePresignedUrlReq("profile.jpg");
-        String expectedObjectKey = "profile/1/some-uuid.jpg";
-        Long expectedImageId = 99L;
-        String expectedUrl = "http://s3.com/profile-upload-url";
+        String originalFilename = "test.jpg";
+        String objectKey = "profile/1/uuid.jpg";
+        String imageUrl = "http://test.com/profile/1/uuid.jpg";
 
-        // 서비스가 호출할 Mock 객체의 동작을 모두 정의합니다.
-        when(mockProfileImageManager.createObjectKey(userId, request.fileName(), String.valueOf(userId)))
-                .thenReturn(expectedObjectKey);
-        when(memberReader.getRef(userId)).thenReturn(Member.builder().id(userId).build());
-        when(memberProfileImageWriter.save(any(Member.class), eq(expectedObjectKey), eq(request.fileName())))
-                .thenReturn(expectedImageId);
-        when(mockProfileImageManager.getPresignedGetUrl(expectedObjectKey)).thenReturn(expectedUrl);
+        given(multipartFile.getOriginalFilename()).willReturn(originalFilename);
+
+        ImageUploadDto uploadDto = new ImageUploadDto(objectKey, imageUrl);
+        given(profileImageManager.upload(multipartFile, userId)).willReturn(uploadDto);
+
+        Member member = mock(Member.class);
+        given(memberReader.get(userId)).willReturn(member);
+        given(member.getProfileImage()).willReturn(null);
+
+        Long savedImageId = 10L;
+        given(profileImageWriter.save(eq(member), eq(objectKey), eq(originalFilename)))
+                .willReturn(savedImageId);
 
         // when
-        PresignedUrlRes actualResult = imageFileService.getProfileUploadUrl(request, userId);
+        ImageUploadRes res = imageFileService.uploadProfileImage(multipartFile, userId);
 
         // then
-        assertThat(actualResult).isNotNull();
-        assertThat(actualResult.id()).isEqualTo(expectedImageId);
-        assertThat(actualResult.url()).isEqualTo(expectedUrl);
+        assertThat(res.imageId()).isEqualTo(savedImageId);
+        assertThat(res.imageUrl()).isEqualTo(imageUrl);
 
-        // 올바른 메서드가 올바른 인자와 함께 호출되었는지 검증합니다.
-        verify(mockProfileImageManager).createObjectKey(userId, request.fileName(), String.valueOf(userId));
-        verify(memberProfileImageWriter).save(any(Member.class), eq(expectedObjectKey), eq(request.fileName()));
-        verify(mockProfileImageManager).getPresignedGetUrl(expectedObjectKey);
-        verify(mockChatImageManager, never()).getPresignedGetUrl(any());
+        verify(profileImageManager).upload(multipartFile, userId);
+        verify(profileImageWriter).save(eq(member), eq(objectKey), eq(originalFilename));
+        verify(profileImageManager, never()).delete(anyString());
     }
 
     @Test
-    @DisplayName("getChatUploadUrl 호출 시 ChatImageManager의 getUploadUrl을 호출해야 한다")
-    void getChatUploadUrl_shouldCallCorrectManager() {
+    @DisplayName("프로필 이미지 업로드 - 성공 (기존 프로필 존재 -> 업데이트 및 기존 파일 삭제)")
+    void uploadProfileImage_Success_ExistingProfile() {
         // given
         Long userId = 1L;
-        ChatPresignedUrlReq request = new ChatPresignedUrlReq("chat-image.png", "chat-room-123");
-        String expectedObjectKey = "chat/chat-room-123/some-uuid.png";
-        Long expectedImageId = 100L;
-        String expectedUrl = "http://s3.com/chat-upload-url";
+        String originalFilename = "new.jpg";
+        String newObjectKey = "profile/1/new.jpg";
+        String newImageUrl = "http://test.com/profile/1/new.jpg";
+        String oldObjectKey = "profile/1/old.jpg";
 
-        // 서비스가 호출할 Mock 객체의 동작을 모두 정의합니다.
-        when(mockChatImageManager.createObjectKey(userId, request.fileName(), request.chatRoomId()))
-                .thenReturn(expectedObjectKey);
-        when(chatRoomReader.getById(request.chatRoomId()))
-                .thenReturn(ChatRoom.builder().id(request.chatRoomId()).build());
-        when(chatImageWriter.save(any(ChatRoom.class), eq(expectedObjectKey), eq(request.fileName())))
-                .thenReturn(expectedImageId);
-        when(mockChatImageManager.getPresignedGetUrl(expectedObjectKey)).thenReturn(expectedUrl);
+        given(multipartFile.getOriginalFilename()).willReturn(originalFilename);
+
+        ImageUploadDto uploadDto = new ImageUploadDto(newObjectKey, newImageUrl);
+        given(profileImageManager.upload(multipartFile, userId)).willReturn(uploadDto);
+
+        Member member = mock(Member.class);
+        MemberProfileImage existingProfile = mock(MemberProfileImage.class);
+
+        given(memberReader.get(userId)).willReturn(member);
+        given(member.getProfileImage()).willReturn(existingProfile);
+        given(existingProfile.getObjectKey()).willReturn(oldObjectKey);
+
+        Long updatedImageId = 10L;
+        given(profileImageWriter.saveEntity(existingProfile)).willReturn(updatedImageId);
 
         // when
-        PresignedUrlRes actualResult = imageFileService.getChatUploadUrl(request, userId);
+        ImageUploadRes res = imageFileService.uploadProfileImage(multipartFile, userId);
 
         // then
-        assertThat(actualResult).isNotNull();
-        assertThat(actualResult.id()).isEqualTo(expectedImageId);
-        assertThat(actualResult.url()).isEqualTo(expectedUrl);
+        assertThat(res.imageId()).isEqualTo(updatedImageId);
+        assertThat(res.imageUrl()).isEqualTo(newImageUrl);
 
-        // 올바른 메서드가 올바른 인자와 함께 호출되었는지 검증합니다.
-        verify(mockChatImageManager).createObjectKey(userId, request.fileName(), request.chatRoomId());
-        verify(chatImageWriter).save(any(ChatRoom.class), eq(expectedObjectKey), eq(request.fileName()));
-        verify(mockChatImageManager).getPresignedGetUrl(expectedObjectKey);
-        verify(mockProfileImageManager, never()).getPresignedGetUrl(any());
+        verify(existingProfile).update(eq(newObjectKey), eq(originalFilename), anyString());
+        verify(profileImageWriter).saveEntity(existingProfile);
+        verify(profileImageManager).delete(oldObjectKey);
+    }
+
+    @Test
+    @DisplayName("채팅방 이미지 업로드 - 성공")
+    void uploadChatImage_Success() {
+        // given
+        Long userId = 1L;
+        String chatRoomId = "room1";
+        String originalFilename = "chat.jpg";
+        String objectKey = "chat/room1/uuid.jpg";
+        String imageUrl = "http://test.com/chat/room1/uuid.jpg";
+
+        given(multipartFile.getOriginalFilename()).willReturn(originalFilename);
+
+        ImageUploadDto uploadDto = new ImageUploadDto(objectKey, imageUrl);
+        given(chatImageManager.upload(multipartFile, userId, chatRoomId)).willReturn(uploadDto);
+
+        ChatRoom chatRoom = mock(ChatRoom.class);
+        given(chatRoomReader.getById(chatRoomId)).willReturn(chatRoom);
+
+        Long savedImageId = 20L;
+        given(chatImageWriter.save(eq(chatRoom), eq(objectKey), eq(originalFilename)))
+                .willReturn(savedImageId);
+
+        // when
+        ImageUploadRes res = imageFileService.uploadChatImage(multipartFile, chatRoomId, userId);
+
+        // then
+        assertThat(res.imageId()).isEqualTo(savedImageId);
+        assertThat(res.imageUrl()).isEqualTo(imageUrl);
+
+        verify(chatImageManager).upload(multipartFile, userId, chatRoomId);
+        verify(chatImageWriter).save(eq(chatRoom), eq(objectKey), eq(originalFilename));
+    }
+
+    @Test
+    @DisplayName("생성자 - 중복 FileType 등록 시 예외 발생")
+    void constructor_DuplicateFileType() {
+        // given
+        AbstractImageManager manager1 = mock(AbstractImageManager.class);
+        AbstractImageManager manager2 = mock(AbstractImageManager.class);
+
+        given(manager1.getFileType()).willReturn(ImageType.PROFILE_IMAGE);
+        given(manager2.getFileType()).willReturn(ImageType.PROFILE_IMAGE); // 중복 타입
+
+        List<AbstractImageManager> managers = List.of(manager1, manager2);
+
+        // when & then
+        assertThatThrownBy(() -> new ImageFileServiceImpl(
+                        managers, memberReader, chatRoomReader, profileImageWriter, chatImageWriter))
+                .isInstanceOf(IllegalStateException.class);
     }
 }

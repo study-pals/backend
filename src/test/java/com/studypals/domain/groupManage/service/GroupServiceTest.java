@@ -30,6 +30,7 @@ import com.studypals.domain.studyManage.entity.StudyType;
 import com.studypals.domain.studyManage.worker.StudyCategoryReader;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
 import com.studypals.global.exceptions.exception.GroupException;
+import com.studypals.global.file.ObjectStorage;
 
 /**
  * {@link GroupService} 에 대한 단위 테스트입니다.
@@ -87,6 +88,9 @@ public class GroupServiceTest {
 
     @Mock
     private GroupHashTagWorker groupHashTagWorker;
+
+    @Mock
+    private ObjectStorage objectStorage;
 
     @InjectMocks
     private GroupServiceImpl groupService;
@@ -278,11 +282,7 @@ public class GroupServiceTest {
     }
 
     private GroupMember createMember(Long id, String nick, String img, Group group, GroupRole role) {
-        Member member = Member.builder()
-                .id(id)
-                .nickname(nick)
-                .imageUrl("https://example.com/" + img)
-                .build();
+        Member member = Member.builder().id(id).nickname(nick).build();
 
         return GroupMember.builder()
                 .id(id + 1000L) // GroupMember 자체의 ID

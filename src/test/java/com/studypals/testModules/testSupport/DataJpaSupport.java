@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 
 import com.studypals.domain.memberManage.entity.Member;
+import com.studypals.domain.memberManage.entity.MemberProfileImage;
 import com.studypals.global.config.QueryDslTestConfig;
 
 @DataJpaTest
@@ -25,11 +26,23 @@ public abstract class DataJpaSupport extends TestEnvironment {
     }
 
     protected Member insertMember(String username, String nickname) {
-        return em.persist(Member.builder()
+        Member member = em.persist(Member.builder()
                 .username(username)
                 .password("password")
                 .nickname(nickname)
-                .imageUrl("imageUrl-url")
+                .build());
+
+        member.setProfileImage(insertMemberProfileImage(member));
+
+        return member;
+    }
+
+    protected MemberProfileImage insertMemberProfileImage(Member member) {
+        return em.persist(MemberProfileImage.builder()
+                .member(member)
+                .objectKey("profile/default" + member.getId() + ".jpg")
+                .originalFileName("default.jpg")
+                .mimeType("jpg")
                 .build());
     }
 }

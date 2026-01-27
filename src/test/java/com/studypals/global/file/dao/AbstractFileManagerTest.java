@@ -1,7 +1,6 @@
 package com.studypals.global.file.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
@@ -42,13 +41,10 @@ class AbstractFileManagerTest {
     @DisplayName("파일 삭제 성공")
     void delete_success() {
         // given
-        String url = "https://example.com/test/image.jpg";
         String objectKey = "test/image.jpg";
 
-        given(objectStorage.parsePath(url)).willReturn(objectKey);
-
         // when
-        fileRepository.delete(url);
+        fileRepository.delete(objectKey);
 
         // then
         then(objectStorage).should(times(1)).delete(objectKey);

@@ -249,11 +249,7 @@ class GroupGoalCalculatorTest {
     }
 
     private Member createMemberEntity(Long id, String nick, String img) {
-        return Member.builder()
-                .id(id)
-                .nickname(nick)
-                .imageUrl("https://example.com/" + img)
-                .build();
+        return Member.builder().id(id).nickname(nick).build();
     }
 
     private GroupMember createGroupMember(Member member, Group group, GroupRole role) {
