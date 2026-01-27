@@ -16,6 +16,7 @@ import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.memberManage.worker.MemberWriter;
 import com.studypals.global.exceptions.errorCode.AuthErrorCode;
 import com.studypals.global.exceptions.exception.AuthException;
+import com.studypals.global.file.ObjectStorage;
 
 /**
  * member service 의 구현 클래스입니다.
@@ -41,6 +42,8 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberMapper memberMapper;
 
+    private final ObjectStorage objectStorage;
+
     @Override
     @Transactional
     public Long createMember(CreateMemberReq dto) {
@@ -64,8 +67,7 @@ public class MemberServiceImpl implements MemberService {
     public Long updateProfile(Long userId, UpdateProfileReq dto) {
         Member member = memberReader.get(userId);
 
-        // TODO: 이미지를 직접 받도록 변경 후, update 로직을 수정해야 함.
-        member.updateProfile(dto.birthday(), dto.position(), dto.imageUrl());
+        member.updateProfile(dto.birthday(), dto.position());
 
         memberWriter.save(member);
 
@@ -76,7 +78,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional(readOnly = true)
     public MemberDetailsRes getProfile(Long userId) {
         Member member = memberReader.get(userId);
-        return memberMapper.toRes(member);
+        return memberMapper.toRes(member, objectStorage);
     }
 
     @Override

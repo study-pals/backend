@@ -48,9 +48,6 @@ public class Member {
     @Column(name = "position", nullable = true, length = 255)
     private String position;
 
-    @Column(name = "image_url", nullable = true, length = 255)
-    private String imageUrl;
-
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @Setter
     private MemberProfileImage profileImage;
@@ -74,9 +71,16 @@ public class Member {
         this.token = 0L;
     }
 
-    public void updateProfile(LocalDate birthday, String position, String imageUrl) {
+    public void updateProfile(LocalDate birthday, String position) {
         this.birthday = birthday;
         this.position = position;
-        this.imageUrl = imageUrl; // TODO : 수정 필요
+    }
+
+    /**
+     * 프로필 이미지의 Object Key를 반환합니다.
+     * 프로필 이미지가 없는 경우 null을 반환합니다.
+     */
+    public String getProfileImageObjectKey() {
+        return this.profileImage != null ? this.profileImage.getObjectKey() : null;
     }
 }

@@ -12,4 +12,4 @@ import jakarta.validation.constraints.PastOrPresent;
  * @author jack8
  * @since 2025-12-16
  */
-public record UpdateProfileReq(@PastOrPresent LocalDate birthday, String position, String imageUrl) {}
+public record UpdateProfileReq(@PastOrPresent LocalDate birthday, String position) {}

@@ -2,7 +2,6 @@ package com.studypals.domain.memberManage.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
@@ -56,7 +55,6 @@ public class MemberProfileImage extends ImageFile {
     private Member member;
 
     @LastModifiedDate
-    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     /**
