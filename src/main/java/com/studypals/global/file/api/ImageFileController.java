@@ -23,7 +23,7 @@ import com.studypals.global.responses.ResponseCode;
  * 클라이언트로부터 파일을 직접 받아 서버에서 스토리지로 업로드를 진행합니다.
  *
  * <pre>
- *     - POST /files/image/profile : 프로필 사진 업로드를 위한 URL 발급
+ *     - POST /files/image/profile : 프로필 사진 업로드
  *     - POST /files/image/chat : 채팅 사진 업로드
  * </pre>
  *

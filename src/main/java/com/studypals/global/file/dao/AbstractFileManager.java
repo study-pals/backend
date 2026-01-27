@@ -13,14 +13,6 @@ import com.studypals.global.file.ObjectStorage;
  * 이 클래스는 파일 관리에 필요한 공통 기능과 기본 계약을 정의합니다.
  * 특정 도메인의 파일을 관리하는 모든 구체적인 Manager 클래스(예: {@link AbstractImageManager})는
  * 이 클래스를 상속받아야 합니다.
- * <p>
- * <b>주요 역할:</b>
- * <ul>
- *     <li>{@link ObjectStorage}에 대한 의존성을 가지며, 이를 통해 실제 스토리지 작업을 수행합니다.</li>
- *     <li>파일 URL을 이용한 공통 삭제 로직({@link #delete})을 제공합니다.</li>
- *     <li>하위 클래스가 어떤 종류의 파일을 처리하는지 명시하도록 {@link #getFileType} 메서드를 강제합니다.
- *     이는 다양한 파일 타입의 Manager를 동적으로 선택하는 전략 패턴의 기반이 됩니다.</li>
- * </ul>
  *
  * @author sleepyhoon
  * @since 2026-01-14

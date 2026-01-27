@@ -58,7 +58,21 @@ public abstract class AbstractImageManager extends AbstractFileManager {
         return objectStorage.createPresignedGetUrl(objectKey, presignedUrlExpireTime);
     }
 
-    // 주석 필요
+    /**
+     * 실제 파일 업로드를 수행하는 공통 메서드입니다.
+     * <p>
+     * 하위 클래스의 {@code upload} 메서드에서 호출되며, 다음 과정을 수행합니다:
+     * <ol>
+     *     <li>{@link #createObjectKey}를 호출하여 저장 경로(Object Key)를 생성합니다.</li>
+     *     <li>부모 클래스의 {@link AbstractFileManager#upload}를 호출하여 실제 스토리지 업로드를 수행합니다.</li>
+     *     <li>업로드된 결과(Key, URL)를 DTO로 변환하여 반환합니다.</li>
+     * </ol>
+     *
+     * @param file     업로드할 멀티파트 파일
+     * @param userId   요청한 사용자 ID
+     * @param targetId 업로드 대상 식별자 (예: 사용자 ID, 채팅방 ID)
+     * @return 업로드된 파일의 키와 URL 정보를 담은 DTO
+     */
     protected final ImageUploadDto performUpload(MultipartFile file, Long userId, String targetId) {
         String objectKey = createObjectKey(userId, file.getOriginalFilename(), targetId);
         String imageUrl = super.upload(file, objectKey);
