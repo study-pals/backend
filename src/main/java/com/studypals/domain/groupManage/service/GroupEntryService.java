@@ -26,7 +26,16 @@ public interface GroupEntryService {
      * @param groupId 코드를 생성할 그룹 ID
      * @return 그룹 ID와 해당 그룹의 초대 코드
      */
-    GroupEntryCodeRes generateEntryCode(Long userId, Long groupId);
+    GroupEntryCodeRes getOrCreateEntryCode(Long userId, Long groupId);
+
+    /**
+     * 초대 코드 설정을 변경합니다.
+     * 설정 변경은 그룹장만 가능합니다. 현재는 expire date 변경만 가능합니다.
+     * @param userId 그룹장
+     * @param groupId 변경하고자 하는 그룹
+     * @param day 변경할 expire date, 현재 시점 기준 해당 일수 만큼 증가
+     */
+    void changeEntryCodeSetting(Long userId, Long groupId, Long day);
 
     /**
      * 초대 코드로 그룹 대표 정보를 조회합니다.
@@ -34,7 +43,7 @@ public interface GroupEntryService {
      *
      * @param entryCode 그룹 초대 코드
      * @return 그룹 대표 정보
-     * @throws com.studypals.global.exceptions.exception.GroupException
+     * @throws com.studypals.global.exceptions.exception.GroupException 일치하는 entrycode 가 없는 경우
      */
     GroupSummaryRes getGroupSummary(String entryCode);
 

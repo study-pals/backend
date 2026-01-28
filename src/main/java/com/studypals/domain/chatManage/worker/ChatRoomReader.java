@@ -131,4 +131,8 @@ public class ChatRoomReader {
     public List<Long> findJoinedMemberId(String chatRoomId) {
         return chatRoomMemberRepository.findMemberIdsByRoomId(chatRoomId);
     }
+
+    public boolean isMemberOfChatRoom(Long userId, String chatRoomId) {
+        return chatRoomMemberRepository.existsByChatRoomIdAndMemberId(chatRoomId, userId);
+    }
 }
