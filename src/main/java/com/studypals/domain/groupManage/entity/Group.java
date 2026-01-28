@@ -69,4 +69,12 @@ public class Group {
     public boolean isFullMember() {
         return totalMember >= maxMember;
     }
+
+    public void update(String name, String tag, Integer maxMember, boolean isOpen, boolean isApprovalRequired) {
+        this.name = name;
+        this.tag = tag;
+        this.maxMember = maxMember;
+        this.isOpen = isOpen;
+        this.isApprovalRequired = isApprovalRequired;
+    }
 }

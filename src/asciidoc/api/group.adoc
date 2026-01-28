@@ -376,3 +376,24 @@ include::{snippets}/group-ranking-controller-rest-docs-test/get-group-ranking_-d
 '''
 include::{snippets}/group-ranking-controller-rest-docs-test/get-group-ranking_-daily_-success/http-response.adoc[]
 include::{snippets}/group-ranking-controller-rest-docs-test/get-group-ranking_-daily_-success/response-fields.adoc[]
+
+=== 그룹 정보 수정 API
+'''
+
+*Description*
+
+'''
+
+그룹 정보를 수정합니다.
+
+*Request* +
+
+'''
+include::{snippets}/group-controller-rest-docs-test/update-group_success/http-request.adoc[]
+include::{snippets}/group-controller-rest-docs-test/update-group_success/request-fields.adoc[]
+
+*Response* +
+
+'''
+include::{snippets}/group-controller-rest-docs-test/update-group_success/http-response.adoc[]
+include::{snippets}/group-controller-rest-docs-test/update-group_success/response-fields.adoc[]
