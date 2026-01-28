@@ -350,6 +350,22 @@ include::{snippets}/group-category-controller-rest-docs-test/create_success/requ
 include::{snippets}/group-category-controller-rest-docs-test/create_success/http-response.adoc[]
 include::{snippets}/group-category-controller-rest-docs-test/create_success/response-headers.adoc[]
 
+=== 그룹장 권한 양도 API
+'''
+
+*Description* +
+
+'''
+
+그룹장이 그룹 내 다른 멤버의 role을 LEADER로 승격시키고, 자신은 MEMBER로 강등하여 그룹장 권한을 양도합니다.
+
+*Request* +
+include::{snippets}/group-member-controller-rest-docs-test/promote-leader_success/http-request.adoc[]
+include::{snippets}/group-member-controller-rest-docs-test/promote-leader_success/path-parameters.adoc[]
+
+*Response* +
+include::{snippets}/group-member-controller-rest-docs-test/promote-leader_success/http-response.adoc[]
+include::{snippets}/group-member-controller-rest-docs-test/promote-leader_success/response-fields.adoc[]
 === 그룹 랭킹 조회 API
 '''
 
