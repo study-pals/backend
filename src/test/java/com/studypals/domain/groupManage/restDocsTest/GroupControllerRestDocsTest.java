@@ -256,23 +256,16 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
     void updateGroup_success() throws Exception {
         // given
         Long groupId = 1L;
-        UpdateGroupReq req = new UpdateGroupReq(
-                "new group name",
-                "new group tag",
-                20,
-                true,
-                true,
-                "new_image.example.com"
-        );
+        UpdateGroupReq req =
+                new UpdateGroupReq("new group name", "new group tag", 20, true, true, "new_image.example.com");
 
         given(groupService.updateGroup(any(), eq(groupId), any())).willReturn(groupId);
         Response<Long> expected = CommonResponse.success(ResponseCode.GROUP_UPDATE, groupId);
 
         // when
-        ResultActions result = mockMvc.perform(
-                put("/groups/{groupId}", groupId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)));
+        ResultActions result = mockMvc.perform(put("/groups/{groupId}", groupId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)));
 
         // then
         result.andExpect(status().isOk())
@@ -283,17 +276,20 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
                         requestFields(
                                 fieldWithPath("name").description("변경할 그룹명").attributes(constraints("not null")),
                                 fieldWithPath("tag").description("변경할 그룹 태그").attributes(constraints("not null")),
-                                fieldWithPath("maxMember").description("변경할 최대 인원수").attributes(constraints("10 ~ 100")),
+                                fieldWithPath("maxMember")
+                                        .description("변경할 최대 인원수")
+                                        .attributes(constraints("10 ~ 100")),
                                 fieldWithPath("isOpen").description("변경할 공개 여부").attributes(constraints("nullable")),
-                                fieldWithPath("isApprovalRequired").description("변경할 승인 필요 여부").attributes(constraints("nullable")),
-                                fieldWithPath("imageUrl").description("변경할 그룹 이미지 URL").attributes(constraints("nullable"))
-                        ),
+                                fieldWithPath("isApprovalRequired")
+                                        .description("변경할 승인 필요 여부")
+                                        .attributes(constraints("nullable")),
+                                fieldWithPath("imageUrl")
+                                        .description("변경할 그룹 이미지 URL")
+                                        .attributes(constraints("nullable"))),
                         responseFields(
                                 fieldWithPath("code").description("응답 코드"),
                                 fieldWithPath("status").description("응답 상태"),
                                 fieldWithPath("message").description("응답 메시지"),
-                                fieldWithPath("data").description("수정된 그룹 ID")
-                        )
-                ));
+                                fieldWithPath("data").description("수정된 그룹 ID"))));
     }
 }

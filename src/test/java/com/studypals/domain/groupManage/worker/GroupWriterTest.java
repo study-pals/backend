@@ -6,17 +6,17 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.List;
 
-import com.studypals.domain.groupManage.dao.GroupMemberRepository;
-import com.studypals.domain.groupManage.dto.UpdateGroupReq;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.dto.UpdateGroupReq;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
@@ -117,7 +117,8 @@ public class GroupWriterTest {
                 .build();
         UpdateGroupReq req = new UpdateGroupReq("new group name", "new group tag", 20, true, true, "image.example.com");
 
-        given(groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId)).willReturn(true);
+        given(groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId))
+                .willReturn(true);
 
         // when
         groupWriter.update(userId, groupId, mockGroup, req);

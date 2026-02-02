@@ -1,9 +1,11 @@
 package com.studypals.domain.groupManage.service;
 
-import com.studypals.domain.groupManage.worker.GroupMemberWriter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+
+import com.studypals.domain.groupManage.worker.GroupMemberWriter;
 
 /**
  * group member service 의 구현 클래스입니다.
@@ -27,7 +29,7 @@ public class GroupMemberServiceImpl implements GroupMemberService {
 
     @Override
     @Transactional
-    public void promoteLeader(Long groupId, Long userId, Long nextLeaderId){
+    public void promoteLeader(Long groupId, Long userId, Long nextLeaderId) {
         groupMemberWriter.promoteLeader(groupId, userId, nextLeaderId);
     }
 }

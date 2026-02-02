@@ -1,18 +1,5 @@
 package com.studypals.domain.groupManage.restDocsTest;
 
-import com.studypals.domain.groupManage.api.GroupMemberController;
-import com.studypals.domain.groupManage.service.GroupMemberService;
-import com.studypals.global.responses.CommonResponse;
-import com.studypals.global.responses.Response;
-import com.studypals.global.responses.ResponseCode;
-import com.studypals.testModules.testSupport.RestDocsSupport;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.ResultActions;
-
 import static com.studypals.testModules.testUtils.JsonFieldResultMatcher.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,6 +11,19 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.ResultActions;
+
+import com.studypals.domain.groupManage.api.GroupMemberController;
+import com.studypals.domain.groupManage.service.GroupMemberService;
+import com.studypals.global.responses.CommonResponse;
+import com.studypals.global.responses.Response;
+import com.studypals.global.responses.ResponseCode;
+import com.studypals.testModules.testSupport.RestDocsSupport;
 
 /**
  * {@link GroupMemberController} 에 대한 rest docs web mvc test 입니다. 문서를 생성합니다.
@@ -49,8 +49,7 @@ public class GroupMemberControllerRestDocsTest extends RestDocsSupport {
         Response<Long> expected = CommonResponse.success(ResponseCode.GROUP_LEADER, groupId);
 
         // when
-        ResultActions result = mockMvc.perform(
-                put("/groups/{groupId}/promote/{nextLeaderId}", groupId, nextLeaderId));
+        ResultActions result = mockMvc.perform(put("/groups/{groupId}/promote/{nextLeaderId}", groupId, nextLeaderId));
 
         // then
         result.andExpect(status().isOk())
@@ -60,14 +59,11 @@ public class GroupMemberControllerRestDocsTest extends RestDocsSupport {
                         httpResponse(),
                         pathParameters(
                                 parameterWithName("groupId").description("그룹 ID"),
-                                parameterWithName("nextLeaderId").description("차기 그룹장 ID")
-                        ),
+                                parameterWithName("nextLeaderId").description("차기 그룹장 ID")),
                         responseFields(
                                 fieldWithPath("code").description("응답 코드"),
                                 fieldWithPath("status").description("응답 상태"),
                                 fieldWithPath("message").description("응답 메시지"),
-                                fieldWithPath("data").description("그룹 ID")
-                        )
-                ));
+                                fieldWithPath("data").description("그룹 ID"))));
     }
 }

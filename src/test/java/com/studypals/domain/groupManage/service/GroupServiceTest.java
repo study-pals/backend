@@ -8,7 +8,6 @@ import static org.mockito.BDDMockito.*;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.worker.ChatRoomWriter;
+import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
@@ -288,7 +288,8 @@ public class GroupServiceTest {
                 .build();
         UpdateGroupReq req = new UpdateGroupReq("new group name", "new group tag", 20, true, true, "image.example.com");
 
-        given(groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId)).willReturn(true);
+        given(groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId))
+                .willReturn(true);
 
         // when
         groupWriterInj.update(userId, groupId, mockGroup, req);
@@ -318,7 +319,8 @@ public class GroupServiceTest {
 
         GroupErrorCode errorCode = GroupErrorCode.GROUP_UPDATE_FAIL;
 
-        given(groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId)).willReturn(false);
+        given(groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId))
+                .willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> groupWriterInj.update(userId, groupId, mockGroup, req))
