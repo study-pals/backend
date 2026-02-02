@@ -29,6 +29,17 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
     @Query(value = "SELECT * FROM group_member WHERE member_id = :userId AND group_id = :groupId", nativeQuery = true)
     Optional<GroupMember> findByMemberIdAndGroupId(Long userId, Long groupId);
 
+    @Query(
+            value =
+                    """
+        SELECT *
+        FROM group_member
+        WHERE member_id = :userId AND group_id = :groupId
+        FOR UPDATE
+        """,
+            nativeQuery = true)
+    Optional<GroupMember> findByMemberIdAndGroupIdForUpdate(Long userId, Long groupId);
+
     List<GroupMember> findAllByMemberId(Long memberId);
 
     @Query(
@@ -44,8 +55,16 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
 
     boolean existsByMemberIdAndGroupId(Long memberId, Long groupId);
 
+    @Query("""
+    SELECT gm
+    FROM GroupMember gm
+    JOIN FETCH gm.member
+    WHERE gm.group.id = :groupId
+    """)
+    List<GroupMember> findGroupMembers(@Param("groupId") Long groupId);
+
     @Query(
-        """
+            """
         SELECT EXISTS (
             SELECT 1
             FROM GroupMember gm

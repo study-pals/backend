@@ -16,7 +16,7 @@ public interface GroupMemberService {
     /**
      * 그룹장이 다른 멤버에게 권한을 넘겨줍니다.
      * @param groupId 소속 그룹
-     * @param userId 그룹장을 넘겨줄 사용자
+     * @param userId 현재 그룹장
      * @param nextLeaderId 그룹장을 받을 멤버
      * @throws com.studypals.global.exceptions.exception.GroupException
      */
