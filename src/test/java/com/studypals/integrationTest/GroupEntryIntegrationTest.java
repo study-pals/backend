@@ -68,9 +68,11 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
         // given
         CreateUserVar user = createUser();
         CreateGroupVar group = createGroup(user.getUserId(), "group", "tag");
-        GroupEntryCode entryCode = new GroupEntryCode("A1B2C3", group.groupId());
+        GroupEntryCode entryCode =
+                GroupEntryCode.builder().code("A1B2C3").groupId(group.groupId()).build();
 
         entryCodeRedisRepository.save(entryCode);
+        entryCodeRedisRepository.saveIdx(entryCode);
 
         // when
         ResultActions result = mockMvc.perform(get("/groups/summary")
@@ -92,10 +94,12 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
         CreateUserVar initUser = createUser();
         CreateGroupVar group = createGroup(initUser.getUserId(), "group", "tag", false);
         CreateUserVar user = createUser("member_username", "member");
-        GroupEntryCode groupEntryCode = new GroupEntryCode("1A2B3C", group.groupId());
+        GroupEntryCode groupEntryCode =
+                GroupEntryCode.builder().code("A1B2C3").groupId(group.groupId()).build();
         GroupEntryReq req = new GroupEntryReq(group.groupId(), groupEntryCode.getCode());
 
         entryCodeRedisRepository.save(groupEntryCode);
+        entryCodeRedisRepository.saveIdx(groupEntryCode);
 
         // when
         ResultActions result = mockMvc.perform(post("/groups/join")
@@ -114,10 +118,12 @@ public class GroupEntryIntegrationTest extends AbstractGroupIntegrationTest {
         // given
         CreateUserVar user = createUser();
         CreateGroupVar group = createGroup(user.getUserId(), "group", "tag");
-        GroupEntryCode groupEntryCode = new GroupEntryCode("1A2B3C", group.groupId());
+        GroupEntryCode groupEntryCode =
+                GroupEntryCode.builder().code("A1B2C3").groupId(group.groupId()).build();
         GroupEntryReq req = new GroupEntryReq(group.groupId(), groupEntryCode.getCode());
 
         entryCodeRedisRepository.save(groupEntryCode);
+        entryCodeRedisRepository.saveIdx(groupEntryCode);
 
         // when
         ResultActions result = mockMvc.perform(post("/groups/entry-requests")

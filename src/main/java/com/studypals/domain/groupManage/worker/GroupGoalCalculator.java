@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dto.GroupCategoryGoalDto;
-import com.studypals.domain.groupManage.dto.GroupMemberProfileDto;
 import com.studypals.domain.groupManage.dto.GroupTotalGoalDto;
+import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.studyManage.dao.StudyCategoryRepository;
 import com.studypals.domain.studyManage.dao.StudyTimeRepository;
 import com.studypals.domain.studyManage.entity.StudyCategory;
@@ -38,10 +38,11 @@ public class GroupGoalCalculator {
     private final StudyCategoryRepository studyCategoryRepository;
     private final TimeUtils timeUtils;
 
-    public GroupTotalGoalDto calculateGroupGoals(Long groupId, List<GroupMemberProfileDto> profiles) {
+    public GroupTotalGoalDto calculateGroupGoals(Long groupId, List<GroupMember> profiles) {
 
         // 필요한 모든 ID 및 날짜 수집
-        List<Long> memberIds = profiles.stream().map(GroupMemberProfileDto::id).toList();
+        List<Long> memberIds =
+                profiles.stream().map(gm -> gm.getMember().getId()).toList();
 
         LocalDate today = timeUtils.getToday();
 
