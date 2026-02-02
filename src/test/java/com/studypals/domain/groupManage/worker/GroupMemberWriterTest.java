@@ -159,7 +159,7 @@ public class GroupMemberWriterTest {
                 .role(GroupRole.MEMBER)
                 .build();
 
-        given(groupMemberRepository.findByMemberIdAndGroupId(m1.getId(), group.getId()))
+        given(groupMemberRepository.findByMemberIdAndGroupIdForUpdate(m1.getId(), group.getId()))
                 .willReturn(Optional.of(gm1));
         given(groupMemberRepository.findByMemberIdAndGroupId(m2.getId(), group.getId()))
                 .willReturn(Optional.of(gm2));
