@@ -73,7 +73,7 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * @param targetId 업로드 대상 식별자 (예: 사용자 ID, 채팅방 ID)
      * @return 업로드된 파일의 키와 URL 정보를 담은 DTO
      */
-    protected final ImageUploadDto performUpload(MultipartFile file, Long userId, String targetId) {
+    public final ImageUploadDto uploadImage(MultipartFile file, Long userId, String targetId) {
         String objectKey = createObjectKey(userId, file.getOriginalFilename(), targetId);
         String imageUrl = super.upload(file, objectKey);
 
@@ -99,10 +99,13 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * @return 생성된 고유 객체 키
      */
     public final String createObjectKey(Long userId, String fileName, String targetId) {
-        validateFileName(fileName);
+        // 1. 검증과 동시에 정규화된 확장자를 받아옵니다.
+        String normalizedExtension = validateAndGetExtension(fileName);
+
         validateTargetId(userId, targetId);
-        String extension = FileUtils.extractExtension(fileName);
-        return generateObjectKeyDetail(targetId, extension);
+
+        // 2. 하위 클래스에 넘겨줍니다.
+        return generateObjectKeyDetail(targetId, normalizedExtension);
     }
 
     /**
@@ -111,15 +114,20 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * TODO: 강도높은 유효성 검증을 위해 Tika, ImageIO을 추가로 도입할 수 있습니다.
      * @param fileName 검증할 파일 이름
      * @throws FileException 유효하지 않은 파일 이름 또는 지원하지 않는 확장자인 경우
+     * @return 유효한 파일 확장자값
      */
-    private void validateFileName(String fileName) {
+    private String validateAndGetExtension(String fileName) {
         if (fileName == null || !fileName.contains(".")) {
             throw new FileException(FileErrorCode.INVALID_FILE_NAME);
         }
-        String extension = FileUtils.extractExtension(fileName);
+
+        // 확장자 추출 및 소문자 변환 (NPE 방지 및 대소문자 문제 해결)
+        String extension = FileUtils.extractExtension(fileName).toLowerCase();
+
         if (!acceptableExtensions.contains(extension)) {
             throw new FileException(FileErrorCode.UNSUPPORTED_FILE_IMAGE_EXTENSION);
         }
+        return extension;
     }
 
     /**

@@ -55,7 +55,7 @@ public abstract class AbstractFileManager {
      * @param objectKey 스토리지에 저장될 키
      * @return 업로드된 파일의 접근 URL
      */
-    public String upload(MultipartFile file, String objectKey) {
+    protected String upload(MultipartFile file, String objectKey) {
         return objectStorage.upload(file, objectKey);
     }
 }

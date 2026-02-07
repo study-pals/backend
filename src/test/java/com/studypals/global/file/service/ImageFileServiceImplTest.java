@@ -1,7 +1,6 @@
 package com.studypals.global.file.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -9,13 +8,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import java.util.List;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -31,16 +29,20 @@ import com.studypals.domain.memberManage.entity.MemberProfileImage;
 import com.studypals.domain.memberManage.worker.MemberProfileImageManager;
 import com.studypals.domain.memberManage.worker.MemberProfileImageWriter;
 import com.studypals.domain.memberManage.worker.MemberReader;
-import com.studypals.global.file.dao.AbstractImageManager;
 import com.studypals.global.file.dto.ImageUploadDto;
 import com.studypals.global.file.dto.ImageUploadRes;
 import com.studypals.global.file.entity.ImageStatus;
 import com.studypals.global.file.entity.ImageType;
+import com.studypals.global.file.worker.ImageManagerFactory;
 
 @ExtendWith(MockitoExtension.class)
 class ImageFileServiceImplTest {
 
-    private ImageFileService imageFileService;
+    @InjectMocks
+    private ImageFileServiceImpl imageFileService;
+
+    @Mock
+    private ImageManagerFactory imageStrategyFactory;
 
     @Mock
     private MemberProfileImageManager profileImageManager;
@@ -66,15 +68,6 @@ class ImageFileServiceImplTest {
     @BeforeEach
     void setUp() {
         TransactionSynchronizationManager.initSynchronization();
-        given(profileImageManager.getFileType()).willReturn(ImageType.PROFILE_IMAGE);
-        given(chatImageManager.getFileType()).willReturn(ImageType.CHAT_IMAGE);
-
-        imageFileService = new ImageFileServiceImpl(
-                List.of(profileImageManager, chatImageManager),
-                memberReader,
-                chatRoomReader,
-                profileImageWriter,
-                chatImageWriter);
     }
 
     @AfterEach
@@ -104,8 +97,13 @@ class ImageFileServiceImplTest {
 
         given(multipartFile.getOriginalFilename()).willReturn(originalFilename);
 
+        // Factory가 적절한 Manager를 반환하도록 설정
+        given(imageStrategyFactory.getManager(ImageType.PROFILE_IMAGE)).willReturn(profileImageManager);
+
         ImageUploadDto uploadDto = new ImageUploadDto(objectKey, imageUrl);
-        given(profileImageManager.upload(multipartFile, userId)).willReturn(uploadDto);
+        // uploadImage 메서드 호출 검증 (targetId는 userId와 동일)
+        given(profileImageManager.uploadImage(multipartFile, userId, String.valueOf(userId)))
+                .willReturn(uploadDto);
 
         given(memberReader.get(userId)).willReturn(member);
 
@@ -119,7 +117,8 @@ class ImageFileServiceImplTest {
         assertThat(res.imageId()).isEqualTo(expectedImageId);
         assertThat(res.imageUrl()).isEqualTo(imageUrl);
 
-        verify(profileImageManager).upload(multipartFile, userId);
+        verify(imageStrategyFactory).getManager(ImageType.PROFILE_IMAGE);
+        verify(profileImageManager).uploadImage(multipartFile, userId, String.valueOf(userId));
         verify(profileImageWriter).save(eq(member), eq(objectKey), eq(originalFilename));
         verify(profileImageManager, never()).delete(anyString());
     }
@@ -136,8 +135,11 @@ class ImageFileServiceImplTest {
 
         given(multipartFile.getOriginalFilename()).willReturn(originalFilename);
 
+        given(imageStrategyFactory.getManager(ImageType.PROFILE_IMAGE)).willReturn(profileImageManager);
+
         ImageUploadDto uploadDto = new ImageUploadDto(newObjectKey, newImageUrl);
-        given(profileImageManager.upload(multipartFile, userId)).willReturn(uploadDto);
+        given(profileImageManager.uploadImage(multipartFile, userId, String.valueOf(userId)))
+                .willReturn(uploadDto);
 
         Member member = mock(Member.class);
         MemberProfileImage existingProfile = mock(MemberProfileImage.class);
@@ -171,8 +173,10 @@ class ImageFileServiceImplTest {
 
         given(multipartFile.getOriginalFilename()).willReturn(originalFilename);
 
+        given(imageStrategyFactory.getManager(ImageType.CHAT_IMAGE)).willReturn(chatImageManager);
+
         ImageUploadDto uploadDto = new ImageUploadDto(objectKey, imageUrl);
-        given(chatImageManager.upload(multipartFile, userId, chatRoomId)).willReturn(uploadDto);
+        given(chatImageManager.uploadImage(multipartFile, userId, chatRoomId)).willReturn(uploadDto);
 
         ChatRoom chatRoom = mock(ChatRoom.class);
         given(chatRoomReader.getById(chatRoomId)).willReturn(chatRoom);
@@ -188,25 +192,8 @@ class ImageFileServiceImplTest {
         assertThat(res.imageId()).isEqualTo(savedImageId);
         assertThat(res.imageUrl()).isEqualTo(imageUrl);
 
-        verify(chatImageManager).upload(multipartFile, userId, chatRoomId);
+        verify(imageStrategyFactory).getManager(ImageType.CHAT_IMAGE);
+        verify(chatImageManager).uploadImage(multipartFile, userId, chatRoomId);
         verify(chatImageWriter).save(eq(chatRoom), eq(objectKey), eq(originalFilename));
-    }
-
-    @Test
-    @DisplayName("생성자 - 중복 FileType 등록 시 예외 발생")
-    void constructor_DuplicateFileType() {
-        // given
-        AbstractImageManager manager1 = mock(AbstractImageManager.class);
-        AbstractImageManager manager2 = mock(AbstractImageManager.class);
-
-        given(manager1.getFileType()).willReturn(ImageType.PROFILE_IMAGE);
-        given(manager2.getFileType()).willReturn(ImageType.PROFILE_IMAGE); // 중복 타입
-
-        List<AbstractImageManager> managers = List.of(manager1, manager2);
-
-        // when & then
-        assertThatThrownBy(() -> new ImageFileServiceImpl(
-                        managers, memberReader, chatRoomReader, profileImageWriter, chatImageWriter))
-                .isInstanceOf(IllegalStateException.class);
     }
 }
