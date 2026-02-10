@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.studypals.domain.chatManage.dto.CreateChatRoomDto;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.worker.ChatRoomWriter;
-import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dao.groupMemberRepository.GroupMemberRepository;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
