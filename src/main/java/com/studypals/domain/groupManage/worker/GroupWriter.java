@@ -2,9 +2,9 @@ package com.studypals.domain.groupManage.worker;
 
 import lombok.RequiredArgsConstructor;
 
-import com.studypals.domain.groupManage.dao.GroupMemberRepository;
-import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
+import com.studypals.domain.groupManage.dao.groupMemberRepository.GroupMemberRepository;
+import com.studypals.domain.groupManage.dao.groupRepository.GroupRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.domain.groupManage.dto.UpdateGroupReq;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;

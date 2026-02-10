@@ -11,7 +11,7 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import lombok.Builder;
 
-import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
+import com.studypals.domain.groupManage.dao.groupEntryRepository.GroupEntryCodeRedisRepository;
 import com.studypals.testModules.testSupport.IntegrationSupport;
 
 /**

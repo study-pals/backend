@@ -1,4 +1,4 @@
-package com.studypals.domain.groupManage.dao;
+package com.studypals.domain.groupManage.dao.groupMemberRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +29,7 @@ import com.studypals.domain.groupManage.entity.GroupMember;
 @Repository
 public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>, GroupMemberCustomRepository {
 
-    @Query(value = "SELECT * FROM group_member WHERE member_id = :userId AND group_id = :groupId", nativeQuery = true)
+    @Query("SELECT gm FROM GroupMember gm WHERE gm.member.id = :userId AND gm.group.id = :groupId")
     Optional<GroupMember> findByMemberIdAndGroupId(Long userId, Long groupId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

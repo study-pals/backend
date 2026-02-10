@@ -19,7 +19,7 @@ import com.studypals.global.file.entity.ImageType;
  * {@link AbstractImageManager}
  *
  * @author sleepyhoon
- * @See AbstractImageManager
+ * @see AbstractImageManager
  * @since 2026-01-13
  */
 @Component

@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
+import com.studypals.domain.groupManage.dao.groupEntryRepository.GroupEntryCodeRedisRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
 import com.studypals.global.responses.ResponseCode;
 

@@ -156,7 +156,7 @@ public class StudySessionServiceImpl implements StudySessionService {
     /**
      * 사용자의 공부 상태를 반환합니다.
      * 공부하고 있다면 해당 공부에 대한 정보를 반환하고, 아니면 단순 false 값만 담아 반환합니다.
-     * @param userId
+     * @param userId 검색할 사용자 아이디
      * @return StudyStatusRes
      */
     @Override

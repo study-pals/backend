@@ -7,8 +7,9 @@ import com.studypals.domain.studyManage.dto.GroupCategoryDto;
 
 public record GetGroupsRes(
         Long groupId,
-        String groupName,
-        String groupTag,
+        String name,
+        String tag,
+        List<String> hashTags,
         int memberCount,
         String chatRoomId,
         boolean isOpen,
@@ -17,11 +18,15 @@ public record GetGroupsRes(
         List<GroupMemberProfileImageDto> profiles,
         List<Long> categoryIds) {
     public static GetGroupsRes of(
-            GroupSummaryDto dto, List<GroupMemberProfileMappingDto> rawProfiles, List<GroupCategoryDto> categoryIds) {
+            GroupSummaryDto dto,
+            List<String> hashTags,
+            List<GroupMemberProfileMappingDto> rawProfiles,
+            List<GroupCategoryDto> categoryIds) {
         return new GetGroupsRes(
                 dto.id(),
                 dto.name(),
                 dto.tag(),
+                hashTags,
                 dto.memberCount(),
                 dto.chatRoomId(),
                 dto.open(),

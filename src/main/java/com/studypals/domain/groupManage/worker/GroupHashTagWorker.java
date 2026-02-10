@@ -1,6 +1,7 @@
 package com.studypals.domain.groupManage.worker;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -85,6 +86,33 @@ public class GroupHashTagWorker {
         groupHashTagRepository.saveAll(groupHashTags);
     }
 
+    /**
+     * groupId 에 대해, 처음 설정한 해시 태그 원본을 반환합니다. 해당 데이터는 정규화 되지 않은 데이터를 반환합니다.
+     * @param groupId 검색할 그룹의 아이디
+     * @return 초기 입력한 hash tag 원본 리스트
+     */
+    public List<String> getHashTagsByGroup(Long groupId) {
+        List<GroupHashTag> groupHashTags = groupHashTagRepository.findAllByGroupId(groupId);
+        return groupHashTags.stream().map(GroupHashTag::getDisplayTag).toList();
+    }
+
+    /**
+     * 여러 groupId에 대한 해시태그 목록을 조회합니다.
+     * @param groupIds 조회할 그룹 ID 목록
+     * @return groupId -> displayTag list 매핑
+     */
+    public Map<Long, List<String>> getHashTagsByGroups(List<Long> groupIds) {
+        if (groupIds == null || groupIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<GroupHashTag> groupHashTags = groupHashTagRepository.findAllByGroupIdIn(groupIds);
+
+        return groupHashTags.stream()
+                .collect(Collectors.groupingBy(
+                        gh -> gh.getGroup().getId(),
+                        Collectors.mapping(GroupHashTag::getDisplayTag, Collectors.toList())));
+    }
     /**
      * 각 태그에 대한 정규화 진행. 띄어쓰기는 _ 로 대체, 중복된 띄어쓰기 제거/특수문제 제거, trim 제거, lowercase
      * @param tags 정규화 대상 리스트

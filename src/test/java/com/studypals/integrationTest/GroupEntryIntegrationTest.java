@@ -23,7 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.studypals.domain.groupManage.dao.GroupEntryCodeRedisRepository;
+import com.studypals.domain.groupManage.dao.groupEntryRepository.GroupEntryCodeRedisRepository;
 import com.studypals.domain.groupManage.dto.GroupEntryReq;
 import com.studypals.domain.groupManage.entity.GroupEntryCode;
 import com.studypals.global.responses.ResponseCode;

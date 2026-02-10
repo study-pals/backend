@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
+import com.studypals.domain.groupManage.dao.groupEntryRepository.GroupEntryRequestRepository;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;
 import com.studypals.domain.memberManage.entity.Member;
@@ -44,7 +45,7 @@ public class GroupEntryRequestRepositoryTest extends DataJpaSupport {
         Slice<GroupEntryRequest> expected = new SliceImpl<>(List.of(request1, request2));
 
         // when
-        Cursor cursor = new Cursor(0, 10, DateSortType.NEW);
+        Cursor cursor = new Cursor(0L, "2025-03-02", 10, DateSortType.NEW);
         Slice<GroupEntryRequest> actual = entryRequestRepository.findAllByGroupIdWithPagination(group.getId(), cursor);
 
         // then

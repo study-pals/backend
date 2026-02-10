@@ -1,8 +1,8 @@
 package com.studypals.global.resolver;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+
+import org.springframework.stereotype.Component;
 
 import com.studypals.global.request.SortType;
 
@@ -13,20 +13,25 @@ import com.studypals.global.request.SortType;
  * @author s0o0bn
  * @since 2025-06-05
  */
+@Component
 public class SortTypeResolver {
-    private final List<Class<? extends SortType>> sortTypeClasses;
 
-    public SortTypeResolver(List<Class<? extends SortType>> sortTypeClasses) {
-        this.sortTypeClasses = sortTypeClasses;
+    public SortType resolve(String sort, Class<? extends SortType> sortEnumClass) {
+        if (sort == null || sort.isBlank()) {
+            throw new IllegalArgumentException("sort is required");
+        }
+
+        return resolveEnum(sort, sortEnumClass);
     }
 
-    public Optional<SortType> resolve(String sort) {
-        if (sort == null) return Optional.empty();
+    private SortType resolveEnum(String value, Class<? extends SortType> enumClass) {
+        for (SortType type : enumClass.getEnumConstants()) {
+            if (type.name().equalsIgnoreCase(value)) {
+                return type;
+            }
+        }
 
-        return sortTypeClasses.stream()
-                .flatMap(clazz -> Arrays.stream(clazz.getEnumConstants()))
-                .map(capture -> (SortType) capture)
-                .filter(type -> type.name().equalsIgnoreCase(sort))
-                .findFirst();
+        throw new IllegalArgumentException("Unsupported sort type: " + value + " (allowed: "
+                + Arrays.toString(enumClass.getEnumConstants()) + ")");
     }
 }

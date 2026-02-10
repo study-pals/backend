@@ -1,4 +1,4 @@
-package com.studypals.domain.groupManage.dao;
+package com.studypals.domain.groupManage.dao.groupEntryRepository;
 
 import java.time.LocalDate;
 

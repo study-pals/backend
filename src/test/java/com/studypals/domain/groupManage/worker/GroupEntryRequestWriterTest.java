@@ -10,7 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.studypals.domain.groupManage.dao.GroupEntryRequestRepository;
+import com.studypals.domain.groupManage.dao.groupEntryRepository.GroupEntryRequestRepository;
 import com.studypals.domain.groupManage.dto.mappers.GroupEntryRequestMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupEntryRequest;

@@ -10,7 +10,7 @@ package com.studypals.global.request;
  * @author s0o0bn
  * @since 2025-06-05
  */
-public record Cursor(long cursor, int size, SortType sort) {
+public record Cursor(Long cursor, String value, int size, SortType sort) {
 
     public boolean isFirstPage() {
         return cursor == 0;
