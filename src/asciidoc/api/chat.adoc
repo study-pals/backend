@@ -95,12 +95,12 @@ Authorization:Bearer {ACCESS_TOKEN}
 ----
 SUBSCRIBE
 id:sub-0
-destination:/sub/chat/room/{chatRoomId}
+destination:/exchange/amq.topic/chat.room.{chatRoomId}
 
 ^@
 ----
 
-서버는 이후 `/sub/chat/room/{chatRoomId}` 로 전달되는 MESSAGE 프레임을
+서버는 이후 `/exchange/amq.topic/chat.room.{chatRoomId}` 로 전달되는 MESSAGE 프레임을
 해당 세션으로 push 해야합니다.
 
 '''
@@ -135,7 +135,7 @@ content-type:application/json
 ----
 MESSAGE
 subscription:sub-0
-destination:/sub/chat/room/{chatRoomId}
+destination:/exchange/amq.topic/chat.room.{chatRoomId}
 message-id:msg-15
 
 {
@@ -178,6 +178,9 @@ content-type:application/json
 '''
 ==== - SUBSCRIBE frame (유저 개인 큐 구독)
 
+[WARNING]
+현재 미구현 상태입니다.
+
 /user/queue 는 특정 유저에게만 전달되는 개인용 메시지를 받기 위한 채널입니다.
 클라이언트는 다음과 같이 단순히 구독만 하면 됩니다.
 
@@ -200,6 +203,9 @@ destination:/user/queue/notifications
 
 '''
 ==== - USER QUEUE MESSAGE frame (개인 메시지)
+
+[WARNING]
+현재 미구현 상태입니다.
 
 서버 → 클라이언트
 
