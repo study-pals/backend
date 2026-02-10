@@ -3,7 +3,10 @@ package com.studypals.domain.groupManage.dao;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.LockModeType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -29,15 +32,8 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
     @Query(value = "SELECT * FROM group_member WHERE member_id = :userId AND group_id = :groupId", nativeQuery = true)
     Optional<GroupMember> findByMemberIdAndGroupId(Long userId, Long groupId);
 
-    @Query(
-            value =
-                    """
-        SELECT *
-        FROM group_member
-        WHERE member_id = :userId AND group_id = :groupId
-        FOR UPDATE
-        """,
-            nativeQuery = true)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT gm FROM GroupMember gm WHERE gm.member.id = :userId AND gm.group.id = :groupId")
     Optional<GroupMember> findByMemberIdAndGroupIdForUpdate(Long userId, Long groupId);
 
     List<GroupMember> findAllByMemberId(Long memberId);

@@ -101,7 +101,7 @@ public class GroupMemberWriter {
                 .findByMemberIdAndGroupId(nextLeaderId, groupId)
                 .orElseThrow(() -> {
                     String message = String.format(
-                            "[GroupMemberWriter#promoteReader] member %d not found in group %d", nextLeaderId, groupId);
+                            "[GroupMemberWriter#promoteLeader] member %d not found in group %d", nextLeaderId, groupId);
                     return new GroupException(GroupErrorCode.GROUP_MEMBER_NOT_FOUND, message);
                 });
 
