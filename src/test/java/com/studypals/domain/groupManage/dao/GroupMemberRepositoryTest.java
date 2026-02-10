@@ -132,7 +132,7 @@ public class GroupMemberRepositoryTest extends DataJpaSupport {
     }
 
     @Test
-    void checkLeaderByGroupIdAndMemberId_success(){
+    void checkLeaderByGroupIdAndMemberId_success() {
         // given
         Member m1 = insertMember("user1", "리더");
         Member m2 = insertMember("user2", "멤버");

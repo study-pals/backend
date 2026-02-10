@@ -1,12 +1,12 @@
 package com.studypals.domain.groupManage.worker;
 
-import com.studypals.domain.groupManage.dao.GroupMemberRepository;
-import com.studypals.domain.groupManage.dto.UpdateGroupReq;
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.groupManage.dao.GroupMemberRepository;
 import com.studypals.domain.groupManage.dao.GroupRepository;
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.dto.UpdateGroupReq;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.global.annotations.Worker;
@@ -49,7 +49,7 @@ public class GroupWriter {
     }
 
     public Group update(Long userId, Long groupId, Group group, UpdateGroupReq dto) {
-        if(!groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId)){
+        if (!groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId)) {
             throw new GroupException(GroupErrorCode.GROUP_UPDATE_FAIL, "not leader");
         }
 

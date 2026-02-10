@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -138,5 +140,35 @@ public class GroupMemberWriterTest {
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
+    }
+
+    @Test
+    void promoteLeader_success() {
+        // given
+        Member m1 = Member.builder().id(1L).build();
+        Member m2 = Member.builder().id(2L).build();
+        Group group = Group.builder().id(1L).build();
+        GroupMember gm1 = GroupMember.builder()
+                .member(m1)
+                .group(group)
+                .role(GroupRole.LEADER)
+                .build();
+        GroupMember gm2 = GroupMember.builder()
+                .member(m2)
+                .group(group)
+                .role(GroupRole.MEMBER)
+                .build();
+
+        given(groupMemberRepository.findByMemberIdAndGroupIdForUpdate(m1.getId(), group.getId()))
+                .willReturn(Optional.of(gm1));
+        given(groupMemberRepository.findByMemberIdAndGroupId(m2.getId(), group.getId()))
+                .willReturn(Optional.of(gm2));
+
+        // when
+        groupMemberWriter.promoteLeader(group.getId(), m1.getId(), m2.getId());
+
+        // then
+        assertThat(gm1.getRole()).isEqualTo(GroupRole.MEMBER);
+        assertThat(gm2.getRole()).isEqualTo(GroupRole.LEADER);
     }
 }

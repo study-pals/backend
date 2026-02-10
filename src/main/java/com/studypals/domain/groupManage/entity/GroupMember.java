@@ -57,4 +57,12 @@ public class GroupMember {
     public boolean isLeader() {
         return role.equals(GroupRole.LEADER);
     }
+
+    public void promoteToLeader() {
+        this.role = GroupRole.LEADER;
+    }
+
+    public void demoteToMember() {
+        this.role = GroupRole.MEMBER;
+    }
 }
