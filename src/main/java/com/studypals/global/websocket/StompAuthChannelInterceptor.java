@@ -1,5 +1,6 @@
 package com.studypals.global.websocket;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Map;
 import java.util.UUID;
@@ -8,8 +9,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -68,12 +72,19 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (accessor == null) throw new IllegalArgumentException("not invalid protocol");
+        if (accessor == null) {
+            return message;
+        }
 
         // heartbeat 통과
+        if (accessor.getMessageType() == SimpMessageType.HEARTBEAT) {
+            return message;
+        }
+
         if (accessor.getCommand() == null) {
             return message;
         }
+
         try {
             switch (accessor.getCommand()) {
                 case CONNECT -> handleConnect(accessor);
@@ -81,7 +92,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
                 case UNSUBSCRIBE -> handleUnsubscribe(accessor);
             }
         } catch (BaseException e) {
-            return null;
+            return toErrorMessage(accessor, e);
         }
 
         return message;
@@ -194,5 +205,13 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
                     ChatErrorCode.CHAT_SUBSCRIBE_FAIL,
                     "[StompAuthChannelInterceptor#validateRoomId] room id is not UUID");
         }
+    }
+
+    private Message<?> toErrorMessage(StompHeaderAccessor accessor, BaseException e) {
+        StompHeaderAccessor error = StompHeaderAccessor.create(StompCommand.ERROR);
+        error.setSessionId(accessor.getSessionId());
+        error.setMessage(e.getMessage());
+
+        return MessageBuilder.createMessage(e.getMessage().getBytes(StandardCharsets.UTF_8), error.getMessageHeaders());
     }
 }
