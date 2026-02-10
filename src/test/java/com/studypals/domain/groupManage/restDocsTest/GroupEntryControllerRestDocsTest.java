@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -56,10 +57,11 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
     void generateEntryCode_success() throws Exception {
         // given
         Long groupId = 1L;
-        GroupEntryCodeRes entryCodeRes = new GroupEntryCodeRes(groupId, "A1B2C3");
+        LocalDateTime expiredAt = LocalDateTime.of(2026, 1, 1, 12, 0, 0);
+        GroupEntryCodeRes entryCodeRes = new GroupEntryCodeRes(groupId, "A1B2C3", expiredAt);
         Response<GroupEntryCodeRes> expected = CommonResponse.success(ResponseCode.GROUP_ENTRY_CODE, entryCodeRes);
 
-        given(groupEntryService.generateEntryCode(any(), any())).willReturn(entryCodeRes);
+        given(groupEntryService.getOrCreateEntryCode(any(), any())).willReturn(entryCodeRes);
 
         // when
         ResultActions result = mockMvc.perform(post("/groups/{groupId}/entry-code", groupId));
@@ -77,10 +79,37 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
                         responseFields(
                                 fieldWithPath("data.groupId").description("그룹 ID"),
                                 fieldWithPath("data.code").description("그룹 초대 코드 | 6자리의 대문자 알파벳, 숫자 조합"),
+                                fieldWithPath("data.expiredAt").description("해당 코드가 만료되는 날짜 및 시간 | null 인 경우 무제한"),
                                 fieldWithPath("code").description("응답 코드"),
                                 fieldWithPath("status").description("응답 상태"),
                                 fieldWithPath("message").description("응답 메시지")),
                         responseHeaders(headerWithName("Location").description("생성된 그룹 초대 코드"))));
+    }
+
+    @Test
+    @WithMockUser
+    void increaseCodeExpire_success() throws Exception {
+        // given
+        Long groupId = 1L;
+        Long day = 7L;
+        UpdateEntryCodeReq req = new UpdateEntryCodeReq(day);
+
+        // when
+        ResultActions result = mockMvc.perform(patch("/groups/{groupId}/entry-code", groupId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)));
+
+        // then
+        result.andExpect(status().isNoContent())
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        pathParameters(parameterWithName("groupId")
+                                .description("초대 코드를 연장할 그룹의 아이디")
+                                .attributes(constraints("not null"))),
+                        requestFields(fieldWithPath("day")
+                                .description("연장할 일 수")
+                                .attributes(constraints("not null, min(0), max(30) || -1(만료 날짜 없음)")))));
     }
 
     @Test

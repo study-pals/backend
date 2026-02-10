@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -19,10 +20,7 @@ import org.springframework.data.domain.SliceImpl;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.worker.ChatRoomWriter;
 import com.studypals.domain.groupManage.dto.*;
-import com.studypals.domain.groupManage.entity.Group;
-import com.studypals.domain.groupManage.entity.GroupEntryRequest;
-import com.studypals.domain.groupManage.entity.GroupMember;
-import com.studypals.domain.groupManage.entity.GroupRole;
+import com.studypals.domain.groupManage.entity.*;
 import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
@@ -74,28 +72,34 @@ public class GroupEntryServiceTest {
     @Mock
     private GroupEntryRequest mockEntryRequest;
 
+    @Mock
+    private GroupEntryCode mockGroupEntryCode;
+
     @InjectMocks
     private GroupEntryServiceImpl groupEntryService;
 
     @Test
-    void generateEntryCode_success() {
+    void getOrCreateEntryCode_success() {
         // given
         Long userId = 1L;
         Long groupId = 1L;
+        LocalDateTime now = LocalDateTime.now();
         String entryCode = "A1B2C3";
-        GroupEntryCodeRes expected = new GroupEntryCodeRes(groupId, entryCode);
+        GroupEntryCodeRes expected = new GroupEntryCodeRes(groupId, entryCode, now);
 
-        given(entryCodeManager.generate(groupId)).willReturn(entryCode);
+        given(entryCodeManager.getOrCreateCode(groupId)).willReturn(mockGroupEntryCode);
+        given(mockGroupEntryCode.getCode()).willReturn(entryCode);
+        given(mockGroupEntryCode.getExpireAt()).willReturn(now);
 
         // when
-        GroupEntryCodeRes actual = groupEntryService.generateEntryCode(userId, groupId);
+        GroupEntryCodeRes actual = groupEntryService.getOrCreateEntryCode(userId, groupId);
 
         // then
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
-    void generateEntryCode_fail_invalidAuthority() {
+    void getOrCreateEntryCode_fail_invalidAuthority() {
         // given
         Long userId = 1L;
         Long groupId = 1L;
@@ -104,7 +108,7 @@ public class GroupEntryServiceTest {
         willThrow(new GroupException(errorCode)).given(authorityValidator).validateLeaderAuthority(userId, groupId);
 
         // when & then
-        assertThatThrownBy(() -> groupEntryService.generateEntryCode(userId, groupId))
+        assertThatThrownBy(() -> groupEntryService.getOrCreateEntryCode(userId, groupId))
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);

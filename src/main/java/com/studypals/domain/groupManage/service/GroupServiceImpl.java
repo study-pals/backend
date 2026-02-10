@@ -18,6 +18,7 @@ import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupConst;
+import com.studypals.domain.groupManage.entity.GroupMember;
 import com.studypals.domain.groupManage.worker.*;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
@@ -125,12 +126,11 @@ public class GroupServiceImpl implements GroupService {
 
         Group group = groupReader.getById(groupId);
 
-        // 그룹에 속한 유저들 프로필
-        List<GroupMemberProfileDto> profiles = groupMemberReader.getAllMemberProfiles(group);
+        List<GroupMember> groupMembers = groupMemberReader.getAllMemberProfiles(group.getId());
 
         // 그룹에 속한 유저들의 목표 달성률 계산
-        GroupTotalGoalDto userGoals = groupGoalCalculator.calculateGroupGoals(groupId, profiles);
+        GroupTotalGoalDto userGoals = groupGoalCalculator.calculateGroupGoals(groupId, groupMembers);
 
-        return GetGroupDetailRes.of(group, profiles, userGoals);
+        return GetGroupDetailRes.of(group, groupMembers, userGoals);
     }
 }

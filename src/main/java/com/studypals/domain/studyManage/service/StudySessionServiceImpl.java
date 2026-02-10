@@ -3,7 +3,9 @@ package com.studypals.domain.studyManage.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,6 +16,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import lombok.RequiredArgsConstructor;
 
+import com.studypals.domain.groupManage.dto.UpdateStudyStatsDto;
+import com.studypals.domain.groupManage.worker.GroupRankingWorker;
 import com.studypals.domain.memberManage.entity.Member;
 import com.studypals.domain.memberManage.worker.MemberReader;
 import com.studypals.domain.studyManage.dto.StartStudyDto;
@@ -58,6 +62,7 @@ public class StudySessionServiceImpl implements StudySessionService {
     private final DailyInfoWriter dailyInfoWriter;
     private final MemberReader memberReader;
     private final StudyTimeReader studyTimeReader;
+    private final GroupRankingWorker groupRankingWorker;
 
     @Override
     @Transactional
@@ -102,11 +107,15 @@ public class StudySessionServiceImpl implements StudySessionService {
         LocalTime startTime = status.getStartTime().toLocalTime();
 
         Map<LocalDate, TimeSaveInfo> timeSaveInfoMap = new HashMap<>();
+        List<UpdateStudyStatsDto> updateRedisStudyStats = new ArrayList<>();
         if (startDate.isEqual(today)) {
 
             long durationInSec = timeUtils.getTimeDuration(startTime, endTime);
             timeSaveInfoMap.put(today, new TimeSaveInfo(member, startTime, endTime));
             studySessionWorker.upsert(member, status, today, durationInSec);
+
+            updateRedisStudyStats.add(new UpdateStudyStatsDto(userId, today, durationInSec));
+
             totalTime += durationInSec;
 
         } else if (startDate.plusDays(1).isEqual(today)) {
@@ -118,6 +127,9 @@ public class StudySessionServiceImpl implements StudySessionService {
 
             studySessionWorker.upsert(member, status, startDate, day1DurationInSec);
             studySessionWorker.upsert(member, status, today, day2DurationInSec);
+
+            updateRedisStudyStats.add(new UpdateStudyStatsDto(userId, startDate, day1DurationInSec));
+            updateRedisStudyStats.add(new UpdateStudyStatsDto(userId, today, day2DurationInSec));
 
             totalTime += day1DurationInSec + day2DurationInSec;
         } else {
@@ -133,6 +145,7 @@ public class StudySessionServiceImpl implements StudySessionService {
                 @Override
                 public void afterCommit() {
                     studyStatusWorker.delete(userId);
+                    groupRankingWorker.updateGroupRankings(updateRedisStudyStats);
                 }
             });
         }
