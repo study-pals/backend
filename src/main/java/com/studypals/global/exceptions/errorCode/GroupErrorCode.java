@@ -47,7 +47,9 @@ public enum GroupErrorCode implements ErrorCode {
             ResponseCode.GROUP_ENTRY_REQUEST, HttpStatus.NOT_FOUND, "can't findAndDelete group entry request"),
 
     GROUP_HASHTAG_FAIL(ResponseCode.GROUP_HASHTAG, HttpStatus.BAD_REQUEST, "fail to save group hash tag"),
-    GROUP_SEARCH_FAIL(ResponseCode.GROUP_SEARCH, HttpStatus.BAD_REQUEST, "perhaps, parameter invalid");
+    GROUP_SEARCH_FAIL(ResponseCode.GROUP_SEARCH, HttpStatus.BAD_REQUEST, "perhaps, parameter invalid"),
+    GROUP_PROMOTE_FAIL(ResponseCode.GROUP_LEADER, HttpStatus.BAD_REQUEST, "failed to promote leader");
+
     private final ResponseCode responseCode;
     private final HttpStatus status;
     private final String message;

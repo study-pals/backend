@@ -177,4 +177,14 @@ public class GroupServiceImpl implements GroupService {
     private Map<Long, List<String>> loadHashTagsMap(List<Long> groupIds) {
         return groupHashTagWorker.getHashTagsByGroups(groupIds);
     }
+
+    @Override
+    @Transactional
+    public Long updateGroup(Long userId, Long groupId, UpdateGroupReq dto) {
+        Group group = groupReader.getById(groupId);
+
+        groupWriter.update(userId, groupId, group, dto);
+
+        return group.getId();
+    }
 }

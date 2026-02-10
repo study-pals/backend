@@ -87,4 +87,13 @@ public class GroupController {
 
         return ResponseEntity.ok(CursorResponse.success(ResponseCode.GROUP_SEARCH, response));
     }
+
+    @PutMapping("/{groupId}")
+    public ResponseEntity<Response<Long>> updateGroup(
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody UpdateGroupReq request,
+            @PathVariable Long groupId) {
+        Long updatedGroupId = groupService.updateGroup(userId, groupId, request);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.GROUP_UPDATE, updatedGroupId));
+    }
 }

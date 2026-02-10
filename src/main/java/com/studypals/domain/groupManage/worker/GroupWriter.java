@@ -3,8 +3,10 @@ package com.studypals.domain.groupManage.worker;
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
+import com.studypals.domain.groupManage.dao.groupMemberRepository.GroupMemberRepository;
 import com.studypals.domain.groupManage.dao.groupRepository.GroupRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.dto.UpdateGroupReq;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.global.annotations.Worker;
@@ -28,6 +30,7 @@ import com.studypals.global.exceptions.exception.GroupException;
 public class GroupWriter {
     private final GroupRepository groupRepository;
     private final GroupTagRepository groupTagRepository;
+    private final GroupMemberRepository groupMemberRepository;
     private final GroupMapper groupMapper;
 
     public Group create(CreateGroupReq dto) {
@@ -41,6 +44,16 @@ public class GroupWriter {
         } catch (Exception e) {
             throw new GroupException(GroupErrorCode.GROUP_CREATE_FAIL);
         }
+
+        return group;
+    }
+
+    public Group update(Long userId, Long groupId, Group group, UpdateGroupReq dto) {
+        if (!groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId)) {
+            throw new GroupException(GroupErrorCode.GROUP_UPDATE_FAIL, "not leader");
+        }
+
+        group.update(dto.name(), dto.tag(), dto.maxMember(), dto.isOpen(), dto.isApprovalRequired());
 
         return group;
     }

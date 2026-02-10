@@ -18,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.studypals.domain.chatManage.dto.CreateChatRoomDto;
 import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.domain.chatManage.worker.ChatRoomWriter;
+import com.studypals.domain.groupManage.dao.GroupMemberRepository;
+import com.studypals.domain.groupManage.dao.groupMemberRepository.GroupMemberRepository;
 import com.studypals.domain.groupManage.dto.*;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
@@ -52,6 +54,9 @@ public class GroupServiceTest {
     @Mock
     private GroupWriter groupWriter;
 
+    @InjectMocks
+    private GroupWriter groupWriterInj;
+
     @Mock
     private GroupReader groupReader;
 
@@ -60,6 +65,9 @@ public class GroupServiceTest {
 
     @Mock
     private GroupMemberWriter groupMemberWriter;
+
+    @Mock
+    private GroupMemberRepository groupMemberRepository;
 
     @Mock
     private GroupAuthorityValidator validator;
@@ -317,6 +325,61 @@ public class GroupServiceTest {
         assertThat(result.hashTags()).containsExactlyInAnyOrder("java", "spring");
     }
 
+    @Test
+    void updateGroup_success() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        Group mockGroup = Group.builder()
+                .id(groupId)
+                .name("group name")
+                .tag("group tag")
+                .maxMember(10)
+                .isOpen(false)
+                .isApprovalRequired(false)
+                .build();
+        UpdateGroupReq req = new UpdateGroupReq("new group name", "new group tag", 20, true, true, "image.example.com");
+
+        given(groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId))
+                .willReturn(true);
+
+        // when
+        groupWriterInj.update(userId, groupId, mockGroup, req);
+
+        // then
+        assertThat(mockGroup.getName()).isEqualTo("new group name");
+        assertThat(mockGroup.getTag()).isEqualTo("new group tag");
+        assertThat(mockGroup.getMaxMember()).isEqualTo(20);
+        assertThat(mockGroup.isOpen()).isEqualTo(true);
+        assertThat(mockGroup.isApprovalRequired()).isEqualTo(true);
+    }
+
+    @Test
+    void updateGroup_fail_ifNotLeader() {
+        // given
+        Long userId = 2L;
+        Long groupId = 1L;
+        Group mockGroup = Group.builder()
+                .id(groupId)
+                .name("group name")
+                .tag("group tag")
+                .maxMember(10)
+                .isOpen(false)
+                .isApprovalRequired(false)
+                .build();
+        UpdateGroupReq req = new UpdateGroupReq("new group name", "new group tag", 20, true, true, "image.example.com");
+
+        GroupErrorCode errorCode = GroupErrorCode.GROUP_UPDATE_FAIL;
+
+        given(groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId))
+                .willReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> groupWriterInj.update(userId, groupId, mockGroup, req))
+                .isInstanceOf(GroupException.class)
+                .extracting("errorCode")
+                .isEqualTo(errorCode);
+    }
     // 헬퍼 메서드: GroupMember 엔티티 4명 생성
     private List<GroupMember> createMockGroupMembers(Long groupId) {
         Group group = Group.builder().id(groupId).build();

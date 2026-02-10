@@ -13,8 +13,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
+import com.studypals.domain.groupManage.dao.groupMemberRepository.GroupMemberRepository;
 import com.studypals.domain.groupManage.dao.groupRepository.GroupRepository;
 import com.studypals.domain.groupManage.dto.CreateGroupReq;
+import com.studypals.domain.groupManage.dto.UpdateGroupReq;
 import com.studypals.domain.groupManage.dto.mappers.GroupMapper;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.global.exceptions.errorCode.GroupErrorCode;
@@ -34,6 +36,9 @@ public class GroupWriterTest {
 
     @Mock
     private GroupRepository groupRepository;
+
+    @Mock
+    private GroupMemberRepository groupMemberRepository;
 
     @Mock
     private GroupTagRepository groupTagRepository;
@@ -96,5 +101,33 @@ public class GroupWriterTest {
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
+    }
+
+    @Test
+    void update_success() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        Group mockGroup = Group.builder()
+                .name("group name")
+                .tag("group tag")
+                .maxMember(10)
+                .isOpen(false)
+                .isApprovalRequired(false)
+                .build();
+        UpdateGroupReq req = new UpdateGroupReq("new group name", "new group tag", 20, true, true, "image.example.com");
+
+        given(groupMemberRepository.checkLeaderByGroupIdAndMemberId(groupId, userId))
+                .willReturn(true);
+
+        // when
+        groupWriter.update(userId, groupId, mockGroup, req);
+
+        // then
+        assertThat(mockGroup.getName()).isEqualTo("new group name");
+        assertThat(mockGroup.getTag()).isEqualTo("new group tag");
+        assertThat(mockGroup.getMaxMember()).isEqualTo(20);
+        assertThat(mockGroup.isOpen()).isEqualTo(true);
+        assertThat(mockGroup.isApprovalRequired()).isEqualTo(true);
     }
 }

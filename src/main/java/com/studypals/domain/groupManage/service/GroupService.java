@@ -60,4 +60,14 @@ public interface GroupService {
      * @return 그룹 정보가 포함된 CursorResponse
      */
     CursorResponse.Content<GetGroupsRes> search(GroupSearchDto dto, Cursor cursor);
+
+    /**
+     * 요청을 보낸 사용자가 속한 그룹의 정보를 수정합니다.
+     * @param userId 그룹을 수정할 사용자
+     * @param groupId 수정할 그룹
+     * @param dto 그룹 수정 시 필요한 데이터
+     * @return 수정된 그룹 ID
+     * @throws com.studypals.global.exceptions.exception.GroupException 식별자 mismatch
+     */
+    Long updateGroup(Long userId, Long groupId, UpdateGroupReq dto);
 }
