@@ -9,7 +9,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import com.studypals.global.annotations.CursorDefault;
 import com.studypals.global.request.Cursor;
@@ -22,7 +22,7 @@ import com.studypals.global.request.SortType;
  * @author s0o0bn
  * @since 2025-06-05
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Component
 public class CursorDefaultResolver implements HandlerMethodArgumentResolver {
     private static final String CURSOR_PARAM = "cursor";

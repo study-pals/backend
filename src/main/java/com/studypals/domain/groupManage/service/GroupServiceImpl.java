@@ -120,7 +120,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     @Transactional(readOnly = true)
-    public CursorResponse.Content<GetGroupsRes> search(GroupSearchDto dto, Cursor cursor) {
+    public CursorResponse.Content<GetGroupsRes> search(GroupSearchReq dto, Cursor cursor) {
         try {
             dto.validate();
         } catch (IllegalArgumentException e) {

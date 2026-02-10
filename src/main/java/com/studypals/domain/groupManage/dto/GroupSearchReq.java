@@ -1,7 +1,5 @@
 package com.studypals.domain.groupManage.dto;
 
-import lombok.Builder;
-
 /**
  * 그룹 검색 조건을 전달하기 위한 DTO입니다.
  *
@@ -24,8 +22,7 @@ import lombok.Builder;
  * @author jack8
  * @since 2026-01-13
  */
-@Builder
-public record GroupSearchDto(String tag, String hashTag, String name, Boolean isOpen, Boolean isApprovalRequired) {
+public record GroupSearchReq(String tag, String hashTag, String name, Boolean isOpen, Boolean isApprovalRequired) {
     /**
      * 키워드 검색 조건의 유효성을 검증합니다.
      *

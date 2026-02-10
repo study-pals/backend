@@ -24,8 +24,4 @@ public class TestSupportConfig {
     public SortTypeResolver sortTypeResolver() {
         return new SortTypeResolver();
     }
-
-    //    public CursorDefaultResolver cursorDefaultResolver(SortTypeResolver sortTypeResolver) {
-    //        return new CursorDefaultResolver(sortTypeResolver);
-    //    }
 }

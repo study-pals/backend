@@ -2,7 +2,7 @@ package com.studypals.domain.groupManage.dao.groupRepository;
 
 import org.springframework.data.domain.Slice;
 
-import com.studypals.domain.groupManage.dto.GroupSearchDto;
+import com.studypals.domain.groupManage.dto.GroupSearchReq;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.global.request.Cursor;
 
@@ -15,7 +15,7 @@ import com.studypals.global.request.Cursor;
  * </p>
  *
  * <p>
- * 구현체에서는 QueryDSL 등을 사용하여 {@link GroupSearchDto}의 조건에 따라
+ * 구현체에서는 QueryDSL 등을 사용하여 {@link GroupSearchReq}의 조건에 따라
  * 그룹 목록을 조회하며, 대량 데이터 환경을 고려해 {@link Slice} 기반 조회를 수행합니다.
  * </p>
  *
@@ -25,7 +25,7 @@ import com.studypals.global.request.Cursor;
  * </p>
  *
  * <p><b>주요 메서드:</b><br>
- * {@link #search(GroupSearchDto, Cursor)}<br>
+ * {@link #search(GroupSearchReq, Cursor)}<br>
  * 검색 조건과 커서를 기반으로 그룹 목록을 조회합니다.
  * </p>
  *
@@ -47,7 +47,7 @@ public interface GroupCustomRepository {
      * 그룹 목록을 커서 기반으로 검색합니다.
      *
      * <p>
-     * {@link GroupSearchDto}에 포함된 검색 조건(태그, 공개 여부, 승인 필요 여부 등)을
+     * {@link GroupSearchReq}에 포함된 검색 조건(태그, 공개 여부, 승인 필요 여부 등)을
      * 기준으로 그룹을 조회하며, {@link Cursor}를 사용해 다음 페이지 여부를 판단합니다.
      * </p>
      *
@@ -60,5 +60,5 @@ public interface GroupCustomRepository {
      * @param cursor 커서 기반 페이징을 위한 기준 정보
      * @return 검색 조건에 맞는 그룹 목록 Slice
      */
-    Slice<Group> search(GroupSearchDto dto, Cursor cursor);
+    Slice<Group> search(GroupSearchReq dto, Cursor cursor);
 }

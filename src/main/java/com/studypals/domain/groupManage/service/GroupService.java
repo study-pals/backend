@@ -59,7 +59,7 @@ public interface GroupService {
      * @param cursor 페이징 시 필요한 데이터 종류
      * @return 그룹 정보가 포함된 CursorResponse
      */
-    CursorResponse.Content<GetGroupsRes> search(GroupSearchDto dto, Cursor cursor);
+    CursorResponse.Content<GetGroupsRes> search(GroupSearchReq dto, Cursor cursor);
 
     /**
      * 요청을 보낸 사용자가 속한 그룹의 정보를 수정합니다.

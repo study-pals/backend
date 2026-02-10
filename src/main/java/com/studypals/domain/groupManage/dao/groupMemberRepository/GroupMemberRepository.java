@@ -29,7 +29,7 @@ import com.studypals.domain.groupManage.entity.GroupMember;
 @Repository
 public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>, GroupMemberCustomRepository {
 
-    @Query(value = "SELECT * FROM group_member WHERE member_id = :userId AND group_id = :groupId", nativeQuery = true)
+    @Query("SELECT gm FROM GroupMember gm WHERE gm.member.id = :userId AND gm.group.id = :groupId")
     Optional<GroupMember> findByMemberIdAndGroupId(Long userId, Long groupId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
@@ -41,7 +41,7 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>,
     @Query(
             """
       SELECT new com.studypals.domain.groupManage.dto.GroupSummaryDto(
-            g.id, g.name, g.tag,  g.totalMember, g.chatRoom.id, g.isOpen, g.isApprovalRequired, g.createdDate
+            g.id, g.name, g.tag, g.totalMember, g.chatRoom.id, g.isOpen, g.isApprovalRequired, g.createdDate
       )
       FROM GroupMember gm
       JOIN gm.group g

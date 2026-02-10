@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.studypals.domain.groupManage.dto.GroupSearchDto;
+import com.studypals.domain.groupManage.dto.GroupSearchReq;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupHashTag;
 import com.studypals.domain.groupManage.entity.HashTag;
@@ -59,7 +59,7 @@ class GroupCustomRepositoryTest extends DataJpaSupport {
     @Test
     @DisplayName("POPULAR: tie(totalMember 동일) 블록이 페이지 경계를 넘을 때 중복/누락 없이 페이징된다")
     void popular_cursorPaging_noOverlap_noMissing_onTieBoundary() {
-        GroupSearchDto dto = new GroupSearchDto(
+        GroupSearchReq dto = new GroupSearchReq(
                 null, null, null, null, null // isOpen, isApprovalRequired (필요하면 켜서 추가 테스트)
                 );
 
@@ -73,7 +73,7 @@ class GroupCustomRepositoryTest extends DataJpaSupport {
     @Test
     @DisplayName("NEW: tie(createdDate 동일) 블록이 페이지 경계를 넘을 때 중복/누락 없이 페이징된다")
     void new_cursorPaging_noOverlap_noMissing_onTieBoundary() {
-        GroupSearchDto dto = new GroupSearchDto(null, null, null, null, null);
+        GroupSearchReq dto = new GroupSearchReq(null, null, null, null, null);
 
         List<Group> all = fetchAllByCursor(dto, GroupSortType.NEW);
 
@@ -85,7 +85,7 @@ class GroupCustomRepositoryTest extends DataJpaSupport {
     @Test
     @DisplayName("OLD: tie(createdDate 동일) 블록이 페이지 경계를 넘을 때 중복/누락 없이 페이징된다")
     void old_cursorPaging_noOverlap_noMissing_onTieBoundary() {
-        GroupSearchDto dto = new GroupSearchDto(null, null, null, null, null);
+        GroupSearchReq dto = new GroupSearchReq(null, null, null, null, null);
 
         List<Group> all = fetchAllByCursor(dto, GroupSortType.OLD);
 
@@ -98,7 +98,7 @@ class GroupCustomRepositoryTest extends DataJpaSupport {
     @DisplayName("tag 검색: POPULAR/NEW/OLD에서 tag 필터가 정확히 작동하고 정렬도 유지된다")
     void tagFilter_works_onAllSorts() {
         // tag 검색은 normalize + containsIgnoreCase
-        GroupSearchDto dto = new GroupSearchDto("TAG-POOL", null, null, null, null);
+        GroupSearchReq dto = new GroupSearchReq("TAG-POOL", null, null, null, null);
 
         // POPULAR
         List<Group> popular = fetchAllByCursor(dto, GroupSortType.POPULAR);
@@ -124,7 +124,7 @@ class GroupCustomRepositoryTest extends DataJpaSupport {
     @Test
     @DisplayName("name 검색: POPULAR/NEW/OLD에서 name 필터가 정확히 작동한다 (tag가 비어있을 때만)")
     void nameFilter_works_onAllSorts() {
-        GroupSearchDto dto = new GroupSearchDto(null, "NamePool", null, null, null);
+        GroupSearchReq dto = new GroupSearchReq(null, "NamePool", null, null, null);
 
         List<Group> popular = fetchAllByCursor(dto, GroupSortType.POPULAR);
         assertThat(popular)
@@ -142,7 +142,7 @@ class GroupCustomRepositoryTest extends DataJpaSupport {
     @Test
     @DisplayName("hashTag 검색: POPULAR/NEW/OLD에서 exists 서브쿼리 기반 필터가 정확히 작동한다 (tag/name 없을 때만)")
     void hashTagFilter_works_onAllSorts() {
-        GroupSearchDto dto = new GroupSearchDto(null, null, "java", null, null);
+        GroupSearchReq dto = new GroupSearchReq(null, null, "java", null, null);
 
         List<Group> popular = fetchAllByCursor(dto, GroupSortType.POPULAR);
         assertThat(popular.stream().map(Group::getId).collect(Collectors.toSet()))
@@ -162,7 +162,7 @@ class GroupCustomRepositoryTest extends DataJpaSupport {
     // Cursor 페이징 공용 유틸
     // =========================
 
-    private List<Group> fetchAllByCursor(GroupSearchDto dto, GroupSortType sort) {
+    private List<Group> fetchAllByCursor(GroupSearchReq dto, GroupSortType sort) {
         List<Group> acc = new ArrayList<>();
 
         Cursor cursor = new Cursor(0L, null, PAGE_SIZE, sort);

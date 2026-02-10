@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import com.studypals.domain.groupManage.dao.GroupTagRepository;
 import com.studypals.domain.groupManage.dao.groupRepository.GroupRepository;
 import com.studypals.domain.groupManage.dao.groupRepository.GroupSortType;
-import com.studypals.domain.groupManage.dto.GroupSearchDto;
+import com.studypals.domain.groupManage.dto.GroupSearchReq;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.domain.groupManage.entity.GroupTag;
 import com.studypals.global.annotations.Worker;
@@ -43,7 +43,7 @@ public class GroupReader {
         return groupRepository.findById(groupId).orElseThrow(() -> new GroupException(GroupErrorCode.GROUP_NOT_FOUND));
     }
 
-    public Slice<Group> search(GroupSearchDto dto, Cursor cursor) {
+    public Slice<Group> search(GroupSearchReq dto, Cursor cursor) {
         GroupSortType sortType = (GroupSortType) cursor.sort();
         try {
             sortType.getParser().apply(cursor.value());

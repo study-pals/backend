@@ -77,4 +77,8 @@ public class StringUtils {
 
         return s;
     }
+
+    public boolean hasText(String s) {
+        return s != null && !s.isBlank();
+    }
 }

@@ -297,7 +297,7 @@ public class GroupControllerRestDocsTest extends RestDocsSupport {
 
         CursorResponse<GetGroupsRes> response = CursorResponse.success(ResponseCode.GROUP_SEARCH, cursorContent);
 
-        given(groupService.search(any(GroupSearchDto.class), any(Cursor.class))).willReturn(cursorContent);
+        given(groupService.search(any(GroupSearchReq.class), any(Cursor.class))).willReturn(cursorContent);
 
         // when
         ResultActions result = mockMvc.perform(get("/groups/search")

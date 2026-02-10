@@ -17,7 +17,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.studypals.domain.groupManage.dto.GroupSearchDto;
+import com.studypals.domain.groupManage.dto.GroupSearchReq;
 import com.studypals.domain.groupManage.entity.Group;
 import com.studypals.global.dao.AbstractPagingRepository;
 import com.studypals.global.request.Cursor;
@@ -28,7 +28,7 @@ import com.studypals.global.utils.StringUtils;
  * 그룹 목록 조회를 위한 QueryDSL 기반 커스텀 Repository 구현체입니다.
  *
  * <p>
- * {@link GroupSearchDto}의 검색 조건(태그/이름/해시태그/공개 여부/승인 필요 여부 등)과
+ * {@link GroupSearchReq}의 검색 조건(태그/이름/해시태그/공개 여부/승인 필요 여부 등)과
  * {@link Cursor}의 커서 기반 페이징 정보를 조합하여 {@link Slice} 형태로 결과를 반환합니다.
  * </p>
  *
@@ -70,8 +70,8 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
      * 아래 요소들을 조합하여 단일 조회 쿼리를 구성합니다.
      * </p>
      * <ul>
-     *   <li>{@link #assembleWhere(GroupSearchDto)}: 키워드 기반 검색 조건(태그/이름/해시태그)</li>
-     *   <li>{@link #assembleType(GroupSearchDto)}: 필터 조건(공개, 정원 미달, 승인 필요)</li>
+     *   <li>{@link #assembleWhere(GroupSearchReq)}: 키워드 기반 검색 조건(태그/이름/해시태그)</li>
+     *   <li>{@link #assembleType(GroupSearchReq)}: 필터 조건(공개, 정원 미달, 승인 필요)</li>
      *   <li>{@link #assembleCursor(Cursor)}: 커서 기반 페이징 조건(정렬 기준 + id tie-break)</li>
      *   <li>{@link #getOrderSpecifier(SortType)}: 정렬 조건(정렬 기준 + id tie-break)</li>
      * </ul>
@@ -101,7 +101,7 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
      * @return 다음 페이지 존재 여부를 포함한 {@link Slice} 결과
      */
     @Override
-    public Slice<Group> search(GroupSearchDto dto, Cursor cursor) {
+    public Slice<Group> search(GroupSearchReq dto, Cursor cursor) {
         OrderSpecifier<?>[] orders = getOrderSpecifier(cursor.sort());
         List<Group> results = queryFactory
                 .selectFrom(group)
@@ -150,18 +150,18 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
      * @param dto 검색 조건 DTO
      * @return 키워드 조건(없으면 null 반환하여 where 절에서 무시)
      */
-    private BooleanExpression assembleWhere(GroupSearchDto dto) {
-        if (hasText(dto.tag())) {
+    private BooleanExpression assembleWhere(GroupSearchReq dto) {
+        if (stringUtils.hasText(dto.tag())) {
             // tag는 normalize 후 containsIgnoreCase로 처리
             // {@code lower(g.tag) like %:normalized%}
             return group.tag.containsIgnoreCase(stringUtils.normalize(dto.tag()));
         }
-        if (hasText(dto.name())) {
+        if (stringUtils.hasText(dto.name())) {
             // name은 trim 후 containsIgnoreCase
             // {@code lower(g.name) like %:trimmed%}
             return group.name.containsIgnoreCase(dto.name().trim());
         }
-        if (hasText(dto.hashTag())) {
+        if (stringUtils.hasText(dto.hashTag())) {
             // hashtag는 "그룹-해시태그 매핑" 테이블을 통해 존재 여부로 필터링
             // {where exists (...) }
             return getHashTagByGroup(dto.hashTag());
@@ -196,7 +196,7 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
      * @param dto 검색 조건 DTO
      * @return 상태 필터 조건(없으면 null)
      */
-    private BooleanExpression assembleType(GroupSearchDto dto) {
+    private BooleanExpression assembleType(GroupSearchReq dto) {
         BooleanExpression cond = null;
 
         if (dto.isOpen() != null) {
@@ -379,15 +379,5 @@ public class GroupCustomRepositoryImpl extends AbstractPagingRepository<Group> i
     private BooleanExpression and(BooleanExpression base, BooleanExpression add) {
         if (add == null) return base;
         return base == null ? add : base.and(add);
-    }
-
-    /**
-     * 문자열이 null/blank가 아닌지 확인합니다.
-     *
-     * @param s 검사할 문자열
-     * @return null이 아니고 공백이 아닌 경우 true
-     */
-    private boolean hasText(String s) {
-        return s != null && !s.isBlank();
     }
 }
