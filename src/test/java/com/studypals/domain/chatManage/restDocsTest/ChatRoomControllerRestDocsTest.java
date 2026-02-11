@@ -144,7 +144,7 @@ class ChatRoomControllerRestDocsTest extends RestDocsSupport {
     @Test
     @WithMockUser
     @DisplayName("채팅 이미지 업로드 성공")
-    void getChatUploadUrl_success() throws Exception {
+    void upLoadChatImage_success() throws Exception {
         // given
         Long imageId = 1L;
         String imageUrl = "http://example.com/presigned-url-image.jpg";

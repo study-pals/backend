@@ -32,7 +32,7 @@
 
 ===  채팅방 API
 ''''
-==== 1. 채팅방 정보 조회
+==== - 채팅방 정보 조회
 
 *Description* +
 
@@ -65,7 +65,28 @@ include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_succe
 include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_success/response-fields.adoc[]
 include::{snippets}/chat-room-controller-rest-docs-test/get-chat-room-info_success/http-response.adoc[]
 
-'''
+''''
+==== - 채팅을 통한 이미지 전송
+
+''''
+*Description* +
+
+채팅방에서 사용할 이미지를 업로드합니다.
+
+- *HTTP Method*: `POST`
+- *Endpoint*: `/files/image/chat`
+- *Content-Type*: `multipart/form-data`
+- *Requires Authentication*: Yes
+
+*REQUEST* +
+include::{snippets}/chat-room-controller-rest-docs-test/up-load-chat-image_success/http-request.adoc[]
+include::{snippets}/chat-room-controller-rest-docs-test/up-load-chat-image_success/request-parts.adoc[]
+
+*RESPONSE* +
+include::{snippets}/chat-room-controller-rest-docs-test/up-load-chat-image_success/response-fields.adoc[]
+include::{snippets}/chat-room-controller-rest-docs-test/up-load-chat-image_success/http-response.adoc[]
+
+
 '''
 
 === 채팅

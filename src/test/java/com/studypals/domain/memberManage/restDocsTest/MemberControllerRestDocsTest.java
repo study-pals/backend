@@ -198,7 +198,7 @@ public class MemberControllerRestDocsTest extends RestDocsSupport {
     @Test
     @WithMockUser
     @DisplayName("프로필 이미지 업로드 성공")
-    void getProfileUploadUrl_success() throws Exception {
+    void upLoadProfileImage_success() throws Exception {
         // given
         Long imageId = 1L;
         String imageUrl = "http://example.com/image.jpg";

@@ -21,6 +21,7 @@
 | 06 | 유저 권한 검색/검증
 | 07 | token 재발급
 | 08 | 토큰 인증
+| 09 | 유저 프로필 사진 등록
 |===
 
 == ✨ API 문서
@@ -174,6 +175,23 @@ include::{snippets}/member-controller-rest-docs-test/check-availability_success_
 include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_username/response-fields.adoc[]
 include::{snippets}/member-controller-rest-docs-test/check-availability_success_with_username/http-response.adoc[]
 
+=== 7. 프로필 이미지 업로드
+''''
+*Description* +
+
+사용자의 프로필 이미지를 업로드합니다. 기존 프로필 이미지가 존재할 경우, 새로운 이미지로 교체됩니다.
+
+- *HTTP Method*: `POST`
+- *Endpoint*: `/files/image/profile`
+- *Content-Type*: `multipart/form-data`
+
+*REQUEST* +
+include::{snippets}/member-controller-rest-docs-test/up-load-profile-image_success/http-request.adoc[]
+include::{snippets}/member-controller-rest-docs-test/up-load-profile-image_success/request-parts.adoc[]
+
+*RESPONSE* +
+include::{snippets}/member-controller-rest-docs-test/up-load-profile-image_success/response-fields.adoc[]
+include::{snippets}/member-controller-rest-docs-test/up-load-profile-image_success/http-response.adoc[]
 
 == ⛔ 예외 출력
 
