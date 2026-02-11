@@ -6,24 +6,34 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.studypals.domain.chatManage.api.ChatRoomController;
 import com.studypals.domain.chatManage.dto.*;
 import com.studypals.domain.chatManage.entity.ChatRoomRole;
 import com.studypals.domain.chatManage.service.ChatRoomService;
+import com.studypals.global.file.dto.ImageUploadRes;
+import com.studypals.global.file.service.ImageFileService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
@@ -40,6 +50,16 @@ class ChatRoomControllerRestDocsTest extends RestDocsSupport {
 
     @MockitoBean
     private ChatRoomService chatRoomService;
+
+    @MockitoBean
+    private ImageFileService imageFileService;
+
+    private final MockMultipartFile mockMultipartFile = new MockMultipartFile(
+            "file", // 컨트롤러가 받는 파라미터 변수명 (필수 확인!)
+            "chat-image.png", // 업로드할 파일명
+            "image/png", // 파일 타입
+            "fake-image-content".getBytes() // 파일 내용 (더미)
+            );
 
     @Test
     @WithMockUser
@@ -119,5 +139,42 @@ class ChatRoomControllerRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("data.logs[].type").description("채팅 타입 (예: TEXT)"),
                                 fieldWithPath("data.logs[].content").description("채팅 메시지 내용"),
                                 fieldWithPath("data.logs[].sender").description("메시지 보낸 유저 ID"))));
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("채팅 이미지 업로드 성공")
+    void getChatUploadUrl_success() throws Exception {
+        // given
+        Long imageId = 1L;
+        String imageUrl = "http://example.com/presigned-url-image.jpg";
+        ImageUploadRes response = new ImageUploadRes(imageId, imageUrl);
+
+        given(imageFileService.uploadChatImage(any(MultipartFile.class), any(), any()))
+                .willReturn(response);
+
+        Response<ImageUploadRes> expected = CommonResponse.success(ResponseCode.FILE_IMAGE_UPLOAD, response);
+
+        // when
+        ResultActions result =
+                mockMvc.perform(multipart("/chat/room/{chatRoomId}/image", "chatRoomId-123-456") // 1. URL 템플릿 사용
+                        .file(mockMultipartFile)
+                        .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(hasKey(expected))
+                .andDo(print())
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        pathParameters(parameterWithName("chatRoomId").description("채팅방 ID")),
+                        requestParts(partWithName("file").description("업로드할 이미지 파일 (MultipartFile)")),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드 (I01-01)"),
+                                fieldWithPath("status").description("응답 상태"),
+                                fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("data.imageId").description("이미지 파일의 식별 ID"),
+                                fieldWithPath("data.imageUrl").description("저장된 이미지를 조회할 presigned url"))));
     }
 }

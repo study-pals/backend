@@ -1,13 +1,17 @@
 package com.studypals.domain.chatManage.api;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.chatManage.dto.ChatRoomInfoRes;
 import com.studypals.domain.chatManage.service.ChatRoomService;
+import com.studypals.global.file.dto.ImageUploadRes;
+import com.studypals.global.file.service.ImageFileService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
@@ -18,6 +22,7 @@ import com.studypals.global.responses.ResponseCode;
  *
  * <pre>
  *     - GET /chat/room/{chatRoomId} : 채팅방 정보 조회
+ *     - POST /chat/room/{chatRoomId}/image : 채팅방 이미지 업로드
  * </pre>
  *
  * @author jack8
@@ -29,6 +34,7 @@ import com.studypals.global.responses.ResponseCode;
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
+    private final ImageFileService imageFileService;
 
     // 구독 이후, 해당 요청 보냄 -> 응답을 받고 정렬 마칠 때 까지, 새로운 메시지가 와도 일단 렌더링 중지, 마치고 렌더링
     @GetMapping("/{chatRoomId}")
@@ -39,5 +45,15 @@ public class ChatRoomController {
         ChatRoomInfoRes chatRoomInfo = chatRoomService.getChatRoomInfo(userId, chatRoomId, chatId);
 
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.CHAT_ROOM_SEARCH, chatRoomInfo, chatRoomId));
+    }
+
+    @PostMapping(value = "/{chatRoomId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response<ImageUploadRes>> uploadChatImage(
+            @RequestPart("file") MultipartFile file,
+            @PathVariable("chatRoomId") String chatRoomId,
+            @AuthenticationPrincipal Long userId) {
+
+        ImageUploadRes response = imageFileService.uploadChatImage(file, chatRoomId, userId);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.FILE_IMAGE_UPLOAD, response));
     }
 }

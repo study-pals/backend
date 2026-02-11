@@ -2,14 +2,18 @@ package com.studypals.domain.memberManage.api;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
 import com.studypals.domain.memberManage.dto.*;
 import com.studypals.domain.memberManage.service.MemberService;
+import com.studypals.global.file.dto.ImageUploadRes;
+import com.studypals.global.file.service.ImageFileService;
 import com.studypals.global.responses.CommonResponse;
 import com.studypals.global.responses.Response;
 import com.studypals.global.responses.ResponseCode;
@@ -21,6 +25,8 @@ import com.studypals.global.responses.ResponseCode;
  *     - POST /register : 회원가입({@link CreateMemberReq})
  *     - GET /profile : 프로필 조회
  *     - PUT /profile : 프로필 수정 ({@link UpdateProfileReq})
+ *     - POST /profile : 프로필 이미지 업로드
+ *     - GET /register/check : 중복 체크
  *
  * </pre>
  *
@@ -31,6 +37,7 @@ import com.studypals.global.responses.ResponseCode;
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
+    private final ImageFileService imageFileService;
 
     @PostMapping("/register")
     public ResponseEntity<Response<Long>> register(@Valid @RequestBody CreateMemberReq req) {
@@ -52,6 +59,13 @@ public class MemberController {
         Long id = memberService.updateProfile(userId, req);
 
         return ResponseEntity.ok(CommonResponse.success(ResponseCode.USER_UPDATE, id, "프로필 갱신을 성공하였습니다."));
+    }
+
+    @PostMapping(value = "/profile/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response<ImageUploadRes>> uploadProfileImage(
+            @RequestPart("file") MultipartFile file, @AuthenticationPrincipal Long userId) {
+        ImageUploadRes response = imageFileService.uploadProfileImage(file, userId);
+        return ResponseEntity.ok(CommonResponse.success(ResponseCode.FILE_IMAGE_UPLOAD, response));
     }
 
     @GetMapping("/register/check")

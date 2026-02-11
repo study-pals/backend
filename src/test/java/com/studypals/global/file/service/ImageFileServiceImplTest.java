@@ -168,8 +168,8 @@ class ImageFileServiceImplTest {
         Long userId = 1L;
         String chatRoomId = "room1";
         String originalFilename = "chat.jpg";
-        String objectKey = "chat/room1/uuid.jpg";
-        String imageUrl = "http://test.com/chat/room1/uuid.jpg";
+        String objectKey = "chat/" + chatRoomId + "/uuid.jpg";
+        String imageUrl = "http://test.com/" + objectKey;
 
         given(multipartFile.getOriginalFilename()).willReturn(originalFilename);
 
