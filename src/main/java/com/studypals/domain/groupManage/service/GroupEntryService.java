@@ -57,6 +57,14 @@ public interface GroupEntryService {
     Long joinGroup(Long userId, GroupEntryReq entryInfo);
 
     /**
+     * 가입된 그룹에서 탈퇴합니다.
+     * 그룹장은 탈퇴할 수 없습니다.
+     * @param userId 그룹 멤버 ID
+     * @param groupId 탈퇴할 그룹 ID
+     */
+    void leaveGroup(Long userId, Long groupId);
+
+    /**
      * 비공개 그룹에 가입 요청을 보냅니다.
      *
      * @param userId 요청할 사용자 ID

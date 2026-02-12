@@ -54,4 +54,17 @@ public class GroupMemberWriter {
         }
         return groupMember;
     }
+
+    public void deleteMember(Long userId, Group group) {
+        GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(userId, group.getId())
+                .orElseThrow(() -> {
+                    String message = String.format(
+                            "[GroupMemberWriter#promoteLeader] member %d not found in group %d", userId, group.getId());
+                    return new GroupException(GroupErrorCode.GROUP_MEMBER_NOT_FOUND, message);
+                });
+        if(groupMember.isLeader()) {
+            throw new GroupException(GroupErrorCode.GROUP_LEAVE_FAIL, "leader can't leave the group");
+        }
+        groupMemberRepository.delete(groupMember);
+    }
 }

@@ -98,6 +98,16 @@ public class GroupEntryServiceImpl implements GroupEntryService {
 
     @Override
     @Transactional
+    public void leaveGroup(Long userId, Long groupId){
+        Group group = groupReader.getById(groupId);
+        Member member = memberReader.getRef(userId);
+
+        chatRoomWriter.leave(group.getChatRoom(), member);
+        groupMemberWriter.deleteMember(userId, group);
+    }
+
+    @Override
+    @Transactional
     public Long requestParticipant(Long userId, GroupEntryReq entryInfo) {
         Group group = groupReader.getById(entryInfo.groupId());
         entryRequestWriter.validateNewRequestAvailable(group);

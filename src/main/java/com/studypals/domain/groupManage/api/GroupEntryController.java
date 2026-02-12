@@ -27,6 +27,7 @@ import com.studypals.global.responses.ResponseCode;
  *     - POST /groups/{groupId}/entry-code : 그룹 초대 코드 생성
  *     - GET /groups/summary : 그룹 대표 정보 조회
  *     - POST /groups/join : 공개 그룹에 가입
+ *     - DELETE /groups/{groupId}/leave : 그룹 탈퇴
  *     - POST /groups/entry-requests : 비공개 그룹 가입 요청
  *     - GET /groups/{groupId}/entry-requests : 그룹 가입 요청 목록 조회
  *     - POST /groups/entry-requests/{requestId}/accept : 그룹 가입 요청 승인
@@ -80,6 +81,13 @@ public class GroupEntryController {
 
         return ResponseEntity.created(URI.create(String.format("/groups/%d/members/%d", req.groupId(), joinId)))
                 .build();
+    }
+
+    @DeleteMapping("/{groupId}/leave")
+    public ResponseEntity<Void> leaveGroup(@AuthenticationPrincipal Long userId, @PathVariable Long groupId) {
+        groupEntryService.leaveGroup(userId, groupId);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/entry-requests")
