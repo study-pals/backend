@@ -24,19 +24,22 @@ class ChatImageManagerTest {
     @Mock
     private ChatRoomReader chatRoomReader;
 
+    @Mock
+    private ChatImageWriter chatImageWriter;
+
     private ChatImageManager chatImageManager;
 
     @BeforeEach
     void setUp() {
         FileProperties fileUploadProperties = new FileProperties(List.of("jpg", "png"), 600);
-        chatImageManager = new ChatImageManager(objectStorage, fileUploadProperties, chatRoomReader);
+        chatImageManager = new ChatImageManager(objectStorage, fileUploadProperties, chatRoomReader, chatImageWriter);
     }
 
     @Test
     @DisplayName("파일 타입 반환 확인")
-    void getFileType() {
+    void getType() {
         // when
-        ImageType type = chatImageManager.getFileType();
+        ImageType type = chatImageManager.getType();
 
         // then
         assertThat(type).isEqualTo(ImageType.CHAT_IMAGE);

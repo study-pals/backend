@@ -109,7 +109,7 @@ class AbstractFileManagerTest {
         }
 
         @Override
-        public ImageType getFileType() {
+        public ImageType getType() {
             return ImageType.PROFILE_IMAGE;
         }
 

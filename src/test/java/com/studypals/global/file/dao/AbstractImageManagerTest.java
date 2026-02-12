@@ -33,8 +33,9 @@ class AbstractImageManagerTest {
 
     // 테스트를 위한 구체 클래스
     static class TestImageManager extends AbstractImageManager {
-        public TestImageManager(ObjectStorage objectStorage, FileProperties fileUploadProperties) {
-            super(objectStorage, fileUploadProperties);
+
+        public TestImageManager(ObjectStorage objectStorage, FileProperties properties) {
+            super(objectStorage, properties);
         }
 
         @Override
@@ -43,18 +44,28 @@ class AbstractImageManagerTest {
         }
 
         @Override
+        protected Long saveImage(Long userId, String targetId, String objectKey, String originalFileName) {
+            return 1L; // 테스트용 더미 ID 반환
+        }
+
+        @Override
         protected List<ImageVariantKey> variants() {
             return List.of();
         }
 
         @Override
-        public ImageType getFileType() {
-            return ImageType.PROFILE_IMAGE;
+        protected boolean usePresignedUrl() {
+            return true;
         }
 
         @Override
-        public boolean usePresignedUrl() {
-            return false;
+        public boolean supports(ImageType fileType) {
+            return true;
+        }
+
+        @Override
+        public ImageType getType() {
+            return ImageType.PROFILE_IMAGE;
         }
     }
 

@@ -21,19 +21,26 @@ class MemberProfileImageManagerTest {
     @Mock
     private ObjectStorage objectStorage;
 
+    @Mock
+    private MemberReader memberReader;
+
+    @Mock
+    private MemberProfileImageWriter memberProfileImageWriter;
+
     private MemberProfileImageManager memberProfileImageManager;
 
     @BeforeEach
     void setUp() {
         FileProperties fileUploadProperties = new FileProperties(List.of("jpg", "png"), 600);
-        memberProfileImageManager = new MemberProfileImageManager(objectStorage, fileUploadProperties);
+        memberProfileImageManager = new MemberProfileImageManager(
+                objectStorage, fileUploadProperties, memberReader, memberProfileImageWriter);
     }
 
     @Test
     @DisplayName("파일 타입 반환 확인")
-    void getFileType() {
+    void getType() {
         // when
-        ImageType type = memberProfileImageManager.getFileType();
+        ImageType type = memberProfileImageManager.getType();
 
         // then
         assertThat(type).isEqualTo(ImageType.PROFILE_IMAGE);
