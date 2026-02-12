@@ -10,22 +10,17 @@ import com.studypals.global.file.FileProperties;
 import com.studypals.global.file.FileUtils;
 import com.studypals.global.file.ObjectStorage;
 import com.studypals.global.file.dto.ImageUploadDto;
+import com.studypals.global.file.dto.ImageUploadRes;
+import com.studypals.global.file.entity.ImageType;
 import com.studypals.global.file.entity.ImageVariantKey;
 
 /**
  * 다양한 종류의 이미지 파일을 일관된 방식으로 처리하기 위한 추상 클래스입니다.
  * <p>
- * 이 클래스는 <b>템플릿 메서드 패턴</b>을 사용하여 이미지 파일 관리의 전체적인 로직 흐름을 정의합니다.
- * {@link #createObjectKey}와 {@link #getPresignedGetUrl} 같은 final 메서드가 템플릿 역할을 하며,
- * 세부적인 구현이 필요한 {@link #generateObjectKeyDetail}은 하위 클래스에서 구현하도록 강제합니다.
- * <p>
  * 이를 통해 프로필 이미지, 채팅 이미지 등 각기 다른 도메인의 이미지 관리 로직을
  * 표준화된 프로세스에 따라 처리하면서도, 도메인별 경로 생성 정책 등은 유연하게 확장할 수 있습니다.
  *
  * @author sleepyhoon
- * @see AbstractFileManager
- * @see com.studypals.domain.memberManage.worker.MemberProfileImageManager
- * @see com.studypals.domain.chatManage.worker.ChatImageManager
  * @since 2026-01-13
  */
 public abstract class AbstractImageManager extends AbstractFileManager {
@@ -54,8 +49,26 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * @param objectKey 스토리지에 저장될 객체의 고유 키
      * @return 업로드 전용 Presigned URL
      */
-    public final String getPresignedGetUrl(String objectKey) {
+    public String getPresignedGetUrl(String objectKey) {
         return objectStorage.createPresignedGetUrl(objectKey, presignedUrlExpireTime);
+    }
+
+    /**
+     * 이미지 업로드 및 메타데이터 저장을 수행하는 템플릿 메서드입니다.
+     * <p>
+     * 1. 스토리지 업로드 ({@link #uploadImage})<br>
+     * 2. DB 메타데이터 저장 ({@link #saveImage})<br>
+     * 과정을 순차적으로 실행합니다.
+     *
+     * @param file     업로드할 파일
+     * @param userId   요청한 사용자 ID
+     * @param targetId 대상 식별자 (프로필인 경우 userId, 채팅인 경우 chatRoomId)
+     * @return 업로드된 이미지 정보 (ID, URL)
+     */
+    public ImageUploadRes upload(MultipartFile file, Long userId, String targetId) {
+        ImageUploadDto uploadDto = uploadImage(file, userId, targetId);
+        Long imageId = saveImage(userId, targetId, uploadDto.objectKey(), file.getOriginalFilename());
+        return new ImageUploadRes(imageId, uploadDto.imageUrl());
     }
 
     /**
@@ -73,7 +86,7 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * @param targetId 업로드 대상 식별자 (예: 사용자 ID, 채팅방 ID)
      * @return 업로드된 파일의 키와 URL 정보를 담은 DTO
      */
-    public final ImageUploadDto uploadImage(MultipartFile file, Long userId, String targetId) {
+    protected ImageUploadDto uploadImage(MultipartFile file, Long userId, String targetId) {
         String objectKey = createObjectKey(userId, file.getOriginalFilename(), targetId);
         String imageUrl = super.upload(file, objectKey);
 
@@ -98,7 +111,7 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * @param targetId 업로드 대상의 식별자 (예: 사용자 ID, 채팅방 ID 등)
      * @return 생성된 고유 객체 키
      */
-    public final String createObjectKey(Long userId, String fileName, String targetId) {
+    public String createObjectKey(Long userId, String fileName, String targetId) {
         // 1. 검증과 동시에 정규화된 확장자를 받아옵니다.
         String normalizedExtension = validateAndGetExtension(fileName);
 
@@ -158,6 +171,17 @@ public abstract class AbstractImageManager extends AbstractFileManager {
     protected abstract String generateObjectKeyDetail(String targetId, String ext);
 
     /**
+     * 업로드된 이미지 정보를 데이터베이스에 저장합니다.
+     *
+     * @param userId           요청 사용자 ID
+     * @param targetId         대상 식별자
+     * @param objectKey        이미지 저장 경로
+     * @param originalFileName 원본 파일명
+     * @return 저장된 이미지의 PK (ID)
+     */
+    protected abstract Long saveImage(Long userId, String targetId, String objectKey, String originalFileName);
+
+    /**
      * 이 Manager가 처리하는 이미지의 다양한 크기 버전(Variant) 정보를 반환합니다.
      * 하위 클래스는 이 메서드를 구현하여 원본, 썸네일 등 필요한 이미지 종류를 정의해야 합니다.
      *
@@ -171,4 +195,6 @@ public abstract class AbstractImageManager extends AbstractFileManager {
      * @return true면 Presigned URL 반환, false면 업로드 시 반환된 URL(Public) 사용
      */
     protected abstract boolean usePresignedUrl();
+
+    public abstract boolean supports(ImageType fileType);
 }

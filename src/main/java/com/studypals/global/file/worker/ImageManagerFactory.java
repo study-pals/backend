@@ -1,17 +1,14 @@
 package com.studypals.global.file.worker;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
 import com.studypals.global.exceptions.errorCode.FileErrorCode;
 import com.studypals.global.exceptions.exception.FileException;
 import com.studypals.global.file.FileType;
-import com.studypals.global.file.dao.AbstractFileManager;
 import com.studypals.global.file.dao.AbstractImageManager;
+import com.studypals.global.file.entity.ImageType;
 
 /**
  * 이미지 파일 처리를 담당하는 매니저({@link AbstractImageManager})들을 관리하고 제공하는 팩토리 클래스입니다.
@@ -30,18 +27,10 @@ import com.studypals.global.file.dao.AbstractImageManager;
  */
 @Component
 public class ImageManagerFactory {
-    private final Map<FileType, AbstractImageManager> managerMap;
+    private final List<AbstractImageManager> managers;
 
     public ImageManagerFactory(List<AbstractImageManager> managers) {
-        this.managerMap = managers.stream()
-                .collect(Collectors.toMap(
-                        AbstractFileManager::getFileType, Function.identity(), (existing, duplicate) -> {
-                            throw new IllegalStateException(String.format(
-                                    "FileType 중복 등록 오류. '%s' 타입이 '%s'와 '%s' 클래스에서 중복으로 처리됩니다.",
-                                    existing.getFileType(),
-                                    existing.getClass().getName(),
-                                    duplicate.getClass().getName()));
-                        }));
+        this.managers = managers;
     }
 
     /**
@@ -51,11 +40,10 @@ public class ImageManagerFactory {
      * @return 요청된 타입의 Manager 인스턴스
      * @throws FileException 해당 {@code fileType}을 처리하는 Manager가 등록되어 있지 않을 경우 발생
      */
-    public AbstractImageManager getManager(FileType fileType) {
-        AbstractImageManager manager = managerMap.get(fileType);
-        if (manager == null) {
-            throw new FileException(FileErrorCode.UNSUPPORTED_FILE_IMAGE_TYPE);
-        }
-        return managerMap.get(fileType);
+    public AbstractImageManager getManager(ImageType imageType) {
+        return managers.stream()
+                .filter(s -> s.supports(imageType))
+                .findFirst()
+                .orElseThrow(() -> new FileException(FileErrorCode.UNSUPPORTED_FILE_IMAGE_TYPE));
     }
 }

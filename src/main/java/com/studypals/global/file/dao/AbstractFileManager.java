@@ -45,7 +45,7 @@ public abstract class AbstractFileManager {
      *
      * @return 이 Manager가 처리하는 {@link FileType}
      */
-    public abstract FileType getFileType();
+    public abstract FileType getType();
 
     /**
      * 파일을 스토리지에 업로드합니다.

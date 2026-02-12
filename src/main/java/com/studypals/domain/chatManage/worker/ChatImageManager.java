@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.studypals.domain.chatManage.entity.ChatRoom;
 import com.studypals.global.exceptions.errorCode.ChatErrorCode;
 import com.studypals.global.exceptions.exception.ChatException;
 import com.studypals.global.file.FileProperties;
@@ -24,17 +26,23 @@ import com.studypals.global.file.entity.ImageVariantKey;
  * {@link AbstractImageManager}
  *
  * @author sleepyhoon
- * @See AbstractImageManager
+ * @see AbstractImageManager
  * @since 2026-01-13
  */
 @Component
 public class ChatImageManager extends AbstractImageManager {
     private static final String CHAT_IMAGE_PATH = "origin/chat";
     private final ChatRoomReader chatRoomReader;
+    private final ChatImageWriter chatImageWriter;
 
-    public ChatImageManager(ObjectStorage objectStorage, FileProperties properties, ChatRoomReader chatRoomReader) {
+    public ChatImageManager(
+            ObjectStorage objectStorage,
+            FileProperties properties,
+            ChatRoomReader chatRoomReader,
+            ChatImageWriter chatImageWriter) {
         super(objectStorage, properties);
         this.chatRoomReader = chatRoomReader;
+        this.chatImageWriter = chatImageWriter;
     }
 
     /**
@@ -55,21 +63,29 @@ public class ChatImageManager extends AbstractImageManager {
     }
 
     @Override
+    @Transactional
+    protected Long saveImage(Long userId, String chatRoomId, String objectKey, String originalFileName) {
+        ChatRoom chatRoom = chatRoomReader.getById(chatRoomId);
+        return chatImageWriter.save(chatRoom, objectKey, originalFileName);
+    }
+
+    @Override
     protected List<ImageVariantKey> variants() {
         return List.of(ImageVariantKey.SMALL, ImageVariantKey.MEDIUM, ImageVariantKey.LARGE);
     }
 
-    /**
-     * 이 클래스는 채팅 이미지를 처리합니다.
-     * @return 처리하는 이미지 종류
-     */
     @Override
-    public ImageType getFileType() {
+    public ImageType getType() {
         return ImageType.CHAT_IMAGE;
     }
 
     @Override
+    public boolean supports(ImageType type) {
+        return type == getType();
+    }
+
+    @Override
     protected boolean usePresignedUrl() {
-        return true;
+        return true; // 채팅 이미지는 Pre-Signed URL 사용
     }
 }
