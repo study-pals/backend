@@ -188,6 +188,25 @@ public class GroupEntryControllerRestDocsTest extends RestDocsSupport {
 
     @Test
     @WithMockUser
+    void leaveGroup_success() throws Exception {
+        // given
+        Long groupId = 1L;
+
+        // when
+        ResultActions result = mockMvc.perform(delete("/groups/{groupId}/leave", groupId));
+
+        // then
+        result.andExpect(status().isNoContent())
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        pathParameters(parameterWithName("groupId")
+                                .description("탈퇴할 그룹 ID")
+                                .attributes(constraints("not null")))));
+    }
+
+    @Test
+    @WithMockUser
     void requestParticipant_success() throws Exception {
         // given
         Long groupId = 1L;
