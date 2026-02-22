@@ -84,6 +84,27 @@ include::{snippets}/group-controller-rest-docs-test/create-group_success/http-re
 include::{snippets}/group-controller-rest-docs-test/create-group_success/response-headers.adoc[]
 include::{snippets}/group-controller-rest-docs-test/create-group_success/http-response.adoc[]
 
+==== 1-3. 그룹 탈퇴
+
+*Description* +
+
+'''
+
+그룹 탈퇴를 위해 사용합니다. 그룹장은 그룹을 탈퇴할 수 없습니다.
+
+*Request* +
+
+'''
+
+include::{snippets}/group-entry-controller-rest-docs-test/leave-group_success/http-request.adoc[]
+include::{snippets}/group-entry-controller-rest-docs-test/leave-group_success/path-parameters.adoc[]
+
+*Response* +
+
+'''
+
+include::{snippets}/group-entry-controller-rest-docs-test/leave-group_success/http-response.adoc[]
+
 === 2. 그룹 가입 관련 API
 
 ==== 2-1. 초대 코드 생성
