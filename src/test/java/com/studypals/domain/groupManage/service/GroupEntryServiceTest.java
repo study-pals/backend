@@ -241,6 +241,33 @@ public class GroupEntryServiceTest {
     }
 
     @Test
+    void leaveGroup_success() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        Group group = Group.builder()
+                .id(groupId)
+                .totalMember(10)
+                .maxMember(10)
+                .isApprovalRequired(false)
+                .build();
+        Member member = Member.builder()
+                .id(userId)
+                .build();
+        group.setChatRoom(mockChatRoom);
+
+        given(groupReader.getById(groupId)).willReturn(group);
+        given(memberReader.getRef(userId)).willReturn(member);
+
+        // when
+        groupEntryService.leaveGroup(userId, groupId);
+
+        // then
+        verify(chatRoomWriter).leave(mockChatRoom, member);
+        verify(groupMemberWriter).deleteMember(userId, group);
+    }
+
+    @Test
     void requestParticipant_success() {
         // given
         Long userId = 1L;

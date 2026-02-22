@@ -3,6 +3,9 @@ package com.studypals.domain.groupManage.worker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -126,7 +129,6 @@ public class GroupMemberWriterTest {
     @Test
     void createMember_fail_memberLimitExceed() {
         // given
-        Long memberId = 1L;
         Long groupId = 1L;
         GroupErrorCode errorCode = GroupErrorCode.GROUP_JOIN_FAIL;
 
@@ -135,6 +137,41 @@ public class GroupMemberWriterTest {
 
         // when & then
         assertThatThrownBy(() -> groupMemberWriter.createMember(mockMember, mockGroup))
+                .isInstanceOf(GroupException.class)
+                .extracting("errorCode")
+                .isEqualTo(errorCode);
+    }
+
+    @Test
+    void deleteMember_success() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+
+        given(mockGroup.getId()).willReturn(groupId);
+        given(groupMemberRepository.findByMemberIdAndGroupId(userId, groupId)).willReturn(Optional.of(mockGroupMember));
+        given(mockGroupMember.isLeader()).willReturn(false);
+
+        // when
+        groupMemberWriter.deleteMember(userId, mockGroup);
+
+        // then
+        verify(groupMemberRepository).delete(mockGroupMember);
+    }
+
+    @Test
+    void deleteMember_fail_leaderCannotLeave() {
+        // given
+        Long userId = 1L;
+        Long groupId = 1L;
+        GroupErrorCode errorCode = GroupErrorCode.GROUP_LEAVE_FAIL;
+
+        given(mockGroup.getId()).willReturn(groupId);
+        given(groupMemberRepository.findByMemberIdAndGroupId(userId, groupId)).willReturn(Optional.of(mockGroupMember));
+        given(mockGroupMember.isLeader()).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> groupMemberWriter.deleteMember(userId, mockGroup))
                 .isInstanceOf(GroupException.class)
                 .extracting("errorCode")
                 .isEqualTo(errorCode);
